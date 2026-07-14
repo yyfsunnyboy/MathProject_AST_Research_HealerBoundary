@@ -9,6 +9,7 @@ from scripts import run_gemini_ab2g_math_core_qualification as base
 from agent_tools.finals_rebuild.ab2d_local_prompt import assemble_ab2d_local_prompt, assemble_ab2g_math_core_prompt, measure_prompt_size
 from agent_tools.finals_rebuild.math_answer_contracts import render_answer_contract
 from agent_tools.finals_rebuild.math_task_sampler import sample_task_parameters
+from agent_tools.finals_rebuild.generator_success import merge_success_fields
 from agent_tools.finals_rebuild.math_boundary_pilot import classify_response
 PROVENANCE={"qwen3:4b-instruct-2507-q4_K_M":{"digest":"0edcdef34593","parameters":"4.0B","quantization":"Q4_K_M"},"qwen3:8b":{"digest":"500a1f067a9f","parameters":"8.2B","quantization":"Q4_K_M","architecture":"qwen3","context_length":40960,"embedding_length":4096}}
 CONDITIONS=("ab1","ab2g_math_core","ab2d_local")
@@ -41,7 +42,7 @@ def main(argv=None):
  for r in rows:
   started=time.monotonic()
   try:
-   response=_call(r["final_prompt"],a.model_tag);raw=response["response"];task=next(x for x in base._tasks(a.task_family) if x["skill_id"]==r["task_family"]);status,candidate,detail=classify_response(raw,{"oracle_payload":r["task_parameters"]},task,execution_timeout=3);r.update({"raw_first_attempt_output":raw,"candidate_extracted":candidate,"evaluable":status not in {"empty_response","extraction_failure","parse_minor","catastrophic_truncation"},"oracle_pass":status=="passed","failure_category":None if status=="passed" else status,"failure_detail":str(detail) or None,"provider_duration":response.get("total_duration",0)/1e9,"prompt_token_count":response.get("prompt_eval_count"),"output_token_count":response.get("eval_count"),"total_token_count":(response.get("prompt_eval_count") or 0)+(response.get("eval_count") or 0)})
+   response=_call(r["final_prompt"],a.model_tag);raw=response["response"];task=next(x for x in base._tasks(a.task_family) if x["skill_id"]==r["task_family"]);status,candidate,detail=classify_response(raw,{"oracle_payload":r["task_parameters"]},task,execution_timeout=3);r.update({"raw_first_attempt_output":raw,"candidate_extracted":candidate,"evaluable":status not in {"empty_response","extraction_failure","parse_minor","catastrophic_truncation"},"oracle_pass":status=="passed","failure_category":None if status=="passed" else status,"failure_detail":detail.get("runtime_error") or detail.get("parse_error") or detail.get("oracle_error"),"provider_duration":response.get("total_duration",0)/1e9,"prompt_token_count":response.get("prompt_eval_count"),"output_token_count":response.get("eval_count"),"total_token_count":(response.get("prompt_eval_count") or 0)+(response.get("eval_count") or 0)});merge_success_fields(r,detail)
   except Exception as e:r.update({"failure_category":"provider_error","failure_detail":str(e),"provider_duration":None})
   r["wall_clock_seconds"]=time.monotonic()-started;_append(out,r)
  summary.write_text(_summary(rows),encoding="utf-8")

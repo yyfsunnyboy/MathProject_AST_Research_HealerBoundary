@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterable, Sequence
 
 from agent_tools.finals_rebuild.extraction import extract_code
+from agent_tools.finals_rebuild.generator_success import assemble_observed_success_fields
 from agent_tools.finals_rebuild.math_generation_runner import ALLOWED_MODELS, call_ollama_chat
 from agent_tools.finals_rebuild.math_task_oracles import evaluate_math_task_oracle
 from agent_tools.finals_rebuild.math_task_sampler import sample_task_parameters
@@ -177,7 +178,15 @@ except BaseException as exc:
         result = json.loads(stdout)
     except json.JSONDecodeError:
         return "infrastructure_failure", None, "invalid evaluator response"
-    return ("passed", result.get("value"), None) if result.get("ok") else ("runtime_failure", None, result.get("message") or result.get("type"))
+    if result.get("ok"):
+        return "passed", result.get("value"), None
+    exc_type = result.get("type")
+    exc_message = result.get("message") or ""
+    if exc_type and exc_message:
+        error = f"{exc_type}: {exc_message}"
+    else:
+        error = exc_message or exc_type
+    return "runtime_failure", None, error
 
 
 def _looks_truncated(raw: str) -> bool:
@@ -205,35 +214,95 @@ def _candidate_generate_source(extracted_source: str) -> str | None:
     return extracted_source[match.start():] if match else None
 
 
+def _success_details(
+    *,
+    outcome: str,
+    raw: str,
+    source: str | None,
+    returned_value: Any = None,
+    frozen: dict[str, Any] | None = None,
+    detail: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    # `raw` is retained by classify_response; availability is always True here.
+    detail = dict(detail or {})
+    fields = assemble_observed_success_fields(
+        outcome=outcome,
+        raw_response_available=True,
+        candidate_extracted=source,
+        returned_value=returned_value,
+        frozen_payload=(frozen or {}).get("oracle_payload") if frozen is not None else None,
+        detail=detail,
+    )
+    detail.update(fields)
+    return detail
+
+
 def classify_response(raw: str, frozen: dict[str, Any], task: dict[str, Any], *, execution_timeout: float = 3.0) -> tuple[str, str | None, dict[str, Any]]:
     if not raw.strip():
-        return "empty_response", None, {}
+        return "empty_response", None, _success_details(outcome="empty_response", raw=raw, source=None)
     if _looks_truncated(raw):
-        return "catastrophic_truncation", None, {}
+        return "catastrophic_truncation", None, _success_details(outcome="catastrophic_truncation", raw=raw, source=None)
     extracted = extract_code(raw)
     if extracted.extraction_status != "extracted" or not extracted.extracted_code:
-        return "extraction_failure", extracted.extracted_code, {"extraction_status": extracted.extraction_status}
+        return "extraction_failure", extracted.extracted_code, _success_details(
+            outcome="extraction_failure", raw=raw, source=extracted.extracted_code,
+            detail={"extraction_status": extracted.extraction_status},
+        )
     source = _candidate_generate_source(extracted.extracted_code)
     if source is None:
-        return "extraction_failure", None, {"extraction_status": "no_generate_source"}
+        return "extraction_failure", None, _success_details(
+            outcome="extraction_failure", raw=raw, source=None,
+            detail={"extraction_status": "no_generate_source"},
+        )
     try:
         tree = ast.parse(source)
     except SyntaxError as exc:
-        return "parse_minor", source, {"parse_error": str(exc)}
+        return "parse_minor", source, _success_details(
+            outcome="parse_minor", raw=raw, source=source, detail={"parse_error": str(exc)},
+        )
     entries = [node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "generate"]
     if len(entries) != 1:
-        return "missing_entry_point", source, {"entry_point_count": len(entries)}
+        return "missing_entry_point", source, _success_details(
+            outcome="missing_entry_point", raw=raw, source=source,
+            detail={"entry_point_count": len(entries)},
+        )
     status, value, error = _execute_generate(source, timeout=execution_timeout, skill_id=task["skill_id"])
     if status != "passed":
-        return status, source, {"runtime_error": error}
+        exception_type, exception_message, timeout = None, error, False
+        if isinstance(error, str):
+            if "execution_timeout" in error:
+                exception_type, exception_message, timeout = "TimeoutExpired", error, True
+            elif ": " in error:
+                head, tail = error.split(": ", 1)
+                if head and head.replace("_", "").isalnum() and head[:1].isupper():
+                    exception_type, exception_message = head, tail
+        return status, source, _success_details(
+            outcome=status, raw=raw, source=source, returned_value=None, frozen=frozen,
+            detail={
+                "runtime_error": error,
+                "exception_type": exception_type,
+                "exception_message": exception_message,
+                "timeout": timeout,
+            },
+        )
     if not isinstance(value, dict) or set(value) != {"question_text", "correct_answer", "oracle_payload"} or not isinstance(value.get("question_text"), str) or value.get("oracle_payload") != frozen["oracle_payload"]:
-        return "schema_failure", source, {}
+        return "schema_failure", source, _success_details(
+            outcome="schema_failure", raw=raw, source=source, returned_value=value, frozen=frozen,
+        )
     verdict = evaluate_math_task_oracle(task["oracle_type"], frozen["oracle_payload"], value["correct_answer"])
     if verdict.get("error"):
-        return "intrinsic_safety", source, {"oracle_error": verdict["error"]}
+        return "intrinsic_safety", source, _success_details(
+            outcome="intrinsic_safety", raw=raw, source=source, returned_value=value, frozen=frozen,
+            detail={"oracle_error": verdict["error"]},
+        )
     if not verdict["is_correct"]:
-        return "answer_incorrect", source, {"expected_answer": verdict["expected_answer"]}
-    return "passed", source, {}
+        return "answer_incorrect", source, _success_details(
+            outcome="answer_incorrect", raw=raw, source=source, returned_value=value, frozen=frozen,
+            detail={"expected_answer": verdict["expected_answer"], "mismatch_reason": "oracle_mismatch"},
+        )
+    return "passed", source, _success_details(
+        outcome="passed", raw=raw, source=source, returned_value=value, frozen=frozen,
+    )
 
 
 CONDITIONS = {"ab1": ("Ab1", build_ab1_prompt), "ab2g": ("Ab2g", build_ab2g_prompt), "ab2d": ("Ab2d", build_ab2d_prompt)}

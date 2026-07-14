@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from agent_tools.finals_rebuild.generator_success import merge_success_fields
 from agent_tools.finals_rebuild.math_boundary_pilot import build_ab2d_prompt, classify_response
 from agent_tools.finals_rebuild.math_generation_runner import ALLOWED_MODELS, OllamaHTTPError, call_ollama_chat
 from agent_tools.finals_rebuild.math_task_sampler import sample_task_parameters
@@ -108,6 +109,7 @@ def _row(task: dict[str, Any], index: int, runtime_version: str | None, model: s
         row.update({"raw_first_attempt_output": raw, "candidate_extracted": extracted, "parse_status": outcome,
                     "evaluable": outcome not in {"empty_response", "catastrophic_truncation", "extraction_failure", "parse_minor", "missing_entry_point", "infrastructure_failure"},
                     "oracle_pass": outcome == "passed", "failure_category": None if outcome == "passed" else outcome})
+        merge_success_fields(row, details)
         row["question"] = None
         for key in ("prompt_eval_count", "eval_count", "total_duration", "load_duration", "prompt_eval_duration", "eval_duration"):
             row[key] = response.get(key)

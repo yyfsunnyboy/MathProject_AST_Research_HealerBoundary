@@ -17,6 +17,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from agent_tools.finals_rebuild.ab2d_local_prompt import assemble_ab2g_math_core_prompt, measure_prompt_size
+from agent_tools.finals_rebuild.generator_success import merge_success_fields
 from agent_tools.finals_rebuild.math_answer_contracts import render_answer_contract
 from agent_tools.finals_rebuild.math_boundary_pilot import classify_response
 from agent_tools.finals_rebuild.math_task_oracles import evaluate_math_task_oracle
@@ -128,6 +129,7 @@ def _apply_response(row: dict[str, Any], task: dict[str, Any], response: Any) ->
                 "evaluable": outcome not in {"empty_response", "catastrophic_truncation", "extraction_failure", "parse_minor", "missing_entry_point", "infrastructure_failure"},
                 "oracle_pass": outcome == "passed", "failure_category": None if outcome == "passed" else outcome,
                 "failure_detail": detail.get("runtime_error") or detail.get("parse_error") or detail.get("oracle_error")})
+    merge_success_fields(row, detail)
     row["execution_timeout"] = bool(row["failure_detail"] and "execution_timeout" in row["failure_detail"])
     row["prompt_token_count"], row["output_token_count"], row["total_token_count"], row["provider_duration"] = _metadata(response)
 
