@@ -2,7 +2,7 @@ import importlib.util
 import json
 from pathlib import Path
 
-from agent_tools.finals_rebuild.math_boundary_pilot import _execute_generate
+from agent_tools.finals_rebuild.math_boundary_pilot import TASK_IDS, _execute_generate
 
 
 def _runner_module():
@@ -12,6 +12,15 @@ def _runner_module():
     assert spec.loader is not None
     spec.loader.exec_module(module)
     return module
+
+
+def test_smoke_runner_uses_corrected_four_task_set():
+    runner = _runner_module()
+    assert list(runner.FAMILIES) == list(TASK_IDS)
+    selected = runner._load_tasks()
+    assert [task["task_id"] for task in selected] == list(TASK_IDS)
+    assert "ce115_cr01_training_sequence_threshold_l3" not in {task["task_id"] for task in selected}
+    assert all(task["task_id"].startswith("ce115_calc_") and task["task_id"].endswith("_l1") for task in selected)
 
 
 def test_candidate_execution_timeout_and_incremental_jsonl(tmp_path):

@@ -16,7 +16,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from agent_tools.finals_rebuild.generator_success import merge_success_fields
-from agent_tools.finals_rebuild.math_boundary_pilot import build_ab2d_prompt, classify_response
+from agent_tools.finals_rebuild.math_boundary_pilot import TASK_IDS, build_ab2d_prompt, classify_response, load_pilot_tasks
 from agent_tools.finals_rebuild.math_generation_runner import ALLOWED_MODELS, OllamaHTTPError, call_ollama_chat
 from agent_tools.finals_rebuild.math_task_sampler import sample_task_parameters
 from agent_tools.finals_rebuild.math_answer_contracts import render_answer_contract
@@ -25,12 +25,8 @@ MODEL = "qwen3:4b-instruct-2507-q4_K_M"
 SEED = 20260714
 CONDITION = "Ab2d"
 CANDIDATE_EXECUTION_TIMEOUT_SECONDS = 3.0
-FAMILIES = (
-    "polynomial_division_quotient_remainder",
-    "largest_proper_divisor_reasoning",
-    "rpm_circumference_to_kph",
-    "alternating_training_progression_threshold",
-)
+# Formal Ab2d smoke uses the corrected four L1 calc families (shared with pilot TASK_IDS).
+FAMILIES = TASK_IDS
 MANIFEST = ROOT / "tests/finals_rebuild/fixtures/math_generation_tasks_ce115_pilot.jsonl"
 RESULT = ROOT / "docs/experiments/results/ab2d_qwen3_4b_l1_seed_20260714_smoke.jsonl"
 SUMMARY = ROOT / "docs/experiments/ab2d_qwen3_4b_l1_seed_20260714_smoke_summary.md"
@@ -74,10 +70,9 @@ def _runtime_version() -> str | None:
 
 
 def _load_tasks() -> list[dict[str, Any]]:
-    tasks = [json.loads(line) for line in MANIFEST.read_text(encoding="utf-8").splitlines() if line.strip()]
-    selected = [next(task for task in tasks if task["skill_id"] == family and task["difficulty_level"] == 1) for family in FAMILIES]
-    if [task["skill_id"] for task in selected] != list(FAMILIES):
-        raise ValueError("the minimal smoke task selection is not the four required L1 families")
+    selected = list(load_pilot_tasks(MANIFEST))
+    if [task["task_id"] for task in selected] != list(TASK_IDS):
+        raise ValueError("the minimal smoke task selection is not the corrected four L1 calc families")
     return selected
 
 

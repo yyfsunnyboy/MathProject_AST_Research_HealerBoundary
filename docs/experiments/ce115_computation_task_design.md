@@ -40,6 +40,25 @@ Each family has three manifest rows (`_l1`, `_l2`, `_l3`) in
 `tests/finals_rebuild/fixtures/math_generation_tasks_ce115_pilot.jsonl`, following the
 existing CE115 pilot row schema (parameter_ranges, oracle_type, randomization contract).
 
+Formal reconstruction readiness (Milestone 2B) freezes the authoritative four-task set
+as the L1 rows only:
+
+- `ce115_calc_radical_simplification_l1` ← CAP Q3 radical-form skill
+- `ce115_calc_exact_rational_expression_l1` ← CAP Q5 exact distributive arithmetic
+- `ce115_calc_polynomial_division_l1` ← CAP Q7 quotient/remainder skill
+- `ce115_calc_polynomial_factor_roots_l1` ← CAP Q9 factoring/roots skill
+
+Reconstruction notes:
+
+- Families parameterize the **skill**, not a single CAP numeric answer.
+- CAP exemplar numbers (504; 2.45/−0.55/98.7; 4x²−3x−5÷(x+2); 2x²+4x−70) appear only in
+  development oracle golden cases, never in samplers/prompts/contracts.
+- The calc roots family requires ordered rational roots only; CAP Q9's requested linear
+  combination belongs to the separate historical `common_factor_quadratic_root_ordering`
+  family and is out of formal calc scope.
+- Legacy `ce115_cr01_*` / alternating tasks remain fixture history only and stay outside
+  the formal loader set.
+
 Note: `polynomial_division_general` is a **new** oracle_type; the existing production
 `polynomial_division_exact` (scalar `remainder`, `divisor_root` payload) is left untouched.
 No migration of the legacy contract is performed or needed — the two coexist and are

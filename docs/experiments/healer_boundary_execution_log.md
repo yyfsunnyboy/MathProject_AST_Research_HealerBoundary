@@ -312,3 +312,265 @@ python -m pytest tests/finals_rebuild/test_math_boundary_pilot.py tests/finals_r
 
 Milestone 1 closeout ready to commit/push. Commit hash recorded in the
 final report rather than amended into this log.
+
+---
+
+## Milestone 2A — Corrected Task ID and Fixture Alignment
+
+### Goal
+
+Align formal pilot / smoke loaders and tests to the corrected `ce115_calc_*`
+four-task L1 set so runners and tests load the same authoritative IDs without
+model runs, prompt changes, or oracle redesign.
+
+### Authoritative corrected task IDs
+
+Family prefixes (design):
+
+- `ce115_calc_radical_simplification`
+- `ce115_calc_exact_rational_expression`
+- `ce115_calc_polynomial_division`
+- `ce115_calc_polynomial_factor_roots`
+
+Formal L1 rows actually loaded (manifest task_id, preferred over bare family ID):
+
+- `ce115_calc_radical_simplification_l1`
+- `ce115_calc_exact_rational_expression_l1`
+- `ce115_calc_polynomial_division_l1`
+- `ce115_calc_polynomial_factor_roots_l1`
+
+### Legacy task exclusion rule
+
+- Old `ce115_cr01_training_sequence_threshold_l3` and other non-`ce115_calc_*`
+  rows may remain in the shared fixture as historical content.
+- Formal `load_pilot_tasks` / Ab2d smoke selection return only the corrected
+  four L1 IDs in deterministic TASK_IDS order.
+- Missing formal IDs or duplicate task_id values fail explicitly; extra legacy
+  rows are ignored, never mixed into the formal set.
+
+### Files changed
+
+| Path | Purpose |
+|---|---|
+| `agent_tools/finals_rebuild/math_boundary_pilot.py` | Corrected TASK_IDS + stricter/missing-aware loader |
+| `scripts/run_ab2d_minimal_smoke.py` | Smoke task set = shared formal TASK_IDS |
+| `tests/finals_rebuild/test_math_boundary_pilot.py` | Alignment + loader contract tests |
+| `tests/finals_rebuild/test_ab2d_minimal_smoke_runner.py` | Assert smoke uses corrected four-task set |
+| `docs/experiments/healer_boundary_execution_log.md` | Milestone 2A record |
+
+### Tests
+
+```powershell
+python -m pytest tests/finals_rebuild/test_math_boundary_pilot.py tests/finals_rebuild/test_ab2d_minimal_smoke_runner.py --basetemp .pytest_tmp_m2a -v
+```
+
+- 18 passed; exit code 0
+
+```powershell
+python -m pytest tests/finals_rebuild/test_generator_success.py tests/finals_rebuild/test_generator_success_integration.py tests/finals_rebuild/test_generator_success_artifacts.py --basetemp .pytest_tmp_m2a_success -q
+```
+
+- 34 passed; exit code 0
+
+### Remaining gaps
+
+- corrected `ce115_calc_*` 正式 run 尚未執行
+- Ab1 prompt still lacks per-family answer-contract text for the new calc
+  oracles (no prompt rewrite in 2A)
+- 真 LaTeX renderer / 人工 readability / 真實 post-Healer replay 仍是 gap
+- 歷史 JSONL / legacy fixture rows are retained, not rewritten
+
+### Status
+
+Milestone 2A corrected task-id / fixture alignment completed.
+No commit or push was made.
+
+---
+
+## Milestone 2B — Corrected Four-Task Reconstruction Readiness
+
+### Goal
+
+Complete source alignment, frozen-parameter / contract / independent-oracle /
+golden-generator / G1–G6 readiness for the corrected four L1 calc tasks without
+model runs, prompt changes, or formal dry runs.
+
+### Formal task IDs
+
+- `ce115_calc_radical_simplification_l1`
+- `ce115_calc_exact_rational_expression_l1`
+- `ce115_calc_polynomial_division_l1`
+- `ce115_calc_polynomial_factor_roots_l1`
+
+### Readiness matrix
+
+| task_id | source alignment | frozen parameters | answer contract | oracle | golden generator | G1–G6 ready |
+|---|---|---|---|---|---|---|
+| `ce115_calc_radical_simplification_l1` | COMPLETE | COMPLETE | COMPLETE | COMPLETE | COMPLETE | COMPLETE |
+| `ce115_calc_exact_rational_expression_l1` | COMPLETE | COMPLETE | COMPLETE | COMPLETE | COMPLETE | COMPLETE |
+| `ce115_calc_polynomial_division_l1` | COMPLETE | COMPLETE | COMPLETE | COMPLETE | COMPLETE | COMPLETE |
+| `ce115_calc_polynomial_factor_roots_l1` | COMPLETE | COMPLETE | COMPLETE | COMPLETE | COMPLETE | COMPLETE |
+
+Initial inventory before 2B golden work: source/frozen/contract/oracle were already
+COMPLETE via design + sampler + contracts + `math_task_oracles`; golden generate()
+and end-to-end G1–G6 were ABSENT and are now filled.
+
+### Source-alignment decisions
+
+- Families map to CAP Q3/Q5/Q7/Q9 skills, not hard-coded single-question answers.
+- Formal set remains L1 only; legacy `ce115_cr01_*` / alternating stay excluded.
+- Calc roots family validates ordered rational roots only; CAP linear-combination
+  stays outside this reconstruction.
+
+### Oracle/golden decisions
+
+- Reused existing independent oracles; no parallel oracle layer.
+- Golden generators are tests-only helpers that sample frozen payloads at
+  `GOLDEN_SEED`, recompute answers via oracle, and emit non-leaking question text
+  under a fixed non-LaTeX notation policy.
+- Golden sources are asserted absent from Ab1/Ab2g/`render_answer_contract` text.
+
+### Files changed
+
+| Path | Purpose |
+|---|---|
+| `tests/finals_rebuild/ce115_calc_golden_generators.py` | Deterministic golden generate()/question builder |
+| `tests/finals_rebuild/test_ce115_calc_reconstruction_readiness.py` | Readiness + invariant + G1–G6 coverage |
+| `docs/experiments/ce115_computation_task_design.md` | Formal L1 IDs + reconstruction notes |
+| `docs/experiments/healer_boundary_execution_log.md` | Milestone 2B record |
+| (carry-over from 2A) pilot/smoke alignment files | Unchanged in purpose from 2A |
+
+### Tests
+
+```powershell
+python -m pytest tests/finals_rebuild/test_math_boundary_pilot.py tests/finals_rebuild/test_ab2d_minimal_smoke_runner.py tests/finals_rebuild/test_ce115_calc_reconstruction_readiness.py --basetemp .pytest_tmp_m2b -v
+```
+
+- 48 passed; exit code 0
+
+```powershell
+python -m pytest tests/finals_rebuild/test_generator_success.py tests/finals_rebuild/test_generator_success_integration.py tests/finals_rebuild/test_generator_success_artifacts.py --basetemp .pytest_tmp_m2b_success -q
+```
+
+- 34 passed; exit code 0
+
+### Remaining gaps
+
+- corrected `ce115_calc_*` 正式 dry run / model qualification 尚未執行
+- Ab1 still lacks per-family answer-contract prose for calc oracles (prompt
+  frozen; contracts available via `render_answer_contract` for Ab2d paths)
+- 真 LaTeX renderer 尚未納入
+- 人工 readability rubric 尚未納入
+- 真實 post-Healer replay 尚未執行
+
+### Status
+
+Milestone 2B reconstruction readiness completed.
+No commit or push was made.
+
+---
+
+## Milestone 2C — No-Model Infrastructure Dry Run
+
+### Goal
+
+Run a no-model infrastructure dry run over the corrected four L1 calc tasks
+using tests/infrastructure golden generators, confirming the existing
+classify/success-field pipeline emits G1–G6 full-PASS serializable artifacts.
+
+### Dry-run exclusion policy
+
+- `run_type = infrastructure_dry_run`
+- `included_in_formal_analysis = false`
+- `model_called = false`
+- `model_tag = synthetic_golden_no_model`
+- `request_count = 0`, `retry_count = 0`
+- `ledger_stage = observed` only (no synthetic pipeline/post-healer rows)
+- Refuse writes under `docs/experiments/results`
+- `record_eligible_for_formal_analysis()` excludes these records
+
+### Formal task IDs
+
+- `ce115_calc_radical_simplification_l1`
+- `ce115_calc_exact_rational_expression_l1`
+- `ce115_calc_polynomial_division_l1`
+- `ce115_calc_polynomial_factor_roots_l1`
+
+### Artifact fields verified
+
+task_id, run_id, run_type, included_in_formal_analysis, model_called,
+model_tag, request_count, retry_count, ledger_stage,
+raw_first_attempt_output, candidate_extracted, actual_question_text,
+evaluation_gates g1–g6, composite_outcomes, oracle_pass/failure_category,
+JSON serializable.
+
+### Result
+
+- records = 4
+- full PASS = 4/4
+- model/API calls = 0
+- Manual offline command wrote under `.pytest_tmp_m2c_manual/` then cleaned
+
+### Files changed
+
+| Path | Purpose |
+|---|---|
+| `agent_tools/finals_rebuild/ce115_calc_golden_generators.py` | Shared golden helpers (moved from tests/) |
+| `agent_tools/finals_rebuild/ce115_calc_golden_dry_run.py` | No-model dry-run pipeline |
+| `scripts/run_ce115_calc_golden_dry_run.py` | Offline CLI entrypoint |
+| `tests/finals_rebuild/test_ce115_calc_golden_dry_run.py` | Dry-run artifact / exclusion tests |
+| `tests/finals_rebuild/test_ce115_calc_reconstruction_readiness.py` | Import shared golden module |
+| `docs/experiments/healer_boundary_execution_log.md` | Milestone 2C record |
+
+### Tests
+
+```powershell
+python -m pytest tests/finals_rebuild/test_math_boundary_pilot.py tests/finals_rebuild/test_ab2d_minimal_smoke_runner.py tests/finals_rebuild/test_ce115_calc_reconstruction_readiness.py tests/finals_rebuild/test_ce115_calc_golden_dry_run.py --basetemp .pytest_tmp_m2c -v
+```
+
+- 53 passed; exit code 0
+
+```powershell
+python -m pytest tests/finals_rebuild/test_generator_success.py tests/finals_rebuild/test_generator_success_integration.py tests/finals_rebuild/test_generator_success_artifacts.py --basetemp .pytest_tmp_m2c_success -q
+```
+
+- 34 passed; exit code 0
+
+### Remaining gaps
+
+- 正式模型 run 尚未執行
+- Ab1 calc 專屬 answer-contract wording 尚未凍結
+- 真 renderer 未納入
+- 人工 readability rubric 未納入
+- 真實 post-Healer replay 未執行
+
+### Status
+
+Milestone 2C no-model infrastructure dry run completed.
+No commit or push was made.
+
+---
+
+## Milestone 2 Closeout — Corrected Four-Task Readiness
+
+- Milestone 2A / 2B / 2C completed
+- Antigravity read-only audit passed (READY FOR MILESTONE 2 CLOSEOUT)
+- Formal task IDs:
+  - `ce115_calc_radical_simplification_l1`
+  - `ce115_calc_exact_rational_expression_l1`
+  - `ce115_calc_polynomial_division_l1`
+  - `ce115_calc_polynomial_factor_roots_l1`
+- Final tests: 53 + 34 passed
+- No-model dry run: 4/4 Full PASS
+- Model/API calls: 0
+- Remaining gaps:
+  - 正式模型 run 尚未執行
+  - Ab1 calc answer-contract wording 尚未凍結
+  - 真 LaTeX renderer 尚未納入
+  - 人工 readability rubric 尚未納入
+  - 真實 post-Healer replay 尚未執行
+- Commit/push: completed in this closeout to `origin main` only
+
+### Status
+
+Milestone 2 closeout completed.

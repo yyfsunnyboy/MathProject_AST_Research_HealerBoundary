@@ -23,13 +23,14 @@ from agent_tools.finals_rebuild.math_task_sampler import sample_task_parameters
 RUN_ID_DEFAULT = "math-boundary-stage-a-20260713"
 REPEAT_SEEDS = (2026071301, 2026071302, 2026071303)
 MODEL_TAGS = ("qwen3:4b-instruct-2507-q4_K_M", "qwen3:8b")
-TASK_IDS = (
-    "ce115_q07_polynomial_division_l1",
-    "ce115_q24_rotation_speed_conversion_l1",
-    "ce115_q24_rotation_speed_conversion_l2",
-    "ce115_q20_largest_proper_divisor_l3",
-    "ce115_cr01_training_sequence_threshold_l3",
+# Family prefixes from ce115_computation_task_design.md; formal pilot rows are L1.
+CORRECTED_FAMILY_IDS = (
+    "ce115_calc_radical_simplification",
+    "ce115_calc_exact_rational_expression",
+    "ce115_calc_polynomial_division",
+    "ce115_calc_polynomial_factor_roots",
 )
+TASK_IDS = tuple(f"{family}_l1" for family in CORRECTED_FAMILY_IDS)
 OUTCOMES = frozenset(("passed", "empty_response", "catastrophic_truncation", "extraction_failure", "parse_minor", "missing_entry_point", "schema_failure", "runtime_failure", "answer_incorrect", "intrinsic_safety", "infrastructure_failure"))
 
 
@@ -38,11 +39,17 @@ def _hash(value: str) -> str:
 
 
 def load_pilot_tasks(path: str | Path) -> tuple[dict[str, Any], ...]:
+    """Load the corrected formal four-task L1 set; ignore legacy rows in the same manifest."""
     all_tasks = [json.loads(line) for line in Path(path).read_text(encoding="utf-8").splitlines() if line.strip()]
-    by_id = {task["task_id"]: task for task in all_tasks}
-    missing = set(TASK_IDS) - set(by_id)
+    by_id: dict[str, dict[str, Any]] = {}
+    for task in all_tasks:
+        task_id = task["task_id"]
+        if task_id in by_id:
+            raise ValueError(f"duplicate task_id in manifest: {task_id}")
+        by_id[task_id] = task
+    missing = [task_id for task_id in TASK_IDS if task_id not in by_id]
     if missing:
-        raise ValueError(f"pilot manifest is missing tasks: {sorted(missing)}")
+        raise ValueError(f"pilot manifest is missing tasks: {missing}")
     return tuple(by_id[task_id] for task_id in TASK_IDS)
 
 
