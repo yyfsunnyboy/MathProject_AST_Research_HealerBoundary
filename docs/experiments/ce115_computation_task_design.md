@@ -59,6 +59,17 @@ Reconstruction notes:
 - Legacy `ce115_cr01_*` / alternating tasks remain fixture history only and stay outside
   the formal loader set.
 
+Formal prompt conditions for the main experiment (Milestone 3A) are:
+
+- Ab1 = Task Contract + Frozen Parameters
+- Ab2g = Math Core Scaffold + Task Contract + Frozen Parameters
+- Ab2d = Math Core Scaffold + one task-local reusable primitive + Task Contract + Frozen Parameters
+
+Shared task-contract text and frozen parameters are byte-identical across the three
+conditions; Ab2d differs only by its local primitive block. Prompt hashes are SHA-256
+over UTF-8 + LF-normalized final prompts and exclude model identity. See
+`docs/experiments/manifests/ce115_calc_main_experiment_manifest.json`.
+
 Note: `polynomial_division_general` is a **new** oracle_type; the existing production
 `polynomial_division_exact` (scalar `remainder`, `divisor_root` payload) is left untouched.
 No migration of the legacy contract is performed or needed — the two coexist and are

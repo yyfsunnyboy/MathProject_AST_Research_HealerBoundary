@@ -574,3 +574,378 @@ No commit or push was made.
 ### Status
 
 Milestone 2 closeout completed.
+
+---
+
+## Milestone 3A — Prompt Conditions and Run Manifest Freeze
+
+### Goal
+
+Freeze Ab1 / Ab2g / Ab2d prompt composition, Ab1 calc answer-contract wording,
+deterministic prompt hashes, and the formal run manifest for the corrected four
+L1 calc tasks — without any model calls.
+
+### Formal conditions
+
+- Ab1 = Task Contract + Frozen Parameters
+- Ab2g = Math Core Scaffold + Task Contract + Frozen Parameters
+- Ab2d = Math Core Scaffold + task-local reusable primitive + Task Contract +
+  Frozen Parameters
+
+### Ab1 contract decisions
+
+Compact schema-only wording frozen for radical / exact-rational /
+poly-division / factor-roots: return fields, types, canonical form, ordering,
+exact arithmetic, frozen parameters immutable. No solving steps or answer
+constants.
+
+### Hash policy
+
+UTF-8 + LF newline normalization → SHA-256 of final prompt text. Model identity
+is excluded from the hashed bytes. Per-task × condition hashes live in the
+manifest; shared Math Core / contract / primitive component hashes also recorded.
+
+### Models/seeds resolved vs unresolved
+
+Resolved:
+- formal seeds `(2026071301, 2026071302, 2026071303)`
+- Ollama 4B/8B tags, digests, quantization, runtime `0.31.2`
+- temperature `0.0`, `num_predict=4096` for Ollama paths
+- request_count=1, retry_count=0, healer_enabled=false
+
+Unresolved (blocking full freeze):
+- Ollama top_p / top_k
+- 8B thinking requested/effective
+- Gemini exact version string, confirmatory vs exploratory role, temperature/top_p/top_k/thinking
+- Gemini cell geometry count
+
+### Files changed
+
+| Path | Purpose |
+|---|---|
+| `agent_tools/finals_rebuild/ce115_calc_prompt_freeze.py` | Condition assemblers, hashes, manifest builder |
+| `docs/experiments/manifests/ce115_calc_main_experiment_manifest.json` | Formal run manifest |
+| `tests/finals_rebuild/test_ce115_calc_prompt_freeze.py` | Freeze / composition / hash tests |
+| `agent_tools/finals_rebuild/math_boundary_pilot.py` | Additive Ab1 calc answer-contract wording |
+| `docs/experiments/ce115_computation_task_design.md` | Condition freeze note |
+| `docs/experiments/healer_boundary_execution_log.md` | Milestone 3A record |
+
+### Tests
+
+```powershell
+python -m pytest tests/finals_rebuild/test_ce115_calc_prompt_freeze.py tests/finals_rebuild/test_math_boundary_pilot.py tests/finals_rebuild/test_ce115_calc_reconstruction_readiness.py tests/finals_rebuild/test_ce115_calc_golden_dry_run.py --basetemp .pytest_tmp_m3a -q
+```
+
+- 63 passed; exit code 0
+
+```powershell
+python -m pytest tests/finals_rebuild/test_generator_success.py tests/finals_rebuild/test_generator_success_integration.py tests/finals_rebuild/test_generator_success_artifacts.py --basetemp .pytest_tmp_m3a_success -q
+```
+
+- 34 passed; exit code 0
+
+### Blocking unresolved fields
+
+Manifest `unresolved_fields` includes Ollama `top_p`/`top_k`, 8B thinking,
+and Gemini version/role/sampling/thinking/cell counts. Therefore
+`frozen=false`.
+
+### Status
+
+Milestone 3A completed with verdict **PARTIALLY FROZEN — UNRESOLVED FIELDS**.
+No commit or push was made.
+
+## Milestone 3B — Model and Runtime Provenance Resolution
+
+### Goal
+
+Resolve main-experiment manifest model/runtime provenance from existing runners,
+saved config, historical artifacts, and read-only local metadata queries — no
+model generation requests.
+
+### Resolved fields (local confirmatory)
+
+- Ollama 4B: `qwen3:4b-instruct-2507-q4_K_M`, digest `0edcdef34593`, Q4_K_M,
+  runtime Ollama `0.31.2`
+- Ollama 8B: `qwen3:8b`, digest `500a1f067a9f`, Q4_K_M, runtime `0.31.2`
+- Confirmatory chat request profile (4B and 8B identical):
+  - `temperature: 0.0` (explicit)
+  - `seed`: per-cell `repeat_seed` (explicit)
+  - `top_p` / `top_k` / `num_predict`: `not_explicitly_set` (omitted → Ollama
+    runtime default; not substituted from Modelfile)
+  - thinking `requested` / `effective`: `not_explicitly_set` (capability listed
+    by `ollama show` does not imply enablement)
+- Local confirmatory cell count: **72**
+  (`4 × 3 × 3 × 2`)
+- Gemini analysis role: **exploratory optional cloud comparison** (not part of
+  confirmatory 72)
+
+### Evidence sources
+
+- `agent_tools/finals_rebuild/math_boundary_pilot.py`
+- `scripts/run_ab2d_minimal_smoke.py`
+- `agent_tools/finals_rebuild/math_generation_runner.py`
+- `scripts/run_gemini_ab2g_math_core_qualification.py`
+- `scripts/run_gemini_ab1_ab2d_diagnostic.py`
+- `config.py`, `core/ai_wrapper.py`
+- `docs/experiments/ab2g_math_core_qualification_design_20260714.md`
+- Read-only: `ollama --version`, `ollama show` (4B/8B)
+
+### runtime_default / not_explicitly_set decisions
+
+- Unset Ollama options are recorded as `not_explicitly_set` with
+  `unset_options_rely_on: ollama_runtime_default`
+- Do not copy Modelfile `PARAMETER` values into the formal request profile
+- Qualification `/api/generate` `num_predict=4096` is non-authoritative for the
+  confirmatory `/api/chat` profile
+
+### Gemini role / status
+
+- Role: exploratory optional cloud comparison
+- Runner tag `gemini-3.5-flash` vs Config preset model
+  `gemini-3-flash-preview` → exact API identifier remains **UNRESOLVED**
+- Sampling evidenced where request-built: temperature `0.1`, max_output_tokens
+  `4096`; top_p/top_k `not_explicitly_set`; seed `unavailable` in generation
+  config; thinking `not_explicitly_set`
+- Exploratory / total planned cell counts remain **UNRESOLVED**
+
+### Freeze result
+
+- `local_confirmatory_frozen = true`
+- `gemini_exploratory_frozen = false`
+- `frozen = false` (single flag must not claim full completion)
+- Verdict: **LOCAL CONFIRMATORY FROZEN**
+
+### Tests
+
+```powershell
+python -m pytest tests/finals_rebuild/test_ce115_calc_prompt_freeze.py tests/finals_rebuild/test_math_boundary_pilot.py tests/finals_rebuild/test_ce115_calc_reconstruction_readiness.py tests/finals_rebuild/test_ce115_calc_golden_dry_run.py --basetemp .pytest_tmp_m3b -q
+```
+
+- 71 passed; exit code 0
+
+```powershell
+python -m pytest tests/finals_rebuild/test_generator_success.py tests/finals_rebuild/test_generator_success_integration.py tests/finals_rebuild/test_generator_success_artifacts.py --basetemp .pytest_tmp_m3b_success -q
+```
+
+- 34 passed; exit code 0
+
+### Remaining blockers
+
+- Gemini exact API model identifier / SDK version
+- Gemini exploratory cell matrix (`exploratory_cloud_cell_count`,
+  `total_planned_cell_count`)
+
+### Status
+
+Milestone 3B completed with verdict **LOCAL CONFIRMATORY FROZEN** (Gemini
+separately unresolved). No commit or push was made.
+
+## Milestone 3C — Zero-Model Local Confirmatory Preflight
+
+### Goal
+
+Validate that the frozen local confirmatory manifest expands deterministically
+into 72 cells with consistent prompts, request settings, output paths, and
+artifact schema — without any model calls.
+
+### 72-cell expansion
+
+- Geometry: `4 tasks × 3 conditions × 3 seeds × 2 local models = 72`
+- Distribution checks: task 18 / condition 24 / seed 24 / model 36
+- No Gemini; no legacy `ce115_cr01_*` tasks
+- Deterministic `cell_id` /
+  `docs/experiments/results/ce115_calc_local_confirmatory/...jsonl` paths
+
+### Prompt/hash validation
+
+- Prompts rebuilt via `ce115_calc_prompt_freeze` assemblers
+- Seed `2026071301` hashes match manifest `per_task_prompt_hashes`
+- 4B/8B prompts byte-identical for identical task×condition×seed
+- Ab1 / Ab2g / Ab2d composition guards enforced
+
+### Request-setting validation
+
+- `temperature=0.0`, per-cell seed, `request_count=1`, `retry_count=0`,
+  `healer_enabled=false`
+- `top_p` / `top_k` / `num_predict` / thinking remain `not_explicitly_set`
+  (no numeric fill-in; no auto-enable thinking)
+
+### Output-path safety
+
+- Unique deterministic paths under formal confirmatory results directory
+- Duplicate path / non-empty existing artifact → fail
+- Dry-run does not write formal JSONL results
+
+### Artifact schema readiness
+
+- Planned observed-record skeleton includes required identity, request,
+  ledger, evaluation, diagnostics, and commit/manifest hash fields
+- Observation fields left `null` (no fabricated model output)
+
+### CLI result
+
+```powershell
+python scripts/preflight_ce115_calc_local_confirmatory.py --manifest docs/experiments/manifests/ce115_calc_main_experiment_manifest.json --dry-run
+```
+
+- planned_cells=72, duplicates=0, hash/request mismatches=0, model_calls=0,
+  verdict=READY
+
+### Tests
+
+```powershell
+python -m pytest tests/finals_rebuild/test_ce115_calc_prompt_freeze.py tests/finals_rebuild/test_ce115_calc_run_preflight.py tests/finals_rebuild/test_math_boundary_pilot.py tests/finals_rebuild/test_ce115_calc_reconstruction_readiness.py tests/finals_rebuild/test_ce115_calc_golden_dry_run.py --basetemp .pytest_tmp_m3c -q
+```
+
+- 92 passed; exit code 0
+
+```powershell
+python -m pytest tests/finals_rebuild/test_generator_success.py tests/finals_rebuild/test_generator_success_integration.py tests/finals_rebuild/test_generator_success_artifacts.py --basetemp .pytest_tmp_m3c_success -q
+```
+
+- 34 passed; exit code 0
+
+### Blockers / runner drift notes (do not flip planning READY)
+
+- `math_boundary_pilot` prompt builders still diverge from freeze assemblers
+- Pilot does not yet execute the full 72-cell freeze plan in one pass with the
+  planned observed success-field write path
+
+### Status
+
+Milestone 3C completed with verdict **READY FOR LOCAL CONFIRMATORY RUN**
+(planning preflight). No commit or push was made.
+
+## Milestone 3D — Frozen Plan / Formal Runner Integration
+
+### Goal
+
+Wire the frozen 72-cell local confirmatory plan into a formal Ollama runner path
+so prompts come only from plan cells, request payloads match manifest unset
+semantics, and observed artifacts assemble via the existing evaluator / G1–G6
+pipeline — without live model calls.
+
+### Runner prompt source
+
+- Formal path: `cell.prompt_text` from `ce115_calc_run_plan` expansion
+- Integrity: `sha256(prompt_text) == cell.prompt_hash` (+ manifest table for
+  freeze seed)
+- Legacy `math_boundary_pilot.build_ab*_prompt` not used on confirmatory path
+
+### Payload policy
+
+- `build_ollama_request_payload`: model, messages, `temperature=0.0`, `seed`
+- Omit `top_p` / `top_k` / `num_predict` / think when `not_explicitly_set`
+- No fill-in from legacy runner defaults; no retries
+
+### Observed artifact schema
+
+- Identity, policy, request provenance, and observed result fields
+- Post-execution additive fill via `classify_response` → G1–G6 / composites
+- Diagnostics from transport response when present
+
+### Planned vs executed distinction
+
+- `record_state=planned` vs `record_state=executed`
+- Formal analysis loader accepts only `executed` local confirmatory rows
+
+### Resume / overwrite policy
+
+- Unique per-cell JSONL under formal confirmatory results dir
+- Existing non-empty / duplicate `cell_id` → fail
+- Resume skips already-executed cell_ids; does not rewrite them
+- Milestone 3D writes only under pytest `tmp_path` in tests
+
+### Tests
+
+```powershell
+python -m pytest tests/finals_rebuild/test_ce115_calc_prompt_freeze.py tests/finals_rebuild/test_ce115_calc_run_preflight.py tests/finals_rebuild/test_ce115_calc_formal_runner.py tests/finals_rebuild/test_ce115_calc_reconstruction_readiness.py tests/finals_rebuild/test_ce115_calc_golden_dry_run.py --basetemp .pytest_tmp_m3d -q
+```
+
+- 95 passed; exit code 0
+
+```powershell
+python -m pytest tests/finals_rebuild/test_generator_success.py tests/finals_rebuild/test_generator_success_integration.py tests/finals_rebuild/test_generator_success_artifacts.py --basetemp .pytest_tmp_m3d_success -q
+```
+
+- 34 passed; exit code 0
+
+### CLI plan-only result
+
+```powershell
+python scripts/run_ce115_calc_local_confirmatory.py --manifest docs/experiments/manifests/ce115_calc_main_experiment_manifest.json --local-confirmatory --plan-only
+```
+
+- planned_cells=72, mismatches/conflicts=0, model_calls=0, verdict=READY
+
+### Remaining blockers
+
+- Live one-cell Ollama smoke not yet run (intentionally out of scope for 3D)
+- Live transport injection wrapper for production execute mode not exercised
+
+### Status
+
+Milestone 3D completed with verdict **READY FOR ONE-CELL LIVE SMOKE**.
+No commit or push was made.
+
+## Milestone 3R2B — Qwen3.5 Local Cohort Refreeze
+
+### Cohort replacement
+
+Local confirmatory models replaced:
+
+- `qwen3.5:4b` (edge-small; reported 4.7B params; digest `2a654d98e6fb`)
+- `qwen3.5:9b` (edge-large; reported 9.7B params; digest `6488c96fa5fa`)
+
+Runtime: Ollama `0.32.0` (model requires `0.17.1`). Quantization Q4_K_M both.
+Cell geometry remains `4 × 3 × 3 × 2 = 72` (no 144-cell expansion).
+
+### Thinking policy
+
+- Formal request: top-level `think=false` (explicit)
+- Capability: supported (listed by `ollama show`)
+- External qualification: `THINK_FALSE_CLEAN`
+  (`C:\Temp\qwen35_thinking_qualification`, 2026-07-15, non-formal)
+- Does not claim perpetual zero-leakage; Gemini thinking not equated
+
+### Sampling / defaults
+
+Request explicit: temperature `0.0`, per-cell seed, `think=false`.
+Not explicitly set: top_p / top_k / presence_penalty / num_predict.
+Observed model defaults recorded separately (temp 1, top_k 20, top_p 0.95,
+presence_penalty 1.5) and must not enter payloads.
+
+### Historical cohort
+
+`qwen3:4b-instruct-2507-q4_K_M` and `qwen3:8b` retained under
+`historical_cohort` / `historical_mechanism_pilot`; excluded from new
+confirmatory plan. Old artifact metadata not rewritten.
+
+### Prompt hash invariance
+
+All 12 task×condition SHA-256 values unchanged vs pre-Qwen3.5 freeze baseline.
+
+### 72-cell regeneration
+
+Cell IDs / paths use `qwen3_5_4b` / `qwen3_5_9b` slugs under
+`docs/experiments/results/ce115_calc_local_confirmatory/`.
+
+### Tests / CLI
+
+Targeted pytest suites with basetemp `.pytest_tmp_m3r2b*` (no model calls):
+99 + 34 passed.
+Preflight dry-run and formal runner `--plan-only`: verdict READY,
+`model_calls=0`, models `qwen3.5:4b` + `qwen3.5:9b`.
+
+### Remaining blockers
+
+- Live one-cell Ollama smoke not yet run
+- Gemini exploratory cells still UNRESOLVED
+- 144-cell / extra-task expansion not decided
+
+### Status
+
+Milestone 3R2B completed with verdict
+**QWEN3.5 LOCAL COHORT REFROZEN — READY FOR RENDER VALIDATION**.
+No commit or push was made.

@@ -88,6 +88,27 @@ def build_ab1_prompt(task: dict[str, Any], frozen: dict[str, Any]) -> str:
             "first_exceed_week (a number), and first_exceed_day (a frozen day label). Do not return only "
             "a distance, a partial answer, or natural-language text. "
         )
+    elif task["oracle_type"] == "radical_simplification":
+        answer_contract = (
+            "correct_answer must be a JSON-compatible dict with exactly coefficient (positive int) "
+            "and radicand (square-free int > 1) for simplest radical form. Exact integers only; no floats. "
+        )
+    elif task["oracle_type"] == "exact_rational_expression":
+        answer_contract = (
+            "correct_answer must be a JSON-compatible dict with exactly value (canonical exact rational "
+            "string: integer string or irreducible p/q with positive denominator). Exact arithmetic only; no floats. "
+        )
+    elif task["oracle_type"] == "polynomial_division_general":
+        answer_contract = (
+            "correct_answer must be a JSON-compatible dict with exactly quotient_coefficients "
+            "(highest degree first; int or irreducible p/q strings) and remainder_coefficients "
+            "(degree lower than the divisor; for a linear divisor, exactly one value). Exact arithmetic; no floats. "
+        )
+    elif task["oracle_type"] == "polynomial_factor_roots":
+        answer_contract = (
+            "correct_answer must be a JSON-compatible dict with exactly roots (two distinct exact rationals "
+            "as int or irreducible p/q strings) in ascending numeric order. Exact arithmetic; no floats. "
+        )
     return (
         "Write only Python source. Implement def generate(level=1, **kwargs).\n"
         f"Task: {task['task_id']} ({task['domain']}, difficulty level {task['difficulty_level']}).\n"
