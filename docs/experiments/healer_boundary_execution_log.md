@@ -949,3 +949,118 @@ Preflight dry-run and formal runner `--plan-only`: verdict READY,
 Milestone 3R2B completed with verdict
 **QWEN3.5 LOCAL COHORT REFROZEN — READY FOR RENDER VALIDATION**.
 No commit or push was made.
+
+## Milestone 3E — End-to-End LaTeX Render Validation and HTML Evidence Report
+
+### Goal
+
+Split G6 into G6a (notation lint) / G6b (real browser MathJax) / G6c (human
+visual review), and build a rebuildable offline HTML evidence report. No formal
+model, Healer, retry, or 72-cell run.
+
+### Formal artifact schema (read-only)
+
+- Planned path: `docs/experiments/results/ce115_calc_local_confirmatory/*.jsonl`
+  (empty until live run; report also accepts fixture JSONL)
+- Executed keys: `record_state`, `cell_id`, `task_id`, `prompt_condition`,
+  `seed`, `model_tag`, `prompt_text`/`prompt_hash`, `raw_first_attempt_output`,
+  `candidate_extracted`, `actual_question_text`, `evaluation_gates` (G1–G6),
+  `composite_outcomes`, `ledger_stage`, `token_duration_diagnostics`,
+  optional `healer`, `retry_count`
+- Report overlays do not overwrite formal G1–G5 or formal G6 lint field
+
+### G6 split
+
+| Gate | Meaning | PASS rule |
+|---|---|---|
+| G6a | notation lint (`evaluate_math_notation`) | delimiter/brace/malformed checks |
+| G6b | Chrome/Edge headless + vendored MathJax 3.2.2 `tex-svg.js` via `file://` + CDP | insert Q/A into DOM, typeset, capture mjx-merror / leftover commands / size / clipping / overlap |
+| G6c | human visual score from independent JSON/CSV | score `2` only |
+
+Aggregate G6 PASS requires question and answer each PASS on G6a+G6b and G6c=2.
+Incomplete human review → G6 / Presentation / Full = `NOT_ASSESSED` (never
+PASS/FAIL).
+
+### Human review persistence
+
+`docs/experiments/human_reviews/ce115_calc_g6c_reviews.json` (and sample
+`ce115_calc_sample_g6c_reviews.json`). HTML rebuild reads this file; reviews
+are never hard-coded into HTML generators.
+
+### Report
+
+- Builder: `agent_tools/finals_rebuild/ce115_calc_evidence_report.py`
+- CLI: `scripts/build_ce115_calc_evidence_report.py`
+- Sample offline report:
+  `docs/experiments/reports/ce115_calc_sample_evidence/index.html`
+- Shows planned/executed/failed, G1–G6, G6a/b/c, Technical/Presentation/Full,
+  Healer eligible/attempted/rescued/regressed, retry-once, tokens/latency,
+  filtered cell table, per-cell detail pages
+- Ratios as `numerator / denominator`; planned excluded from executed denom
+- Hashes: artifact / report dataset / report build
+
+### Renderer
+
+- Browser: Chrome `150.0.7871.115`
+  (`C:\Program Files\Google\Chrome\Application\chrome.exe`); Edge available
+- MathJax: vendored `agent_tools/finals_rebuild/vendor/mathjax/tex-svg.js`
+  (3.2.2; SHA-256 in `SHA256SUMS`); frontend-equivalent config (`$`/`\(`/`dfrac`)
+- Network during G6b: remote `network_calls=0`
+
+### Files changed
+
+| Path | Purpose |
+|---|---|
+| `agent_tools/finals_rebuild/browser_mathjax_renderer.py` | Offline Chrome/Edge CDP MathJax probe |
+| `agent_tools/finals_rebuild/latex_render_validation.py` | G6a/G6b/G6c + status propagation |
+| `agent_tools/finals_rebuild/ce115_calc_evidence_report.py` | HTML evidence report builder |
+| `agent_tools/finals_rebuild/vendor/mathjax/*` | Offline MathJax vendor |
+| `scripts/build_ce115_calc_evidence_report.py` | CLI |
+| `tests/finals_rebuild/test_latex_render_validation.py` | Fixtures / negative / persistence tests |
+| `tests/finals_rebuild/fixtures/latex_render/*` | Sample cells + reviews |
+| `docs/experiments/human_reviews/*` | Persistent G6c store |
+| `docs/experiments/reports/ce115_calc_sample_evidence/*` | Sample offline report |
+| `docs/experiments/healer_boundary_execution_log.md` | Milestone 3E record |
+
+### Tests
+
+```powershell
+$env:PYTHONPATH = "C:\Projects\MathProject_AST_Research_HealerBoundary"
+python -m pytest tests/finals_rebuild/test_latex_render_validation.py --basetemp .pytest_tmp_m3e -q
+```
+
+### Call counts
+
+- model_calls = 0
+- healer_calls = 0
+- network_calls = 0 (G6b remote requests)
+
+### Status
+
+Milestone 3E completed. No commit or push was made.
+
+## Milestone 3E Closeout Audit
+
+### Cleanups
+
+- Removed `.pytest_tmp_m3e*` scratch; added `.pytest_tmp*/` and report
+  `vendor/` copies to `.gitignore`
+- Sample commit strategy **B**: minimal golden under
+  `docs/experiments/reports/ce115_calc_sample_evidence/` (~189 KiB, 14 files),
+  no duplicated MathJax blob, machine paths sanitized to `(local-browser)` /
+  repo-relative paths; rebuild byte-deterministic for dataset/build hashes
+
+### Vendor provenance
+
+- `tex-svg.js` MathJax 3.2.2 + `LICENSE` (Apache-2.0 notice) + README + SHA256SUMS
+
+### Naming / equivalence
+
+- Distinct report fields: `artifact_g6_legacy_lint`,
+  `report_g6a_notation_lint`, `report_g6b_renderer_parse`,
+  `report_g6c_human_visual`, `report_g6_overall`
+- Equivalence note: `docs/experiments/ce115_calc_g6_renderer_equivalence.md`
+
+### Status
+
+Milestone 3E closeout audit completed. No commit or push was made.

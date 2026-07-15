@@ -75,12 +75,20 @@ be inferred from generated code.
 
 ## 9. G6 — Mathematical Notation Validity
 
-G6 evaluates notation in the actual question text. It covers LaTeX delimiter
-pairing, malformed or truncated commands, consistent inline/display usage,
-unsafe Unicode/LaTeX mixing, and parser/renderer validity where the question
-contains mathematical notation. Notation syntax validity, rendered appearance,
-and mathematical semantic correctness are separate concerns; semantic
-correctness remains G4.
+G6 evaluates notation in the actual question text (and, for presentation
+evidence reports, the answer text). Milestone 3E splits report observation
+into unambiguously named fields:
+
+- **artifact_g6_legacy_lint** — formal `evaluation_gates.g6_math_notation`
+  (delimiter/brace lint persisted on artifacts; do not reinterpret as overall G6)
+- **report_g6a_notation_lint** — report-side notation lint
+- **report_g6b_renderer_parse** — real browser MathJax render validation
+- **report_g6c_human_visual** — human visual review (score 0/1/2)
+- **report_g6_overall** — report aggregate G6
+
+`report_g6_overall` **PASS** requires G6a PASS, G6b PASS, and G6c score 2 for
+both question and answer. Incomplete human review is **NOT_ASSESSED**, never
+PASS or FAIL. Formal artifact lint fields are never overwritten by the report.
 
 Without persisted actual question text, raw notation evidence, and the relevant
 lint/render observation, G6 is **NOT_OBSERVED**. It must not be inferred from
