@@ -1,0 +1,72 @@
+{
+  "protocol_id": "ce115_ab2d_assembly_protocol_v3",
+  "source_commit": "971c5b54",
+  "return_contract": "flat_polydiv_v3",
+  "classification": "NON_FORMAL_DISPOSABLE_SMOKE",
+  "analysis_status": "EXCLUDED_FROM_ALL_FORMAL_ANALYSES",
+  "model_calls_planned": 1,
+  "retry": 0,
+  "healer": 0,
+  "repair": 0,
+  "replay": 0,
+  "hashes": {
+    "prompt": "9331215620d55e08d444daa405de33179edebc924149159287bc62ce67b8be7c",
+    "payload": "ccf051a281af6d0fb284d1f08cb8d041255d4538d5eeeca18ade9f814e30364b"
+  },
+  "payload": {
+    "model": "qwen3.5:4b",
+    "messages": [
+      {
+        "role": "user",
+        "content": "# CE115 Ab2d-Assembly domain contract\nfrom core.prompts.domain_function_library import FractionOps, PolynomialOps, RadicalOps\nfrom core.skill_policies.radical_logic import RadicalLogicEngine\n\nRequired APIs:\n- `PolynomialOps.div_qr`\n- `PolynomialOps.format_latex`\n- `PolynomialOps.format_plain`\n\nMUST_CALL: invoke every required API through its canonical name in `generate`.\nDO_NOT_REIMPLEMENT_DOMAIN_LOGIC: do not define domain helper classes/functions or reproduce their algorithms.\nPolynomialOps.div_qr(dividend_coefficients, divisor_coefficients) returns exactly `(quotient_coefficients, remainder_coefficients)` as two flat exact coefficient lists; never nest either list or use floats.\nReturn contract: `generate(level=1, **kwargs)` returns a dict with `question_text`, `correct_answer`, and `oracle_payload`.\nExample: `quotient_coefficients, remainder_coefficients = PolynomialOps.div_qr(dividend_coefficients, divisor_coefficients)`; assign both returned flat lists directly to `correct_answer` without wrapping either list.\n\nWrite only Python. Implement generate(level=1, **kwargs) for frozen dividend_coefficients=[-6,-4,3] and divisor_coefficients=[1,-2]. Call PolynomialOps.div_qr exactly once using those lists. Directly unpack `quotient_coefficients, remainder_coefficients`. Return exactly question_text, correct_answer, oracle_payload. correct_answer must be {\"quotient_coefficients\": quotient_coefficients, \"remainder_coefficients\": remainder_coefficients}; do not wrap remainder_coefficients. Expected exact answer is quotient [-6,-16], remainder [-29]. oracle_payload must exactly equal the frozen inputs.\n"
+      }
+    ],
+    "stream": false,
+    "think": false,
+    "options": {
+      "temperature": 0.0,
+      "seed": 2026071302,
+      "num_ctx": 65536,
+      "num_predict": 24576
+    }
+  },
+  "raw_output": "```python\ndef generate(level=1, **kwargs):\n    from core.prompts.domain_function_library import PolynomialOps\n    \n    # Frozen input coefficients as per contract requirements\n    dividend_coefficients = [-6, -4, 3]\n    divisor_coefficients = [1, -2]\n    \n    # Call the required API exactly once using canonical names\n    quotient_coefficients, remainder_coefficients = PolynomialOps.div_qr(dividend_coefficients, divisor_coefficients)\n    \n    # Construct correct_answer dict directly unpacking results without wrapping lists or floats\n    correct_answer = {\n        \"quotient_coefficients\": quotient_coefficients, \n        \"remainder_coefficients\": remainder_coefficients\n    }\n    \n    # Prepare oracle_payload with frozen inputs exactly as specified\n    oracle_payload = {\"dividend_coefficients\": dividend_coefficients, \"divisor_coefficients\": divisor_coefficients}\n    \n    return {\n        \"question_text\": f\"Divide polynomial {-6,-4,3} by {1,-2}\", \n        \"correct_answer\": correct_answer, \n        \"oracle_payload\": oracle_payload\n    }\n```",
+  "raw_output_hash": "0336cca7dc4a814726abdbd8df28808eb74f767a2c1fcedd58998b1243d193ed",
+  "extracted_code": "def generate(level=1, **kwargs):\n    from core.prompts.domain_function_library import PolynomialOps\n    \n    # Frozen input coefficients as per contract requirements\n    dividend_coefficients = [-6, -4, 3]\n    divisor_coefficients = [1, -2]\n    \n    # Call the required API exactly once using canonical names\n    quotient_coefficients, remainder_coefficients = PolynomialOps.div_qr(dividend_coefficients, divisor_coefficients)\n    \n    # Construct correct_answer dict directly unpacking results without wrapping lists or floats\n    correct_answer = {\n        \"quotient_coefficients\": quotient_coefficients, \n        \"remainder_coefficients\": remainder_coefficients\n    }\n    \n    # Prepare oracle_payload with frozen inputs exactly as specified\n    oracle_payload = {\"dividend_coefficients\": dividend_coefficients, \"divisor_coefficients\": divisor_coefficients}\n    \n    return {\n        \"question_text\": f\"Divide polynomial {-6,-4,3} by {1,-2}\", \n        \"correct_answer\": correct_answer, \n        \"oracle_payload\": oracle_payload\n    }",
+  "scanner": {
+    "classification": "ASSEMBLY_COMPLIANT",
+    "required_apis": [
+      "PolynomialOps.div_qr"
+    ],
+    "called_apis": [
+      "PolynomialOps.div_qr"
+    ],
+    "missing_apis": [],
+    "forbidden_definitions": [],
+    "reimplemented_helpers": [],
+    "invalid_calls": [],
+    "runtime_library_available": true,
+    "errors": []
+  },
+  "runtime_executed": true,
+  "evaluator_result": "{'question_text': 'Divide polynomial (-6, -4, 3) by (1, -2)', 'correct_answer': {'quotient_coefficients': [-6, -16], 'remainder_coefficients': [-29]}, 'oracle_payload': {'dividend_coefficients': [-6, -4, 3], 'divisor_coefficients': [1, -2]}}",
+  "synthetic_wrapper_passed": true,
+  "pre_detail": "{'question_text': 'q', 'correct_answer': {'quotient_coefficients': [-6, -16], 'remainder_coefficients': [-29]}, 'oracle_payload': {'dividend_coefficients': [-6, -4, 3], 'divisor_coefficients': [1, -2]}}",
+  "nested_remainder": false,
+  "flat_remainder_evidence": false,
+  "completion": "NATURAL_COMPLETE",
+  "telemetry": {
+    "prompt_eval_count": 369,
+    "eval_count": 236,
+    "total_duration": 5570086700
+  },
+  "wall_clock_seconds": 5.582178354263306,
+  "verdict": "SMOKE_CORRECTNESS_AND_SCHEMA_CONFIRMED",
+  "model_healer_repair_replay_retry_counts": {
+    "model": 1,
+    "healer": 0,
+    "repair": 0,
+    "replay": 0,
+    "retry": 0
+  }
+}

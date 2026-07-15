@@ -47,7 +47,7 @@ MUST_CALL: invoke every required API through its canonical name in `generate`.
 DO_NOT_REIMPLEMENT_DOMAIN_LOGIC: do not define domain helper classes/functions or reproduce their algorithms.
 PolynomialOps.div_qr(dividend_coefficients, divisor_coefficients) returns exactly `(quotient_coefficients, remainder_coefficients)` as two flat exact coefficient lists; never nest either list or use floats.
 Return contract: `generate(level=1, **kwargs)` returns a dict with `question_text`, `correct_answer`, and `oracle_payload`.
-Example: `q, r = PolynomialOps.div_qr([1, 0, -1], [1, -1])`.
+Example: `quotient_coefficients, remainder_coefficients = PolynomialOps.div_qr(dividend_coefficients, divisor_coefficients)`; assign both returned flat lists directly to `correct_answer` without wrapping either list.
 """
 
 

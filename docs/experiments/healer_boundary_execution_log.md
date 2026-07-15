@@ -1,3 +1,9 @@
+# Milestone 5B.7H ? Polynomial Division Return-Contract Usage Fix
+
+- Hardened the assembly example to directly unpack quotient/remainder flat lists and assign them directly to the output schema.
+- One disposable 4B smoke confirmed exact `[-29]` remainder, no nested list, runtime execution, schema, and semantic correctness.
+- The return-contract usage defect is fixed; formal rerun gate remains `FORMAL_RERUN_GATE_READY`.
+
 # Milestone 5B.7G ? Domain Verification Evidence Closeout
 
 - Expanded deterministic property evidence to 200 cases each for polynomial, fraction, and radical canonical paths; no counterexamples.
