@@ -1,0 +1,74 @@
+def generate(level=1, **kwargs):
+    from fractions import Fraction
+    
+    dividend_coeffs = [-6, -4, 3]
+    divisor_coeffs = [1, -2]
+    
+    # Perform polynomial division with exact arithmetic using Fractions
+    def poly_div_qr(dividend, divisor):
+        if not dividend:
+            return [], []
+        
+        n = len(dividend) - 1
+        m = len(divisor) - 1
+        
+        quotient_coeffs = [Fraction(0)] * (n - m + 1)
+        remainder_coeffs = list(dividend)[:]
+        
+        for i in range(n, m, -1):
+            if divisor[0] == 0:
+                continue
+            
+            factor = Fraction(remainder[i], divisor[0])
+            
+            # Subtract factor * (divisor shifted by power of x corresponding to current position)
+            shift_power = n - i + 1
+            for j in range(len(divisor)):
+                idx = i - m + j
+                if idx < len(remainder_coeffs):
+                    remainder_coeffs[idx] -= factor * divisor[j]
+        
+        # Trim trailing zeros from quotient (but keep at least one term if non-zero)
+        while len(quotient_coeffs) > 1 and quotient_coeffs[-1] == Fraction(0):
+            quotient_coeffs.pop()
+            
+        return quotient_coeffs, remainder_coeffs
+    
+    q_coeff_frac, r_coeff_frac = poly_div_qr(dividend_coeffs, divisor_coeffs)
+    
+    # Convert fractions to strings or integers as required
+    def format_coef(c):
+        if isinstance(c, Fraction):
+            if c.denominator == 1:
+                return int(c.numerator)
+            else:
+                return f"{c.numerator}/{c.denominator}"
+        elif isinstance(c, (int, float)):
+            # Handle potential floats from input by converting to exact fraction first
+            frac = Fraction(c).limit_denominator()
+            if frac.denominator == 1:
+                return int(frac.numerator)
+            else:
+                return f"{frac.numerator}/{frac.denominator}"
+        elif c is None or (isinstance(c, float) and abs(c - round(c)) < 1e-9):
+            return int(round(c)) if isinstance(c, float) else str(c)
+        
+    quotient_formatted = [format_coef(c) for c in q_coeff_frac]
+    
+    # For remainder with linear divisor (degree 1), we expect one coefficient value
+    r_list = list(r_coeff_frac)
+    while len(r_list) > 0 and isinstance(r_list[-1], Fraction) and r_list[-1].numerator == 0:
+        if len(r_list) <= 2: # Keep at least the constant term for linear divisor remainder
+            break
+        r_list.pop()
+    
+    remainder_formatted = [format_coef(c) for c in r_list]
+    
+    return {
+        "question_text": f"Divide the polynomial with coefficients {-dividend_coeffs} by the linear divisor with coefficients {divisor_coeffs}. Report the quotient and remainder.",
+        "correct_answer": {
+            "quotient_coefficients": quotient_formatted,
+            "remainder_coefficients": remainder_formatted
+        },
+        "oracle_payload": {"dividend_coefficients": [-6, -4, 3], "divisor_coefficients": [1, -2]}
+    }

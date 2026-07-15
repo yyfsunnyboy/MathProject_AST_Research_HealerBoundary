@@ -1,0 +1,56 @@
+{
+  "protocol_id": "ce115_corrected_context_rerun_protocol",
+  "version": "1.0.0",
+  "description": "Corrected context budget rerun protocol for the CE115 task suite. Corrects Ollama default context cap to prevent premature truncation.",
+  "original_run_label": "INITIAL_FORMAL_RUN_CONTEXT_UNCONTROLLED",
+  "corrected_run_label": "CORRECTED_FORMAL_RUN_CONTEXT_CONTROLLED",
+  "parameter_overrides": {
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "think": false
+  },
+  "invariants": {
+    "tasks_count": 4,
+    "models_count": 2,
+    "conditions_count": 3,
+    "seeds_count": 3,
+    "total_cells_count": 72,
+    "temperature": 0.0,
+    "repeat_penalty": 1.0,
+    "top_k": "not_explicitly_set",
+    "top_p": "not_explicitly_set",
+    "presence_penalty": "not_explicitly_set"
+  },
+  "execution_rules": {
+    "preserve_original_artifacts": true,
+    "isolated_output_directory": "docs/experiments/results/ce115_calc_corrected_rerun",
+    "first_attempt_only": true,
+    "no_healer_or_repair": true,
+    "no_automatic_retry": true
+  },
+  "classification_rules": {
+    "repetition_loop_detection": {
+      "repeated_line_ratio_threshold": 0.40,
+      "longest_repeated_contiguous_block_threshold": 15
+    },
+    "limit_reached_handling": {
+      "hit_context_ceiling": {
+        "verdict": "CONFIGURATION_INVALID",
+        "exclude_from_failure_taxonomy": true,
+        "is_model_failure": false
+      },
+      "hit_predict_ceiling_with_degeneration": {
+        "verdict": "MODEL_DEGENERATIVE_NONTERMINATION",
+        "exclude_from_failure_taxonomy": false,
+        "is_model_failure": true
+      }
+    }
+  },
+  "post_execution_pipeline": [
+    "rebuild_census",
+    "rebuild_taxonomy",
+    "rebuild_minimal_core_applicability",
+    "rebuild_safe_historical_applicability",
+    "rebuild_replay_eligibility"
+  ]
+}

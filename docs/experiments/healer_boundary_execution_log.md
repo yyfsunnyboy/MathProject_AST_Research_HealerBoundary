@@ -1242,5 +1242,48 @@ Rebuild the 18 × 4 safe generic rule adjudication matrix using a deterministic,
 Milestone 5B.4 completed with verdict **EVIDENCE_REBUILT_BUDGET_RECOMMENDED**.
 No code repairs, model re-runs, or sandbox replays were executed.
 
+## Milestone 5B.5 — Context-Budget Preflight and Corrected Rerun Protocol Freeze
 
+### Goal
 
+Execute a 6-cell context budget preflight using `num_ctx = 65536` and `num_predict = 24576` under `think = false` options to validate budget feasibility and prevent context truncation. Freeze the corrected full-rerun protocol.
+
+### Preflight Outcomes
+
+*   **Cells Executed**: 6 cells (no retries).
+*   **Completion Classifications**:
+    1. `qwen3_5_4b__ce115_calc_radical_simplification_l1__ab1__seed_2026071303` -> `MODEL_DEGENERATIVE_NONTERMINATION` (In=454, Out=24576, repetition loop).
+    2. `qwen3_5_4b__ce115_calc_radical_simplification_l1__ab2g__seed_2026071301` -> `MODEL_DEGENERATIVE_NONTERMINATION` (In=579, Out=24576, repetition loop).
+    3. `qwen3_5_9b__ce115_calc_polynomial_division_l1__ab2g__seed_2026071302` -> `MODEL_DEGENERATIVE_NONTERMINATION` (In=641, Out=24576, repetition loop).
+    4. `qwen3_5_9b__ce115_calc_polynomial_division_l1__ab1__seed_2026071301` -> `NATURAL_COMPLETE` (In=515, Out=1600).
+    5. `qwen3_5_9b__ce115_calc_polynomial_division_l1__ab2d__seed_2026071302` -> `NATURAL_COMPLETE` (In=696, Out=733).
+    6. `qwen3_5_4b__ce115_calc_exact_rational_expression_l1__ab2d__seed_2026071301` -> `NATURAL_COMPLETE` (In=663, Out=569).
+*   **Repetition Diagnostics**: Detects loop behavior at 24576 token limit. Three cells hit the prediction limit due to infinite generation loops, which is a model behavioral characteristic.
+*   **Budget Coverage**: Preflight successfully run on 4B & 9B models and across Ab1, Ab2g, and Ab2d configurations.
+*   **Rerun Protocol Freezing**: Corrected full rerun protocol manifest (`docs/experiments/manifests/ce115_corrected_context_rerun_protocol.json` and `.md`) successfully created and frozen.
+
+### Files Created/Tracked
+
+*   **Preflight Runner & Tests**:
+    *   `scripts/ce115_context_budget_preflight.py`
+    *   `tests/finals_rebuild/test_ce115_preflight.py`
+*   **Preflight Results & Reports**:
+    *   `docs/experiments/results/ce115_context_budget_preflight/` (Contains JSONL results and raw outputs for the 6 cells)
+    *   `docs/experiments/results/ce115_context_budget_preflight/ce115_context_budget_preflight_summary.json`
+    *   `docs/experiments/results/ce115_context_budget_preflight/ce115_context_budget_preflight_summary.md`
+*   **Rerun Protocol Manifests**:
+    *   `docs/experiments/manifests/ce115_corrected_context_rerun_protocol.json`
+    *   `docs/experiments/manifests/ce115_corrected_context_rerun_protocol.md`
+
+### Call Counts & Status
+*   `model_calls` = 6
+*   `healer_calls` = 0
+*   `repair_calls` = 0
+*   `replay_calls` = 0
+*   `retry_calls` = 0
+*   `api_calls` = 6
+
+### Status
+
+Milestone 5B.5 completed with verdict **CONTEXT_PREFLIGHT_PASSED_WITH_MODEL_DEGENERATION**.
+Rerun protocol successfully frozen.
