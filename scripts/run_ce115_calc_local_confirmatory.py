@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 """Formal CE115 local confirmatory runner entry point.
 
-Milestone 3D: only --plan-only is exercised (no model calls).
-
-  python scripts/run_ce115_calc_local_confirmatory.py \\
-    --manifest docs/experiments/manifests/ce115_calc_main_experiment_manifest.json \\
-    --plan-only
+Milestone 3D/3F: --plan-only validates the frozen 72-cell plan (no model calls).
+Live one-cell smoke uses scripts/run_ce115_calc_one_cell_smoke.py so this file
+stays free of Ollama/HTTP transport imports.
 """
 from __future__ import annotations
 
@@ -64,8 +62,9 @@ def main(argv: list[str] | None = None) -> int:
         return _plan_only(args.manifest)
 
     print(
-        "error: live confirmatory execution is not enabled in this milestone; "
-        "pass --plan-only (and optionally --local-confirmatory)",
+        "error: live confirmatory execution is not enabled in this entrypoint; "
+        "pass --plan-only, or use scripts/run_ce115_calc_one_cell_smoke.py "
+        "--local-confirmatory --cell-id <id>",
         file=sys.stderr,
     )
     return 2

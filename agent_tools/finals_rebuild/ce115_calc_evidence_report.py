@@ -178,6 +178,13 @@ def build_dataset(
             "unknown_review_cell_ids:" + ",".join(unknown_review_cell_ids)
         )
 
+    # Artifact-level request counts (formal smoke / confirmatory), separate from
+    # report-build renderer call counters which must remain zero for rebuilds.
+    artifact_model_calls = 0
+    for row in executed_rows:
+        if row.get("record_state") == RECORD_STATE_EXECUTED:
+            artifact_model_calls += int(row.get("request_count") or 0)
+
     planned_ids = [str(c["cell_id"]) for c in planned_cells]
     for cell in planned_cells:
         cell_id = str(cell["cell_id"])
@@ -365,9 +372,10 @@ def build_dataset(
             1 for r in executed_cells if (r.get("healer") or {}).get("regressed") is True
         ),
         "retry_once": sum(1 for r in executed_cells if int(r.get("retry_count") or 0) == 1),
-        "model_calls": model_calls,
+        "model_calls": artifact_model_calls,
         "healer_calls": healer_calls,
         "network_calls": network_calls,
+        "report_rebuild_renderer_model_calls": model_calls,
         "executed_denominator": den,
         "warnings": warnings,
         "unknown_review_cell_ids": list(unknown_review_cell_ids or []),
@@ -377,9 +385,10 @@ def build_dataset(
         "cells": cells,
         "summary": summary,
         "call_counts": {
-            "model_calls": model_calls,
+            "model_calls": artifact_model_calls,
             "healer_calls": healer_calls,
             "network_calls": network_calls,
+            "report_rebuild_renderer_model_calls": model_calls,
         },
         "warnings": warnings,
     }

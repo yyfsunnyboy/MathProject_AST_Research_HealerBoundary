@@ -187,8 +187,12 @@ def test_review_persistence_across_rebuild(tmp_path, sample_rows, reviews):
         renderer_fn=_fake_renderer,
         run_renderer=True,
     )
-    assert r1["call_counts"] == {"model_calls": 0, "healer_calls": 0, "network_calls": 0}
-    assert r2["call_counts"] == {"model_calls": 0, "healer_calls": 0, "network_calls": 0}
+    assert r1["call_counts"]["model_calls"] == 0
+    assert r1["call_counts"]["healer_calls"] == 0
+    assert r1["call_counts"]["network_calls"] == 0
+    assert r2["call_counts"]["model_calls"] == 0
+    assert r2["call_counts"]["healer_calls"] == 0
+    assert r2["call_counts"]["network_calls"] == 0
     detail = (out2 / "cells" / "fixture_renderer_pass_human_2.html").read_text(encoding="utf-8")
     assert "updated-after-first-build" in detail
     meta = json.loads((out2 / "report_meta.json").read_text(encoding="utf-8"))

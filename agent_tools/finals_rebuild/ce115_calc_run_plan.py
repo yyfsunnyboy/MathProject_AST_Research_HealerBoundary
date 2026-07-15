@@ -471,6 +471,12 @@ def assert_cross_model_prompt_identity(cells: list[dict[str, Any]]) -> None:
 
 
 def assert_output_path_safety(cells: list[dict[str, Any]], *, repo_root: Path | None = None) -> list[str]:
+    """Validate path determinism and record existing non-empty artifacts.
+
+    Existing artifacts are returned as blockers (not a hard raise) so resume /
+    post-smoke plan loads remain possible. Per-cell write still refuse-overwrite
+    via write_executed_record / assert_output_writable.
+    """
     root = (repo_root or REPO_ROOT).resolve()
     blockers: list[str] = []
     seen: set[str] = set()
@@ -489,8 +495,7 @@ def assert_output_path_safety(cells: list[dict[str, Any]], *, repo_root: Path | 
         except ValueError as exc:
             raise PreflightError(f"output path outside formal confirmatory dir: {rel}") from exc
         if abs_path.is_file() and abs_path.stat().st_size > 0:
-            raise PreflightError(f"existing non-empty formal artifact would be overwritten: {rel}")
-        # Parent may be created at formal run time only — preflight must not write results.
+            blockers.append(rel)
     return blockers
 
 

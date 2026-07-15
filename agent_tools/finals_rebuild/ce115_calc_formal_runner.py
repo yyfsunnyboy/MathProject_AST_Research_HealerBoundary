@@ -334,12 +334,14 @@ def run_local_confirmatory(
     repo_root: Path | None = None,
     write_artifacts: bool = False,
     cell_limit: int | None = None,
+    cell_ids: set[str] | frozenset[str] | None = None,
     resume: bool = True,
     results_dir: Path | None = None,
 ) -> dict[str, Any]:
     """Execute confirmatory cells from the frozen plan.
 
     ``transport`` is required. This function never imports a live Ollama client.
+    Optional ``cell_ids`` restricts execution to the named frozen cells only.
     """
     if transport is None:
         raise FormalRunnerError(
@@ -353,6 +355,14 @@ def run_local_confirmatory(
     cells = list(plan["cells"])
     assert_cell_distribution(cells)
     assert_cross_model_prompt_identity(cells)
+    if cell_ids is not None:
+        wanted = {str(cid) for cid in cell_ids}
+        selected = [c for c in cells if str(c["cell_id"]) in wanted]
+        found = {str(c["cell_id"]) for c in selected}
+        missing = sorted(wanted - found)
+        if missing:
+            raise FormalRunnerError(f"unknown cell_id(s) not in frozen plan: {missing}")
+        cells = selected
     if write_artifacts:
         assert_output_path_safety(cells, repo_root=root)
 
@@ -384,7 +394,8 @@ def run_local_confirmatory(
 
     return {
         "run_id": run_id,
-        "planned_cells": len(cells),
+        "planned_cells": len(plan["cells"]),
+        "selected_cells": len(cells),
         "executed_cells": len(rows),
         "skipped_executed_cells": skipped,
         "transport_calls": transport_calls,

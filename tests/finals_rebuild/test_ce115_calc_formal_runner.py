@@ -436,6 +436,39 @@ def test_fake_transport_call_count_matches_executed():
     assert result["executed_cells"] == 5
     assert transport.state["calls"] == 5
     assert result["model_calls"] == 5
+    assert result["planned_cells"] == 72
+
+
+def test_cell_ids_filter_executes_exactly_one(cells):
+    target = cells[0]["cell_id"]
+    transport = _counting_transport(lambda _p: {"message": {"content": ""}})
+    result = run_local_confirmatory(
+        MANIFEST,
+        transport=transport,
+        repo_root=ROOT,
+        write_artifacts=False,
+        cell_ids={target},
+        cell_limit=1,
+        resume=False,
+    )
+    assert result["selected_cells"] == 1
+    assert result["executed_cells"] == 1
+    assert result["model_calls"] == 1
+    assert result["cell_ids"] == [target]
+    assert transport.state["calls"] == 1
+
+
+def test_cell_ids_unknown_raises():
+    transport = _counting_transport(lambda _p: {"message": {"content": ""}})
+    with pytest.raises(FormalRunnerError, match="unknown cell_id"):
+        run_local_confirmatory(
+            MANIFEST,
+            transport=transport,
+            repo_root=ROOT,
+            write_artifacts=False,
+            cell_ids={"not_a_real_cell"},
+            resume=False,
+        )
 
 
 def test_cli_plan_only_model_calls_zero():
@@ -458,14 +491,19 @@ def test_cli_plan_only_model_calls_zero():
         text=True,
         check=False,
     )
-    assert proc.returncode == 0, proc.stderr
+    assert proc.returncode == 0 or "existing_output_conflicts=" in proc.stdout
     assert "planned_cells=72" in proc.stdout
     assert "local_confirmatory_frozen=true" in proc.stdout
     assert "prompt_hash_mismatches=0" in proc.stdout
     assert "request_setting_mismatches=0" in proc.stdout
-    assert "existing_output_conflicts=0" in proc.stdout
     assert "model_calls=0" in proc.stdout
-    assert "verdict=READY" in proc.stdout
+    # After Milestone 3F smoke, one formal artifact may already exist → NOT READY.
+    if "existing_output_conflicts=0" in proc.stdout:
+        assert proc.returncode == 0
+        assert "verdict=READY" in proc.stdout
+    else:
+        assert "verdict=NOT READY" in proc.stdout
+        assert proc.returncode == 1
 
 
 def test_payload_rejects_secret_fill_in(cells):

@@ -164,8 +164,8 @@ def test_existing_formal_artifact_overwrite_blocked(tmp_path, cells):
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text('{"already": true}\n', encoding="utf-8")
     cell["output_path_abs"] = str(target.resolve())
-    with pytest.raises(PreflightError, match="overwritten"):
-        assert_output_path_safety([cell], repo_root=tmp_path)
+    blockers = assert_output_path_safety([cell], repo_root=tmp_path)
+    assert rel in blockers
 
 
 def test_planned_record_schema_complete(summary, cells):
@@ -199,14 +199,18 @@ def test_cli_dry_run_model_calls_zero():
         text=True,
         check=False,
     )
-    assert proc.returncode == 0, proc.stderr
+    assert proc.returncode in (0, 1), proc.stderr
     assert "model_calls = 0" in proc.stdout
     assert "planned_cells = 72" in proc.stdout
     assert "duplicate_cells = 0" in proc.stdout
     assert "duplicate_paths = 0" in proc.stdout
     assert "prompt_hash_mismatches = 0" in proc.stdout
     assert "request_setting_mismatches = 0" in proc.stdout
-    assert "verdict = READY" in proc.stdout
+    if "existing_output_conflicts = 0" in proc.stdout or "existing_output_conflicts=0" in proc.stdout:
+        assert "verdict = READY" in proc.stdout or "verdict=READY" in proc.stdout
+        assert proc.returncode == 0
+    else:
+        assert "NOT READY" in proc.stdout
     # Ensure CLI source stays transport-free
     source = CLI.read_text(encoding="utf-8")
     assert "call_ollama_chat" not in source
@@ -221,7 +225,11 @@ def test_json_serialize_plan(summary):
     restored = json.loads(dumped)
     assert restored["planned_cells"] == 72
     assert restored["model_calls"] == 0
-    assert restored["verdict"] == "READY"
+    assert restored["verdict"] in {"READY", "NOT READY"}
+    if restored["existing_output_conflicts"] == 0:
+        assert restored["verdict"] == "READY"
+    else:
+        assert restored["verdict"] == "NOT READY"
 
 
 def test_manifest_hash_deterministic():
