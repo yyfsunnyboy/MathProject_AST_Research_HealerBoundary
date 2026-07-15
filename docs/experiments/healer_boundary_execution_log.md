@@ -1064,3 +1064,60 @@ Milestone 3E completed. No commit or push was made.
 ### Status
 
 Milestone 3E closeout audit completed. No commit or push was made.
+
+## Milestone 5B.1 — Empty-Block Safety Adjudication and Rule-Governance Freeze
+
+### Goal
+
+Conduct a forensic, read-only empty-block safety adjudication on 5 empty-block candidates and establish the rule-governance specifications. Exclude unsafe heuristics from the formal pipeline.
+
+### Adjudication Outcomes
+
+*   **Candidates Reviewed**: 5 empty-block candidates
+*   **NONCORE_NOOP_BLOCK_SAFE count**: 0/5
+*   **Reclassified Unsafe**: 5/5
+    1.  `qwen3_5_4b__ce115_calc_radical_simplification_l1__ab1__seed_2026071301`: `CORE_LOGIC_MISSING`. Empty block in uncalled math helper `get_square_free` skips prime exponent reduction. The outer loop lacks increment logic (infinite loop if executed).
+    2.  `qwen3_5_4b__ce115_calc_radical_simplification_l1__ab1__seed_2026071302`: `CORE_LOGIC_MISSING`. Empty block in uncalled helper `get_prime_factorization_sqrt_v2` skips factor assignment. Loop variable `j` is static (infinite loop if executed).
+    3.  `qwen3_5_4b__ce115_calc_radical_simplification_l1__ab1__seed_2026071303`: `CORE_LOGIC_MISSING`. Empty block `if temp_n > 1:` in prime factors helper skips remainder recording, breaking math correctness. File also lacks return dictionary in `generate()` (truncated).
+    4.  `qwen3_5_4b__ce115_calc_radical_simplification_l1__ab2g__seed_2026071301`: `TRUNCATED_BLOCK`. File ends in truncated declaration `def generate(level=1,` at the very end, preventing compilation regardless of block repairs.
+    5.  `qwen3_5_9b__ce115_calc_polynomial_factor_roots_l1__ab2g__seed_2026071301`: `CORE_LOGIC_MISSING`. Empty block `if sqrt_delta_int * sqrt_delta_int != delta:` in core generator branch was left unimplemented by the model, risking downstream value and type errors.
+
+### Governance Decisions Frozen
+
+*   **Three-Layer Split**:
+    *   `Minimal Core Library`: Frozen and immutable (includes fullwidth punctuation rule).
+    *   `Safe Historical Library`: Reconstructed deterministic rules (R01-R04).
+    *   `Exploratory Sandbox`: Excluded rules (semantic self-heal, SyntaxError deletion, input replacement, loop rewrites, fallbacks, default injection). Restricts speculative rescues to future work only.
+*   **No Duplicate Implementation**: Safe Historical rules must reference existing `core.normalize_fullwidth_python_punctuation` instead of duplicating it.
+*   **Fixed Order & Convergence**: Steps run exactly once: Fence -> Leakage -> Trailing -> Fullwidth -> Empty-Block. A second run must result in zero modifications, else the script is rejected as `NON_CONVERGENT`.
+*   **Verified Rescue Definition**: Defines `VERIFIED_RESCUE`, `PARTIAL_REPAIR`, and `REGRESSION`.
+
+### Files Created/Tracked
+
+*   **Adjudication Reports**:
+    *   `docs/experiments/reports/ce115_empty_block_safety_adjudication.json`
+    *   `docs/experiments/reports/ce115_empty_block_safety_adjudication.md`
+    *   `docs/experiments/reports/safe_historical_healer_governance_spec.md`
+*   **8 Historical Healer Audit Outputs** (now tracked in Git):
+    *   `docs/experiments/reports/historical_healer_call_graph.md`
+    *   `docs/experiments/reports/historical_healer_rule_inventory.json`
+    *   `docs/experiments/reports/historical_healer_rule_inventory.md`
+    *   `docs/experiments/reports/historical_healer_git_provenance.md`
+    *   `docs/experiments/reports/historical_healer_pipeline_bugs.md`
+    *   `docs/experiments/reports/historical_healer_test_artifact_index.json`
+    *   `docs/experiments/reports/ce115_historical_rule_match_provisional.json`
+    *   `docs/experiments/reports/historical_healer_requalification_recommendation.md`
+*   **Execution Log Update**:
+    *   `docs/experiments/healer_boundary_execution_log.md` (this file)
+
+### Call Counts & Status
+*   `model_calls` = 0
+*   `healer_calls` = 0
+*   `repair_calls` = 0
+*   `replay_calls` = 0
+*   `retry_calls` = 0
+*   `api_calls` = 0
+
+### Status
+Milestone 5B.1 completed with verdict **EMPTY_BLOCK_REPAIR_UNSAFE**.
+No code repairs or sandbox compilations were run.

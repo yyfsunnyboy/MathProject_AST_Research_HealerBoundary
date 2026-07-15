@@ -1,0 +1,135 @@
+{
+  "provisional_tally": {
+    "Minimal_Core_applicable": 0,
+    "Historical_rules_pattern_match_candidate": 10,
+    "Safe_requalified_candidate": 0,
+    "Unsafe_or_semantic_only": 18,
+    "total_taxonomy_candidates": 18
+  },
+  "candidates": [
+    {
+      "cell_id": "qwen3_5_4b__ce115_calc_radical_simplification_l1__ab1__seed_2026071301",
+      "task": "ce115_calc_radical_simplification_l1",
+      "failure_location": "generate() -> simplify_sqrt() -> get_square_free()",
+      "parent_function": "get_square_free(n)",
+      "block_type": "if",
+      "condition": "count >= 2",
+      "called_by_generate": false,
+      "controls_math_semantics": true,
+      "loop_progress_dependency": true,
+      "truncation_evidence": "none",
+      "raw_block_already_empty": true,
+      "possible_prior_rule_interaction": [],
+      "other_syntax_failures": [],
+      "pass_insertion_risk": "Inserting pass compiles the code but conceals an infinite loop bug in the outer while loop (which has no increment for i) and leaves the mathematical simplification unimplemented.",
+      "classification": "CORE_LOGIC_MISSING",
+      "safe_for_deterministic_pass_insertion": false,
+      "evidence": [
+        "if count >= 2: # Actually we just divide by the square part directly in one go per prime factor logic below is simpler",
+        "    ",
+        "return remaining_radicand, total_factor"
+      ],
+      "reason": "The empty block belongs to an unimplemented square extraction helper function. In addition to missing logic, the helper's outer loop lacks a loop index increment (i += 1), meaning that if it were called, it would result in an infinite loop. It is unsafe to insert a pass because it masks critical missing logic."
+    },
+    {
+      "cell_id": "qwen3_5_4b__ce115_calc_radical_simplification_l1__ab1__seed_2026071302",
+      "task": "ce115_calc_radical_simplification_l1",
+      "failure_location": "generate() -> simplify_sqrt() -> get_prime_factorization_sqrt_v2()",
+      "parent_function": "get_prime_factorization_sqrt_v2(n)",
+      "block_type": "if",
+      "condition": "temp % sq_val == 0 and is_square_free(temp // sq_val)",
+      "called_by_generate": false,
+      "controls_math_semantics": true,
+      "loop_progress_dependency": true,
+      "truncation_evidence": "none",
+      "raw_block_already_empty": true,
+      "possible_prior_rule_interaction": [],
+      "other_syntax_failures": [],
+      "pass_insertion_risk": "Inserting pass compiles the code but conceals an infinite loop in get_prime_factorization_sqrt_v2 where loop variable j is static.",
+      "classification": "CORE_LOGIC_MISSING",
+      "safe_for_deterministic_pass_insertion": false,
+      "evidence": [
+        "if temp % sq_val == 0 and is_square_free(temp // sq_val):",
+        "    # Found a square that leaves the rest square-free? ",
+        "    # Wait, this logic might miss cases where multiple squares exist...",
+        "if sq_val <= temp:"
+      ],
+      "reason": "The empty block belongs to an uncalled, abandoned helper function. The loop contains no update logic for index j, meaning it would run infinitely if invoked. Inserting a pass hides this semantic bug."
+    },
+    {
+      "cell_id": "qwen3_5_4b__ce115_calc_radical_simplification_l1__ab1__seed_2026071303",
+      "task": "ce115_calc_radical_simplification_l1",
+      "failure_location": "generate() -> robust_simplify() -> get_prime_factors() and get_prime_factors_v2()",
+      "parent_function": "get_prime_factors(n)",
+      "block_type": "if",
+      "condition": "temp_n > 1",
+      "called_by_generate": false,
+      "controls_math_semantics": true,
+      "loop_progress_dependency": false,
+      "truncation_evidence": "The file ends abruptly after rem_final = n without return dictionary or further code, indicating truncation.",
+      "raw_block_already_empty": true,
+      "possible_prior_rule_interaction": [],
+      "other_syntax_failures": [
+        "Missing return dictionary in generate()"
+      ],
+      "pass_insertion_risk": "Inserting pass hides the missing logic of recording the remaining prime factor, causing mathematical errors during prime factorization.",
+      "classification": "CORE_LOGIC_MISSING",
+      "safe_for_deterministic_pass_insertion": false,
+      "evidence": [
+        "if temp_n > 1: # Wait, need to update logic here",
+        "def get_prime_factors_v2(n):"
+      ],
+      "reason": "The block is an unimplemented remainder handler in prime factorization. Skipping this logic will result in math oracle errors. The file is also truncated at the end as it lacks a return dictionary in generate()."
+    },
+    {
+      "cell_id": "qwen3_5_4b__ce115_calc_radical_simplification_l1__ab2g__seed_2026071301",
+      "task": "ce115_calc_radical_simplification_l1",
+      "failure_location": "generate()",
+      "parent_function": "generate()",
+      "block_type": "if",
+      "condition": "final_val % (j ** 2) == 0",
+      "called_by_generate": true,
+      "controls_math_semantics": true,
+      "loop_progress_dependency": false,
+      "truncation_evidence": "The file ends abruptly with 'def generate(level=1,' at line 269, representing a clear truncation.",
+      "raw_block_already_empty": true,
+      "possible_prior_rule_interaction": [],
+      "other_syntax_failures": [
+        "Truncated generate function declaration at end of file"
+      ],
+      "pass_insertion_risk": "Inserting pass inside the first generate() definition does not resolve compilation because the end of the file is truncated mid-definition.",
+      "classification": "TRUNCATED_BLOCK",
+      "safe_for_deterministic_pass_insertion": false,
+      "evidence": [
+        "if final_val % (j ** 2) == 0:",
+        "    # This logic is getting messy. Let's restart the extraction cleanly...",
+        "pass"
+      ],
+      "reason": "The file ends with an incomplete 'def generate(level=1,' statement, representing a clear truncation. Inserting pass inside the earlier block does not make the file parseable."
+    },
+    {
+      "cell_id": "qwen3_5_9b__ce115_calc_polynomial_factor_roots_l1__ab2g__seed_2026071301",
+      "task": "ce115_calc_polynomial_factor_roots_l1",
+      "failure_location": "generate()",
+      "parent_function": "generate()",
+      "block_type": "if",
+      "condition": "sqrt_delta_int * sqrt_delta_int != delta",
+      "called_by_generate": true,
+      "controls_math_semantics": true,
+      "loop_progress_dependency": false,
+      "truncation_evidence": "none",
+      "raw_block_already_empty": true,
+      "possible_prior_rule_interaction": [],
+      "other_syntax_failures": [],
+      "pass_insertion_risk": "Inserting pass allows execution to continue with float values for non-perfect square discriminants, leading to potential formatting/runtime errors in simplify_fraction.",
+      "classification": "CORE_LOGIC_MISSING",
+      "safe_for_deterministic_pass_insertion": false,
+      "evidence": [
+        "if sqrt_delta_int * sqrt_delta_int != delta:",
+        "    # If not a perfect square, we need to handle the irrational root case...",
+        "sqrt_delta = delta ** 0.5"
+      ],
+      "reason": "The empty block belongs to the core generate() function and was intended to validate the discriminant. Inserting pass would allow invalid non-perfect square cases to execute, leading to downstream type or value errors."
+    }
+  ]
+}
