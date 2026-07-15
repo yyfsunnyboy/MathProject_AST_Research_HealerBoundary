@@ -1,0 +1,305 @@
+def generate(level=1, **kwargs):
+    products = [{"left": "4.95", "right": "89.6", "sign": 1}, {"left": "-0.05", "right": "89.6", "sign": -1}]
+    
+    # Convert decimal strings to integers by scaling (multiply by 10^max_decimal_places)
+    # Term 1: 4.95 * 89.6 -> scale factor 100 for left, 10 for right? 
+    # Let's use a common denominator approach with fractions logic manually
+    
+    def parse_term(term):
+        sign = term["sign"]
+        l_str = term["left"].rstrip('0') if '.' in term["left"] else term["left"]
+        r_str = term["right"].rstrip('0') if '.' in term["right"] else term["right"]
+        
+        # Count decimal places to determine scaling factor for each side, then find LCM-like scale
+        l_parts = l_str.split('.')
+        r_parts = r_str.split('.')
+        
+        left_int = int(l_parts[0]) * (10 ** len(l_parts[1])) if '.' in l_str else int(l_str)
+        right_int = int(r_parts[0]) * (10 ** len(r_parts[1])) if '.' in r_str else int(r_str)
+        
+        # The actual value is sign * left_decimal * right_decimal
+        # We can represent each term as a fraction with denominator 10^(dec_left + dec_right)
+        denom = 10**(len(l_parts[1]) if len(l_parts)>1 and l_parts[1] else 0 + 
+                     len(r_parts[1]) if len(r_parts)>1 and r_parts[1] else 0)
+        
+        # Actually, let's just convert to float then back to exact fraction? No, use integer arithmetic.
+        # Better: parse as integers with explicit power of 10 denominator for each term
+        
+        dec_left = len(l_str.split('.')[1]) if '.' in l_str else 0
+        dec_right = len(r_str.split('.')[1]) if '.' in r_str else 0
+        total_decimals = dec_left + dec_right
+        
+        val_num = sign * int(float(term["left"]) * float(term["right"])) # This might lose precision? 
+        # Instead: parse manually to avoid float issues during parsing, but Python's decimal module is safer.
+        
+        from decimal import Decimal, getcontext
+        getcontext().prec = 50
+        
+        d_left = Decimal(term["left"])
+        d_right = Decimal(term["right"])
+        term_val = sign * (d_left * d_right)
+        
+        # Convert to Fraction-like representation manually for exactness without float intermediate if possible, 
+        # but Decimal is fine here since inputs are short decimals.
+        return term_val
+    
+    total_decimal_value = sum(parse_term(p) for p in products)
+    
+    # Now convert the final Decimal result to an irreducible fraction string or integer
+    from fractions import Fraction
+    frac = Fraction(total_decimal_value).limit_denominator() 
+    # Wait, limit_denominator is not exact. We need exact conversion from Decimal which has finite precision here.
+    # Since inputs are given as strings with limited decimals, we can do:
+    
+    total_num = 0
+    total_denom = 1
+    
+    for p in products:
+        l_str = p["left"]
+        r_str = p["right"]
+        sign = p["sign"]
+        
+        # Parse left and right as integers scaled by powers of 10
+        if '.' in l_str:
+            parts_l = l_str.split('.')
+            num_l = int(parts_l[0] + (parts_l[1] or '0'))
+            den_l = 10 ** len(parts_l[1])
+        else:
+            num_l = int(l_str)
+            den_l = 1
+            
+        if '.' in r_str:
+            parts_r = r_str.split('.')
+            num_r = int(parts_r[0] + (parts_r[1] or '0'))
+            den_r = 10 ** len(parts_r[1])
+        else:
+            num_r = int(r_str)
+            den_r = 1
+            
+        # Term value as fraction: sign * (num_l/den_l) * (num_r/den_r) = sign * num_l*num_r / (den_l*den_r)
+        term_num = sign * num_l * num_r
+        term_denom = den_l * den_r
+        
+        total_num += term_num
+        # To add fractions: new_num = a/b + c/d = (ad+bc)/bd, but we can keep running sum with GCD reduction at each step or just once.
+        # Let's do one big fraction addition to avoid intermediate large numbers if possible, 
+        # but Python handles large ints automatically. We'll accumulate and reduce only at the end for simplicity? 
+        # Actually, reducing at each step keeps numbers smaller. But let's just sum numerators with common denominator logic:
+        
+    # Re-calculate total_num/total_denom properly by finding LCM of denominators or using Fraction class directly on Decimals converted to Fractions
+    
+    from fractions import Fraction as F
+    terms = []
+    for p in products:
+        l_str = p["left"]
+        r_str = p["right"]
+        sign = p["sign"]
+        
+        if '.' in l_str:
+            parts_l = l_str.split('.')
+            num_l = int(parts_l[0] + (parts_l[1] or '0'))
+            den_l = 10 ** len(parts_l[1])
+        else:
+            num_l = int(l_str)
+            den_l = 1
+            
+        if '.' in r_str:
+            parts_r = r_str.split('.')
+            num_r = int(parts_r[0] + (parts_r[1] or '0'))
+            den_r = 10 ** len(parts_r[1])
+        else:
+            num_r = int(r_str)
+            den_r = 1
+            
+        term_frac = F(sign * num_l * num_r, den_l * den_r)
+        terms.append(term_frac)
+    
+    total_frac = sum(terms)
+    
+    # Format the answer string
+    if total_frac.denominator == 1:
+        ans_str = str(total_frac.numerator)
+    else:
+        # Ensure positive denominator (Fraction does this automatically, but just in case)
+        num_val = abs(total_frac.numerator)
+        den_val = total_frac.denominator
+        gcd_num_denom = math.gcd(num_val, den_val) if 'math' not in locals() else __import__('math').gcd(num_val, den_val) # Wait, Fraction already reduced.
+        ans_str = f"{total_frac.numerator}/{total_frac.denominator}"
+    
+    import math
+    
+    total_num_int = 0
+    total_denom_int = 1
+    
+    for p in products:
+        l_str = p["left"]
+        r_str = p["right"]
+        sign = p["sign"]
+        
+        if '.' in l_str:
+            parts_l = l_str.split('.')
+            num_l = int(parts_l[0] + (parts_l[1] or '0'))
+            den_l = 10 ** len(parts_l[1])
+        else:
+            num_l = int(l_str)
+            den_l = 1
+            
+        if '.' in r_str:
+            parts_r = r_str.split('.')
+            num_r = int(parts_r[0] + (parts_r[1] or '0'))
+            den_r = 10 ** len(parts_r[1])
+        else:
+            num_r = int(r_str)
+            den_r = 1
+            
+        term_num = sign * num_l * num_r
+        term_denom = den_l * den_r
+        
+        # Add to total fraction: current_total + new_term
+        # common denominator = lcm(total_denom, term_denom) but easier to use Fraction logic manually or just accumulate with gcd reduction
+        pass
+    
+    # Let's redo the accumulation correctly without relying on sum of Fractions which might not reduce intermediate steps optimally (though it doesn't matter for correctness).
+    
+    total_num_val = 0
+    total_denom_val = 1
+    
+    import math as m_math
+    
+    for p in products:
+        l_str = p["left"]
+        r_str = p["right"]
+        sign = p["sign"]
+        
+        if '.' in l_str:
+            parts_l = l_str.split('.')
+            num_l = int(parts_l[0] + (parts_l[1] or '0'))
+            den_l = 10 ** len(parts_l[1])
+        else:
+            num_l = int(l_str)
+            den_l = 1
+            
+        if '.' in r_str:
+            parts_r = r_str.split('.')
+            num_r = int(parts_r[0] + (parts_r[1] or '0'))
+            den_r = 10 ** len(parts_r[1])
+        else:
+            num_r = int(r_str)
+            den_r = 1
+            
+        term_num_val = sign * num_l * num_r
+        term_denom_val = den_l * den_r
+        
+        # Add fractions: (total_num/total_denom) + (term_num/term_denom)
+        new_num = total_num_val * term_denom_val + term_num_val * total_denom_val
+        new_denom = total_denom_val * term_denom_val
+        
+        g = m_math.gcd(new_num, new_denom)
+        total_num_val //= g
+        total_denom_val //= g
+    
+    if total_denom_val == 1:
+        ans_str = str(total_num_val)
+    else:
+        # Ensure positive denominator (should be already by gcd and logic, but just in case sign is handled)
+        if total_denom_val < 0:
+            total_num_val *= -1
+            total_denom_val *= -1
+        ans_str = f"{total_num_val}/{total_denom_val}"
+    
+    question_text = "Calculate the value of the expression:" + "".join([f" {p['sign']} {p['left']}{'' if p['right']=='89.6' else ''} * {p['right']}" for p in products]) # Simplified display
+    
+    # Better formatting: 
+    terms_display = []
+    for i, p in enumerate(products):
+        sign_str = "+" if p["sign"] == 1 and i > 0 else ""
+        term_text = f"{p['left']} * {p['right']}"
+        if p["sign"] == -1:
+            term_text = "-" + term_text[2:] # Remove the first char which is '+' or nothing? 
+            # Actually, let's build string properly.
+    
+    expr_parts = []
+    for i, p in enumerate(products):
+        sign_str = "+" if p["sign"] == 1 else ""
+        left_val = p["left"]
+        right_val = p["right"]
+        
+        term_expr = f"{left_val} * {right_val}"
+        if p["sign"] == -1:
+            # If it's negative, we can either put minus before or handle sign in display. 
+            # Standard is to show the term with its sign applied visually? The problem says "sum over terms of sign * left * right"
+            # So for first term if positive no + needed at start, but between terms use operator.
+            pass
+        
+        if i == 0:
+            expr_parts.append(f"{p['left']} * {p['right']}" if p["sign"]==1 else f"-{abs(int(float(p['left']))*float(p['right']))}?" No.)
+    
+    # Let's just format as sum of terms with signs embedded in the numbers or explicit operators.
+    # Example: 4.95 * 89.6 - (-0.05) * 89.6 ? But input has sign=-1 and left="-0.05". 
+    # So term is sign * left * right = (-1)*(-0.05)*89.6 = +0.05*89.6
+    # Display should reflect the expression as given: 4.95 * 89.6 - (-0.05) * 89.6 ? 
+    # Or just list terms with their signs in front? The instruction says "arithmetic expression built from these terms".
+    
+    formatted_terms = []
+    for i, p in enumerate(products):
+        if p["sign"] == 1:
+            term_str = f"{p['left']} * {p['right']}"
+        else:
+            # If sign is -1 and left is negative, then (-1)*(-0.05) = +0.05, but we want to show the structure? 
+            # The input has "sign": -1 and "left": "-0.05". So term value is positive.
+            # But how to display? Maybe just use the sign in front of the product without parentheses if left is negative?
+            # Let's assume we display as: [term1] + [term2] where each term includes its effective contribution with operator between them.
+            # Standard math expression would be: 4.95 * 89.6 - (-0.05) * 89.6 ? But that equals adding because of double negative? 
+            # Actually, the task says "sum over terms of sign * left * right". So if term is defined as (sign)*(left)*(right),
+            # then for second term: (-1)*(-0.05)*89.6 = +0.432...
+            # To display naturally: 4.95*89.6 - (-0.05)*89.6 is correct representation if we consider the minus as part of the sign operator and left includes its own negative? 
+            # But typically, you'd write: 4.95 * 89.6 + (1) * (-0.05) * 89.6 ? No.
+            
+            # Let's look at input: {"left": "-0.05", "right": "89.6", "sign": -1}
+            # Value = -1 * (-0.05) * 89.6 = +0.432...
+            # Natural expression: 4.95*89.6 - (-0.05)*89.6 ? That would be interpreted as subtracting a negative product, which is adding. 
+            # But maybe the intended display is just listing terms with their signs in front of the left factor?
+            
+            term_str = f"-{p['left']} * {p['right']}" if p["sign"] == -1 else f"+{p['left']} * {p['right']}" 
+            # But first term doesn't get +. And for negative sign, we can just put minus before the left value?
+            
+    # Simpler: Build expression as sum of (sign) followed by product. For positive terms at start or after +, no extra operator needed except between terms.
+    
+    expr_parts = []
+    for i, p in enumerate(products):
+        if i == 0 and p["sign"] == 1:
+            term_str = f"{p['left']} * {p['right']}"
+        elif i > 0 and p["sign"] == 1:
+            term_str = f"+{p['left']} * {p['right']}"
+        else: # sign is -1 or first term negative? First term here is positive. Second term has sign=-1.
+             if p["sign"] == -1:
+                 term_str = f"-{abs(float(p['left']))}?" No, keep string. 
+                 # If left is "-0.05", then -(-0.05) is confusing in text without parentheses? 
+                 # Let's just use the sign to prepend an operator and show the absolute value of left if needed? 
+                 # But input has "left": "-0.05". So term_str = f"-{p['left']} * {p['right']}" would be -(-0.05)*89.6 which is correct mathematically but visually odd without parens?
+                 # Actually, in standard notation: 4.95*89.6 + (-1)*(-0.05)*89.6 ? Too verbose.
+                 
+    # Let's assume the expression should be written as sum of terms where each term is (sign) * left * right, and we format it naturally.
+    # For second term: sign=-1, left="-0.05", so term = (-1)*(-0.05)*89.6. 
+    # We can write this as + 0.05*89.6 but that changes the structure? The task says "built from these terms".
+    
+    # Alternative: Just concatenate with operators based on sign, and show left/right exactly as given.
+    expr_parts = []
+    for i, p in enumerate(products):
+        if i == 0:
+            term_str = f"{p['left']} * {p['right']}"
+        else:
+            if p["sign"] == 1:
+                term_str = f"+{p['left']} * {p['right']}"
+            else:
+                # sign is -1, so we put a minus and then the product. But left might be negative too.
+                # If left is "-0.05", then writing "-(-0.05)*89.6" is acceptable in some contexts but maybe not standard. 
+                # However, to preserve exact input strings: term_str = f"-{p['left']} * {p['right']}" -> -(-0.05)*89.6
+                term_str = f"-{p['left']} * {p['right']}"
+        expr_parts.append(term_str)
+    
+    question_text = "Calculate: " + "".join(expr_parts).replace("+-", "-").replace("-+", "+") # Clean up double signs if any
+    
+    return {"question_text": question_text, 
+            "correct_answer": {"value": ans_str}, 
+            "oracle_payload": products}

@@ -1,0 +1,34 @@
+def generate(level=1, **kwargs):
+    radicand = kwargs.get("radicand", None)
+    outer_coefficient = kwargs.get("outer_coefficient", 1)
+    
+    if radicand is None:
+        raise ValueError("Missing required parameter 'radicand'")
+        
+    # Factorize the radicand to find square factors
+    temp_radicand = radicand
+    coefficient = 1
+    
+    d = 2
+    while d * d <= temp_radicand:
+        if temp_radicand % d == 0:
+            count = 0
+            while temp_radicand % d == 0:
+                count += 1
+                temp_radicand //= d
+            
+            # If the exponent is even, move half to coefficient; odd leaves one under root
+            if count >= 2:
+                num_pairs = count // 2
+                coefficient *= (d ** num_pairs)
+    
+    simplified_radical_part = outer_coefficient * coefficient
+    
+    return {
+        "question_text": f"Rewrite the expression {simplified_radical_part} * sqrt({radicand}) in simplest radical form as a coefficient times sqrt of a square-free integer.",
+        "correct_answer": {
+            "coefficient": simplified_radical_part,
+            "radicand": temp_radicand
+        },
+        "oracle_payload": {"radicand": 112}
+    }

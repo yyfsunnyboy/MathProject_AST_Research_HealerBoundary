@@ -1,0 +1,34 @@
+def generate(level=1, **kwargs):
+    radicand = kwargs.get("radicand", 27)
+    
+    # Factorize to find square factors
+    temp_radicand = radicand
+    coefficient = 1
+    
+    d = 2
+    while d * d <= temp_radicand:
+        if temp_radicand % (d * d) == 0:
+            count = 0
+            while temp_radicand % (d * d) == 0:
+                count += 2
+                temp_radicand //= (d * d)
+            # If we extracted a square, add to coefficient
+            if count > 0:
+                factor_sqrt = int(d ** (count // 2))
+                coefficient *= factor_sqrt
+        else:
+            d += 1
+    
+    # Handle remaining prime or non-square-free part
+    final_radicand = temp_radicand
+    
+    question_text = f"Rewrite {coefficient} * sqrt({radicand}) in simplest radical form as a new integer coefficient times the square root of a square-free radicand."
+    
+    return {
+        "question_text": question_text,
+        "correct_answer": {
+            "coefficient": coefficient,
+            "radicand": final_radicand
+        },
+        "oracle_payload": {"radicand": 27}
+    }

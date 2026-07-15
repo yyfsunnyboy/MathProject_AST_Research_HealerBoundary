@@ -1,0 +1,113 @@
+def generate(level=1, **kwargs):
+    quadratic_coefficients = kwargs.get("quadratic_coefficients", {"a": 2, "b": 0, "c": -18})
+    
+    a = quadratic_coefficients["a"]
+    b = quadratic_coefficients["b"]
+    c = quadratic_coefficients["c"]
+
+    # Calculate discriminant using exact arithmetic (integers)
+    delta_num = b * b - 4 * a * c
+    
+    if delta_num < 0:
+        raise ValueError("No real roots for this polynomial.")
+    
+    sqrt_delta_numerator, sqrt_delta_denominator = abs(delta_num), 1
+    
+    # Simplify the square root of discriminant by finding perfect squares
+    temp_sqrt = int(sqrt_delta_numerator ** 0.5)
+    if temp_sqrt * temp_sqrt == sqrt_delta_numerator:
+        simplified_root_numerator = temp_sqrt
+        simplified_root_denominator = 1
+    else:
+        # If not a perfect square, we keep it as is for the formula (though problem implies rational roots usually)
+        # However, task says "exact arithmetic" and return int or p/q. 
+        # Let's assume standard factorization where discriminant might be non-square but result still needs to be exact fraction?
+        # Actually, if coefficients are integers and we need rational roots, delta must be a perfect square.
+        # If not, the problem asks for "roots" which could be irrational in general math context, 
+        # BUT task says: "return exactly two distinct roots... as int or irreducible p/q".
+        # This implies discriminant MUST be a perfect square for this specific contract to hold with rational outputs.
+        
+        # Let's re-evaluate the frozen parameters [2, 0, -18]. 
+        # Delta = 0^2 - 4*2*(-18) = 144. sqrt(144) = 12. It is a perfect square.
+        # So we can safely assume delta_num will be a perfect square for valid inputs in this context.
+        
+        simplified_root_numerator = int(sqrt_delta_numerator ** 0.5)
+        if simplified_root_numerator * simplified_root_numerator != sqrt_delta_numerator:
+            raise ValueError("Discriminant is not a perfect square; rational roots expected.")
+            
+    # Roots formula: (-b +/- sqrt(delta)) / (2a)
+    
+    numerator1 = -b + simplified_root_numerator
+    denominator_common = 2 * a
+    
+    root1_num, root1_den = abs(numerator1), denominator_common if numerator1 >= 0 else -denominator_common
+    # Handle sign correctly for fraction representation p/q with positive q
+    if numerator1 < 0:
+        root1_num = -numerator1
+        root1_den = -root1_den
+    
+    # Simplify root1
+    gcd_val = abs(root1_num) // (abs(numerator1).__gcd(denominator_common)) if denominator_common != 0 else 1
+    from math import gcd as _math_gcd
+    common_divisor = _math_gcd(abs(numerator1), denominator_common)
+    
+    root1_simplified_numerator = numerator1 // common_divisor
+    root1_simplified_denominator = denominator_common // common_divisor
+    
+    # Ensure positive denominator for string representation if needed, but logic above handles sign in num.
+    if root1_simplified_denominator < 0:
+        root1_simplified_numerator *= -1
+        root1_simplified_denominator *= -1
+        
+    numerator2 = -b - simplified_root_numerator
+    
+    # Handle sign correctly for fraction representation p/q with positive q
+    num_val_2 = numerator2
+    den_val_common = denominator_common
+    
+    if num_val_2 < 0:
+        root2_num = -num_val_2
+        root2_den = -den_val_common
+    else:
+        root2_num = num_val_2
+        root2_den = den_val_common
+        
+    common_divisor_2 = _math_gcd(abs(num_val_2), abs(den_val_common)) if (abs(num_val_2) > 0 or abs(den_val_common) > 0) else 1
+    
+    # Avoid division by zero in gcd logic just in case, though a!=0 for quadratic
+    root2_simplified_numerator = num_val_2 // common_divisor_2
+    root2_simplified_denominator = den_val_common // common_divisor_2
+    
+    if root2_simplified_denominator < 0:
+        root2_simplified_numerator *= -1
+        root2_simplified_denominator *= -1
+        
+    # Compare roots to sort them numerically (ascending)
+    
+    def get_float_value_for_sorting(root_num, root_den):
+        return float(root_num) / float(root_den) if root_den != 0 else float('inf')
+
+    val1 = get_float_value_for_sorting(root1_simplified_numerator, root1_simplified_denominator)
+    val2 = get_float_value_for_sorting(root2_simplified_numerator, root2_simplified_denominator)
+    
+    # Construct the list of roots in ascending order as strings or ints
+    if abs(val1 - val2) < 1e-9:
+        raise ValueError("Roots are not distinct.")
+
+    sorted_roots = []
+    if val1 <= val2:
+        root_a_str = str(root1_simplified_numerator) + "/" + str(root1_simplified_denominator) if root1_simplified_denominator != 1 else str(root1_simplified_numerator)
+        root_b_str = str(root2_simplified_numerator) + "/" + str(root2_simplified_denominator) if root2_simplified_denominator != 1 else str(root2_simplified_numerator)
+    else:
+        root_a_str = str(root2_simplified_numerator) + "/" + str(root2_simplified_denominator) if root2_simplified_denominator != 1 else str(root2_simplified_numerator)
+        root_b_str = str(root1_simplified_numerator) + "/" + str(root1_simplified_denominator) if root1_simplified_denominator != 1 else str(root1_simplified_numerator)
+
+    sorted_roots = [root_a_str, root_b_str]
+    
+    question_text = f"Factor the quadratic polynomial {a}x^2 + {b}x + {c} and find its two distinct roots."
+    
+    return {
+        "question_text": question_text,
+        "correct_answer": {"roots": sorted_roots},
+        "oracle_payload": {"quadratic_coefficients": [2, 0, -18]}
+    }

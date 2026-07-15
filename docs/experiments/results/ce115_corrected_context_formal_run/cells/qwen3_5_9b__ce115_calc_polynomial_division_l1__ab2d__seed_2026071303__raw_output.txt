@@ -1,0 +1,60 @@
+def generate(level=1, **kwargs):
+    from fractions import Fraction
+    
+    dividend_coeffs = [-7, 4, -1]
+    divisor_coeffs = [1, 2]
+    
+    # Perform polynomial division with exact arithmetic using Fractions
+    def poly_div_qr(dividend, divisor):
+        if not dividend:
+            return [], []
+        
+        n = len(dividend) - 1
+        m = len(divisor) - 1
+        
+        quotient_coeffs = [Fraction(0)] * (n - m + 1)
+        remainder_coeffs = list(dividend)[:]
+        
+        for i in range(n, m - 1, -1):
+            if divisor[0] == 0:
+                raise ValueError("Divisor leading coefficient cannot be zero")
+            
+            factor = Fraction(remainder[i], divisor[0])
+            quotient_coeffs[n - i] = factor
+            
+            # Subtract scaled divisor from remainder starting at position i
+            for j in range(len(divisor)):
+                if i + j < len(remainder_coeffs):
+                    remainder_coeffs[i + j] -= factor * divisor[j]
+        
+        # Clean up trailing zeros in quotient (though logic above handles degree correctly)
+        while len(quotient_coeffs) > 1 and quotient_coeffs[-1] == Fraction(0):
+            quotient_coeffs.pop()
+            
+        return quotient_coeffs, remainder_coeffs
+    
+    q_frac, r_frac = poly_div_qr(dividend_coeffs, divisor_coeffs)
+    
+    # Convert fractions to strings if not integers
+    def format_coeff(c):
+        if isinstance(c, int):
+            return c
+        elif isinstance(c, Fraction):
+            if c.denominator == 1:
+                return c.numerator
+            else:
+                return f"{c.numerator}/{c.denominator}"
+    
+    q_str = [format_coeff(c) for c in q_frac]
+    r_str = [format_coeff(c) for c in r_frac]
+    
+    question_text = "Divide the polynomial with coefficients [-7, 4, -1] by the linear divisor with coefficients [1, 2]. Report the quotient and remainder."
+    
+    return {
+        "question_text": question_text,
+        "correct_answer": {
+            "quotient_coefficients": q_str,
+            "remainder_coefficients": r_str
+        },
+        "oracle_payload": {"dividend_coefficients": [-7, 4, -1], "divisor_coefficients": [1, 2]}
+    }

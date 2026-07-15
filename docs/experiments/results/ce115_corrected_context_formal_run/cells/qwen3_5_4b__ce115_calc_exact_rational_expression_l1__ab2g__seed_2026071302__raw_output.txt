@@ -1,0 +1,126 @@
+def generate(level=1, **kwargs):
+    products = kwargs.get("products") or [{"left": "4.95", "right": "89.6", "sign": 1}, {"left": "-0.05", "right": "89.6", "sign": -1}]
+
+    def parse_decimal(s):
+        if '.' in s:
+            return int(s.replace('.', '')), len(s) - s.rfind('.')
+        else:
+            return int(s), 0
+
+    terms = []
+    for p in products:
+        left_num, left_denom = parse_decimal(p["left"])
+        right_num, right_denom = parse_decimal(p["right"])
+        sign = p["sign"]
+        numerator = (left_num * right_num) // gcd(left_denom, right_denom) if False else 0 # Placeholder logic below
+
+    def gcd(a, b):
+        while b:
+            a, b = b, a % b
+        return abs(a)
+
+    total_numerator = 0
+    total_denominator = 1
+    
+    for p in products:
+        left_num, left_denom = parse_decimal(p["left"])
+        right_num, right_denom = parse_decimal(p["right"])
+        
+        term_val_num = (int(left_num) * int(right_num)) // gcd(int(left_denom), int(right_denom)) if False else 0
+        
+    # Correct calculation logic inline to avoid float issues entirely
+    
+    def get_rational_from_str(s):
+        parts = s.split('.')
+        integer_part = int(parts[0])
+        decimal_digits = ''.join(parts[1:]) if len(parts) > 1 and parts[1] else ''
+        
+        total_val_num = integer_part * (10 ** len(decimal_digits)) + int(decimal_digits)
+        return total_val_num, 10 ** len(decimal_digits), s
+
+    def multiply_rational(n1, d1, n2, d2):
+        num = n1 * n2
+        den = d1 * d2
+        common = gcd(num, den)
+        return num // common, den // common
+    
+    def add_subtract_rational(n1, d1, sign=1):
+        # Convert to same denominator
+        new_n1, new_d1 = n1, d1
+        
+        if len(products) > 0:
+            p2 = products[0]
+            l_num, l_denom = get_rational_from_str(p2["left"])[:2], int(get_rational_from_str(p2["left"])[0]) # Simplified approach for single term logic
+            
+    # Re-implementing cleanly with exact arithmetic
+    
+    def to_fraction(s):
+        if '.' not in s:
+            return int(s), 1
+        
+        integer_part = int(int(s.split('.')[0]))
+        decimal_str = s.split('.')[1]
+        
+        total_num = integer_part * (10 ** len(decimal_str)) + int(decimal_str)
+        denom = 10 ** len(decimal_str)
+        
+        return total_num, denom
+
+    def add_terms(term_list):
+        # term_list is list of tuples: (numerator, denominator, sign_multiplier)
+        if not term_list:
+            return 0, 1
+        
+        current_n, current_d = term_list[0][0], term_list[0][1] * abs(term_list[0][2])
+        
+        for i in range(1, len(term_list)):
+            n_i, d_i, s_i = term_list[i]
+            
+            # Add/subtract: common denominator
+            lcm_d = (current_d * d_i) // gcd(current_d, d_i)
+            
+            scaled_n_current = current_n * (lcm_d // current_d) * abs(s_i) if s_i < 0 else current_n * (lcm_d // current_d) # Sign handled separately in loop logic? No, sign is part of term
+            
+            # Actually simpler: just compute numerator based on sign
+            add_val = n_i * (lcm_d // d_i)
+            
+            new_num = current_n + s_i * add_val
+            new_den = lcm_d
+            
+            common_gcd = gcd(new_num, new_den)
+            return new_num // common_gcd, new_den // common_gcd
+
+    # Build terms list: (numerator_part, denominator_part, sign_multiplier)
+    term_list = []
+    
+    for p in products:
+        left_str = str(p["left"])
+        right_str = str(p["right"])
+        
+        l_num, l_denom = to_fraction(left_str)
+        r_num, r_denom = to_fraction(right_str)
+        
+        # Product of fractions
+        prod_n = l_num * r_num
+        prod_d = l_denom * r_denom
+        
+        term_list.append((prod_n, prod_d, p["sign"]))
+
+    final_n, final_d = add_terms(term_list)
+    
+    if gcd(final_n, abs(final_d)) != 1: # Reduce fraction
+        common_gcd = gcd(abs(final_n), abs(final_d))
+        final_n //= common_gcd
+        final_d //= common_gcd
+        
+    canonical_str = str(int(final_n / int(final_d))) if final_d == 1 else f"{final_n}/{abs(final_d)}"
+
+    question_text = " ".join([f"{p['sign']:+d} {p['left']} * {p['right']}" for p in products])
+    
+    oracle_payload = {"products": [{"left": str(p["left"]), "right": str(p["right"]), "sign": int(p["sign"])} for p in products]}
+
+    return {
+        "question_text": question_text,
+        "correct_answer": {"value": canonical_str},
+        "oracle_payload": oracle_payload
+    }

@@ -1,0 +1,95 @@
+def generate(level=1, **kwargs):
+    quadratic_coefficients = kwargs.get("quadratic_coefficients", {"a": 1, "b": 4, "c": -12})
+    
+    a = quadratic_coefficients["a"]
+    b = quadratic_coefficients["b"]
+    c = quadratic_coefficients["c"]
+
+    # Calculate discriminant using integer arithmetic to avoid float issues
+    delta = (b * b) - (4 * a * c)
+    
+    if delta < 0:
+        raise ValueError("No real roots for this polynomial.")
+        
+    sqrt_delta_int = int(delta ** 0.5)
+    if sqrt_delta_int * sqrt_delta_int != delta:
+        # If not a perfect square, we need to handle the irrational root case or assume task constraints imply rational roots only? 
+        # The contract says "exact rationals as int or irreducible p/q". This implies discriminant must be a perfect square for this specific function signature given frozen params.
+        # However, let's check if delta is a perfect square first based on the example logic usually expected in these tasks unless specified otherwise.
+        # Given the constraint "exact rationals", we assume inputs yield rational roots (perfect square discriminant).
+        raise ValueError("Discriminant must be a perfect square for exact rational root representation.")
+
+    sqrt_delta = sqrt_delta_int
+    
+    numerator1 = -b + sqrt_delta
+    denominator1 = 2 * a
+    # Simplify fraction x/y -> p/q where gcd(p,q)=1 and q>0
+    if denominator1 < 0:
+        numerator1 = -numerator1
+        denominator1 = -denominator1
+        
+    common_divisor_num_denom_1 = abs(numerator1) % (abs(denominator1)) == 0 or abs(denominator1) % abs(numerator1) != 0 # Logic check for simplification
+    
+    def gcd(x, y):
+        while y:
+            x, y = y, x % y
+        return x
+
+    if denominator1 > 0 and numerator1 < 0:
+         g = gcd(abs(numerator1), abs(denominator1))
+         root_str_1 = f"{numerator1 // -g}/{denominator1 // g}" # Wait, signs. 
+         # Let's redo simplification cleanly
+    
+    def simplify_fraction(num, den):
+        if num == 0: return "0"
+        common = gcd(abs(num), abs(den))
+        s_num = num // common
+        s_den = den // common
+        
+        if s_den < 0:
+            s_num = -s_num
+            s_den = -s_den
+            
+        # Check for integer result
+        if s_den == 1:
+            return str(s_num)
+        
+        return f"{s_num}/{s_den}"
+
+    root_str_1 = simplify_fraction(numerator1, denominator1)
+    
+    numerator2 = -b - sqrt_delta
+    root_str_2 = simplify_fraction(numerator2, denominator1)
+    
+    # Sort roots in ascending numeric order. 
+    # We need to compare the values of the fractions/ints derived from strings or re-evaluate numerically for sorting but keep exact representation.
+    val1_num = numerator1; val1_den = 2*a if a!=0 else 1 # handled by simplify logic implicitly? No, denominator is fixed in formula before simplification.
+    # Actually simpler: compare float values of the simplified fractions to sort them correctly for output list
+    
+    def parse_val(s):
+        try: return int(s)
+        except ValueError: 
+            parts = s.split('/')
+            if len(parts)==1: return 0 # Should not happen with valid logic above unless integer
+            n, d = map(int, parts)
+            return n/d
+            
+    val_1 = parse_val(root_str_1)
+    val_2 = parse_val(root_str_2)
+
+    roots_list = []
+    
+    if val_1 <= val_2:
+        roots_list.append(root_str_1)
+        roots_list.append(root_str_2)
+    else:
+        roots_list.append(root_str_2)
+        roots_list.append(root_str_1)
+        
+    question_text = f"Factor the quadratic polynomial {a}x^2 + {b}x + {c} and find its two distinct real roots."
+
+    return {
+        "question_text": question_text,
+        "correct_answer": {"roots": roots_list},
+        "oracle_payload": {"quadratic_coefficients": [1, 4, -12]}
+    }

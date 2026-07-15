@@ -1,0 +1,80 @@
+def generate(level=1, **kwargs):
+    products = [{"left": "4.35", "right": "94.2", "sign": 1}, {"left": "-0.65", "right": "94.2", "sign": -1}]
+    
+    # Parse first term: 4.35 * 94.2
+    l1_parts = [int(x) for x in "435".split("")] if "." not in "4.35" else []
+    # Manual parsing of decimals to integers by scaling
+    def parse_decimal(s):
+        parts = s.split(".")
+        int_part = int(parts[0]) if len(parts) > 1 and parts[0] != "" else 0
+        frac_part = int(parts[1].ljust(6, '0')[:6]) if len(parts) == 2 else 0
+        return (int_part * 10**len(parts[1])) + frac_part
+    
+    # Term 1: 4.35 -> 435/100 = 87/20; 94.2 -> 942/10 = 471/5
+    val_l1, scale_l1 = parse_decimal("4.35"), len("4.35".split(".")[1]) if "." in "4.35" else 0 # This logic is flawed for simple split
+    
+    # Correct parsing approach: count decimal places and shift
+    def to_fraction(s):
+        if '.' not in s:
+            return int(s), 1
+        integer_part, frac_str = s.split('.')
+        denom = 10 ** len(frac_str)
+        num = int(integer_part + frac_str.ljust(len(frac_str), '0')) # Ensure correct length handling
+        if integer_part == "":
+            num = int("0" + frac_str.lstrip('0') or '0')
+        else:
+             full_num = int(integer_part) * denom + (int(frac_str))
+        return full_num, denom
+
+    t1_l_numerator, t1_l_denominator = to_fraction(products[0]["left"])
+    t1_r_numerator, t1_r_denominator = to_fraction(products[0]["right"])
+    
+    # Term 2: -0.65 * 94.2 (sign is handled separately)
+    t2_l_numerator, t2_l_denominator = to_fraction("-0.65")
+    t2_r_numerator, t2_r_denominator = to_fraction(products[1]["right"])
+
+    # Calculate Term 1 value: sign * left_num/denom * right_num/denom
+    term1_val_num = products[0]["sign"] * (t1_l_numerator * t1_r_numerator)
+    term1_val_denom = t1_l_denominator * t1_r_denominator
+    
+    # Calculate Term 2 value: sign * left_num/denom * right_num/denom
+    term2_val_num = products[1]["sign"] * (t2_l_numerator * t2_r_numerator)
+    term2_val_denom = t2_l_denominator * t2_r_denominator
+    
+    # Common denominator for addition
+    common_denom = abs(term1_val_denom * term2_val_denom) // gcd(term1_val_denom, term2_val_denom) if (term1_val_denom != 0 and term2_val_denom != 0) else max(abs(term1_val_denom), abs(term2_val_denominator))
+    # Actually simpler: lcm(a,b) = |a*b| / gcd(a,b). If one is zero, handle separately. Denominators are powers of 10 here so non-zero.
+    
+    import math
+    
+    def get_lcm(x, y):
+        return abs(x * y) // math.gcd(abs(x), abs(y)) if x != 0 and y != 0 else max(abs(x), abs(y))
+
+    lcm_denom = get_lcm(term1_val_denom, term2_val_denom)
+    
+    # Adjust numerators to common denominator
+    adj_term1_num = (term1_val_num * lcm_denom // term1_val_denom)
+    adj_term2_num = (term2_val_num * lcm_denom // term2_val_denom)
+    
+    total_numerator = adj_term1_num + adj_term2_num
+    
+    # Simplify fraction
+    common_divisor = math.gcd(abs(total_numerator), abs(lcm_denom)) if lcm_denom != 0 else (abs(total_numerator) or 1)
+    
+    simplified_num = total_numerator // common_divisor
+    simplified_denom = lcm_denom // common_divisor
+    
+    # Ensure positive denominator
+    if simplified_denom < 0:
+        simplified_num *= -1
+        simplified_denom *= -1
+        
+    result_str = str(simplified_num) + "/" + str(simplified_denominator) if abs(simplified_denominator) > 1 else str(abs(simplified_numerator))
+
+    question_text = f"Calculate the value of {products[0]['sign'] * products[0]['left']} \\times {products[0]['right']} + {products[1]['sign'] * products[1]['left']} \\times {products[1]['right']}"
+    
+    return {
+        "question_text": question_text,
+        "correct_answer": {"value": result_str},
+        "oracle_payload": products
+    }

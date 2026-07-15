@@ -1,0 +1,164 @@
+def generate(level=1, **kwargs):
+    from fractions import Fraction
+    
+    products = kwargs.get("products") or [{"left": "4.95", "right": "89.6", "sign": 1}, {"left": "-0.05", "right": "89.6", "sign": -1}]
+    
+    question_text_parts = []
+    for i, term in enumerate(products):
+        sign_str = "+" if term["sign"] == 1 else "-"
+        left_val = str(term["left"])
+        right_val = str(term["right"])
+        
+        # Build the expression string carefully to match standard arithmetic notation
+        if i == 0:
+            question_text_parts.append(f"{sign_str} {left_val} × {right_val}")
+        else:
+            question_text_parts.append(f"+{sign_str} {abs(left_val)} × {right_val}")
+    
+    # Handle the sign logic for display correctly based on term structure
+    # Re-evaluating to ensure visual correctness of "4.95 * 89.6 - 0.05 * 89.6" or similar
+    expr_parts = []
+    for i, t in enumerate(products):
+        s = "+" if t["sign"] == 1 else "-"
+        l = str(t["left"])
+        r = str(t["right"])
+        
+        # We need to represent the term as it is. 
+        # If sign is -1 and left is negative, we have (-0.05) * 89.6 which is effectively subtracting a positive product or adding a negative one.
+        # The prompt asks for "arithmetic expression built from these terms".
+        # Term: sign * left * right
+        
+        if i == 0:
+            expr_parts.append(f"{s} {l} × {r}")
+        else:
+            # For subsequent terms, we prepend the operator. 
+            # However, standard math notation usually groups by operation order or just lists them with operators between full terms?
+            # Let's assume a linear list of operations where each term is added/subtracted based on its sign relative to the sum accumulation logic described: "sum over terms of sign * left * right".
+            # So it is effectively Term1 + Term2. 
+            # If Term1 has sign 1, we write "+ T1" (or just T1).
+            # If Term2 has sign -1, we write "- T2_part"? No, the term itself includes the sign multiplier in its definition?
+            # "sum over terms of sign * left * right". 
+            # Let's construct it as: (+ 4.95 × 89.6) + (-0.05 × 89.6).
+            
+            pass
+            
+    # Correct construction for the string representation based on standard math expression formatting where signs are explicit operators between terms or part of the term value?
+    # Usually "a * b - c * d" implies (a*b) + (-1)*(c*d). 
+    # Here we have specific sign values. Let's format as: "+ 4.95 × 89.6 - 0.05 × 89.6".
+    
+    final_expr = []
+    for i, t in enumerate(products):
+        s_val = "1" if t["sign"] == 1 else "-1"
+        l_str = str(t["left"])
+        r_str = str(t["right"])
+        
+        # Construct the term value part: sign * left * right
+        # But for display, we want to show the operation. 
+        # If i==0 and s_val is 1: "4.95 × 89.6"
+        # If i>0 and s_val is -1: "- 0.05 × 89.6" (assuming left was positive magnitude in display? Or keep sign?)
+        # The prompt says terms have 'sign'. 
+        # Let's assume the expression is built as sum(sign * left * right).
+        
+        term_str = f"{s_val} {l_str} × {r_str}" if i == 0 else (f"+{term_str}" if s_val == "1" else f"-{-l_str} × {r_str}") # This logic is getting messy. Let's simplify.
+    
+    # Simplest interpretation: The expression is the sum of terms where each term is explicitly signed in its value or operator?
+    # Given inputs: 4.95 * 89.6 and -0.05 * 89.6 with signs +1 and -1 respectively.
+    # Value = (+1)*4.95*89.6 + (-1)*(-0.05)*89.6 ? No, "sign" is a property of the term in the list.
+    # The calculation rule: sum(sign * left * right).
+    # So Term 1 contribution = (+1) * 4.95 * 89.6.
+    # Term 2 contribution = (-1) * -0.05 * 89.6.
+    
+    # Let's build the string to reflect this sum clearly: "4.95 × 89.6 + 0.05 × 89.6" 
+    # Wait, if sign is -1 and left is "-0.05", then (-1)*(-0.05) = 0.05.
+    # If the user wants to see the raw terms with their signs: "4.95 × 89.6 + (-0.05 × 89.6)"? 
+    # Or maybe just list them as they are in a sequence of operations?
+    # Let's try to make it look like standard math: "+ 4.95 * 89.6 - 0.05 * 89.6" implies the second term is subtracted, meaning its value is negative relative to the first positive one. 
+    # But our calculation says sign=-1 applied to left="-0.05". That results in a POSITIVE contribution (since neg*neg=pos).
+    
+    # Let's re-read carefully: "sum over terms of sign * left * right"
+    # Term 1: s=1, l="4.95", r="89.6" -> +1 * 4.95 * 89.6 = Positive large number.
+    # Term 2: s=-1, l="-0.05", r="89.6" -> -1 * (-0.05) * 89.6 = POSITIVE small number.
+    
+    # So the total is (4.95*89.6) + ((-1)*(-0.05)*89.6). 
+    # How to represent this in question_text? 
+    # Option A: "4.95 × 89.6 + (-0.05 × 89.6)" -> This implies adding a negative term, which is wrong mathematically if the sign multiplier flips it back up.
+    # Option B: The expression should reflect the operations performed. 
+    # Maybe the "sign" indicates whether to add or subtract the product of left and right? 
+    # If so: Term 1 (+) -> + (4.95 * 89.6). Term 2 (-) -> - (0.05 * 89.6)? But left is "-0.05".
+    
+    # Let's assume the most literal interpretation of "expression built from these terms":
+    # The expression is: (+1)*4.95*89.6 + (-1)*(-0.05)*89.6 
+    # Which simplifies to 4.95 * 89.6 - (-0.05) * 89.6 ? No, that's confusing.
+    
+    # Let's assume the standard format for such tasks: "a op b + c op d".
+    # If we treat 'sign' as an operator indicator (+ or -):
+    # Term 1 (sign=+1) -> Add term? Or just start with it? 
+    # Term 2 (sign=-1) -> Subtract the product of left and right? But what is "left" here? "-0.05".
+    
+    # Let's try a different angle: The expression string should evaluate to the sum.
+    # We can construct it as: "+4.95 × 89.6 + -1×-0.05 × 89.6"? Too complex.
+    # How about we normalize the display? 
+    # If sign is positive, show "left * right". If negative, maybe "- left * right" (assuming left is magnitude)? But left has a value like "-0.05".
+    
+    # Let's go with the most robust interpretation: The expression consists of terms where each term is explicitly written as `sign` followed by `left` and `right`. 
+    # Example: "1 * 4.95 × 89.6 + -1 * -0.05 × 89.6"
+    
+    expr_parts = []
+    for i, t in enumerate(products):
+        s_str = str(t["sign"])
+        l_str = str(t["left"])
+        r_str = str(t["right"])
+        
+        term_repr = f"{s_str} × {l_str} × {r_str}" # Wait, sign * left * right. 
+        # Actually the prompt says "sum over terms of sign * left * right". 
+        # So we are summing [sign*left*right].
+        # Let's write it as: (+1)×4.95×89.6 + (-1)×(-0.05)×89.6
+        
+        if i == 0:
+            expr_parts.append(f"{s_str} × {l_str} × {r_str}")
+        else:
+            # If the term is being added, we use '+'. 
+            # But wait, does 'sign' mean the operator between terms? Or a multiplier inside the term?
+            # "sum over terms of sign * left * right" strongly suggests it's a multiplier.
+            
+            pass
+            
+    final_str = "+".join([f"{t['sign']} × {t['left']} × {t['right']}" for t in products])
+    
+    question_text = f"Evaluate: {' + '.join(f'{t[\"sign\"]} × {t[\"left\"]} × {t[\"right\"]}' for t in products)}"
+
+    # Recalculate using exact arithmetic
+    total_value = Fraction(0)
+    for term in products:
+        s_val = int(term["sign"])
+        l_val = Fraction(str(term["left"]))
+        r_val = Fraction(str(term["right"]))
+        
+        contribution = s_val * l_val * r_val
+        total_value += contribution
+    
+    # Format result
+    if total_value.denominator == 1:
+        ans_str = str(total_value.numerator)
+    else:
+        # Ensure positive denominator and irreducible (Fraction does this automatically)
+        num = total_value.numerator
+        den = abs(total_value.denominator)
+        
+        if num < 0:
+            ans_str = f"{num}/{den}"
+        elif num == 0:
+            ans_str = "0"
+        else:
+            # Check for negative numerator? Fraction handles sign in numerator usually. 
+            # But we need positive denominator.
+            # If total_value is -1/2, it stores as (-1)/2 or 1/-2? Python fractions keeps denom > 0.
+            ans_str = f"{num}/{den}"
+
+    oracle_payload = {"products": products}
+    
+    return {
+        "question_text": question_text,
+        "correct_answer": {"value": str(total_value)}, # Fraction.__str__ returns 'p/q' or integer if denom is 1. This matches requirements perfectly.
+        "oracle_payload": oracle_payload
+    }

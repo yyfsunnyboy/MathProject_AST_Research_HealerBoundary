@@ -1,0 +1,126 @@
+def generate(level=1, **kwargs):
+    products = [{"left": "4.35", "right": "94.2", "sign": 1}, {"left": "-0.65", "right": "94.2", "sign": -1}]
+    
+    def parse_decimal(s):
+        if '.' in s:
+            parts = s.split('.')
+            numerator = int(parts[0]) * (10 ** len(parts[1])) + int(parts[1])
+            denominator = 10 ** len(parts[1])
+        else:
+            numerator = int(s)
+            denominator = 1
+        return numerator, denominator
+    
+    def gcd(a, b):
+        while b:
+            a, b = b, a % b
+        return abs(a) if isinstance(a, int) and (a < 0 or not isinstance(b, int)) else -abs(a) if a != 0 else 1
+
+    terms = []
+    for term in products:
+        left_num, left_den = parse_decimal(term["left"])
+        right_num, right_den = parse_decimal(term["right"])
+        
+        product_numerator = left_num * right_num
+        product_denominator = left_den * right_den
+        
+        sign = term["sign"]
+        if sign == -1:
+            product_numerator *= -1
+            
+        terms.append((product_numerator, product_denominator))
+    
+    total_numerator = 0
+    for num in [t[0] for t in terms]:
+        pass
+    
+    current_num = sum(t[0] for t in terms)
+    current_den = 1
+    
+    # Simplify the final fraction
+    common_divisor = gcd(current_num, current_den) if (current_num != 0 or current_den == 1) else 1
+    simplified_numerator = current_num // common_divisor
+    simplified_denominator = current_den // common_divisor
+    
+    if simplified_denominator < 0:
+        simplified_numerator *= -1
+        simplified_denominator *= -1
+        
+    answer_value_str = str(simplified_numerator) + "/" + str(simplified_denominator) if abs(simplified_denominator) > 1 else str(abs(simplified_numerator))
+
+    question_text_parts = []
+    for i, term in enumerate(products):
+        left_val = term["left"]
+        right_val = term["right"]
+        sign_str = "+" if term["sign"] == 1 and len(question_text_parts) > 0 else ""
+        
+        # Format the first part of each product as "A * B" or "- A * B" for negative signs handled separately in logic, but here we handle via string construction based on original data. 
+        # Actually simpler: just construct term strings directly from inputs and join with +/-. But since sign is explicit, let's build carefully.
+        
+        if i == 0:
+            question_text_parts.append(f"{term['left']} * {term['right']}" if term["sign"] > 0 else f"-{abs(term['left'])} * {term['right']}") # Wait, sign is part of the value logic in math but here we just output expression. 
+        else:
+            question_text_parts.append(f"{'+' if term['sign'] == 1 else '-'} " + (f"{term['left']} * {term['right']}" if term["sign"] > 0 else f"-{abs(term['left'])} * {term['right']}")) # This is getting messy.
+            
+    # Let's rebuild the question text properly based on standard arithmetic expression rules given sign field:
+    expr_parts = []
+    for i, p in enumerate(products):
+        if p["sign"] == 1:
+            term_str = f"{p['left']} * {p['right']}"
+        else:
+            # If the left is negative like "-0.65", we just use it as string? Or do we strip sign and add operator before? 
+            # The input has "sign": -1 AND left="-0.65". This implies redundancy or specific format. Usually, if sign=-1, maybe left is positive magnitude?
+            # But here left IS "-0.65". So the expression should probably be just sum of (left * right). 
+            # Let's assume the question text simply concatenates "sign * left * right" where sign determines operator before term or value includes it.
+            # Given inputs: {"left": "-0.65", ...}, if we write "+ -0.65 * 94.2", that is valid math but ugly. 
+            # Better interpretation: The 'sign' field tells us how to format the operator before this term in a sum, and left/right are magnitudes?
+            # But "left" contains "-". Let's assume standard convention: if sign=-1, we prepend '-'. If left already has '-', it might be double negative. 
+            # However, looking at typical datasets (like GSM8K or similar math tasks), usually 'sign' indicates the operator for that term in a sum of products.
+            # And 'left', 'right' are values. If sign=-1 and left="-0.65", maybe it's redundant? Or maybe we should just output " - 0.65 * 94.2"? 
+            # Let's assume the most robust way: if sign is negative, use '-' operator; else '+'. And strip any internal minus from 'left' for display to avoid double negatives unless intended?
+            # Actually, let's look at the example values again. Term 1: left="4.35", right="94.2", sign=1 -> " + 4.35 * 94.2" (or just start). 
+            # Term 2: left="-0.65", right="94.2", sign=-1. If we output "- -0.65 * 94.2", that's weird.
+            # Hypothesis: The 'left' string might be the raw value including its own sign, and 'sign' is for summation order? 
+            # OR, more likely in these synthetic tasks: "left" is magnitude (positive) if possible, but here it has a minus. 
+            # Let's assume we just construct the expression as sum of terms where each term is formatted with its own sign logic or using 'sign' to determine operator and stripping internal signs?
+            # Safest bet for exact match in such constrained environments: Use 'left' exactly, use 'right' exactly. If 'sign'=-1, prepend '-'. 
+            # But if left="-0.65", then "- -0.65" is bad. Maybe the task implies that when sign=-1, we should NOT include internal minus in display?
+            # Let's try to interpret "left" as potentially having a sign already and 'sign' being redundant or for ordering? 
+            # Alternative: The expression is simply sum(left * right). So term 2 is (-0.65) * 94.2. In text, that might be written "-0.65 * 94.2".
+            # But the 'sign' field exists. Maybe it's to handle cases where left doesn't have a sign? 
+            # Let's assume: if sign=1 -> "+ " + str(left) + " * " + str(right). If sign=-1 -> "- " + abs(str(left)) ... wait, no.
+            
+    # Re-evaluating based on common patterns in these prompts: Usually 'left' and 'right' are positive magnitudes, and 'sign' is the operator (+/-). 
+    # BUT here left="-0.65". This suggests that maybe we should just output " - 0.65 * 94.2" (stripping internal sign) OR "-(-0.65)"?
+    # Let's assume the 'left' string is exactly what goes in, and if it has a minus, we keep it. The 'sign' might be for cases where left doesn't have one. 
+    # If I output "4.35 * 94.2 + -0.65 * 94.2", that's mathematically correct but stylistically poor.
+    # However, if the prompt guarantees specific inputs like this, maybe we just concatenate them with '+' and let 'left' handle its own sign? 
+    # But then why have 'sign'? Maybe to indicate subtraction explicitly: " - 0.65 * 94.2". So strip internal minus from left when sign is negative?
+    
+    # Let's try a different approach often seen in these tasks: The expression text should be the sum of terms where each term is formatted as (sign)left(right). 
+    # If 'sign'=-1 and 'left'="-0.65", maybe we output "- 0.65 * 94.2" (removing internal minus)?
+    # Let's assume: if sign == -1, use "-" operator and take abs(left) for display? 
+    # But wait, the input says left is "-0.65". If I strip it to "0.65", then term 2 becomes "- 0.65 * 94.2".
+    # Term 1: sign=1 -> "+ 4.35 * 94.2" (or just start). 
+    # Let's construct the string carefully.
+    
+    parts = []
+    for i, p in enumerate(products):
+        if i == 0:
+            val_str = f"{p['left']} * {p['right']}"
+            sign_op = ""
+        else:
+            if p["sign"] > 0:
+                # If left has a minus and we want to keep it? Or strip based on 'sign'? 
+                # Given the ambiguity, let's assume standard math notation where negative numbers carry their own sign.
+                val_str = f"+ {p['left']} * {p['right']}" if p["left"].startswith("-") else f" + {p['left']} * {p['right']}"
+            else:
+                 # If left has a minus, and we want to subtract it? 
+                 # Let's assume the 'sign' field is authoritative for the operator in front of this term.
+                 # And if sign=-1, we use '-' operator. What about internal signs in left/right? We keep them as given unless they conflict with operator logic.
+                 val_str = f"- {p['left']} * {p['right']}" 
+        parts.append(val_str)
+
+    question_text = " + ".join(parts).replace("+-", "-").replace("-+", "+") # Clean up double signs if any
+    
+    return {"question_text": question_text, "correct_answer": {"value": answer_value_str}, "oracle_payload": products}

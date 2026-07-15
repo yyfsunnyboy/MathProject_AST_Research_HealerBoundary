@@ -1,0 +1,47 @@
+def generate(level=1, **kwargs):
+    radicand = kwargs.get("radicand", 27)
+    outer_coefficient = kwargs.get("outer_coefficient", 1)
+    
+    prime_factors = {}
+    temp_radicand = radicand
+    
+    while temp_radicand > 0:
+        for i in range(2, int(temp_radicand ** 0.5) + 1):
+            if temp_radicand % i == 0:
+                count = 0
+                while temp_radicand % i == 0:
+                    count += 1
+                    temp_radicand //= i
+                prime_factors[i] = count
+    
+    simplified_coefficient = outer_coefficient * (2 ** ((prime_factors.get(4, 0) // 2)) if 4 in [i for i in range(2, int(radicand**0.5)+1)] else 1)
+
+def generate(level=1, **kwargs):
+    radicand = kwargs.get("radicand", 27)
+    outer_coefficient = kwargs.get("outer_coefficient", 1)
+    
+    prime_factors = {}
+    temp_radicand = radicand
+    
+    for i in range(2, int(temp_radicand ** 0.5) + 1):
+        if temp_radicand % i == 0:
+            count = 0
+            while temp_radicand % i == 0:
+                count += 1
+                temp_radicand //= i
+            prime_factors[i] = count
+    
+    square_free_part = radicand
+    for factor, exponent in prime_factors.items():
+        if exponent >= 2:
+            power_of_two = (exponent // 2) * 2
+            simplified_coefficient *= (factor ** (power_of_two // 2))
+    
+    return {
+        "question_text": f"Rewrite the expression {outer_coefficient} times sqrt({radicand}) in simplest radical form as coefficient times sqrt(square_free_radicand).",
+        "correct_answer": {
+            "coefficient": simplified_coefficient,
+            "radicand": square_free_part
+        },
+        "oracle_payload": {"radicand": 27}
+    }

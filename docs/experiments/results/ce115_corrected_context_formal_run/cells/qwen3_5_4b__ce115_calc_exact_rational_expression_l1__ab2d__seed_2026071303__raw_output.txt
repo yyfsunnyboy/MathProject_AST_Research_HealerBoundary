@@ -1,0 +1,63 @@
+def generate(level=1, **kwargs):
+    from fractions import Fraction
+    
+    products = kwargs.get("products") or [{"left": "4.35", "right": "94.2", "sign": 1}, {"left": "-0.65", "right": "94.2", "sign": -1}]
+    
+    question_text_parts = []
+    for i, term in enumerate(products):
+        sign_str = "+" if term["sign"] == 1 else "-"
+        left_val = str(term["left"])
+        right_val = str(term["right"])
+        
+        # Format the expression string. For single terms or simple cases, keep it clean.
+        # We will construct a standard arithmetic expression like "4.35 * 94.2 - (-0.65) * 94.2"
+        if i == 0:
+            question_text_parts.append(f"{left_val} * {right_val}")
+        else:
+            sign_str = "+" if term["sign"] > 0 else "-"
+            # Handle the subtraction of a negative product explicitly for clarity or standard form
+            left_neg = str(term["left"])
+            right_neg = str(term["right"])
+            
+            # If we have -A * B, it's equivalent to -(A*B). 
+            # The term is sign * left * right.
+            # Term 1: +4.35 * 94.2 -> "4.35 * 94.2"
+            # Term 2: -(-0.65) * 94.2 -> "- (-0.65) * 94.2" or just add the negative result logic in text?
+            # Let's represent it as a sum of signed products to match "sign * left * right".
+            
+            if term["sign"] == -1:
+                question_text_parts.append(f"- {left_neg} * {right_neg}")
+            else:
+                question_text_parts.append(f"+ {left_val} * {right_val}") # Though redundant +, it matches the schema logic visually
+    
+    full_expression = " ".join(question_text_parts)
+    
+    total_value = Fraction(0)
+    for term in products:
+        left_frac = Fraction(term["left"])
+        right_frac = Fraction(term["right"])
+        sign_val = 1 if term["sign"] == 1 else -1
+        
+        # Calculate product exactly
+        prod = (sign_val * left_frac * right_frac)
+        
+        total_value += prod
+    
+    # Format the result: integer string or irreducible p/q with positive denominator
+    num, den = total_value.numerator, total_value.denominator
+    
+    if den == 1:
+        answer_str = str(num)
+    else:
+        # Ensure positive denominator (Fraction does this automatically for canonical form usually, but let's be safe)
+        if den < 0:
+            num = -num
+            den = -den
+        
+        answer_str = f"{num}/{den}"
+    
+    return {
+        "question_text": full_expression,
+        "correct_answer": {"value": answer_str},
+        "oracle_payload": products
+    }

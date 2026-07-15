@@ -1,0 +1,132 @@
+def generate(level=1, **kwargs):
+    dividend = kwargs.get("dividend_coefficients", [6, 0, 6])
+    divisor = kwargs.get("divisor_coefficients", None)
+    
+    # Frozen parameters override if not provided in kwargs to ensure consistency with the specific task instance
+    frozen_dividend = [6, 0, 6]
+    frozen_divisor = [1, -4]
+
+    dividend_coeffs = frozen_dividend
+    divisor_coeffs = frozen_divisor
+    
+    a = divisor_coeffs[0] # Leading coefficient of linear divisor (x + b/a) -> actually ax+b form usually implies coefficients are for x^1 and x^0. 
+                          # Standard polynomial division input: [a, c] means 'ax + c'.
+    
+    if len(dividend_coeffs) == 3:
+        dividend_degree = 2
+        dividend_a2 = dividend_coeffs[0]
+        dividend_b1 = dividend_coeffs[1]
+        dividend_c0 = dividend_coeffs[2]
+        
+        # Divisor is linear: ax + c. Here divisor_coefficients=[a, c].
+        a_div = divisor_coeffs[0]
+        c_div = divisor_coeffs[1]
+        
+        # Division of (A x^2 + B x + C) by (D x + E)
+        A = dividend_a2
+        B = dividend_b1
+        C = dividend_c0
+        
+        D = a_div
+        E = c_div
+        
+        # Quotient will be linear: Qx + R_coefficient? No, quotient is degree 1.
+        # (Ax^2 + Bx + C) / (Dx + E) -> Quotient: (A/D)x + ... 
+        # Let's do synthetic division logic or direct algebraic expansion.
+        
+        # We want Q(x)*Divisor(x) + Remainder = Dividend(x)
+        # Q(x) is degree 1: q1*x + q0
+        # R is constant r
+        
+        # (q1*x + q0)*(Dx + E) + r = Ax^2 + Bx + C
+        # D*q1 * x^2 + (E*q1 + D*q0)*x + (E*q0 + r) = A*x^2 + B*x + C
+        
+        # Coefficients matching:
+        q1 = A / D
+        E_q1_plus_D_q0 = B
+        E*q1 + D*q0 = B => D*q0 = B - E*q1 => q0 = (B - E*q1) / D
+        r = C - (E*q0)
+        
+        # Calculate exact values using fractions to avoid float issues
+        
+        from math import gcd
+        
+        def frac(n, d):
+            if d == 0: return None
+            g = abs(gcd(int(n), int(d)))
+            n //= g
+            d //= g
+            sign = -1 if (n < 0) ^ (d < 0) else 1
+            n *= sign
+            d *= sign
+            # Simplify further? gcd handles it. 
+            return f"{n}/{d}"
+
+        q1_num, q1_den = A, D
+        
+        term_E_q1 = E * q1_num / q1_den if q1_den != 0 else float('inf') # This is conceptual
+        # Let's work with integers first then reduce.
+        
+        # q1 = A/D
+        num_q1 = A
+        den_q1 = D
+        
+        # q0 calculation: (B - E * (A/D)) / D = (BD - EA) / (D^2)
+        numerator_q0_num = B*D - E*A
+        denominator_q0_den = D*D
+        
+        g_q0 = abs(gcd(numerator_q0_num, denominator_q0_den)) if denominator_q0_den != 0 else 1
+        num_q0_final = numerator_q0_num // g_q0
+        den_q0_final = denominator_q0_den // g_q0
+        
+        # Remainder r calculation: C - E*q0
+        # q0 is (num_q0 / den_q0)
+        # r = C - E * num/den = (C*den - E*num)/den
+        numerator_r_num = C * den_q0_final - E * num_q0_final
+        denominator_r_den = den_q0_final
+        
+        g_r = abs(gcd(numerator_r_num, denominator_r_den)) if denominator_r_den != 0 else 1
+        num_r_final = numerator_r_num // g_r
+        den_r_final = denominator_r_den // g_r
+
+        # Format quotient coefficients: [q1, q0]
+        quot_str_q1 = frac(num_q1, den_q1)
+        quot_str_q0 = frac(num_q0_final, den_q0_final)
+        
+        # Remainder is a single value (constant polynomial). 
+        rem_val = num_r_final if den_r_final == 1 else f"{num_r_final}/{den_r_final}"
+
+    elif len(dividend_coeffs) < 3:
+         # Handle lower degree cases generically? The frozen params are fixed to [6,0,6] so this branch is just fallback.
+        pass
+        
+    question_text = "Divide the polynomial $P(x)$ with coefficients ${dividend} by the linear divisor $(ax+b)$ defined by coefficients ${divisor}, and report the quotient coefficients (highest degree first) and the remainder."
+    
+    # Constructing specific text based on frozen params for clarity if needed, but generic is safer.
+    dividend_str = f"{dividend_coeffs[0]}x^2 + {dividend_coeffs[1]}x + {dividend_coeffs[2]}"
+    divisor_str = f"({divisor_coeffs[0]})x + ({divisor_coeffs[1]})" if divisor_coeffs[1]>=0 else f"({divisor_coeffs[0]})x{divisor_coeffs[1]}" # Simplify display
+    
+    q_text_q1 = quot_str_q1
+    q_text_q0 = quot_str_q0
+    r_text = rem_val
+
+    question_text = f"Divide the polynomial $6x^2 + 0x + 6$ by the linear divisor $(1)x - 4$. Report the quotient coefficients (highest degree first) and the remainder."
+    
+    # Wait, standard format for "ax+b": if b is negative, usually written as ax-b. 
+    # The input says [1, -4]. So it's x-4.
+    # Let's refine question_text to be mathematically precise based on inputs provided in frozen params.
+    
+    final_question = f"Divide the polynomial $6x^2 + 0x + 6$ by $(1)x - 4$. Report the quotient coefficients (highest degree first) and the remainder."
+
+    correct_answer_dict = {
+        "quotient_coefficients": [q_text_q1, q_text_q0],
+        "remainder_coefficients": [r_text] # Remainder is a constant polynomial of degree 0. 
+    }
+    
+    oracle_payload = {"dividend_coefficients": frozen_dividend, "divisor_coefficients": frozen_divisor}
+
+    return {
+        "question_text": final_question,
+        "correct_answer": correct_answer_dict,
+        "oracle_payload": oracle_payload
+    }

@@ -1,0 +1,57 @@
+def generate(level=1, **kwargs):
+    a = kwargs.get("a", None) or 1
+    b = kwargs.get("b", None) or 4
+    c = kwargs.get("c", None) or -12
+    
+    # Calculate roots using quadratic formula: (-b ± sqrt(b^2 - 4ac)) / (2a)
+    discriminant = b**2 - 4*a*c
+    if discriminant < 0:
+        return {
+            "question_text": f"Factor the quadratic expression x^{2} + {b}x + {c} and find its roots.",
+            "correct_answer": {"roots": ["No real roots"]},
+            "oracle_payload": {"quadratic_coefficients": [a, b, c]}
+        }
+    
+    sqrt_disc = int(discrimant ** 0.5) if discriminant >= 0 else None
+    
+    # Check for perfect square to return exact rational roots or simplified fractions
+    import math
+    is_perfect_square = (discriminant >= 0 and math.isqrt(discriminant)**2 == discriminant)
+    
+    sqrt_val = int(math.sqrt(discriminant)) if is_perfect_square else None
+    
+    root1_num = -b + sqrt_val
+    root1_den = 2 * a
+    root2_num = -b - sqrt_val
+    root2_den = 2 * a
+    
+    def simplify_fraction(n, d):
+        if n == 0:
+            return "0"
+        g = abs(math.gcd(n, d))
+        sn = n // g
+        sd = d // g
+        # Ensure positive denominator
+        if sd < 0:
+            sn = -sn
+            sd = -sd
+        if sd == 1:
+            return str(sn)
+        else:
+            return f"{sn}/{sd}"
+
+    r1_str = simplify_fraction(root1_num, root1_den)
+    r2_str = simplify_fraction(root2_num, root2_den)
+    
+    # Sort roots numerically for ascending order comparison before formatting final output if needed. 
+    # However, the requirement is to return them in ascending numeric order as strings/integers.
+    val1 = float(r1_str.replace('/', '.'))
+    val2 = float(r2_str.replace('/', '.'))
+    
+    sorted_roots = [r1_str, r2_str] if (val1 <= val2) else [r2_str, r1_str]
+
+    return {
+        "question_text": f"Factor the quadratic expression x^{2} + {b}x + {c} and find its roots.",
+        "correct_answer": {"roots": sorted_roots},
+        "oracle_payload": {"quadratic_coefficients": [a, b, c]}
+    }

@@ -1,0 +1,93 @@
+def generate(level=1, **kwargs):
+    products = [{"left": "4.35", "right": "94.2", "sign": 1}, {"left": "-0.65", "right": "94.2", "sign": -1}]
+    
+    def decimal_to_fraction(s):
+        if '.' in s:
+            integer_part, fractional_part = s.split('.')
+            numerator = int(integer_part) * (10 ** len(fractional_part)) + int(fractional_part)
+            denominator = 10 ** len(fractional_part)
+        else:
+            numerator = int(s)
+            denominator = 1
+        return numerator, denominator
+
+    def fraction_to_string(num, den):
+        if num == 0:
+            return "0"
+        common_divisor = gcd(abs(num), abs(den))
+        reduced_num = num // common_divisor
+        reduced_den = den // common_divisor
+        if reduced_den < 0:
+            reduced_num *= -1
+            reduced_den *= -1
+        if reduced_den == 1:
+            return str(reduced_num)
+        else:
+            return f"{reduced_num}/{reduced_den}"
+
+    def gcd(a, b):
+        while b != 0:
+            a, b = b, a % b
+        return abs(a)
+
+    terms = []
+    question_parts = ["("]
+    
+    for i, term in enumerate(products):
+        sign_str = "+" if term["sign"] == 1 else "-"
+        
+        left_num, left_den = decimal_to_fraction(term["left"])
+        right_num, right_den = decimal_to_fraction(term["right"])
+        
+        # Calculate product: (num/den) * (num2/den2) -> num*num2 / den*den2
+        prod_num = left_num * right_num
+        prod_den = left_den * right_den
+        
+        if term["sign"] == 1:
+            terms.append(prod_num, prod_den)
+            question_parts.append(f"+ {fraction_to_string(prod_num, prod_den)}")
+        else:
+            # Subtracting a positive is adding a negative. 
+            # The problem says "sum over terms of sign * left * right".
+            # So we add (sign * product). If sign is -1, it's -(product).
+            neg_prod_num = prod_num if term["sign"] == 1 else -prod_num
+            
+            question_parts.append(f"+ {fraction_to_string(neg_prod_num, prod_den)}")
+
+    question_text = "".join(question_parts) + ")"
+    
+    # Calculate exact sum
+    total_num = 0
+    total_den = 1
+    
+    for term in products:
+        sign_val = term["sign"]
+        left_num, left_den = decimal_to_fraction(term["left"])
+        right_num, right_den = decimal_to_fraction(term["right"])
+        
+        prod_num = left_num * right_num
+        prod_den = left_den * right_den
+        
+        # Add to total: sign_val * (prod_num / prod_den)
+        if term["sign"] == 1:
+            add_num = prod_num
+            add_den = prod_den
+        else:
+            add_num = -prod_num
+            add_den = prod_den
+            
+        # Total = Total + AddNum/AddDen -> (Total*AddDen + AddNum) / Denom
+        new_total_num = total_num * add_den + add_num
+        new_total_den = total_den * add_den
+        
+        total_num, total_den = new_total_num, new_total_den
+    
+    correct_answer_value = fraction_to_string(total_num, total_den)
+    
+    oracle_payload = products
+
+    return {
+        "question_text": question_text,
+        "correct_answer": {"value": correct_answer_value},
+        "oracle_payload": oracle_payload
+    }

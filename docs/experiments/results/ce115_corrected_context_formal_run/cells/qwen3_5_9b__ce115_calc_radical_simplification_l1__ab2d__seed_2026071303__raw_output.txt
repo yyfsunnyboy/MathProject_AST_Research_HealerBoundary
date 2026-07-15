@@ -1,0 +1,120 @@
+def generate(level=1, **kwargs):
+    import math
+    
+    radicand = kwargs.get("radicand", 112)
+    
+    temp_radicand = radicand
+    coefficient = 0
+    
+    for i in range(2, int(math.sqrt(radicand)) + 1):
+        while (temp_radicand % (i * i) == 0):
+            factor_count = 0
+            current_i = i
+            temp_divisor = i * i
+            
+            # Count how many times we can divide by the square of this prime/factor
+            count = 0
+            divisor_sq = i * i
+            while (temp_radicand % divisor_sq == 0):
+                factor_count += 1
+                temp_radicand //= divisor_sq
+                
+            if factor_count > 0:
+                coefficient *= (i ** factor_count)
+    
+    # Handle the case where radicand is a perfect square or has remaining factors that are squares of larger numbers not caught by loop range? 
+    # Actually, iterating up to sqrt(radicand) covers all possible prime factors. If after removing small squares we have something left > 1, it's either:
+    # 1. A product of distinct primes (square-free part remains as is).
+    # 2. Or a square itself? No, because if n = k^2 * m where m < sqrt(n), then factors would be caught. 
+    # Wait, logic check: If radicand has factor p^3, we extract p^2 into coefficient and leave one p in radicand.
+    
+    # Re-evaluating the loop range for correctness with composite squares like 4*9=36?
+    # The standard way is to iterate primes or just all integers up to sqrt(n). 
+    # If I use i*i, it works because if n = a*b where b=a^2*k, then we extract.
+    
+    # Let's refine the extraction logic for robustness:
+    temp_radicand = radicand
+    
+    coefficient = 1
+    square_free_part = 0
+    
+    d = 2
+    while d * d <= temp_radicand:
+        if (temp_radicand % d) == 0:
+            count = 0
+            while (temp_radicand % d) == 0:
+                count += 1
+                temp_radicand //= d
+            
+            # If exponent is even, move all to coefficient. 
+            # If odd, keep one in radicand and rest in coefficient? No, simplest form keeps max possible square factors out.
+            
+            if (count % 2) == 0:
+                coeff_factor = d ** count
+                coefficient *= coeff_factor
+            else:
+                coeff_factor = d ** (count - 1)
+                coefficient *= coeff_factor
+                temp_radicand *= d # Put one back
+        
+        d += 1
+    
+    if temp_radicand > 1:
+        square_free_part = temp_radicand * coefficient / coefficient # Wait, logic error above.
+        
+    # Correct Logic Reset:
+    
+    def simplify_radical(n):
+        result_coefficient = 1
+        remaining_n = n
+        
+        d = 2
+        while d * d <= remaining_n:
+            if (remaining_n % d) == 0:
+                count = 0
+                while (remaining_n % d) == 0:
+                    count += 1
+                    remaining_n //= d
+                
+                # We want to extract the largest square factor. 
+                # If we have d^k, we can pull out d^(2*floor(k/2)).
+                
+                num_squares = count // 2
+                if num_squares > 0:
+                    result_coefficient *= (d ** num_squares)
+                    
+            d += 1
+            
+        return result_coefficient, remaining_n
+
+    coeff_part, sq_free_part = simplify_radical(radicand)
+    
+    # Ensure radicand is square free. The logic above ensures that because we divide out all pairs.
+    # If the original number was a perfect square (e.g., 16), count=4 -> num_squares=2 -> coeff*=d^2, remaining_n becomes 1. Correct.
+    
+    question_text = f"Rewrite {kwargs.get('outer_coefficient', 1)} * sqrt({radicand}) in simplest radical form as coefficient * sqrt(square_free_radicand)."
+    
+    # Wait, the prompt says "question_text must ask to rewrite outer_coefficient * sqrt(radicand)..."
+    # But if outer_coefficient is not provided in kwargs (default 1), we use that. 
+    # However, looking at frozen parameters: only radicand=112 is given. 
+    # The task contract says "optional `outer_coefficient`". If absent treat as 1.
+    
+    final_outer = kwargs.get("outer_coefficient", 1)
+    
+    question_text = f"Rewrite {final_outer} * sqrt({radicand}) in simplest radical form."
+
+    return {
+        "question_text": question_text,
+        "correct_answer": {
+            "coefficient": coeff_part * final_outer, # Wait. The task says: rewrite outer_coefficient * sqrt(radicand). 
+            # Usually simplification applies to the radicand only unless specified otherwise? 
+            # Let's re-read carefully: "rewrite outer_coefficient * sqrt(radicand) in simplest radical form coefficient * sqrt(square_free_radicand)."
+            # Does it mean (outer_coefficient * simplified_radical)? Or just simplify the root and keep coeff outside?
+            # Standard math problem interpretation: Simplify A*sqrt(B). 
+            # If B = 12, sqrt(12) = 2*sqrt(3), so result is A*2*sqrt(3). The coefficient in answer should be A*2.
+            
+            "coefficient": coeff_part * final_outer,
+            "radicand": sq_free_part
+        },
+        "oracle_payload": {"radicand": 112}
+    }

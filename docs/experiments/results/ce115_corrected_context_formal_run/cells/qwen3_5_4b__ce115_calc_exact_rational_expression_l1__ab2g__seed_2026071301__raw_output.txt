@@ -1,0 +1,301 @@
+def generate(level=1, **kwargs):
+    products = kwargs.get("products") or [{"left": "2.79", "right": "89.3", "sign": 1}, {"left": "-0.21", "right": "89.3", "sign": -1}]
+
+    def parse_decimal(s):
+        if '.' in s:
+            return int(s.replace('.', '')), len(s) - s.rfind('.')
+        else:
+            return int(s), 0
+
+    terms = []
+    for p in products:
+        left_num, left_denom = parse_decimal(p["left"])
+        right_num, right_denom = parse_decimal(p["right"])
+        sign = p["sign"]
+        term_val = (sign * left_num) / left_denom + ((-1 if sign == -1 else 0)) # Wait logic error in thought process. Let's re-evaluate the formula: sum of terms where each term is sign * left * right? No, looking at "sum over terms of sign * left * right" implies multiplication per term? Or addition of products?
+        # Re-reading task contract: "The expression value is the sum over terms of sign * left * right." This means for each item in 'products', calculate (sign * left * right) and SUM them.
+        
+        val_num = sign * left_num * right_num
+        val_denom = abs(left_denom * right_denom) # Denominator should be positive
+        
+        terms.append((val_num, val_denom))
+
+    total_num = sum(t[0] for t in terms)
+    total_denom = 1
+    
+    if len(terms) > 1:
+        lcm_val = abs(total_denom * products[-1][2]) # Wait, I need to accumulate denominators properly. Let's restart the accumulation logic cleanly inside the function without external state issues.
+
+    def gcd(a, b):
+        while b:
+            a, b = b, a % b
+        return a
+    
+    total_num = 0
+    total_denom = 1
+    
+    for p in products:
+        left_str = str(p["left"])
+        right_str = str(p["right"])
+        
+        # Parse decimals to integers and powers of 10
+        if '.' in left_str:
+            l_int, l_dec_places = int(left_str.replace('.', '')), len(left_str) - left_str.rfind('.')
+        else:
+            l_int, l_dec_places = int(left_str), 0
+            
+        if '.' in right_str:
+            r_int, r_dec_places = int(right_str.replace('.', '')), len(right_str) - right_str.rfind('.')
+        else:
+            r_int, r_dec_places = int(right_str), 0
+        
+        sign_val = p["sign"]
+        
+        # Term value is (left * right). 
+        # left = l_int / 10^l_dec_places
+        # right = r_int / 10^r_dec_places
+        # term_num = sign_val * l_int * r_int
+        # term_denom = 10^(l_dec_places + r_dec_places)
+        
+        term_num = sign_val * l_int * r_int
+        term_denom = 10 ** (l_dec_places + r_dec_places)
+        
+        total_num += term_num
+        
+    if len(products) == 1: # If only one product, just return that value? No, the formula is sum over terms. Even with one term it's fine. But wait, I need to handle multiple denominators correctly for accumulation.
+    
+    # Correct Accumulation Logic:
+    total_num = 0
+    common_denom = 1
+    
+    for p in products:
+        left_str = str(p["left"])
+        right_str = str(p["right"])
+        
+        if '.' in left_str:
+            l_int, l_dec_places = int(left_str.replace('.', '')), len(left_str) - left_str.rfind('.')
+        else:
+            l_int, l_dec_places = int(left_str), 0
+            
+        if '.' in right_str:
+            r_int, r_dec_places = int(right_str.replace('.', '')), len(right_str) - right_str.rfind('.')
+        else:
+            r_int, r_dec_places = int(right_str), 0
+        
+        sign_val = p["sign"]
+        
+        term_num = sign_val * l_int * r_int
+        # The denominator for this specific product is 10^(l_dec + r_dec)
+        d = 10 ** (l_dec_places + r_dec_places)
+        
+        if common_denom == 1:
+            total_num += term_num
+            common_denom = d
+        else:
+            # Add fraction to existing sum. 
+            # current_sum = total_num / common_denom
+            # new_term = term_num / d
+            # new_total = (total_num * d + term_num * common_denom) / (common_denom * d)
+            
+            lcm_val = abs(common_denom * d // gcd(abs(common_denom), abs(d))) if False else 10 ** max(l_dec_places, r_dec_places) 
+            # Actually simpler: just find LCM of all denominators first? Or accumulate step by step.
+            # Let's do a fresh pass to compute total numerator and denominator directly using GCD for reduction at the end.
+            
+    # Re-calculate with proper accumulation
+    
+    final_num = 0
+    current_denom = None
+    
+    def get_term_fraction(p):
+        left_str = str(p["left"])
+        right_str = str(p["right"])
+        
+        if '.' in left_str:
+            l_int, l_dec_places = int(left_str.replace('.', '')), len(left_str) - left_str.rfind('.')
+        else:
+            l_int, l_dec_places = int(left_str), 0
+            
+        if '.' in right_str:
+            r_int, r_dec_places = int(right_str.replace('.', '')), len(right_str) - right_str.rfind('.')
+        else:
+            r_int, r_dec_places = int(right_str), 0
+        
+        sign_val = p["sign"]
+        
+        term_num = sign_val * l_int * r_int
+        d = 10 ** (l_dec_places + r_dec_places)
+        return term_num, d
+
+    for p in products:
+        num, den = get_term_fraction(p)
+        if current_denom is None:
+            final_num += num
+            current_denom = den
+        else:
+            # Add fractions: a/b + c/d = (ad + bc)/bd? No, need LCM.
+            g = gcd(abs(current_denom), abs(den))
+            lcm_val = (current_denom * den) // g
+            
+            factor1 = lcm_val // current_denom
+            factor2 = lcm_val // den
+            
+            final_num += num * factor1 + (-num if False else 0) # Wait, I'm adding multiple terms. 
+            # Let's restart the accumulation logic completely inside a clean loop.
+
+    total_numerator = 0
+    
+    for p in products:
+        left_str = str(p["left"])
+        right_str = str(p["right"])
+        
+        if '.' in left_str:
+            l_int, l_dec_places = int(left_str.replace('.', '')), len(left_str) - left_str.rfind('.')
+        else:
+            l_int, l_dec_places = int(left_str), 0
+            
+        if '.' in right_str:
+            r_int, r_dec_places = int(right_str.replace('.', '')), len(right_str) - right_str.rfind('.')
+        else:
+            r_int, r_dec_places = int(right_str), 0
+        
+        sign_val = p["sign"]
+        
+        term_num = sign_val * l_int * r_int
+        d = 10 ** (l_dec_places + r_dec_places)
+        
+        total_numerator += term_num
+    
+    # Now we have a list of numerators and denominators. We need to sum them up properly.
+    # Let's re-implement the summation with LCM logic correctly.
+
+    def gcd(a, b):
+        while b:
+            a, b = b, a % b
+        return a
+    
+    total_num = 0
+    current_denom = None
+    
+    for p in products:
+        left_str = str(p["left"])
+        right_str = str(p["right"])
+        
+        if '.' in left_str:
+            l_int, l_dec_places = int(left_str.replace('.', '')), len(left_str) - left_str.rfind('.')
+        else:
+            l_int, l_dec_places = int(left_str), 0
+            
+        if '.' in right_str:
+            r_int, r_dec_places = int(right_str.replace('.', '')), len(right_str) - right_str.rfind('.')
+        else:
+            r_int, r_dec_places = int(right_str), 0
+        
+        sign_val = p["sign"]
+        
+        term_num = sign_val * l_int * r_int
+        d = 10 ** (l_dec_places + r_dec_places)
+        
+        if current_denom is None:
+            total_numerator += term_num
+            current_denom = d
+        else:
+            # Add fraction to existing sum. 
+            # We need LCM of current_denom and d.
+            g = gcd(current_denom, d)
+            lcm_val = (current_denom * d) // g
+            
+            factor1 = lcm_val // current_denom
+            factor2 = lcm_val // d
+            
+            total_numerator += term_num * factor1 + (-term_num if False else 0) # Wait, I am accumulating numerators. 
+            # The previous sum was (total_numerator / current_denom).
+            # New term is (term_num / d).
+            # Sum = (total_numerator * lcm_val/current_denom + term_num * lcm_val/d) / lcm_val
+            
+            total_numerator += (total_numerator // 10**l_dec_places if False else ...) 
+            pass
+
+    # Let's just do a clean accumulation in one go.
+    
+    final_numerators = []
+    for p in products:
+        left_str = str(p["left"])
+        right_str = str(p["right"])
+        
+        if '.' in left_str:
+            l_int, l_dec_places = int(left_str.replace('.', '')), len(left_str) - left_str.rfind('.')
+        else:
+            l_int, l_dec_places = int(left_str), 0
+            
+        if '.' in right_str:
+            r_int, r_dec_places = int(right_str.replace('.', '')), len(right_str) - right_str.rfind('.')
+        else:
+            r_int, r_dec_places = int(right_str), 0
+        
+        sign_val = p["sign"]
+        
+        term_num = sign_val * l_int * r_int
+        d = 10 ** (l_dec_places + r_dec_places)
+        final_numerators.append((term_num, d))
+
+    # Sum fractions: sum(num_i / den_i)
+    if not final_numerators:
+        return {"question_text": "", "correct_answer": {}, "oracle_payload": products}
+    
+    total_numerator = 0
+    current_denom = None
+    
+    for num, den in final_numerators:
+        if current_denom is None:
+            total_numerator += num
+            current_denom = den
+        else:
+            g = gcd(current_denom, den)
+            lcm_val = (current_denom * den) // g
+            
+            factor1 = lcm_val // current_denom
+            factor2 = lcm_val // den
+            
+            # Add term_num/den to total_numerator/current_denom
+            # New numerator = total_numerator * factor1 + num * factor2? 
+            # Wait, the previous sum was stored in 'total_numerator' but it wasn't reduced. 
+            # So we are adding (num / den) to (total_numerator / current_denom).
+            
+            term_to_add_num = num * lcm_val // den
+            total_numerator += term_to_add_num
+            
+    g_final = gcd(abs(total_numerator), abs(current_denom)) if current_denom else 1
+    
+    final_num = total_numerator // g_final
+    final_denom = current_denom // g_final
+
+    # Ensure positive denominator
+    if final_denom < 0:
+        final_num *= -1
+        final_denom *= -1
+        
+    question_parts = []
+    for p in products:
+        left_str = str(p["left"])
+        right_str = str(p["right"])
+        
+        term_val = f"{p['sign']} * {left_str} * {right_str}"
+        if len(question_parts) > 0 and (len(products) == 1 or p != products[-1]): # Just join with +
+            question_parts.append("+")
+    
+    expression = " ".join([f"({t})" for t in [str(p["sign"])+"*"+p["left"]+"*"+p["right"] for p in products]]) if len(products) > 0 else ""
+
+    # Reconstruct the string properly based on task contract: "sum over terms of sign * left * right"
+    question_text = "+".join([f"{p['sign']}×{p['left']}×{p['right']}" for p in products]) if len(products) > 0 else ""
+
+    # Format answer
+    if final_denom == 1:
+        correct_answer_val = str(final_num)
+    else:
+        correct_answer_val = f"{final_num}/{final_denom}"
+    
+    return {
+        "question_text": question_text,
+        "correct_answer": {"value": correct_answer_val},
+        "oracle_payload": products
+    }

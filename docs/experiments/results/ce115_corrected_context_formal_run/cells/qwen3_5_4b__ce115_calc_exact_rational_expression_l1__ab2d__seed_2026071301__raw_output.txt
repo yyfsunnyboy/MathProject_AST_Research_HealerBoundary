@@ -1,0 +1,47 @@
+def generate(level=1, **kwargs):
+    from fractions import Fraction
+    
+    products = kwargs.get("products") or [{"left": "2.79", "right": "89.3", "sign": 1}, {"left": "-0.21", "right": "89.3", "sign": -1}]
+    
+    question_text_parts = []
+    for i, term in enumerate(products):
+        sign_str = "+" if term["sign"] == 1 else "-"
+        left_str = str(term["left"])
+        right_str = str(term["right"])
+        
+        # Format the expression clearly. For single terms or simple sums, keep it readable.
+        # We will construct a string like "2.79 * 89.3 - (-0.21) * 89.3" but ensure signs are explicit in calculation logic.
+        term_expr = f"{left_str} * {right_str}" if i == len(products) - 1 else f"+{term['sign']} * ({left_str}) * ({right_str})" # This is getting messy, let's do a cleaner string build
+        
+    # Rebuild question text cleanly based on the list
+    expr_terms = []
+    for term in products:
+        s = "+" if term["sign"] == 1 else "-"
+        l = str(term["left"])
+        r = str(term["right"])
+        expr_terms.append(f"{s} {l} * {r}")
+    
+    question_text = " ".join(expr_terms) + "."
+
+    # Calculate exact value using Fractions to avoid float issues with decimals like 2.79
+    total_fraction = Fraction(0, 1)
+    for term in products:
+        sign_val = Fraction(term["sign"]) if isinstance(term["sign"], int) else Fraction(int(term["sign"]))
+        
+        # Convert decimal strings to Fractions exactly
+        left_frac = Fraction(str(term["left"]), 1) 
+        right_frac = Fraction(str(term["right"]), 1)
+        
+        term_val = sign_val * (left_frac * right_frac)
+        total_fraction += term_val
+    
+    # Format the result as required: integer string if denominator is 1, else irreducible p/q with positive denominator
+    final_value_str = str(total_fraction.numerator) + "/" + str(total_fraction.denominator) if total_fraction.denominator != 1 else str(int(total_fraction))
+
+    oracle_payload = {"products": products}
+
+    return {
+        "question_text": question_text,
+        "correct_answer": {"value": final_value_str},
+        "oracle_payload": oracle_payload
+    }

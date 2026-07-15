@@ -1,0 +1,29 @@
+def generate(level=1, **kwargs):
+    radicand = kwargs.get("radicand", 54)
+    
+    # Factorize to find square factors
+    temp_radicand = radicand
+    coefficient = 1
+    
+    d = 2
+    while d * d <= temp_radicand:
+        if temp_radicand % (d * d) == 0:
+            count = 0
+            while temp_radicand % (d * d) == 0:
+                count += 2
+                temp_radicand //= (d * d)
+            # If we extracted a square, add to coefficient
+            if count > 0:
+                factor_sqrt = int(d ** (count // 2))
+                coefficient *= factor_sqrt
+        else:
+            d += 1
+    
+    return {
+        "question_text": f"Rewrite sqrt({radicand}) in simplest radical form.",
+        "correct_answer": {
+            "coefficient": coefficient,
+            "radicand": temp_radicand
+        },
+        "oracle_payload": {"radicand": 54}
+    }

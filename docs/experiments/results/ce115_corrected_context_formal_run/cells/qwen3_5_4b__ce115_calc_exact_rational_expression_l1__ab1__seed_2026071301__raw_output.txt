@@ -1,0 +1,188 @@
+def generate(level=1, **kwargs):
+    products = [{"left": "2.79", "right": "89.3", "sign": 1}, {"left": "-0.21", "right": "89.3", "sign": -1}]
+    
+    def parse_decimal(s):
+        if '.' in s:
+            integer_part, decimal_part = s.split('.')
+            return int(integer_part), int(decimal_part)
+        else:
+            return int(s), 0
+    
+    terms = []
+    question_parts = [""]
+    for term in products:
+        sign_str = " -" if term["sign"] == -1 else ""
+        left_int, left_dec = parse_decimal(term["left"])
+        right_int, right_dec = parse_decimal(term["right"])
+        
+        # Construct the expression string part by part to avoid float issues during display
+        question_parts.append(f"{term['sign']} * {term['left']} * {term['right']}")
+    
+    full_expression = " + ".join(question_parts) if len(products) > 1 else question_parts[0]
+    # Adjust the first sign for proper mathematical notation (e.g., "- a" instead of "+ -a")
+    parts_list = [int(p.split('*')[2]) for p in products] 
+    # Reconstruct properly: term is sign * left * right. We need to format it as "sign1*left1*right1 + sign2*left2*right2..."
+    
+    formatted_terms = []
+    for i, t in enumerate(products):
+        if i == 0:
+            # First term keeps its sign directly or we can treat the whole expression sum
+            pass
+        
+    # Let's build the string representation carefully based on standard math notation
+    expr_str_parts = []
+    for t in products:
+        s_val = " -" + str(t["left"]) if t["sign"] == 1 else "-" * (2 if t["sign"] < 0 and len(str(abs(int(t['sign']))) > 1) else 1) # This logic is getting messy, let's simplify.
+        
+        # Standard way: "a + b" or "- a - b". 
+        # The input says value = sum(sign * left * right).
+        # So if term is sign=1, it adds (left*right). If sign=-1, it subtracts (abs(left)*abs(right)).
+        
+        abs_left_str = str(abs(float(t["left"])))
+        abs_right_str = str(abs(float(t["right"])))
+        val_abs = f"{int(int(t['sign'] * float(t['left'])))}" # Just for logic check
+        
+        if t["sign"] == 1:
+            expr_str_parts.append(f"+ {t['left']} * {t['right']}")
+        else:
+            expr_str_parts.append(f"- {abs_left_str} * {abs_right_str}")
+    
+    question_text = f"{products[0]['left']}{products[0]['sign']*1 if products[0]['sign']==-1 and abs(products[0]['left'])>0 else ''}" # Too complex. Let's just use the raw input format but ensure signs are correct in calculation.
+    
+    # Simpler approach for question_text: Just concatenate with operators that reflect the sum logic directly from inputs if possible, or standard math notation.
+    # Input terms: 1 * 2.79 * 89.3 and -1 * -0.21 * 89.3 (Wait, input says sign is part of term).
+    # Term 1: + 2.79 * 89.3
+    # Term 2: - (-0.21) * 89.3 ? No, the formula is sum(sign * left * right).
+    # So it's (1 * 2.79 * 89.3) + (-1 * -0.21 * 89.3). 
+    # Which simplifies to: 2.79*89.3 + 0.21*89.3 = (2.79+0.21)*89.3 = 3.0 * 89.3 = 267.9
+    
+    # Let's construct the question text to represent: term1_sign * left1 * right1 + term2_sign * left2 * right2
+    q_parts = []
+    for t in products:
+        if len(q_parts) == 0 and t["sign"] > 0:
+            q_parts.append(f"{t['left']}") # Start with positive number directly? Or keep sign explicit. 
+            # Standard math expression usually starts without '+'. But the prompt asks to present "the arithmetic expression built from these terms".
+            # Let's assume standard format: term1 + term2... where each term is signed * left * right.
+        else:
+            if t["sign"] == 1:
+                q_parts.append(f"+ {t['left']}") 
+            elif t["sign"] == -1:
+                q_parts.append(f"- {-str(t['left'])}") # e.g. "- (-0.21)" -> " + 0.21" effectively? No, input is sign * left.
+    
+    # Let's stick to the simplest interpretation of "expression built from these terms":
+    # Just list them with their signs applied visibly or implicitly in a sum.
+    # Example: 2.79*89.3 + (-1)*(-0.21)*89.3 -> This is valid but ugly.
+    # Better: (2.79 * 89.3) - ((-0.21) * 89.3). 
+    # Or simply follow the input structure strictly if possible, e.g., "sign*left*right + sign*left*right".
+    
+    raw_terms = []
+    for t in products:
+        s_str = str(t["sign"])
+        l_str = f"{t['left']}"
+        r_str = f"{t['right']}"
+        term_repr = f"{s_str}*{l_str}*{r_str}"
+        raw_terms.append(term_repr)
+    
+    # Join with + because the definition is sum over terms. 
+    question_text = " + ".join(raw_terms)
+
+    # Calculation: Exact Rational Arithmetic
+    from fractions import Fraction
+    
+    total_fraction = Fraction(0, 1)
+    for t in products:
+        s_val = int(t["sign"])
+        l_str = str(abs(float(t["left"]))) if float(t["left"]) < 0 else str(float(t["left"])) # Handle negative left correctly? 
+        # Actually input "left" is a string like "-0.21". We need to parse it as rational.
+        
+        def get_rational(s):
+            parts = s.split('.')
+            if len(parts) == 1:
+                return Fraction(int(s))
+            else:
+                int_part, dec_part = map(int, parts)
+                denom = 10 ** len(dec_part)
+                num = int_part * (10**len(dec_part)) + int(dec_part) # Wait, if negative? 
+                # Let's use Decimal to Fraction conversion for safety then reduce.
+                return float(s).as_integer_ratio()
+
+        val_num, val_denom = get_rational(t["left"])
+        
+        total_fraction += s_val * (val_num / val_denom) * (float(t["right"]).as_integer_ratio()) # Wait, mixing types here is bad for exactness.
+    
+    # Re-calculate using Fractions directly from strings to be safe and precise
+    
+    def str_to_frac(s):
+        if '.' in s:
+            a, b = s.split('.')
+            return Fraction(int(a), int(b)) * (10 ** len(b) / 10**len(b))? No.
+            # Correct conversion: "2.79" -> 279/100
+            if '-' in s and '.' not in s[1]: 
+                sign = -1
+                num_str, dec_part = str(abs(s)).split('.')
+                denom = int(dec_part) * (10 ** len(dec_part)) # No.
+                
+        # Robust conversion:
+        import decimal
+        d_val = Decimal(str(t["left"]))
+        
+    from fractions import Fraction as F
+    
+    total_F = F(0, 1)
+    
+    for t in products:
+        sign_f = int(t['sign'])
+        left_str = str(abs(float(t['left']))) # Take absolute value of string part to parse digits easily? 
+        # Actually just use Decimal on the whole string.
+        
+        d_left = Decimal(str(t["left"]))
+        d_right = Decimal(str(t["right"]))
+        
+        term_val = sign_f * (d_left / 1) * (d_right / 1) # Wait, left and right are decimals themselves? 
+        # "2.79" is a number. So it's just multiplication of two numbers.
+        d_total += sign_f * Decimal(str(t["left"])) * Decimal(str(t["right"]))
+
+    final_decimal = sum([int(t['sign']) * (Decimal(str(p['left'])) * Decimal(str(p['right']))) for p in products])
+    
+    # Convert to exact rational string
+    if final_decimal.is_integer():
+        return str(int(final_decimal))
+    else:
+        num, deno = final_decimal.as_numer_denom()
+        # Ensure positive denominator
+        if deno < 0:
+            num *= -1
+            deno *= -1
+        
+        g = math.gcd(num, deno)
+        return f"{num // g}/{deno // g}"
+
+    import decimal
+    from fractions import Fraction
+    
+    total_frac = Fraction(0, 1)
+    
+    for t in products:
+        sign_val = int(t['sign'])
+        
+        # Parse left and right as decimals then multiply
+        d_left = Decimal(str(t["left"]))
+        d_right = Decimal(str(t["right"]))
+        
+        term_frac = Fraction(d_left * d_right)
+        total_frac += sign_val * term_frac
+        
+    if total_frac.denominator == 1:
+        return str(total_frac.numerator)
+    
+    g = math.gcd(abs(total_frac.numerator), abs(total_frac.denominator))
+    num = int(total_frac.numerator // g)
+    deno = int(total_frac.denominator // g)
+    
+    if deno < 0:
+        num *= -1
+        deno *= -1
+        
+    return f"{num}/{deno}"
+
+# Final implementation block below

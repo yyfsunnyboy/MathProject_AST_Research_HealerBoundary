@@ -1,0 +1,131 @@
+def generate(level=1, **kwargs):
+    quadratic_coefficients = kwargs.get("quadratic_coefficients", {"a": 2, "b": -6, "c": 4})
+    
+    a = quadratic_coefficients["a"]
+    b = quadratic_coefficients["b"]
+    c = quadratic_coefficients["c"]
+
+    # Factor out common factor if possible (GCD of coefficients)
+    import math
+    
+    def gcd_list(lst):
+        result = lst[0]
+        for i in range(1, len(lst)):
+            result = math.gcd(result, abs(lst[i]))
+        return result
+    
+    g = gcd_list([a, b, c])
+    
+    if g > 1:
+        factor_out = f"greatest common divisor {g}"
+        simplified_a = a // g
+        simplified_b = b // g
+        simplified_c = c // g
+        
+        # Check for perfect square discriminant in the factored form to find rational roots easily
+        delta_prime = (simplified_b ** 2) - (4 * simplified_a * simplified_c)
+        
+        if delta_prime >= 0:
+            sqrt_delta_prime = int(delta_prime**0.5)
+            
+            # Roots of ax^2 + bx + c are (-b ± sqrt(b^2-4ac)) / (2a)
+            numerator1 = -simplified_b + sqrt_delta_prime
+            denominator1 = 2 * simplified_a
+            
+            if numerator1 % denominator1 == 0:
+                root1_int = numerator1 // denominator1
+                roots_list = [root1_int]
+                
+                # Calculate second root using Vieta's formulas or direct calculation
+                sum_roots = -simplified_b / simplified_a
+                product_roots = c / a
+                
+                if len(roots_list) == 2:
+                    pass 
+                else:
+                     numerator2 = -simplified_b - sqrt_delta_prime
+                     denominator2 = 2 * simplified_a
+                    
+                     # Simplify fraction for second root
+                     common_divisor = math.gcd(abs(numerator2), abs(denominator2))
+                     
+                     if common_divisor > 1:
+                         num_simpl = numerator2 // common_divisor
+                         den_simpl = denominator2 // common_divider
+                         
+                         # Check sign of denominator to ensure positive in string representation
+                         if den_simpl < 0:
+                             num_simpl *= -1
+                             den_simpl *= -1
+                     
+                     root_str = f"{num_simpl}/{den_simpl}" if abs(denominator2) > 1 else str(numerator2 // denominator2)
+
+    # Direct calculation for roots without factoring out GCD first to ensure correctness with given frozen params
+    delta = (b ** 2) - (4 * a * c)
+    
+    sqrt_delta = int(delta**0.5) if delta >= 0 else None
+    
+    numerator1 = -b + sqrt_delta
+    denominator1 = 2 * a
+    
+    # Simplify first root fraction
+    common_divisor_1 = math.gcd(abs(numerator1), abs(denominator1))
+    
+    num_simpl_1 = numerator1 // common_divisor_1
+    den_simpl_1 = denominator1 // common_divisor_1
+    
+    if den_simpl_1 < 0:
+        num_simpl_1 *= -1
+        den_simpl_1 *= -1
+        
+    root_str_1 = f"{num_simpl_1}/{den_simpl_1}" if abs(denominator1) > 1 else str(num_simpl_1 // den_simpl_1)
+
+    numerator2 = -b - sqrt_delta
+    denominator2 = 2 * a
+    
+    # Simplify second root fraction
+    common_divisor_2 = math.gcd(abs(numerator2), abs(denominator2))
+    
+    num_simpl_2 = numerator2 // common_divisor_2
+    den_simpl_2 = denominator2 // common_divisor_2
+    
+    if den_simpl_2 < 0:
+        num_simpl_2 *= -1
+        den_simpl_2 *= -1
+        
+    root_str_2 = f"{num_simpl_2}/{den_simpl_2}" if abs(denominator2) > 1 else str(num_simpl_2 // den_simpl_2)
+
+    # Convert to numeric values for comparison and sorting
+    val_root_1 = float(root_str_1.replace('/', ' ').split()[0]) / (float(root_str_1.split('/')[1].replace(' ', '')) if '/' in root_str_1 else 1.0)
+    
+    def parse_val(s):
+        parts = s.split('/')
+        num = int(parts[0])
+        den = int(parts[1]) if len(parts) > 1 else 1
+        return num / den
+
+    val_root_2 = parse_val(root_str_2)
+    
+    # Sort roots in ascending order
+    sorted_roots = []
+    root_objects = [(root_str_1, parse_val(root_str_1)), (root_str_2, parse_val(root_str_2))]
+    
+    if len(set([parse_val(r[0]) for r in root_objects])) == 2:
+        # Distinct roots exist
+        sorted_roots.sort(key=lambda x: x[1], reverse=False)
+        
+        final_roots = [sorted_roots[0][0], sorted_roots[1][0]]
+    else:
+        # Should not happen per task contract for distinct roots requirement, but handle gracefully if needed
+        pass
+
+    question_text = f"Factor the quadratic expression {a}x^2 + {b}x + {c} by extracting common factors and find its two distinct rational roots."
+    
+    correct_answer = {"roots": final_roots}
+    oracle_payload = {"quadratic_coefficients": [a, b, c]}
+
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer,
+        "oracle_payload": oracle_payload
+    }

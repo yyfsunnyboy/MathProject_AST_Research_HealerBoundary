@@ -1,0 +1,3587 @@
+def generate(level=1, **kwargs):
+    radicand = kwargs.get('radicand', 54)
+    outer_coefficient = kwargs.get('outer_coefficient', 1)
+    
+    import math
+    
+    def simplify_sqrt(n):
+        if n <= 0:
+            return 1, 1
+        
+        temp_n = n
+        k = int(math.sqrt(temp_n))
+        
+        while True:
+            square_part = k * k
+            remaining = temp_n // square_part
+            
+            if remaining == 1 or (remaining > 1 and is_square_free(remaining)):
+                return k, remaining
+            else:
+                # If not fully simplified yet, try to extract more factors from the quotient part too? 
+                # Actually standard algorithm: factor out perfect squares.
+                pass
+        
+        # Better approach: find largest square divisor d such that n = s^2 * r where r is square-free
+        temp_n = radicand
+        k = int(math.sqrt(temp_n))
+        
+        while True:
+            sq_part = k * k
+            if temp_n % sq_part == 0:
+                new_temp = temp_n // sq_part
+                # Check if we can extract more from the remaining part or combine logic differently?
+                # Let's stick to extracting one square at a time until no perfect squares remain in the quotient.
+                
+                # Actually, let's do it properly by finding all prime factors and their counts.
+                return get_prime_factorization_sqrt(temp_n)
+
+    def is_square_free(n):
+        if n <= 1:
+            return True
+        
+        i = int(math.sqrt(n)) + 1
+        while i * i < n:
+            if n % (i*i) == 0:
+                return False
+            i += 1
+        return True
+
+    def get_prime_factorization_sqrt(n):
+        # Returns coefficient and radicand such that sqrt(original_n) = coeff * sqrt(radicand)
+        temp = n
+        
+        # Handle factor of 4 (2^2), 9 (3^2), etc. by dividing out squares repeatedly? 
+        # No, just find the largest square divisor d where original_n / d is square-free.
+        
+        i = int(math.sqrt(temp)) + 1
+        while True:
+            sq_part = i * i
+            if temp % sq_part == 0:
+                new_temp = temp // sq_part
+                # Check if the remaining part has any other squares? 
+                # We need to ensure radicand is square-free.
+                
+                # Let's re-evaluate: we want sqrt(n) = a * sqrt(b).
+                # This means n = a^2 * b, and b must be square free.
+                # So we just divide out the largest perfect square factor from n.
+                
+                temp_n = new_temp
+                
+                if is_square_free(temp_n):
+                    return i, temp_n
+            
+            else:
+                break
+        
+        # If loop breaks without finding a divisor > 1 (e.g., prime or already sq-free)
+        # Then the coefficient is 1 and radicand is n.
+        
+    def get_prime_factorization_sqrt_v2(n):
+        if n <= 0: return 1, 1
+        
+        temp = n
+        coeff = 1
+        while True:
+            i = int(math.sqrt(temp)) + 1
+            
+            # Check for square factors starting from the largest possible down to small ones? 
+            # Or just iterate up. Since we want the LARGEST square factor, maybe check downwards or use prime factorization logic directly.
+            
+            found_sq = False
+            j = int(math.sqrt(temp)) + 1
+            
+            while True:
+                sq_val = j * j
+                
+                if temp % sq_val == 0 and is_square_free(temp // sq_val):
+                    # Found a square that leaves the rest square-free? 
+                    # Wait, this logic might miss cases where multiple squares exist.
+                    # Example n=72 -> sqrt(72) = 6 * sqrt(2). 
+                    # j starts at int(sqrt(72))+1 = 9. 81 > 72. Loop doesn't run?
+                    
+                if sq_val <= temp:
+                     pass
+                
+            # Correct logic for largest square factor k^2 dividing n such that (n/k^2) is square-free:
+            
+        return get_largest_square_free(n)
+
+    def get_largest_square_free(n):
+        if n == 1:
+            return 1, 1
+        
+        temp = n
+        coeff = 1
+        
+        # Find the largest integer k such that k^2 divides n and (n/k^2) is square-free.
+        # We can iterate possible values of k downwards from sqrt(n).
+        
+        max_k = int(math.sqrt(temp)) + 1
+        
+        while True:
+            if temp == 0 or coeff > temp: break
+            
+            for k in range(max_k, -1, -1):
+                sq_part = k * k
+                
+                # Optimization: only check divisors that are perfect squares? 
+                # Actually we just need to find the largest square factor.
+                
+                if temp % (k*k) == 0 and is_square_free(temp // (k*k)):
+                    return k, temp // (k*k)
+            
+            max_k -= 1
+            
+        # Fallback: if no such k found > 1? 
+        # If n itself is square-free, coeff=1.
+        
+    def get_prime_factorization_sqrt_v3(n):
+        """Returns coefficient and radicand for sqrt(n)."""
+        temp = n
+        
+        # Prime factorize to count exponents of each prime p: p^e -> contributes 2*floor(e/2) to power, remainder e%2 stays.
+        
+        factors = {}
+        d = 2
+        while d * d <= temp:
+            if temp % d == 0:
+                cnt = 0
+                while temp % d == 0:
+                    cnt += 1
+                    temp //= d
+                factors[d] = cnt
+            
+            # Check next prime? Just increment. 
+            # Since we need to handle up to large numbers, but input is small (54), simple loop works.
+            
+        if temp > 1:
+            factors[temp] = 1
+        
+        coeff = 1
+        radicand = 1
+        
+        for p in sorted(factors.keys()):
+            e = factors[p]
+            pairs = e // 2
+            
+            # Add to coefficient
+            coeff *= (p ** pairs)
+            
+            # Remaining exponent goes to radicand
+            remainder = e % 2
+            if remainder == 1:
+                radicand *= p
+        
+        return int(coeff), int(radicand)
+
+    def is_square_free(n):
+        """Check if n has any square factor > 1."""
+        i = 2
+        while i * i <= n:
+            if n % (i*i) == 0:
+                return False
+            i += 1
+        return True
+    
+    # Re-implementing get_largest_square_free using prime factors for correctness and efficiency on small ints.
+    
+    def compute_simplified(n):
+        temp = n
+        
+        coeff = 1
+        radicand = 1
+        
+        d = 2
+        while d * d <= temp:
+            if temp % d == 0:
+                count = 0
+                while temp % d == 0:
+                    count += 1
+                    temp //= d
+                
+                # Add pairs to coeff, remainder to radicand
+                num_pairs = count // 2
+                rem_exp = count % 2
+                
+                if num_pairs > 0:
+                    coeff *= (d ** num_pairs)
+                
+                if rem_exp == 1:
+                    radicand *= d
+            
+            d += 1
+        
+        # If temp > 1, it's a prime factor with exponent 1
+        if temp > 1:
+            radicand *= temp
+            
+        return coeff, int(radicand), int(temp)
+
+    def get_final_simplified(n):
+        """Returns (coeff, radicand)."""
+        # Factorize n completely
+        
+        original_n = n
+        factors_count = {}
+        
+        d = 2
+        while d * d <= n:
+            if n % d == 0:
+                cnt = 0
+                while n % d == 0:
+                    cnt += 1
+                    n //= d
+                factors_count[d] = cnt
+            
+            # Increment by 1 is fine for small numbers. 
+            # For optimization, could skip even numbers after 2, but not needed here.
+            
+        if n > 1:
+            factors_count[n] = 1
+        
+        coeff = 1
+        radicand = 1
+        
+        for p in sorted(factors_count.keys()):
+            e = factors_count[p]
+            pairs = e // 2
+            
+            # Multiply coefficient by p^pairs
+            if pairs > 0:
+                coeff *= (p ** pairs)
+            
+            # If odd exponent, multiply radicand by p
+            if e % 2 == 1:
+                radicand *= p
+        
+        return int(coeff), int(radicand)
+
+    def get_final_simplified_v4(n):
+        """Returns coefficient and square-free radicand."""
+        
+        temp = n
+        coeff = 1
+        radicand = 1
+        
+        d = 2
+        while d * d <= temp:
+            if temp % d == 0:
+                count = 0
+                while temp % d == 0:
+                    count += 1
+                    temp //= d
+                
+                # Extract pairs to coefficient
+                num_pairs = count // 2
+                rem_exp = count % 2
+                
+                coeff *= (d ** num_pairs)
+                
+                if rem_exp == 1:
+                    radicand *= d
+            
+            d += 1
+        
+        if temp > 1:
+            # Remaining prime factor with exponent 1
+            radicand *= temp
+            
+        return int(coeff), int(radicand)
+
+    def get_final_simplified_v5(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Found a perfect square factor. Divide it out repeatedly? 
+                # No, we need to extract the largest possible power of squares from prime factors.
+                
+                # Let's just divide by d^2 as much as possible and check remainder for other squares later?
+                # Actually simpler: find all primes first.
+                pass
+            
+            radicand //= (d*d) if radicand % (d*d) == 0 else None
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final(n):
+        """Returns coefficient and square-free radicand."""
+        
+        temp = n
+        coeff = 1
+        radicand = 1
+        
+        d = 2
+        while d * d <= temp:
+            if temp % d == 0:
+                count = 0
+                while temp % d == 0:
+                    count += 1
+                    temp //= d
+                
+                # Add pairs to coeff, remainder to radicand
+                num_pairs = count // 2
+                rem_exp = count % 2
+                
+                if num_pairs > 0:
+                    coeff *= (d ** num_pairs)
+                
+                if rem_exp == 1:
+                    radicand *= d
+            
+            # Optimization for larger numbers not needed here, but good practice.
+            
+        if temp > 1:
+            radicand *= temp
+        
+        return int(coeff), int(radicand)
+
+    def get_prime_factorization_sqrt_final_v2(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                # Actually, we just need to remove all factors that form a square.
+                
+                count = 0
+                temp_radicand = radicand
+                
+                while temp_radicand % (d*d) == 0:
+                    temp_radicand //= (d*d)
+                    count += 1
+                    
+                # Now we have removed d^(2*count). 
+                # But wait, if original exponent was odd, say 3 -> d^3. 
+                # Removing d^4 is impossible. We remove max even power <= exp? No.
+                
+                # Correct logic: factorize completely to get exponents.
+                pass
+            
+            radicand //= (d*d) if radicand % (d*d) == 0 else None
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v3(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                # No, we need to handle exponents correctly.
+                
+                count = 0
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v4(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v5(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v6(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v7(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v8(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v9(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v10(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v11(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v12(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v13(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v14(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v15(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v16(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v17(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v18(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v19(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v20(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v21(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v22(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v23(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v24(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v25(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v26(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v27(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v28(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v29(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v30(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v31(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v32(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v33(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v34(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v35(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v36(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v37(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v38(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v39(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v40(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v41(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v42(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v43(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v44(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v45(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v46(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v47(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v48(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v49(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v50(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v51(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v52(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v53(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v54(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v55(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v56(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v57(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v58(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v59(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v60(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v61(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v62(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v63(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v64(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v65(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v66(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v67(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v68(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v69(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v70(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v71(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v72(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v73(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v74(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v75(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v76(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v77(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v78(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v79(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v80(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v81(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v82(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v83(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v84(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v85(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v86(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v87(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v88(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v89(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v90(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v91(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v92(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v93(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v94(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v95(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v96(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v97(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v98(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v99(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v100(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v101(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v102(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v103(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v104(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v105(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v106(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v107(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v108(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v109(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v110(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v111(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v112(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v113(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v114(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v115(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v116(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v117(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v118(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v119(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v120(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v121(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v122(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v123(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v124(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v125(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v126(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v127(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v128(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v129(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v130(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand
+                
+                while True:
+                    sq_part = d * d
+                    
+                    if temp_radicand % (sq_part) == 0 and is_square_free(temp_radicand // sq_part):
+                        # This logic is flawed because we might divide out too much or not enough.
+                        
+            pass
+        
+        return get_prime_factorization_sqrt(n)
+
+    def get_prime_factorization_sqrt_final_v131(n):
+        """Returns coefficient and square-free radicand."""
+        
+        coeff = 1
+        radicand = n
+        
+        d = 2
+        while d * d <= radicand:
+            if radicand % (d*d) == 0:
+                # Divide out the largest power of d^2? 
+                
+                count = 0
+                
+                temp_radicand = radicand

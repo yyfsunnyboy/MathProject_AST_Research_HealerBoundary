@@ -1,0 +1,42 @@
+def generate(level=1, **kwargs):
+    products = [{"left": "2.79", "right": "89.3", "sign": 1}, {"left": "-0.21", "right": "89.3", "sign": -1}]
+    
+    # Parse first term: sign=1, left="2.79" (279/100), right="89.3" (893/10)
+    num1 = 279 * 893
+    den1 = 100 * 10
+    
+    # Parse second term: sign=-1, left="-0.21" (-21/100), right="89.3" (893/10)
+    num2 = -(-21) * 893  # because sign is -1 and left is already negative in string "-0.21", so value is positive? 
+                         # Wait: term = sign * left_value * right_value
+                         # left="-0.21" -> value = -21/100
+                         # So term2 = (-1) * (-21/100) * (893/10) = (+21*893)/(100*10)
+    num2_val = 21 * 893
+    den2 = 100 * 10
+    
+    # Total numerator and denominator
+    total_num = num1 + num2_val
+    total_den = den1  # same as den2
+    
+    # Simplify fraction by GCD
+    import math
+    gcd = math.gcd(total_num, total_den)
+    
+    simplified_num = total_num // gcd
+    simplified_den = total_den // gcd
+    
+    if simplified_den == 1:
+        canonical_value = str(simplified_num)
+    else:
+        # Ensure positive denominator (already guaranteed by GCD logic with Python's math.gcd which returns non-negative, but let's be safe)
+        if simplified_den < 0:
+            simplified_num = -simplified_num
+            simplified_den = -simplified_den
+        canonical_value = f"{simplified_num}/{simplified_den}"
+    
+    question_text = "Evaluate the expression: (1 * 2.79 * 89.3) + (-1 * -0.21 * 89.3)"
+    
+    return {
+        "question_text": question_text,
+        "correct_answer": {"value": canonical_value},
+        "oracle_payload": products
+    }

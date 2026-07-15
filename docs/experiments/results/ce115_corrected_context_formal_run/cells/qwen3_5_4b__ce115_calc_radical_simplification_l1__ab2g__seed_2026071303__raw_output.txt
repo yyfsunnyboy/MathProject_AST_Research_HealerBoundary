@@ -1,0 +1,59 @@
+def generate(level=1, **kwargs):
+    radicand = kwargs.get('radicand', None) or level * 7 if 'level' in locals() else 0
+    
+    # Ensure we use the exact frozen parameters as per instruction for this specific task context
+    # The prompt specifies "Frozen parameters: {"radicand": 112}" and "oracle_payload must exactly equal" it.
+    radicand = 112
+
+    import math
+
+    def is_square_free(n):
+        """Check if n has any square factor > 1."""
+        i = 2
+        while i * i <= n:
+            if n % (i * i) == 0:
+                return False
+            i += 1
+        return True
+
+    def simplify_sqrt(radicand):
+        """Simplify sqrt(radicand) to coefficient * sqrt(square_free)."""
+        # Find the largest square factor by trial division up to sqrt(n)
+        temp = radicand
+        coeff = 1
+        
+        i = 2
+        while i * i <= temp:
+            count = 0
+            while temp % (i * i) == 0:
+                temp //= (i * i)
+                count += 1
+            
+            # If we found a square factor, multiply coefficient by sqrt(i^count) -> i^(floor(count/2))
+            if count >= 2:
+                coeff *= int(math.pow(i, count // 2))
+        
+        return coeff, temp
+
+    outer_coefficient = kwargs.get('outer_coefficient', None) or 1
+    
+    # Calculate simplified parts for the radicand itself
+    inner_simplified_coeff, square_free_radicand = simplify_sqrt(radicand)
+    
+    # Total coefficient is product of original multiplier and extracted squares from radicand
+    total_coefficient = outer_coefficient * inner_simplified_coeff
+
+    question_text = f"Simplify {total_coefficient} sqrt({radicand}) to simplest radical form."
+    
+    correct_answer = {
+        "coefficient": int(total_coefficient),
+        "radicand": square_free_radicand
+    }
+    
+    oracle_payload = {"radicand": radicand, "outer_coefficient": outer_coefficient}
+
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer,
+        "oracle_payload": oracle_payload
+    }

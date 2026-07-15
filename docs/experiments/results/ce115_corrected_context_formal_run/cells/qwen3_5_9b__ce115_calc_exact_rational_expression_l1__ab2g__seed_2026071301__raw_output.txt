@@ -1,0 +1,133 @@
+def generate(level=1, **kwargs):
+    products = [{"left": "2.79", "right": "89.3", "sign": 1}, {"left": "-0.21", "right": "89.3", "sign": -1}]
+    
+    def parse_decimal(s):
+        if '.' in s:
+            parts = s.split('.')
+            numerator = int(parts[0]) * (10 ** len(parts[1])) + int(parts[1])
+            denominator = 10 ** len(parts[1])
+        else:
+            return int(s), 1
+        # Simplify by GCD
+        from math import gcd
+        g = gcd(numerator, denominator)
+        return numerator // g, denominator // g
+
+    def multiply(a_num, a_den, b_num, b_den):
+        num = a_num * b_num
+        den = a_den * b_den
+        from math import gcd
+        g = gcd(num, den) if (num > 0 or den > 0) else -gcd(abs(num), abs(den))
+        # Handle sign properly for GCD which is always positive in Python's math.gcd
+        common = gcd(abs(num), abs(den))
+        return num // common, den // common
+
+    def add(a_num, a_den, b_num, b_den):
+        new_num = a_num * b_den + b_num * a_den
+        new_den = a_den * b_den
+        from math import gcd
+        if new_den == 0: return 0, 1
+        common = gcd(abs(new_num), abs(new_den))
+        sign_correction = -1 if (new_num < 0 and new_den > 0) or (new_num > 0 and new_den < 0) else 1
+        # Actually math.gcd returns non-negative. We need to handle the fraction reduction carefully.
+        common = gcd(abs(new_num), abs(new_den))
+        return (sign_correction * new_num // common if sign_correction != -1 or new_den > 0 else -(new_num//common)), (abs(new_den) // common)
+
+    # Re-implement add correctly without external math.gcd issues for signs
+    def safe_add(n1, d1, n2, d2):
+        num = n1 * d2 + n2 * d1
+        den = d1 * d2
+        if den == 0: return 0, 1
+        from math import gcd
+        g = gcd(abs(num), abs(den))
+        # Ensure denominator is positive for canonical form
+        sign_num = num // g
+        sign_den = den // g
+        if sign_den < 0:
+            sign_num *= -1
+            sign_den *= -1
+        return sign_num, sign_den
+
+    def safe_multiply(n1, d1, n2, d2):
+        from math import gcd
+        num = n1 * n2
+        den = d1 * d2
+        if den == 0: return 0, 1
+        g = gcd(abs(num), abs(den))
+        sign_num = (num // g)
+        sign_den = (den // g)
+        # Canonical form requires positive denominator
+        if sign_den < 0:
+            sign_num *= -1
+            sign_den *= -1
+        return sign_num, sign_den
+
+    total_numerator = 0
+    total_denominator = 1
+    
+    for term in products:
+        left_str = term["left"]
+        right_str = term["right"]
+        sign = term["sign"]
+        
+        ln, ld = parse_decimal(left_str)
+        rn, rd = parse_decimal(right_str)
+        
+        prod_n, prod_d = safe_multiply(ln, ld, rn, rd)
+        
+        if sign == 1:
+            total_num, total_den = safe_add(total_numerator, total_denominator, prod_n, prod_d)
+        else:
+            # Subtracting the product (sign is -1 means we subtract this term from sum? 
+            # Wait, contract says "sum over terms of sign * left * right". So if sign=-1, it's negative.
+            # My add function handles adding a positive or negative numerator correctly.
+            total_num, total_den = safe_add(total_numerator, total_denominator, -prod_n, prod_d)
+
+    final_n, final_d = total_num, total_den
+    
+    from math import gcd
+    g = gcd(abs(final_n), abs(final_d))
+    
+    if final_d == 0: # Should not happen with valid inputs but safe guard
+        val_str = "0"
+    else:
+        simplified_n = (final_n // g) * (-1 if final_d < 0 else 1) # Wait, gcd is positive. 
+        # Let's redo the simplification logic cleanly inside this block
+        
+        common_divisor = gcd(abs(final_n), abs(final_d))
+        
+        reduced_num = final_n // common_divisor
+        reduced_den = final_d // common_divisor
+        
+        if reduced_den < 0:
+            reduced_num *= -1
+            reduced_den *= -1
+            
+        # If denominator is 1, return integer string
+        if reduced_den == 1:
+            val_str = str(reduced_num)
+        else:
+            val_str = f"{reduced_numerator}/{reduced_denominator}"
+
+    question_text = "Calculate the value of:" + "".join([f" {term['sign']} ({term['left']})({term['right']})" for term in products]) if len(products) > 0 else ""
+    
+    # Re-calculate val_str properly inside the block above was messy. Let's do it cleanly now.
+    common_divisor = gcd(abs(final_n), abs(final_d))
+    reduced_num = final_n // common_divisor
+    reduced_den = final_d // common_divisor
+    
+    if reduced_den < 0:
+        reduced_num *= -1
+        reduced_den *= -1
+        
+    if reduced_den == 1:
+        val_str = str(reduced_num)
+    else:
+        # Ensure no spaces and correct format p/q
+        val_str = f"{reduced_num}/{reduced_den}"
+
+    return {
+        "question_text": "".join([f" {term['sign']} ({term['left']})({term['right']})" for term in products]),
+        "correct_answer": {"value": val_str},
+        "oracle_payload": {"products": [{"left": "2.79", "right": "89.3", "sign": 1}, {"left": "-0.21", "right": "89.3", "sign": -1}]}
+    }

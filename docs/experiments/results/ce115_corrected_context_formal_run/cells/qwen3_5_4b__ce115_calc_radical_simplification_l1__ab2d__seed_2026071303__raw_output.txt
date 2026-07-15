@@ -1,0 +1,39 @@
+def generate(level=1, **kwargs):
+    radicand = kwargs.get('radicand', 112)
+    outer_coefficient = kwargs.get('outer_coefficient', 1)
+    
+    def simplify_radical(n):
+        if n <= 0:
+            return 1, n
+        
+        i = 2
+        while i * i <= n:
+            count = 0
+            temp = n
+            while temp % (i * i) == 0:
+                count += 1
+                temp //= (i * i)
+            
+            if count >= 2:
+                factor = i ** count // (i ** 2)
+                return simplify_radical(factor), temp
+            
+            i += 1
+        
+        return n, 1
+    
+    coeff_part, radicand_part = simplify_radical(radicand)
+    
+    total_coefficient = outer_coefficient * int(coeff_part) if isinstance(coeff_part, float) else outer_coefficient * coeff_part
+    final_radicand = radicand_part
+    
+    question_text = f"Simplify {total_coefficient} \\sqrt{{{final_radicand}}} to simplest radical form."
+    
+    correct_answer = {"coefficient": total_coefficient, "radicand": int(final_radicand)}
+    oracle_payload = {"radicand": 112}
+
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer,
+        "oracle_payload": oracle_payload
+    }

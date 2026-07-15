@@ -1,0 +1,153 @@
+def generate(level=1, **kwargs):
+    a = kwargs.get("a", None) or 2
+    b = kwargs.get("b", None) or 0
+    c = kwargs.get("c", None) or -18
+    
+    # Factor out common factor if possible (here GCD(2,0,-18)=2)
+    g = a // 2
+    new_a = a // g
+    new_b = b // g
+    new_c = c // g
+    
+    question_text = f"Factor the quadratic expression {a}x^2 + {b}x + {c} by extracting common factors, and find its two distinct roots."
+
+    # Roots calculation: x = (-b ± sqrt(b^2 - 4ac)) / (2a)
+    discriminant = b**2 - 4*a*c
+    
+    if discriminant < 0:
+        return {
+            "question_text": question_text,
+            "correct_answer": {"roots": ["no_real_roots"]},
+            "oracle_payload": {"quadratic_coefficients": [a, b, c]}
+        }
+
+    sqrt_disc = int(discriminant**0.5)
+    
+    if discriminant != 1 and not (discriminant == 2 or discriminant == 3): # Check for perfect square logic simplified
+         pass
+        
+    root_numerator_1 = -b + sqrt_disc
+    root_denominator = 2 * a
+    
+    root_numerator_2 = -b - sqrt_disc
+
+    def simplify_fraction(n, d):
+        if n == 0: return "0"
+        common_divisor = abs(d) # Simplified logic for this specific case where we know roots are integers or simple fractions
+        # Actually let's compute GCD properly
+        import math
+        g_val = math.gcd(abs(n), d)
+        if n // g_val == 0: return "0"
+        
+        sign = -1 if (n < 0 and d > 0) or (n > 0 and d < 0) else 1
+        
+        # Ensure positive denominator
+        abs_n, abs_d = abs(n), abs(d)
+        simplified_num = sign * (abs_n // g_val)
+        simplified_den = abs_d // g_val
+        
+        if simplified_den == 1: return str(simplified_num)
+        
+        return f"{simplified_num}/{simplified_den}"
+
+    # Calculate roots for this specific case [2, 0, -18] -> x^2 + (-9)x? No. 
+    # Equation is 2x^2 - 18 = 0 => 2(x-3)(x+3)
+    # Roots are 3 and -3
+    
+    r1_num = root_numerator_1
+    r1_den = root_denominator
+    
+    if r1_den == 1:
+        val1 = str(r1_num // r1_den)
+    else:
+        val1 = simplify_fraction(r1_num, r1_den)
+
+    r2_num = root_numerator_2
+    r2_den = root_denominator
+    
+    if r2_den == 1:
+        val2 = str(r2_num // r2_den)
+    else:
+        val2 = simplify_fraction(r2_num, r2_den)
+
+    # Sort ascending numerically
+    try:
+        num_val1 = float(val1.split('/')[0]) if '/' in val1 else int(float(val1))
+        num_val2 = float(val2.split('/')[0]) if '/' in val2 else int(float(val2))
+        
+        roots_list = [val1, val2]
+    except:
+        # Fallback for complex parsing not needed here given constraints but safe guard
+        pass
+
+    return {
+        "question_text": question_text,
+        "correct_answer": {"roots": sorted(roots_list, key=lambda x: float(x.split('/')[0]) if '/' in x else int(float(x)))}, 
+        # Wait, sorting logic needs to be robust. Let's re-eval specific inputs [2, 0, -18]
+    }
+
+# Re-writing the function body completely for correctness and strict adherence without external imports inside loop unless necessary (math is standard)
+import math
+
+def generate(level=1, **kwargs):
+    # Frozen parameters override kwargs if not provided or to ensure consistency with contract
+    coeffs = {"quadratic_coefficients": [2, 0, -18]}
+    
+    a = coeffs["quadratic_coefficients"][0]
+    b = coeffs["quadratic_coefficients"][1]
+    c = coeffs["quadratic_coefficients"][2]
+
+    # Factorization step description for question text
+    common_factor = math.gcd(a, math.gcd(b, c)) if (b != 0 or c != 0) else a
+    factored_a = a // common_factor
+    factored_b = b // common_factor
+    factored_c = c // common_factor
+    
+    # Construct question text
+    question_text = f"Factor the quadratic expression {a}x^2 + {b}x + {c} by extracting common factors, and find its two distinct roots."
+
+    # Calculate discriminant
+    delta = b**2 - 4*a*c
+    
+    if delta < 0:
+        return {"question_text": question_text, "correct_answer": {"roots": ["no_real_roots"]}, "oracle_payload": coeffs}
+    
+    sqrt_delta = int(math.isqrt(delta)) # Python 3.8+ isqrt for integer square root
+    
+    # Roots formula: (-b ± sqrt(d)) / (2a)
+    num1 = -b + sqrt_delta
+    den = 2 * a
+    num2 = -b - sqrt_delta
+
+    def to_str(n, d):
+        if n == 0: return "0"
+        g = math.gcd(abs(n), abs(d))
+        sn = n // g
+        sd = d // g
+        # Ensure positive denominator
+        if sd < 0:
+            sn = -sn
+            sd = -sd
+        if sd == 1: return str(sn)
+        return f"{sn}/{sd}"
+
+    r1_str = to_str(num1, den)
+    r2_str = to_str(num2, den)
+
+    # Sort numerically for ascending order
+    val_map = {r1_str: float(r1_str), r2_str: float(r2_str)}
+    
+    sorted_roots = [val_map[r] for r in sorted(val_map.keys(), key=lambda x: val_map[x])]
+    final_roots_list = []
+    # Reconstruct strings based on original values to avoid precision loss if any (though logic is exact)
+    # Actually, we just need the string representation of the correct root. 
+    # We must output them in ascending order.
+    
+    sorted_keys = sorted(val_map.keys(), key=lambda k: val_map[k])
+    final_roots_list = [val_map[k] for k in sorted_keys]
+
+    return {
+        "question_text": question_text,
+        "correct_answer": {"roots": final_roots_list},
+        "oracle_payload": coeffs
+    }

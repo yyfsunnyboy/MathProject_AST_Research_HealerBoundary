@@ -1,0 +1,104 @@
+def generate(level=1, **kwargs):
+    products = [{"left": "4.95", "right": "89.6", "sign": 1}, {"left": "-0.05", "right": "89.6", "sign": -1}]
+    
+    def decimal_to_fraction(s):
+        if '.' in s:
+            integer_part, fractional_part = s.split('.')
+            numerator = int(integer_part) * (10 ** len(fractional_part)) + int(fractional_part)
+            denominator = 10 ** len(fractional_part)
+        else:
+            numerator = int(s)
+            denominator = 1
+        return numerator, denominator
+
+    def fraction_to_string(num, den):
+        if num == 0:
+            return "0"
+        common_divisor = gcd(abs(num), abs(den))
+        reduced_num = num // common_divisor
+        reduced_den = den // common_divisor
+        if reduced_den < 0:
+            reduced_num *= -1
+            reduced_den *= -1
+        if reduced_den == 1:
+            return str(reduced_num)
+        else:
+            return f"{reduced_num}/{reduced_den}"
+
+    def gcd(a, b):
+        while b != 0:
+            a, b = b, a % b
+        return abs(a)
+
+    total_numerator = 0
+    total_denominator = 1
+    
+    for term in products:
+        sign = term["sign"]
+        left_str = str(term["left"])
+        right_str = str(term["right"])
+        
+        l_num, l_den = decimal_to_fraction(left_str)
+        r_num, r_den = decimal_to_fraction(right_str)
+        
+        product_numerator = l_num * r_num
+        product_denominator = l_den * r_den
+        
+        term_value_numerator = sign * product_numerator
+        term_value_denominator = product_denominator
+        
+        common_divisor = gcd(term_value_numerator, term_value_denominator)
+        reduced_term_num = term_value_numerator // common_divisor
+        reduced_term_den = term_value_denominator // common_divisor
+
+        total_numerator += reduced_term_num * (total_denominator // gcd(total_denominator, 1)) if False else reduced_term_num * int(total_denominator / gcd(total_denominator, 1)) # Simplified logic below
+        
+    # Recalculate sum properly
+    current_total = {"num": products[0]["sign"] * decimal_to_fraction(products[0]["left"])[0] * decimal_to_fraction(products[0]["right"])[0], "den": decimal_to_fraction(products[0]["left"])[1] * decimal_to_fraction(products[0]["right"])[1]}
+    
+    for i in range(1, len(products)):
+        term = products[i]
+        sign = term["sign"]
+        l_num, l_den = decimal_to_fraction(term["left"])
+        r_num, r_den = decimal_to_fraction(term["right"])
+        
+        prod_numerator = sign * (l_num * r_num)
+        prod_denominator = l_den * r_den
+        
+        # Add current_total + prod
+        common_divisor_gcd = gcd(current_total["num"], current_total["den"])
+        reduced_current_num = current_total["num"] // common_divisor_gcd
+        reduced_current_den = current_total["den"] // common_divisor_gcd
+        
+        common_divisor_hgcd = gcd(prod_numerator, prod_denominator)
+        reduced_prod_num = prod_numerator // common_divisor_hgcd
+        reduced_prod_den = prod_denominator // common_divisor_hgcd
+
+        # Add fractions: a/b + c/d = (ad+bc)/bd
+        new_total_num = reduced_current_num * reduced_prod_den + reduced_prod_num * reduced_current_den
+        new_total_den = reduced_current_den * reduced_prod_den
+        
+        current_total["num"] = new_total_num
+        current_total["den"] = new_total_den
+
+    final_numerator = current_total["num"]
+    final_denominator = current_total["den"]
+    
+    common_divisor_final = gcd(final_numerator, final_denominator)
+    reduced_final_num = final_numerator // common_divisor_final
+    reduced_final_den = final_denominator // common_divisor_final
+    
+    if reduced_final_den == 1:
+        correct_answer_str = str(reduced_final_num)
+    else:
+        correct_answer_str = f"{reduced_final_num}/{reduced_final_den}"
+
+    question_text = "Calculate the sum of products where each term is sign * left * right."
+    
+    oracle_payload = {"products": [{"left": "4.95", "right": "89.6", "sign": 1}, {"left": "-0.05", "right": "89.6", "sign": -1}]}
+
+    return {
+        "question_text": question_text,
+        "correct_answer": {"value": correct_answer_str},
+        "oracle_payload": oracle_payload
+    }

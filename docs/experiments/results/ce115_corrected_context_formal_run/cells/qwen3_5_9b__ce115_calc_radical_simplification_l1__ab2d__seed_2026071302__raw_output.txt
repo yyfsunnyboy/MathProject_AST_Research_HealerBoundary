@@ -1,0 +1,44 @@
+def generate(level=1, **kwargs):
+    import math
+    
+    radicand = kwargs.get("radicand", 54)
+    
+    if radicand <= 0:
+        raise ValueError("Radicand must be a positive integer.")
+        
+    temp_radicand = radicand
+    coefficient = 1
+    
+    for i in range(2, int(math.sqrt(radicand)) + 1):
+        while temp_radicand % (i * i) == 0:
+            factor_count = 0
+            current_i = i
+            while temp_radicand % current_i == 0:
+                temp_radicand //= current_i
+                factor_count += 1
+            
+            if factor_count >= 2:
+                pairs = factor_count // 2
+                coefficient *= (current_i ** pairs)
+    
+    square_free_part = radicand
+    
+    for i in range(2, int(math.sqrt(square_free_part)) + 1):
+        while square_free_part % (i * i) == 0:
+            square_free_part //= (i * i)
+            
+    if coefficient > 1 and square_free_part < radicand:
+        simplified_radicand = square_free_part
+    else:
+        simplified_radicand = radicand
+        
+    question_text = f"Rewrite {kwargs.get('outer_coefficient', 1)} times the square root of {radicand} in simplest radical form." if kwargs.get("outer_coefficient", None) is not None else f"Rewrite sqrt({radicand}) in simplest radical form."
+    
+    return {
+        "question_text": question_text,
+        "correct_answer": {
+            "coefficient": coefficient,
+            "radicand": simplified_radicand
+        },
+        "oracle_payload": {"radicand": 54}
+    }

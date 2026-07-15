@@ -1,0 +1,67 @@
+def generate(level=1, **kwargs):
+    products = [{"left": "4.95", "right": "89.6", "sign": 1}, {"left": "-0.05", "right": "89.6", "sign": -1}]
+    
+    def parse_decimal(s):
+        if '.' in s:
+            parts = s.split('.')
+            numerator = int(parts[0]) * (10 ** len(parts[1])) + int(parts[1])
+            denominator = 10 ** len(parts[1])
+        else:
+            return int(s), 1
+        # Simplify by GCD
+        from math import gcd
+        g = gcd(numerator, denominator)
+        return numerator // g, denominator // g
+
+    def add_fractions(a_num, a_den, b_num, b_den):
+        new_num = a_num * b_den + b_num * a_den
+        new_den = a_den * b_den
+        from math import gcd
+        g = gcd(new_num, new_den)
+        return new_num // g, new_den // g
+
+    total_num = 0
+    total_den = 1
+    
+    for term in products:
+        left_str = term["left"]
+        right_str = term["right"]
+        sign = term["sign"]
+        
+        l_n, l_d = parse_decimal(left_str)
+        r_n, r_d = parse_decimal(right_str)
+        
+        prod_num = l_n * r_n
+        prod_den = l_d * r_d
+        
+        if sign == 1:
+            total_num, _ = add_fractions(total_num, total_den, prod_num, prod_den)
+        else:
+            total_num, _ = add_fractions(total_num, total_den, -prod_num, prod_den)
+
+    from math import gcd
+    g = gcd(abs(total_num), abs(total_den))
+    
+    if total_den == 1:
+        val_str = str(total_num // g)
+    else:
+        num_reduced = (total_num // g) * (-1) # Ensure positive denominator logic handled below? No, let's redo reduction carefully.
+        
+    # Re-calculate final reduced form properly
+    if total_den == 0: 
+        val_str = "undefined"
+    elif abs(total_den) == 1:
+        val_str = str(abs(total_num)) * ("-" if total_num < 0 else "")
+    else:
+        num_reduced = total_num // g
+        den_reduced = total_den // g
+        # Ensure positive denominator
+        if den_reduced < 0:
+            num_reduced *= -1
+            den_reduced *= -1
+        
+        val_str = f"{num_reduced}/{den_reduced}"
+
+    question_text = "Calculate the value of:" + "".join([f" {term['sign']} ({term['left']})({term['right']})" for term in products])
+    
+    return {"question_text": question_text, "correct_answer": {"value": val_str}, "oracle_payload": products}

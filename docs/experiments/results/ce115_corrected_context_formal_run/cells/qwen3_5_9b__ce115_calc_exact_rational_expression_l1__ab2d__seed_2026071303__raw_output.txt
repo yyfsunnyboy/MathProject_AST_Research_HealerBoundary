@@ -1,0 +1,70 @@
+def generate(level=1, **kwargs):
+    from fractions import Fraction
+    
+    products = [{"left": "4.35", "right": "94.2", "sign": 1}, {"left": "-0.65", "right": "94.2", "sign": -1}]
+    
+    def parse_decimal(s):
+        if '.' in s:
+            parts = s.split('.')
+            numerator_str = int(parts[0]) * (10 ** len(parts[1])) + int(parts[1])
+            denominator = 10 ** len(parts[1])
+        else:
+            numerator_str = int(s)
+            denominator = 1
+        
+        if numerator_str < 0 and s.startswith('-'):
+            sign = -1
+            num_abs = abs(numerator_str)
+        elif s.startswith('-'):
+            sign = -1
+            num_abs = abs(numerator_str)
+        else:
+            sign = 1
+            num_abs = numerator_str
+            
+        return Fraction(sign * num_abs, denominator)
+
+    def evaluate_term(term):
+        left_val = parse_decimal(term["left"])
+        right_val = parse_decimal(term["right"])
+        term_sign = int(term["sign"])
+        
+        product = left_val * right_val
+        result = term_sign * product
+        
+        return result
+    
+    total_sum = Fraction(0, 1)
+    
+    for term in products:
+        total_sum += evaluate_term(term)
+    
+    if total_sum.denominator == 1:
+        answer_value_str = str(total_sum.numerator)
+    else:
+        answer_value_str = f"{total_sum.numerator}/{total_sum.denominator}"
+    
+    question_text_parts = []
+    for i, term in enumerate(products):
+        left_val = parse_decimal(term["left"])
+        right_val = parse_decimal(term["right"])
+        
+        if abs(left_val) == 1:
+            left_str = str(abs(int(left_val))) + "x" if int(left_val) != -1 else "-x"
+        elif abs(right_val) == 1:
+            right_str = str(abs(int(right_val))) + "x" if int(right_val) != -1 else "-x"
+        else:
+            left_str = term["left"]
+            right_str = term["right"]
+        
+        sign_str = "+" if term["sign"] == 1 and i > 0 else ""
+        question_text_parts.append(f"{sign_str}{term['sign']} {left_val} * {right_val}")
+    
+    expression = " + ".join(question_text_parts)
+    question_text = f"Evaluate the following arithmetic expression: {expression}"
+
+    return {
+        "question_text": question_text,
+        "correct_answer": {"value": answer_value_str},
+        "oracle_payload": products
+    }

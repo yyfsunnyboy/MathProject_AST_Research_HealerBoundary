@@ -1287,3 +1287,51 @@ Execute a 6-cell context budget preflight using `num_ctx = 65536` and `num_predi
 
 Milestone 5B.5 completed with verdict **CONTEXT_PREFLIGHT_PASSED_WITH_MODEL_DEGENERATION**.
 Rerun protocol successfully frozen.
+
+## Milestone 5B.6 — Corrected 72-Cell Formal Run
+
+### Goal
+
+Execute the corrected formal run for all 72 cells under the frozen context protocol (num_ctx = 65536, num_predict = 24576, think = false, temp = 0.0) without running census, taxonomy, Healer, or replays. Preserve the initial uncontrolled run artifacts.
+
+### Outcomes
+
+*   **Planned Cells**: 72
+*   **Executed Cells**: 72
+*   **Unique Cell IDs**: 72
+*   **Completion Classifications**:
+    - `NATURAL_COMPLETE`: 50
+    - `CONFIGURATION_LIMIT_REACHED`: 0
+    - `MODEL_DEGENERATIVE_NONTERMINATION`: 22
+    - `MODEL_EARLY_INCOMPLETE_TERMINATION`: 0
+    - `RUNTIME_FAILURE`: 0
+*   **Observations**:
+    - With the corrected context budget (65536/24576), no cell was prematurely truncated due to configuration limits (0 CONFIGURATION_LIMIT_REACHED).
+    - 22 cells hit the prediction limit (24576) due to entering loop/repetition degenerations, successfully classified as `MODEL_DEGENERATIVE_NONTERMINATION` (including cells from radical simplification and polynomial division tasks).
+    - All other 50 cells completed naturally under the expanded budget.
+
+### Files Created/Tracked
+
+*   **Corrected Runner & Tests**:
+    *   `scripts/run_ce115_corrected_context_formal_run.py`
+    *   `tests/finals_rebuild/test_ce115_corrected_run.py`
+*   **Corrected Run Artifacts**:
+    *   `docs/experiments/results/ce115_corrected_context_formal_run/`
+    *   `docs/experiments/results/ce115_corrected_context_formal_run/ce115_corrected_context_formal_run_manifest.json`
+    *   `docs/experiments/results/ce115_corrected_context_formal_run/ce115_corrected_context_formal_run_summary.json`
+    *   `docs/experiments/results/ce115_corrected_context_formal_run/ce115_corrected_context_formal_run_summary.md`
+    *   `docs/experiments/results/ce115_corrected_context_formal_run/ce115_corrected_context_formal_run_exception_report.json`
+    *   `docs/experiments/results/ce115_corrected_context_formal_run/cells/` (All 72 cell `.jsonl` and raw `.txt` files)
+
+### Call Counts & Status
+*   `model_calls` = 78 (including preflight)
+*   `healer_calls` = 0
+*   `repair_calls` = 0
+*   `replay_calls` = 0
+*   `retry_calls` = 0
+*   `api_calls` = 78
+
+### Status
+
+Milestone 5B.6 completed with verdict **CORRECTED_RUN_COMPLETED_WITH_DEGENERATION**.
+Rerun cohort finished and results are isolated and stored.
