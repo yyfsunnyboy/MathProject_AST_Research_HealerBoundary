@@ -1335,3 +1335,61 @@ Execute the corrected formal run for all 72 cells under the frozen context proto
 
 Milestone 5B.6 completed with verdict **CORRECTED_RUN_COMPLETED_WITH_DEGENERATION**.
 Rerun cohort finished and results are isolated and stored.
+
+## Milestone 5B.7 — Corrected Census and Failure Taxonomy Rebuild
+
+### Goal
+
+Analyze the 72 corrected cohort cell outputs, rebuild the output size census, classify all failed cells into the correct failure families, generate stratified summaries, and identify candidate healer pools under a three-layer governance structure without running active healers or code replays.
+
+### Rebuild Outcomes
+
+*   **Outcomes Census (72 Cells)**:
+    - `NATURAL_COMPLETE`: 50
+    - `MODEL_DEGENERATIVE_NONTERMINATION`: 22
+    - `CONFIGURATION_LIMIT_REACHED`: 0
+    - `RUNTIME_FAILURE`: 0
+    - `INSUFFICIENT_TELEMETRY`: 0
+*   **Evaluator Gates outcomes (G1–G5)**:
+    - `passed`: 9
+    - `failed`: 63 (failures to classify)
+*   **Failure Taxonomy Families (63 Failed Cells)**:
+    - `MODEL_DEGENERATIVE_NONTERMINATION`: 22
+    - `OUTPUT_WRAPPING_OR_LEAKAGE`: 6
+    - `PARSE_OR_SYNTAX_FAILURE`: 0
+    - `ENTRY_POINT_OR_CONTRACT_FAILURE`: 3
+    - `CORE_LOGIC_INCORRECT`: 19
+    - `CORE_LOGIC_MISSING`: 13
+*   **Degeneration Analysis (22 Cells)**:
+    - 7 cells had complete, syntactically valid code prefix prior to entering repetition loop (`pre_loop_program_complete = True`, `post_completion_loop = True`).
+    - 15 cells entered repetition loop before defining generate() or completing its return payload structure (`pre_loop_program_complete = False`).
+*   **Healer Candidate Pool (63 Failures)**:
+    - `SAFE_HISTORICAL_CANDIDATE`: 11 candidates (6 inline leakage cells + 5 safe-prefix extraction loop cells).
+    - `ABSTAIN`: 52 failures (core logic errors, incomplete programs, or non-degeneration failures).
+
+### Files Created/Tracked
+
+*   **Rebuild Script & Tests**:
+    *   `scripts/rebuild_ce115_corrected_census.py`
+    *   `tests/finals_rebuild/test_ce115_corrected_census_taxonomy.py`
+*   **Rebuilt Artifacts**:
+    *   `docs/experiments/results/ce115_corrected_context_formal_run/ce115_corrected_census.json`
+    *   `docs/experiments/results/ce115_corrected_context_formal_run/ce115_corrected_census.md`
+    *   `docs/experiments/results/ce115_corrected_context_formal_run/ce115_corrected_taxonomy.json`
+    *   `docs/experiments/results/ce115_corrected_context_formal_run/ce115_corrected_taxonomy.md`
+    *   `docs/experiments/results/ce115_corrected_context_formal_run/ce115_corrected_stratified_summary.json`
+    *   `docs/experiments/results/ce115_corrected_context_formal_run/ce115_corrected_healer_candidate_pool.json`
+    *   `docs/experiments/results/ce115_corrected_context_formal_run/ce115_corrected_healer_candidate_pool.md`
+
+### Call Counts & Status
+*   `model_calls` = 78 (including preflight)
+*   `healer_calls` = 0
+*   `repair_calls` = 0
+*   `replay_calls` = 0
+*   `retry_calls` = 0
+*   `api_calls` = 78
+
+### Status
+
+Milestone 5B.7 completed with verdict **CORRECTED_TAXONOMY_REBUILT_POOL_FROZEN**.
+Taxonomy and governance candidate pool successfully frozen.
