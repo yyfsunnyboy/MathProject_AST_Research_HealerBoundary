@@ -1158,3 +1158,42 @@ Conduct a forensic, read-only audit and safety adjudication of the 4 generic rul
 Milestone 5B.2 completed with verdict **NO_SAFE_GENERIC_RULE_WINDOW**.
 No code repairs or sandbox compilations were run.
 
+## Milestone 5B.3 — Leakage and Truncation Root-Cause Attribution
+
+### Goal
+
+Conduct a forensic, read-only root-cause attribution of the 8 leakage cells and 3 truncation cells from the CE115 confirmatory local model runs. Trace request configuration, response telemetry, and qualification coverage gap.
+
+### Attribution Outcomes
+
+*   **Leakage Cells Reviewed**: 8 cells
+*   **Leakage Root Causes**: 8 entries reclassified as BEHAVIOR (inline reasoning leakage induced by RL-thinking weights under `think: false` suppression).
+*   **Truncation Cells Reviewed**: 3 cells
+*   **Truncation Root Causes**: 3 entries reclassified as CONFIGURATION_OR_INFRASTRUCTURE (Ollama total context cap of 4096 tokens reached exactly where `prompt_eval_count` + `eval_count` = 4096).
+*   **Three-Layer Attribution**:
+    *   `CAPABILITY`: 5
+    *   `BEHAVIOR`: 8
+    *   `CONFIGURATION_OR_INFRASTRUCTURE`: 3
+    *   `MIXED`: 0
+    *   `UNRESOLVED`: 0
+
+### Files Created/Tracked
+
+*   **Attribution Reports**:
+    *   `docs/experiments/reports/ce115_leakage_truncation_root_cause.json`
+    *   `docs/experiments/reports/ce115_leakage_truncation_root_cause.md`
+
+### Call Counts & Status
+*   `model_calls` = 0
+*   `healer_calls` = 0
+*   `repair_calls` = 0
+*   `replay_calls` = 0
+*   `retry_calls` = 0
+*   `api_calls` = 0
+
+### Status
+
+Milestone 5B.3 completed with verdict **ROOT_CAUSES_ATTRIBUTED**.
+No code repairs or sandbox compilations were run.
+
+
