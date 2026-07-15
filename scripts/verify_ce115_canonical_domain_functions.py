@@ -10,18 +10,18 @@ from agent_tools.finals_rebuild.ce115_ab2d_assembly import TASK_API_MAPPING,stub
 def poly(xs,x): return sum(Fraction(c)*Fraction(x)**(len(xs)-1-i) for i,c in enumerate(xs))
 def main():
  rng=random.Random(7152026); counter=[]; counts={'polynomial':0,'fraction':0,'radical':0}
- for _ in range(100):
+ for _ in range(200):
   q=[rng.randint(-4,4) for _ in range(rng.randint(1,3))];d=[rng.choice([x for x in range(-4,5) if x])]+[rng.randint(-4,4) for _ in range(rng.randint(0,2))];r=[rng.randint(-3,3) for _ in range(max(1,len(d)-1))];prod=[0]*(len(q)+len(d)-1)
   for i,a in enumerate(q):
    for j,b in enumerate(d):prod[i+j]+=a*b
   prod[-len(r):]=[prod[-len(r)+i]+r[i] for i in range(len(r))];qq,rr=PolynomialOps.div_qr(prod,d)
   for x in (-2,-1,0,1,2):assert poly(prod,x)==poly(qq,x)*poly(d,x)+poly(rr,x)
   assert isinstance(qq,list) and isinstance(rr,list) and not any(isinstance(z,(float,list)) for z in qq+rr);counts['polynomial']+=1
- for _ in range(100):
+ for _ in range(200):
   a=Fraction(rng.randint(-20,20),rng.randint(1,20));b=Fraction(rng.randint(-20,20),rng.randint(1,20));aa,bb=FractionOps.create(str(a)),FractionOps.create(str(b));assert FractionOps.add(aa,bb)==a+b and FractionOps.sub(aa,bb)==a-b and FractionOps.mul(aa,bb)==a*b
   if b:assert FractionOps.div(aa,bb)==a/b
   counts['fraction']+=1
- for _ in range(100):
+ for _ in range(200):
   n=rng.randint(0,1000);c,r=RadicalOps.simplify_term(1,n);assert c*c*r==n;counts['radical']+=1
  for bad in ([],[True,1],['bad']):
   try:PolynomialOps.div_qr(bad,[1])

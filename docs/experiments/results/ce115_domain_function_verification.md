@@ -3,9 +3,9 @@
 ```json
 {
   "property_counts": {
-    "polynomial": 100,
-    "fraction": 100,
-    "radical": 100
+    "polynomial": 200,
+    "fraction": 200,
+    "radical": 200
   },
   "counterexamples": [],
   "all_passed": true,

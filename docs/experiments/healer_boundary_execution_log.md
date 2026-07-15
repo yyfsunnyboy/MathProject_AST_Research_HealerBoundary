@@ -1,3 +1,9 @@
+# Milestone 5B.7G ? Domain Verification Evidence Closeout
+
+- Expanded deterministic property evidence to 200 cases each for polynomial, fraction, and radical canonical paths; no counterexamples.
+- Consolidated fixed edges, evaluator positive/negative cases, API consistency, canonical resolution, synthetic runtime, and smoke regression.
+- Formal rerun gate is `FORMAL_RERUN_GATE_READY`; no model, Healer, repair, replay, or retry calls were made.
+
 # Milestone 5B.7F ? Canonical Domain Function Verification and API Hardening
 
 - Verified canonical PolynomialOps, FractionOps, and RadicalOps with 100 deterministic property cases each; no counterexamples.
