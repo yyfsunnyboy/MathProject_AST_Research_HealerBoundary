@@ -1,3 +1,10 @@
+# Milestone 5B.7B ? Ab2d Assembly Wiring Fix and Protocol Freeze
+
+- Added a separate `ab2d_assembly` 24-cell protocol; the legacy corrected cohort and Ab1/Ab2g are unchanged.
+- The scanner enforces canonical API calls, rejects helper redefinition/reimplementation and invalid arity, and injects the canonical runtime namespace.
+- `polynomial_factor_roots_l1` remains `ASSEMBLY_COVERAGE_UNAVAILABLE`; no substitute primitive was introduced.
+- No model, healer, repair, replay, or retry call was made.
+
 # Milestone 1A — Generator Success Chain Definition
 
 ## Goal
