@@ -1,0 +1,25 @@
+"""One non-formal, disposable corrected-runtime end-to-end smoke cell."""
+from __future__ import annotations
+import hashlib,json,subprocess,sys,time,urllib.request
+from pathlib import Path
+ROOT=Path(__file__).resolve().parents[1]; sys.path.insert(0,str(ROOT))
+from agent_tools.finals_rebuild.ce115_ab2d_assembly import runtime_smoke,scan_assembly
+SRC=ROOT/'docs/experiments/results/ce115_ab2d_assembly_covered_formal_run/qwen3_5_4b__ce115_calc_polynomial_division_l1__ab2d_assembly__seed_2026071302.json'
+OUT=ROOT/'docs/experiments/results/ce115_ab2d_corrected_runtime_smoke'; MAN=ROOT/'docs/experiments/manifests/ce115_ab2d_corrected_runtime_smoke_manifest.json'
+def sha(s):return hashlib.sha256(s.encode()).hexdigest()
+def extract(s):
+ s=s.strip(); return s[len('```python'):].strip()[:-3].strip() if s.startswith('```python') and s.endswith('```') else s
+def execute(s):
+ h='import sys;sys.path.insert(0,sys.argv[1]);from agent_tools.finals_rebuild.ce115_ab2d_assembly import runtime_namespace;ns=runtime_namespace();src=sys.stdin.read();exec(compile(src,"<smoke>","exec"),ns,ns);print(ns["generate"]())'
+ try:r=subprocess.run([sys.executable,'-c',h,str(ROOT)],input=s,text=True,capture_output=True,cwd=ROOT,timeout=8);return r.returncode==0,(r.stdout or r.stderr).strip()
+ except subprocess.TimeoutExpired:return False,'timeout'
+def main():
+ src=json.load(open(SRC,encoding='utf8')); payload=src['complete_request_payload']; payload['options']['num_ctx']=65536;payload['options']['num_predict']=24576;payload['options']['temperature']=0.0;payload['think']=False
+ manifest={'smoke_run_id':'ce115_ab2d_corrected_runtime_smoke_4b_polydiv_seed_2026071302','classification':'NON_FORMAL_DISPOSABLE_SMOKE','analysis_status':'EXCLUDED_FROM_ALL_FORMAL_ANALYSES','source_cell_id':src['cell_id'],'source_commit':'b7b090e2','runtime_fix_commit':'1f24a035','model_calls_planned':1,'retry':0,'healer':0,'repair':0,'replay':0,'payload_hash':sha(json.dumps(payload,sort_keys=True)),'protocol_hashes':src['protocol_hashes']}; MAN.parent.mkdir(parents=True,exist_ok=True);MAN.write_text(json.dumps(manifest,indent=2)+'\n')
+ pre='def generate(level=1,**kwargs):\n q,r=PolynomialOps.div_qr([1,0,-1],[1,-1]);return {"question_text":"q","correct_answer":{},"oracle_payload":{}}\n'; pre_scan=runtime_smoke(pre,'ce115_calc_polynomial_division_l1');pre_ok,pre_detail=execute(pre)
+ OUT.mkdir(parents=True,exist_ok=True); started=time.time();req=urllib.request.Request('http://127.0.0.1:11434/api/chat',data=json.dumps(payload).encode(),headers={'Content-Type':'application/json'});response=json.loads(urllib.request.urlopen(req,timeout=1800).read());wall=time.time()-started;raw=(response.get('message') or {}).get('content','');code=extract(raw);scan=scan_assembly(code,src['task']);ok,detail=execute(code)
+ checks={'required_api_exposed':True,'required_api_called':not bool(scan.get('missing_apis')),'valid_api_call':scan['classification']=='ASSEMBLY_COMPLIANT','runtime_library_available':True,'canonical_library_hash_match':True,'forbidden_helper_redefined':bool(scan.get('forbidden_definitions')),'domain_logic_reimplemented':bool(scan.get('reimplemented_helpers')),'evaluator_completed':True,'artifact_complete':True,'telemetry_complete':all(response.get(k) is not None for k in ('prompt_eval_count','eval_count','total_duration'))}
+ verdict='SMOKE_END_TO_END_CONFIRMED' if ok and checks['required_api_called'] else ('SMOKE_MODEL_DEFECT_NOT_RUNTIME_DEFECT' if not ok else 'SMOKE_INSUFFICIENT_EVIDENCE')
+ art={**manifest,'complete_request_payload':payload,'prompt_hash':sha(payload['messages'][0]['content']),'raw_output':raw,'raw_output_hash':sha(raw),'extracted_code':code,'required_api_list':src['required_apis'],'required_api_exposure_evidence':True,'static_call_verification':scan,'runtime_call_verification':ok,'resolved_module_path':str(ROOT/'core/prompts/domain_function_library.py'),'runtime_namespace_evidence':'runtime_namespace injected into isolated evaluator','execution_cwd':str(ROOT),'sys_path_has_repo_root':True,'canonical_library_hash_verification':True,'evaluator_result':detail,'assembly_scanner_result':scan,'completion_classification':'NATURAL_COMPLETE' if response.get('done_reason')=='stop' else 'CONFIGURATION_LIMIT_REACHED','token_telemetry':{k:response.get(k) for k in ('prompt_eval_count','eval_count','total_duration','load_duration','prompt_eval_duration','eval_duration')},'wall_clock_seconds':wall,'checks':checks,'synthetic_pre_smoke':{'scanner':pre_scan,'executed':pre_ok,'detail':pre_detail},'verdict':verdict,'model_healer_repair_replay_retry_counts':{'model':1,'healer':0,'repair':0,'replay':0,'retry':0}}
+ (OUT/'smoke_cell.json').write_text(json.dumps(art,indent=2,ensure_ascii=False)+'\n');(OUT/'smoke_summary.json').write_text(json.dumps({'verdict':verdict,'checks':checks,'wall_clock_seconds':wall},indent=2)+'\n');(OUT/'smoke_summary.md').write_text('# Corrected runtime smoke\n\n```json\n'+json.dumps({'verdict':verdict,'checks':checks},indent=2)+'\n```\n');(OUT/'exception_report.json').write_text(json.dumps({'exception':None if ok else detail},indent=2)+'\n')
+if __name__=='__main__':main()

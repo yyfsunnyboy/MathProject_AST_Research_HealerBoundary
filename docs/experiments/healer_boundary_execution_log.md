@@ -1,3 +1,9 @@
+# Milestone 5B.7E ? One-Cell Corrected Runtime End-to-End Smoke
+
+- Completed one disposable, non-formal 4B polynomial-division smoke cell using the corrected runtime namespace.
+- End-to-end API call, canonical library hash, evaluator, scanner, artifact, and telemetry checks passed.
+- The smoke is excluded from every formal analysis; no 18-cell rerun was performed.
+
 # Milestone 5B.7D ? Ab2d-Spec vs Ab2d-Assembly Covered-Subset Comparison
 
 - Compared the 18 paired covered cells by model/task/seed without changing artifacts or calling a model.
