@@ -1,0 +1,142 @@
+{
+  "cell_id": "qwen3_5_9b__ce115_calc_exact_rational_expression_l1__ab2d_assembly__seed_2026071302",
+  "model": "qwen3.5:9b",
+  "task": "ce115_calc_exact_rational_expression_l1",
+  "condition": "ab2d_assembly",
+  "seed": 2026071302,
+  "evaluator": "ce115_assembly_scanner",
+  "complete_request_payload": {
+    "model": "qwen3.5:9b",
+    "messages": [
+      {
+        "role": "user",
+        "content": "# CE115 Ab2d-Assembly domain contract\nfrom core.prompts.domain_function_library import FractionOps, PolynomialOps, RadicalOps\nfrom core.skill_policies.radical_logic import RadicalLogicEngine\n\nRequired APIs:\n- `FractionOps.create`\n- `FractionOps.add`\n- `FractionOps.sub`\n- `FractionOps.mul`\n- `FractionOps.div`\n- `FractionOps.to_latex`\n\nMUST_CALL: invoke every required API through its canonical name in `generate`.\nDO_NOT_REIMPLEMENT_DOMAIN_LOGIC: do not define domain helper classes/functions or reproduce their algorithms.\nReturn contract: `generate(level=1, **kwargs)` returns a dict with `question_text`, `correct_answer`, and `oracle_payload`.\nExample: `q, r = PolynomialOps.div_qr([1, 0, -1], [1, -1])`.\n\n## Task contract\n# Task Specification: Exact Rational Expression Evaluation\n- Task Name: Exact Rational Expression Evaluation\n- Input Parameters: `products` (ordered list of terms; each term has `sign` (1 or -1), `left` and `right` exact decimal strings). The expression value is the sum over terms of sign * left * right.\n- Output: `question_text` must present the arithmetic expression built from these terms.\n- Calculation: `correct_answer` must evaluate the expression with exact rational arithmetic (no floats) and return the canonical value string.\n- Data Contract: `oracle_payload` must return exactly the input parameters.\n\nWrite only complete Python source code.\nDo not use Markdown fences, prose, explanations, or prompt echoes.\nImplement exactly one function:\n\ndef generate(level=1, **kwargs):\n\n`generate()` must return exactly the three-key dictionary specified below.\n\nReturn exactly these three top-level keys and no others:\n`question_text`, `correct_answer`, and `oracle_payload`.\nDo not return `answer`, `mode`, or any additional key.\nThe task-specific `correct_answer` schema below supersedes any earlier generic `correct_answer: str` instruction.\n\nRequired return schema:\n{\n  \"question_text\": str,\n  \"correct_answer\": {\n      \"value\": str  # canonical exact value: integer string, or irreducible \"p/q\" with positive denominator\n  },\n  \"oracle_payload\": dict\n}\n- Formatting rules: reduce completely; output the integer string if the denominator is 1; never use decimal or float approximations.\n- Equality: Exact dictionary match. No tolerance.\n\nAb1 answer-contract wording:\ncorrect_answer must be a JSON-compatible dict with exactly value (canonical exact rational string: integer string or irreducible p/q with positive denominator). Exact arithmetic only; no floats or decimals; do not alter frozen parameters.\n\n## Frozen parameters\n{\"products\": [{\"left\": \"4.95\", \"right\": \"89.6\", \"sign\": 1}, {\"left\": \"-0.05\", \"right\": \"89.6\", \"sign\": -1}]}\n`oracle_payload` must exactly equal the frozen parameters above.\n"
+      }
+    ],
+    "stream": false,
+    "think": false,
+    "options": {
+      "temperature": 0.0,
+      "seed": 2026071302,
+      "num_ctx": 65536,
+      "num_predict": 24576
+    }
+  },
+  "prompt_hash": "fdb8e7de8cd261d9acdbdc651097fd1844bb956a86ee7cc7e038c7f9cafee8a1",
+  "payload_hash": "80430aa88ae1b527ba99c22960ada06ad220997d429e06a34916357753f61995",
+  "protocol_hashes": {
+    "task_api_mapping": "51d3680397de3294e851841d87e8e4d9199cb78def348681416eae0e4d514b4a",
+    "prompt_stubs": {
+      "ce115_calc_radical_simplification_l1": "a1f5e1c646f74f8f8d1a80178640682d81181f5ecc173566f774e19b97dc1781",
+      "ce115_calc_polynomial_division_l1": "389e5bc3770f1f3e13b050cf01c0017fa545557c1b93acaaca75c69e21f4022e",
+      "ce115_calc_exact_rational_expression_l1": "6c47e71efcbc41370d057ce6aa151f47d777c6afb3d3e531802923f936a5a5ce",
+      "ce115_calc_polynomial_factor_roots_l1": "be42d7d781346c8ca9ff0e2a00d406d91443791c433e227127fbc3511130c38c"
+    },
+    "canonical_library": "cbc6ae6b9d4dc3291e64b3170463f6194d275793678dfed4cf3bac5ddfbc0ffd",
+    "assembly_scanner": "775349f7b3ae5f8952f368f225d4909f4e841d3a6936bcd6968897c2c4e381b6",
+    "protocol_manifest": "e5e7feac100c7d2691a3387f366b163c84b3e7beeba00f508f05c422d29cb95a"
+  },
+  "required_apis": [
+    "FractionOps.create",
+    "FractionOps.add",
+    "FractionOps.sub",
+    "FractionOps.mul",
+    "FractionOps.div"
+  ],
+  "prompt_stub": "# CE115 Ab2d-Assembly domain contract\nfrom core.prompts.domain_function_library import FractionOps, PolynomialOps, RadicalOps\nfrom core.skill_policies.radical_logic import RadicalLogicEngine\n\nRequired APIs:\n- `FractionOps.create`\n- `FractionOps.add`\n- `FractionOps.sub`\n- `FractionOps.mul`\n- `FractionOps.div`\n- `FractionOps.to_latex`\n\nMUST_CALL: invoke every required API through its canonical name in `generate`.\nDO_NOT_REIMPLEMENT_DOMAIN_LOGIC: do not define domain helper classes/functions or reproduce their algorithms.\nReturn contract: `generate(level=1, **kwargs)` returns a dict with `question_text`, `correct_answer`, and `oracle_payload`.\nExample: `q, r = PolynomialOps.div_qr([1, 0, -1], [1, -1])`.\n",
+  "runtime_library_provenance": "core.prompts.domain_function_library",
+  "raw_output": "def generate(level=1, **kwargs):\n    from core.prompts.domain_function_library import FractionOps\n    \n    products = [{\"left\": \"4.95\", \"right\": \"89.6\", \"sign\": 1}, {\"left\": \"-0.05\", \"right\": \"89.6\", \"sign\": -1}]\n    \n    terms = []\n    for p in products:\n        left_frac = FractionOps.create(p[\"left\"])\n        right_frac = FractionOps.create(p[\"right\"])\n        term_val = FractionOps.mul(left_frac, right_frac)\n        if p[\"sign\"] == 1:\n            terms.append(term_val)\n        else:\n            neg_term = FractionOps.sub(FractionOps.zero(), term_val) # Assuming zero() exists or using create(\"0\")\n            # Since we don't have explicit zero creation in the list, let's assume standard behavior. \n            # Actually, better to just negate manually if needed, but API might not support direct negation of a fraction object easily without sub from 0.\n            # Let's rely on FractionOps.sub(FractionOps.create(\"0\"), term_val) or similar logic implied by the library.\n            # However, looking at standard patterns for such libraries: usually there is an add/sub method that handles signs if we construct terms differently? \n            # The prompt says \"sum over terms of sign * left * right\".\n            # Let's assume FractionOps.create(\"0\") exists or use a helper. Since I cannot redefine logic, I must assume standard API completeness for basic ops.\n            # If not available, I will construct the term as is and handle summation later? \n            # Wait, the instruction says \"invoke every required API\". It doesn't list FractionOps.zero().\n            # Let's try to infer: maybe we just create positive terms and subtract negative ones using sub?\n            # But 'sub' takes two fractions. So term_neg = FractionOps.sub(FractionOps.create(\"0\"), term_val). \n            # I will assume FractionOps.create can handle \"0\". If not, this is a constraint violation risk. \n            # Given the strictness, let's hope create handles basic numbers including 0.\n            \n    # Re-evaluating without assuming zero() if not listed:\n    # We need to sum them up. Let's assume we build positive and negative parts or use sub from 0.\n    # To be safe with \"invoke every required API\", I will only call create, add, sub, mul, div, to_latex.\n    # If zero is not in the list of Required APIs (it isn't), maybe I shouldn't rely on it? \n    # But how else to represent -X? FractionOps.sub(FractionOps.create(\"0\"), X) seems necessary unless there's a neg method.\n    # Let's assume create works for \"0\".\n    \n    current_sum = None\n    \n    def add_to_sum(val):\n        nonlocal current_sum\n        if current_sum is None:\n            current_sum = val\n        else:\n            current_sum = FractionOps.add(current_sum, val)\n            \n    # Process first term (positive)\n    t1_left = \"4.95\"\n    t1_right = \"89.6\"\n    sign1 = 1\n    \n    f_l1 = FractionOps.create(t1_left)\n    f_r1 = FractionOps.create(t1_right)\n    prod1 = FractionOps.mul(f_l1, f_r1)\n    \n    # Process second term (negative)\n    t2_left = \"-0.05\"\n    t2_right = \"89.6\"\n    sign2 = -1\n    \n    f_l2 = FractionOps.create(t2_left)\n    f_r2 = FractionOps.create(t2_right)\n    prod2 = FractionOps.mul(f_l2, f_r2)\n    \n    # Sum them: 4.95*89.6 + (-0.05)*89.6\n    # Note: t2_left is already negative string \"-0.05\", so mul will result in a negative fraction object? \n    # Or does the library handle sign internally? The prompt says \"sign * left * right\". \n    # If I pass \"-0.05\" to create, it becomes -1/20. Then multiply by 89.6 gives negative value.\n    # So prod2 is already negative. We just add them.\n    \n    total = FractionOps.add(prod1, prod2)\n    \n    question_text = f\"{t1_left} \\\\times {t1_right} + (-{abs(float(t2_left))}) \\\\times {t2_right}\" \n    # Better to format exactly as input strings but handle the negative sign in text nicely.\n    # Input: \"4.95\", \"-0.05\". Text: 4.95 * 89.6 + (-0.05) * 89.6 ? Or just use the string directly?\n    # Let's construct a clean LaTeX-like or readable text.\n    term1_str = f\"{t1_left} \\\\times {t1_right}\"\n    term2_str = f\"+ ({t2_left}) \\\\times {t2_right}\" if t2_left.startswith(\"-\") else f\"- (-{float(t2_left)})\" # No, keep simple.\n    # Just join with + and use the string values directly? \n    # \"4.95 * 89.6 + -0.05 * 89.6\" looks weird but accurate to input strings.\n    # Let's make it readable: \"4.95 \\\\times 89.6 + (-0.05) \\\\times 89.6\"\n    \n    latex_term1 = f\"{t1_left} \\\\cdot {t1_right}\"\n    latex_term2 = f\"+ ({t2_left}) \\\\cdot {t2_right}\" # t2_left is \"-0.05\", so it becomes + (-0.05) ... which implies subtraction effectively if parsed, but mathematically correct representation of the term value.\n    \n    question_text = latex_term1 + \" \" + latex_term2\n    \n    canonical_val_str = FractionOps.to_latex(total).replace(\"\\\\frac{\", \"\").replace(\"}{\", \"/\").replace(\"{\", \"(\") # This is risky guessing internal format.\n    # The API `to_latex` likely returns a string like \"\\\\frac{-98016}{...}\" or similar? \n    # Or maybe it returns the simplified fraction \"p/q\". Let's assume standard LaTeX output for fractions and integers.\n    # If to_latex returns \"\\frac{a}{b}\", we need to parse that into canonical form p/q or integer.\n    # However, without seeing internal implementation of `to_latex`, I must guess its return format based on \"canonical exact value\".\n    # Usually these libraries return a string representation suitable for display. \n    # If the requirement is \"integer string\" or \"irreducible p/q\", and to_latex returns LaTeX...\n    # Maybe `correct_answer` expects me to parse the latex? Or maybe `to_latex` on an integer/zero works differently?\n    # Let's assume `FractionOps.to_latex(x)` returns a string that I need to interpret. \n    # BUT, looking at similar tasks: often `to_latex` is for display in question_text, and we might have another way or the result of mul/add already has internal state? No, return type is str usually.\n    \n    # Alternative interpretation: The prompt says \"correct_answer must be a JSON-compatible dict with exactly value\". \n    # And \"Formatting rules: reduce completely; output the integer string if denominator 1...\".\n    # If `to_latex` returns LaTeX like \"\\frac{0}{5}\", I need to convert that.\n    # Since I cannot see inside, and strict adherence is required, maybe there's a trick? \n    # Or perhaps for this specific domain library, `to_latex` on the final result gives exactly what we want if formatted right?\n    # Let's assume standard behavior: it returns LaTeX. We need to extract p/q from that or handle integers.\n    # But wait, I am not allowed to define helper classes/functions. \n    # Is there a way `to_latex` is NOT used for the answer value but just display? \n    # The prompt says \"invoke every required API through its canonical name in generate\". It doesn't say ONLY those APIs can be called or that they must produce the final string directly without parsing.\n    # But I cannot write a parser regex if not allowed to define helpers? Regex is built-in, so it's fine.\n    \n    latex_res = FractionOps.to_latex(total)\n    \n    # Parse LaTeX fraction: \\frac{num}{den} or just num (if integer). \n    import re\n    \n    match = re.search(r'\\\\frac\\{(.*?)\\}\\{(.*?)\\}', latex_res)\n    if match:\n        num_str, den_str = match.groups()\n        val_str = f\"{int(num_str)}/{int(den_str)}\" # Wait, inputs are decimals. The library handles exact rational arithmetic internally? \n        # Yes \"exact rational arithmetic (no floats)\". So internal state is Fraction objects.\n        # But `to_latex` might return LaTeX with large numbers or simplified ones.\n        # We need to ensure irreducible and positive denominator.\n        # If the latex has negative numerator, it's fine as long as denom > 0.\n        \n        # Check if integer (denom is 1)\n        den_int = int(den_str)\n        num_int = int(num_str)\n        \n        if den_int == 1:\n            val_str = str(abs(num_int)) * (-1 if num_int < 0 else 1) # Wait, sign handling. \n            # If result is -5, latex might be \\frac{-5}{1}. So num=-5, den=1. Result \"-5\".\n            val_str = f\"{num_int}\"\n        else:\n             # Ensure positive denominator (usually LaTeX ensures this, but let's check)\n             if den_int < 0:\n                 num_int *= -1\n                 den_int *= -1\n             val_str = f\"{num_int}/{den_int}\"\n    elif latex_res.replace(\" \", \"\").replace(\"\\\\\", \"\") == \"\": # Empty? unlikely.\n        pass\n    else:\n         # If no fraction found, maybe it's an integer printed as is or something else. \n         # But given the math (4.95*89.6 - 0.05*89.6 = 89.6*(4.9-0.05) = 89.6 * 4.85), it will be a fraction or integer.\n         # Let's assume the regex covers all cases for fractions, and if not found (integer case in some libs?), handle gracefully? \n         # Actually, standard LaTeX integers are just \"5\". So match fails.\n         val_str = latex_res.strip()\n\n    oracle_payload = {\"products\": products}\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": {\"value\": val_str},\n        \"oracle_payload\": oracle_payload\n    }",
+  "raw_output_hash": "25c14b85cfc193020f4d62ccb3d3e17e3bb2207fd0a08e68676dc10444010864",
+  "token_telemetry": {
+    "prompt_eval_count": 671,
+    "eval_count": 2442,
+    "total_duration": 108713903100,
+    "load_duration": 247699200,
+    "prompt_eval_duration": 27438000,
+    "eval_duration": 36107750000
+  },
+  "done": true,
+  "done_reason": "stop",
+  "wall_clock_seconds": 108.71521282196045,
+  "evaluator_outcome": "runtime_failure",
+  "candidate_extracted": "def generate(level=1, **kwargs):\n    from core.prompts.domain_function_library import FractionOps\n    \n    products = [{\"left\": \"4.95\", \"right\": \"89.6\", \"sign\": 1}, {\"left\": \"-0.05\", \"right\": \"89.6\", \"sign\": -1}]\n    \n    terms = []\n    for p in products:\n        left_frac = FractionOps.create(p[\"left\"])\n        right_frac = FractionOps.create(p[\"right\"])\n        term_val = FractionOps.mul(left_frac, right_frac)\n        if p[\"sign\"] == 1:\n            terms.append(term_val)\n        else:\n            neg_term = FractionOps.sub(FractionOps.zero(), term_val) # Assuming zero() exists or using create(\"0\")\n            # Since we don't have explicit zero creation in the list, let's assume standard behavior. \n            # Actually, better to just negate manually if needed, but API might not support direct negation of a fraction object easily without sub from 0.\n            # Let's rely on FractionOps.sub(FractionOps.create(\"0\"), term_val) or similar logic implied by the library.\n            # However, looking at standard patterns for such libraries: usually there is an add/sub method that handles signs if we construct terms differently? \n            # The prompt says \"sum over terms of sign * left * right\".\n            # Let's assume FractionOps.create(\"0\") exists or use a helper. Since I cannot redefine logic, I must assume standard API completeness for basic ops.\n            # If not available, I will construct the term as is and handle summation later? \n            # Wait, the instruction says \"invoke every required API\". It doesn't list FractionOps.zero().\n            # Let's try to infer: maybe we just create positive terms and subtract negative ones using sub?\n            # But 'sub' takes two fractions. So term_neg = FractionOps.sub(FractionOps.create(\"0\"), term_val). \n            # I will assume FractionOps.create can handle \"0\". If not, this is a constraint violation risk. \n            # Given the strictness, let's hope create handles basic numbers including 0.\n            \n    # Re-evaluating without assuming zero() if not listed:\n    # We need to sum them up. Let's assume we build positive and negative parts or use sub from 0.\n    # To be safe with \"invoke every required API\", I will only call create, add, sub, mul, div, to_latex.\n    # If zero is not in the list of Required APIs (it isn't), maybe I shouldn't rely on it? \n    # But how else to represent -X? FractionOps.sub(FractionOps.create(\"0\"), X) seems necessary unless there's a neg method.\n    # Let's assume create works for \"0\".\n    \n    current_sum = None\n    \n    def add_to_sum(val):\n        nonlocal current_sum\n        if current_sum is None:\n            current_sum = val\n        else:\n            current_sum = FractionOps.add(current_sum, val)\n            \n    # Process first term (positive)\n    t1_left = \"4.95\"\n    t1_right = \"89.6\"\n    sign1 = 1\n    \n    f_l1 = FractionOps.create(t1_left)\n    f_r1 = FractionOps.create(t1_right)\n    prod1 = FractionOps.mul(f_l1, f_r1)\n    \n    # Process second term (negative)\n    t2_left = \"-0.05\"\n    t2_right = \"89.6\"\n    sign2 = -1\n    \n    f_l2 = FractionOps.create(t2_left)\n    f_r2 = FractionOps.create(t2_right)\n    prod2 = FractionOps.mul(f_l2, f_r2)\n    \n    # Sum them: 4.95*89.6 + (-0.05)*89.6\n    # Note: t2_left is already negative string \"-0.05\", so mul will result in a negative fraction object? \n    # Or does the library handle sign internally? The prompt says \"sign * left * right\". \n    # If I pass \"-0.05\" to create, it becomes -1/20. Then multiply by 89.6 gives negative value.\n    # So prod2 is already negative. We just add them.\n    \n    total = FractionOps.add(prod1, prod2)\n    \n    question_text = f\"{t1_left} \\\\times {t1_right} + (-{abs(float(t2_left))}) \\\\times {t2_right}\" \n    # Better to format exactly as input strings but handle the negative sign in text nicely.\n    # Input: \"4.95\", \"-0.05\". Text: 4.95 * 89.6 + (-0.05) * 89.6 ? Or just use the string directly?\n    # Let's construct a clean LaTeX-like or readable text.\n    term1_str = f\"{t1_left} \\\\times {t1_right}\"\n    term2_str = f\"+ ({t2_left}) \\\\times {t2_right}\" if t2_left.startswith(\"-\") else f\"- (-{float(t2_left)})\" # No, keep simple.\n    # Just join with + and use the string values directly? \n    # \"4.95 * 89.6 + -0.05 * 89.6\" looks weird but accurate to input strings.\n    # Let's make it readable: \"4.95 \\\\times 89.6 + (-0.05) \\\\times 89.6\"\n    \n    latex_term1 = f\"{t1_left} \\\\cdot {t1_right}\"\n    latex_term2 = f\"+ ({t2_left}) \\\\cdot {t2_right}\" # t2_left is \"-0.05\", so it becomes + (-0.05) ... which implies subtraction effectively if parsed, but mathematically correct representation of the term value.\n    \n    question_text = latex_term1 + \" \" + latex_term2\n    \n    canonical_val_str = FractionOps.to_latex(total).replace(\"\\\\frac{\", \"\").replace(\"}{\", \"/\").replace(\"{\", \"(\") # This is risky guessing internal format.\n    # The API `to_latex` likely returns a string like \"\\\\frac{-98016}{...}\" or similar? \n    # Or maybe it returns the simplified fraction \"p/q\". Let's assume standard LaTeX output for fractions and integers.\n    # If to_latex returns \"\\frac{a}{b}\", we need to parse that into canonical form p/q or integer.\n    # However, without seeing internal implementation of `to_latex`, I must guess its return format based on \"canonical exact value\".\n    # Usually these libraries return a string representation suitable for display. \n    # If the requirement is \"integer string\" or \"irreducible p/q\", and to_latex returns LaTeX...\n    # Maybe `correct_answer` expects me to parse the latex? Or maybe `to_latex` on an integer/zero works differently?\n    # Let's assume `FractionOps.to_latex(x)` returns a string that I need to interpret. \n    # BUT, looking at similar tasks: often `to_latex` is for display in question_text, and we might have another way or the result of mul/add already has internal state? No, return type is str usually.\n    \n    # Alternative interpretation: The prompt says \"correct_answer must be a JSON-compatible dict with exactly value\". \n    # And \"Formatting rules: reduce completely; output the integer string if denominator 1...\".\n    # If `to_latex` returns LaTeX like \"\\frac{0}{5}\", I need to convert that.\n    # Since I cannot see inside, and strict adherence is required, maybe there's a trick? \n    # Or perhaps for this specific domain library, `to_latex` on the final result gives exactly what we want if formatted right?\n    # Let's assume standard behavior: it returns LaTeX. We need to extract p/q from that or handle integers.\n    # But wait, I am not allowed to define helper classes/functions. \n    # Is there a way `to_latex` is NOT used for the answer value but just display? \n    # The prompt says \"invoke every required API through its canonical name in generate\". It doesn't say ONLY those APIs can be called or that they must produce the final string directly without parsing.\n    # But I cannot write a parser regex if not allowed to define helpers? Regex is built-in, so it's fine.\n    \n    latex_res = FractionOps.to_latex(total)\n    \n    # Parse LaTeX fraction: \\frac{num}{den} or just num (if integer). \n    import re\n    \n    match = re.search(r'\\\\frac\\{(.*?)\\}\\{(.*?)\\}', latex_res)\n    if match:\n        num_str, den_str = match.groups()\n        val_str = f\"{int(num_str)}/{int(den_str)}\" # Wait, inputs are decimals. The library handles exact rational arithmetic internally? \n        # Yes \"exact rational arithmetic (no floats)\". So internal state is Fraction objects.\n        # But `to_latex` might return LaTeX with large numbers or simplified ones.\n        # We need to ensure irreducible and positive denominator.\n        # If the latex has negative numerator, it's fine as long as denom > 0.\n        \n        # Check if integer (denom is 1)\n        den_int = int(den_str)\n        num_int = int(num_str)\n        \n        if den_int == 1:\n            val_str = str(abs(num_int)) * (-1 if num_int < 0 else 1) # Wait, sign handling. \n            # If result is -5, latex might be \\frac{-5}{1}. So num=-5, den=1. Result \"-5\".\n            val_str = f\"{num_int}\"\n        else:\n             # Ensure positive denominator (usually LaTeX ensures this, but let's check)\n             if den_int < 0:\n                 num_int *= -1\n                 den_int *= -1\n             val_str = f\"{num_int}/{den_int}\"\n    elif latex_res.replace(\" \", \"\").replace(\"\\\\\", \"\") == \"\": # Empty? unlikely.\n        pass\n    else:\n         # If no fraction found, maybe it's an integer printed as is or something else. \n         # But given the math (4.95*89.6 - 0.05*89.6 = 89.6*(4.9-0.05) = 89.6 * 4.85), it will be a fraction or integer.\n         # Let's assume the regex covers all cases for fractions, and if not found (integer case in some libs?), handle gracefully? \n         # Actually, standard LaTeX integers are just \"5\". So match fails.\n         val_str = latex_res.strip()\n\n    oracle_payload = {\"products\": products}\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": {\"value\": val_str},\n        \"oracle_payload\": oracle_payload\n    }",
+  "evaluator_details": {
+    "runtime_error": "AttributeError: type object 'FractionOps' has no attribute 'zero'",
+    "exception_type": "AttributeError",
+    "exception_message": "type object 'FractionOps' has no attribute 'zero'",
+    "timeout": false,
+    "ledger_stage": "observed",
+    "actual_question_text": null,
+    "evaluation_gates": {
+      "g1_evaluability": {
+        "status": "PASS",
+        "reason": "evaluability_passed",
+        "raw_output_present": true,
+        "extraction_succeeded": true,
+        "candidate_nonempty": true,
+        "parse_succeeded": true,
+        "required_entry_point_present": true
+      },
+      "g2_executability": {
+        "status": "FAIL",
+        "reason": "runtime_failure",
+        "load_succeeded": true,
+        "entry_point_called": true,
+        "timeout": false,
+        "exception_type": "AttributeError",
+        "exception_message": "type object 'FractionOps' has no attribute 'zero'",
+        "return_value_produced": false
+      },
+      "g3_contract_compliance": {
+        "status": "NOT_ASSESSED",
+        "reason": "g2_not_passed"
+      },
+      "g4_semantic_correctness": {
+        "status": "NOT_ASSESSED",
+        "reason": "g2_not_passed"
+      },
+      "g5_problem_presentation": {
+        "status": "NOT_OBSERVED",
+        "reason": "actual_question_text_unavailable",
+        "question_present": false
+      },
+      "g6_math_notation": {
+        "status": "NOT_OBSERVED",
+        "reason": "actual_question_text_unavailable",
+        "uses_latex": false
+      }
+    },
+    "composite_outcomes": {
+      "technical_pass": "FAIL",
+      "presentation_pass": "NOT_OBSERVED",
+      "full_pass": "FAIL"
+    }
+  },
+  "assembly_scanner": {
+    "classification": "REQUIRED_API_NOT_CALLED",
+    "required_apis": [
+      "FractionOps.create",
+      "FractionOps.add",
+      "FractionOps.sub",
+      "FractionOps.mul",
+      "FractionOps.div"
+    ],
+    "called_apis": [
+      "FractionOps.add",
+      "FractionOps.create",
+      "FractionOps.mul",
+      "FractionOps.sub",
+      "FractionOps.to_latex"
+    ],
+    "missing_apis": [
+      "FractionOps.div"
+    ],
+    "forbidden_definitions": [],
+    "reimplemented_helpers": [],
+    "invalid_calls": [],
+    "runtime_library_available": true,
+    "errors": []
+  },
+  "completion_classification": "NATURAL_COMPLETE",
+  "runtime_library_available": true
+}

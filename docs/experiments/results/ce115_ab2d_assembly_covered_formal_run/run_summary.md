@@ -1,0 +1,90 @@
+# Covered Ab2d-Assembly formal run
+
+```json
+{
+  "counts": {
+    "protocol": 24,
+    "executed": 18,
+    "unique_executed": 18,
+    "exclusions": 6,
+    "model_calls": 18,
+    "retry": 0,
+    "healer": 0,
+    "repair": 0,
+    "replay": 0
+  },
+  "completion_counts": {
+    "NATURAL_COMPLETE": 16,
+    "CONFIGURATION_LIMIT_REACHED": 2
+  },
+  "evaluator_counts": {
+    "runtime_failure": 12,
+    "catastrophic_truncation": 1,
+    "answer_incorrect": 1,
+    "parse_minor": 2,
+    "passed": 1,
+    "schema_failure": 1
+  },
+  "assembly_counts": {
+    "INSUFFICIENT_EVIDENCE": 10,
+    "INVALID_API_CALL": 3,
+    "ASSEMBLY_COMPLIANT": 3,
+    "REQUIRED_API_NOT_CALLED": 2
+  },
+  "required_api_exposure_rate": {
+    "numerator": 18,
+    "denominator": 18
+  },
+  "required_api_call_rate": {
+    "numerator": 13,
+    "denominator": 18
+  },
+  "runtime_library_available": {
+    "numerator": 8,
+    "denominator": 18
+  },
+  "token_output_wall_summary": {
+    "total_output_chars": 178111,
+    "total_wall_seconds": 1984.472978591919
+  },
+  "structural_exclusions": [
+    {
+      "cell_id": "qwen3_5_4b__ce115_calc_polynomial_factor_roots_l1__ab2d_assembly__seed_2026071301",
+      "task": "ce115_calc_polynomial_factor_roots_l1",
+      "classification": "STRUCTURAL_EXCLUSION_ASSEMBLY_COVERAGE_UNAVAILABLE",
+      "reason": "No canonical reusable polynomial factor/roots primitive exists in the repository."
+    },
+    {
+      "cell_id": "qwen3_5_4b__ce115_calc_polynomial_factor_roots_l1__ab2d_assembly__seed_2026071302",
+      "task": "ce115_calc_polynomial_factor_roots_l1",
+      "classification": "STRUCTURAL_EXCLUSION_ASSEMBLY_COVERAGE_UNAVAILABLE",
+      "reason": "No canonical reusable polynomial factor/roots primitive exists in the repository."
+    },
+    {
+      "cell_id": "qwen3_5_4b__ce115_calc_polynomial_factor_roots_l1__ab2d_assembly__seed_2026071303",
+      "task": "ce115_calc_polynomial_factor_roots_l1",
+      "classification": "STRUCTURAL_EXCLUSION_ASSEMBLY_COVERAGE_UNAVAILABLE",
+      "reason": "No canonical reusable polynomial factor/roots primitive exists in the repository."
+    },
+    {
+      "cell_id": "qwen3_5_9b__ce115_calc_polynomial_factor_roots_l1__ab2d_assembly__seed_2026071301",
+      "task": "ce115_calc_polynomial_factor_roots_l1",
+      "classification": "STRUCTURAL_EXCLUSION_ASSEMBLY_COVERAGE_UNAVAILABLE",
+      "reason": "No canonical reusable polynomial factor/roots primitive exists in the repository."
+    },
+    {
+      "cell_id": "qwen3_5_9b__ce115_calc_polynomial_factor_roots_l1__ab2d_assembly__seed_2026071302",
+      "task": "ce115_calc_polynomial_factor_roots_l1",
+      "classification": "STRUCTURAL_EXCLUSION_ASSEMBLY_COVERAGE_UNAVAILABLE",
+      "reason": "No canonical reusable polynomial factor/roots primitive exists in the repository."
+    },
+    {
+      "cell_id": "qwen3_5_9b__ce115_calc_polynomial_factor_roots_l1__ab2d_assembly__seed_2026071303",
+      "task": "ce115_calc_polynomial_factor_roots_l1",
+      "classification": "STRUCTURAL_EXCLUSION_ASSEMBLY_COVERAGE_UNAVAILABLE",
+      "reason": "No canonical reusable polynomial factor/roots primitive exists in the repository."
+    }
+  ],
+  "protocol_exceptions": []
+}
+```

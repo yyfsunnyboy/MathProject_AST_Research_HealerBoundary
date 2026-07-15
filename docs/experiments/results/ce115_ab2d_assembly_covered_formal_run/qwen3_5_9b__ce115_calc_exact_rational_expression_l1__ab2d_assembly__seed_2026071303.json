@@ -1,0 +1,142 @@
+{
+  "cell_id": "qwen3_5_9b__ce115_calc_exact_rational_expression_l1__ab2d_assembly__seed_2026071303",
+  "model": "qwen3.5:9b",
+  "task": "ce115_calc_exact_rational_expression_l1",
+  "condition": "ab2d_assembly",
+  "seed": 2026071303,
+  "evaluator": "ce115_assembly_scanner",
+  "complete_request_payload": {
+    "model": "qwen3.5:9b",
+    "messages": [
+      {
+        "role": "user",
+        "content": "# CE115 Ab2d-Assembly domain contract\nfrom core.prompts.domain_function_library import FractionOps, PolynomialOps, RadicalOps\nfrom core.skill_policies.radical_logic import RadicalLogicEngine\n\nRequired APIs:\n- `FractionOps.create`\n- `FractionOps.add`\n- `FractionOps.sub`\n- `FractionOps.mul`\n- `FractionOps.div`\n- `FractionOps.to_latex`\n\nMUST_CALL: invoke every required API through its canonical name in `generate`.\nDO_NOT_REIMPLEMENT_DOMAIN_LOGIC: do not define domain helper classes/functions or reproduce their algorithms.\nReturn contract: `generate(level=1, **kwargs)` returns a dict with `question_text`, `correct_answer`, and `oracle_payload`.\nExample: `q, r = PolynomialOps.div_qr([1, 0, -1], [1, -1])`.\n\n## Task contract\n# Task Specification: Exact Rational Expression Evaluation\n- Task Name: Exact Rational Expression Evaluation\n- Input Parameters: `products` (ordered list of terms; each term has `sign` (1 or -1), `left` and `right` exact decimal strings). The expression value is the sum over terms of sign * left * right.\n- Output: `question_text` must present the arithmetic expression built from these terms.\n- Calculation: `correct_answer` must evaluate the expression with exact rational arithmetic (no floats) and return the canonical value string.\n- Data Contract: `oracle_payload` must return exactly the input parameters.\n\nWrite only complete Python source code.\nDo not use Markdown fences, prose, explanations, or prompt echoes.\nImplement exactly one function:\n\ndef generate(level=1, **kwargs):\n\n`generate()` must return exactly the three-key dictionary specified below.\n\nReturn exactly these three top-level keys and no others:\n`question_text`, `correct_answer`, and `oracle_payload`.\nDo not return `answer`, `mode`, or any additional key.\nThe task-specific `correct_answer` schema below supersedes any earlier generic `correct_answer: str` instruction.\n\nRequired return schema:\n{\n  \"question_text\": str,\n  \"correct_answer\": {\n      \"value\": str  # canonical exact value: integer string, or irreducible \"p/q\" with positive denominator\n  },\n  \"oracle_payload\": dict\n}\n- Formatting rules: reduce completely; output the integer string if the denominator is 1; never use decimal or float approximations.\n- Equality: Exact dictionary match. No tolerance.\n\nAb1 answer-contract wording:\ncorrect_answer must be a JSON-compatible dict with exactly value (canonical exact rational string: integer string or irreducible p/q with positive denominator). Exact arithmetic only; no floats or decimals; do not alter frozen parameters.\n\n## Frozen parameters\n{\"products\": [{\"left\": \"4.35\", \"right\": \"94.2\", \"sign\": 1}, {\"left\": \"-0.65\", \"right\": \"94.2\", \"sign\": -1}]}\n`oracle_payload` must exactly equal the frozen parameters above.\n"
+      }
+    ],
+    "stream": false,
+    "think": false,
+    "options": {
+      "temperature": 0.0,
+      "seed": 2026071303,
+      "num_ctx": 65536,
+      "num_predict": 24576
+    }
+  },
+  "prompt_hash": "779b07c8f04022e637296955f48a7cf61995a25db4837dfd76bb68fa9f275ca2",
+  "payload_hash": "32e8e7776d97c7577440a523f302db71c181c93abfb29c94345c7e655c52e1e1",
+  "protocol_hashes": {
+    "task_api_mapping": "51d3680397de3294e851841d87e8e4d9199cb78def348681416eae0e4d514b4a",
+    "prompt_stubs": {
+      "ce115_calc_radical_simplification_l1": "a1f5e1c646f74f8f8d1a80178640682d81181f5ecc173566f774e19b97dc1781",
+      "ce115_calc_polynomial_division_l1": "389e5bc3770f1f3e13b050cf01c0017fa545557c1b93acaaca75c69e21f4022e",
+      "ce115_calc_exact_rational_expression_l1": "6c47e71efcbc41370d057ce6aa151f47d777c6afb3d3e531802923f936a5a5ce",
+      "ce115_calc_polynomial_factor_roots_l1": "be42d7d781346c8ca9ff0e2a00d406d91443791c433e227127fbc3511130c38c"
+    },
+    "canonical_library": "cbc6ae6b9d4dc3291e64b3170463f6194d275793678dfed4cf3bac5ddfbc0ffd",
+    "assembly_scanner": "775349f7b3ae5f8952f368f225d4909f4e841d3a6936bcd6968897c2c4e381b6",
+    "protocol_manifest": "e5e7feac100c7d2691a3387f366b163c84b3e7beeba00f508f05c422d29cb95a"
+  },
+  "required_apis": [
+    "FractionOps.create",
+    "FractionOps.add",
+    "FractionOps.sub",
+    "FractionOps.mul",
+    "FractionOps.div"
+  ],
+  "prompt_stub": "# CE115 Ab2d-Assembly domain contract\nfrom core.prompts.domain_function_library import FractionOps, PolynomialOps, RadicalOps\nfrom core.skill_policies.radical_logic import RadicalLogicEngine\n\nRequired APIs:\n- `FractionOps.create`\n- `FractionOps.add`\n- `FractionOps.sub`\n- `FractionOps.mul`\n- `FractionOps.div`\n- `FractionOps.to_latex`\n\nMUST_CALL: invoke every required API through its canonical name in `generate`.\nDO_NOT_REIMPLEMENT_DOMAIN_LOGIC: do not define domain helper classes/functions or reproduce their algorithms.\nReturn contract: `generate(level=1, **kwargs)` returns a dict with `question_text`, `correct_answer`, and `oracle_payload`.\nExample: `q, r = PolynomialOps.div_qr([1, 0, -1], [1, -1])`.\n",
+  "runtime_library_provenance": "core.prompts.domain_function_library",
+  "raw_output": "from core.prompts.domain_function_library import FractionOps, PolynomialOps, RadicalOps\nfrom core.skill_policies.radical_logic import RadicalLogicEngine\n\ndef generate(level=1, **kwargs):\n    products = [{\"left\": \"4.35\", \"right\": \"94.2\", \"sign\": 1}, {\"left\": \"-0.65\", \"right\": \"94.2\", \"sign\": -1}]\n    \n    term1_left_frac = FractionOps.create(products[0][\"left\"])\n    term1_right_frac = FractionOps.create(products[0][\"right\"])\n    term1_val = FractionOps.mul(term1_left_frac, term1_right_frac)\n    \n    term2_left_frac = FractionOps.create(products[1][\"left\"])\n    term2_right_frac = FractionOps.create(products[1][\"right\"])\n    term2_base_val = FractionOps.mul(term2_left_frac, term2_right_frac)\n    term2_val = FractionOps.sub(FractionOps.zero(), term2_base_val) if products[1][\"sign\"] == -1 else term2_base_val\n    \n    # Re-evaluating based on strict sign logic: sum(sign * left * right)\n    total_sum = FractionOps.create(\"0\")\n    \n    for p in products:\n        l_frac = FractionOps.create(p[\"left\"])\n        r_frac = FractionOps.create(p[\"right\"])\n        prod_val = FractionOps.mul(l_frac, r_frac)\n        \n        if p[\"sign\"] == 1:\n            total_sum = FractionOps.add(total_sum, prod_val)\n        else:\n            # Subtract the product (equivalent to adding negative product)\n            neg_prod = FractionOps.sub(FractionOps.zero(), prod_val)\n            total_sum = FractionOps.add(total_sum, neg_prod)\n            \n    canonical_str = FractionOps.to_latex(total_sum) if hasattr(FractionOps, 'to_latex') else str(total_sum.numerator) + \"/\" + str(total_sum.denominator)\n    \n    # Ensure the output format is strictly \"p/q\" or integer string with positive denominator and reduced form.\n    # Assuming FractionOps object has numerator/denominator attributes for final formatting if to_latex isn't standard for this specific return type requirement.\n    # Since we must use canonical names, let's assume a helper logic inside the library handles reduction, \n    # but here we construct the string manually from the result of operations assuming they return objects with .numerator and .denominator or similar if not exposed via to_latex for this specific contract check.\n    \n    # Correction: The prompt requires using FractionOps.to_latex in Required APIs list? No, it lists create, add, sub, mul, div, to_latex as required APIs. \n    # However, the return schema asks for a canonical value string (integer or p/q). \n    # Let's assume the result of operations allows access to numerator/denominator directly if not using latex representation which might include formatting chars like \\frac{}.\n    \n    res_obj = total_sum\n    num = getattr(res_obj, 'numerator', None)\n    den = getattr(res_obj, 'denominator', 1)\n    \n    # If attributes don't exist (unlikely given library design but safe fallback), we rely on the object string representation or re-calculation logic if needed. \n    # Given \"MUST_CALL: invoke every required API\", and to_latex is listed, let's check its output format first? \n    # Usually latex returns \"\\frac{a}{b}\". The contract asks for canonical value (integer or p/q).\n    # Let's assume the library objects have .numerator and .denominator. If not, we might need a different approach, but standard domain libraries usually do.\n    \n    if num is None:\n        # Fallback parsing from string representation if attributes missing? No, that breaks \"exact rational arithmetic\". \n        # We must assume the library objects have these properties or to_latex returns something parseable.\n        # Let's try to access them directly as per standard Fraction implementations in such contexts.\n        pass\n        \n    final_val_str = f\"{num}/{den}\" if den != 1 else str(num)\n\n    return {\n        \"question_text\": f\"Calculate the value of: {' + '.join([f'{p[\"sign\"]}{p[\"left\"]} * {p[\"right\"]}' for p in products])}\",\n        \"correct_answer\": {\"value\": final_val_str},\n        \"oracle_payload\": products\n    }",
+  "raw_output_hash": "ff0369fc969d6f4dd6a8d6cc0de5e8c85d4d766091a69f7bef85f2919881df79",
+  "token_telemetry": {
+    "prompt_eval_count": 671,
+    "eval_count": 957,
+    "total_duration": 42730698300,
+    "load_duration": 220114900,
+    "prompt_eval_duration": 27006000,
+    "eval_duration": 14096570000
+  },
+  "done": true,
+  "done_reason": "stop",
+  "wall_clock_seconds": 42.74412798881531,
+  "evaluator_outcome": "runtime_failure",
+  "candidate_extracted": "from core.prompts.domain_function_library import FractionOps, PolynomialOps, RadicalOps\nfrom core.skill_policies.radical_logic import RadicalLogicEngine\n\ndef generate(level=1, **kwargs):\n    products = [{\"left\": \"4.35\", \"right\": \"94.2\", \"sign\": 1}, {\"left\": \"-0.65\", \"right\": \"94.2\", \"sign\": -1}]\n    \n    term1_left_frac = FractionOps.create(products[0][\"left\"])\n    term1_right_frac = FractionOps.create(products[0][\"right\"])\n    term1_val = FractionOps.mul(term1_left_frac, term1_right_frac)\n    \n    term2_left_frac = FractionOps.create(products[1][\"left\"])\n    term2_right_frac = FractionOps.create(products[1][\"right\"])\n    term2_base_val = FractionOps.mul(term2_left_frac, term2_right_frac)\n    term2_val = FractionOps.sub(FractionOps.zero(), term2_base_val) if products[1][\"sign\"] == -1 else term2_base_val\n    \n    # Re-evaluating based on strict sign logic: sum(sign * left * right)\n    total_sum = FractionOps.create(\"0\")\n    \n    for p in products:\n        l_frac = FractionOps.create(p[\"left\"])\n        r_frac = FractionOps.create(p[\"right\"])\n        prod_val = FractionOps.mul(l_frac, r_frac)\n        \n        if p[\"sign\"] == 1:\n            total_sum = FractionOps.add(total_sum, prod_val)\n        else:\n            # Subtract the product (equivalent to adding negative product)\n            neg_prod = FractionOps.sub(FractionOps.zero(), prod_val)\n            total_sum = FractionOps.add(total_sum, neg_prod)\n            \n    canonical_str = FractionOps.to_latex(total_sum) if hasattr(FractionOps, 'to_latex') else str(total_sum.numerator) + \"/\" + str(total_sum.denominator)\n    \n    # Ensure the output format is strictly \"p/q\" or integer string with positive denominator and reduced form.\n    # Assuming FractionOps object has numerator/denominator attributes for final formatting if to_latex isn't standard for this specific return type requirement.\n    # Since we must use canonical names, let's assume a helper logic inside the library handles reduction, \n    # but here we construct the string manually from the result of operations assuming they return objects with .numerator and .denominator or similar if not exposed via to_latex for this specific contract check.\n    \n    # Correction: The prompt requires using FractionOps.to_latex in Required APIs list? No, it lists create, add, sub, mul, div, to_latex as required APIs. \n    # However, the return schema asks for a canonical value string (integer or p/q). \n    # Let's assume the result of operations allows access to numerator/denominator directly if not using latex representation which might include formatting chars like \\frac{}.\n    \n    res_obj = total_sum\n    num = getattr(res_obj, 'numerator', None)\n    den = getattr(res_obj, 'denominator', 1)\n    \n    # If attributes don't exist (unlikely given library design but safe fallback), we rely on the object string representation or re-calculation logic if needed. \n    # Given \"MUST_CALL: invoke every required API\", and to_latex is listed, let's check its output format first? \n    # Usually latex returns \"\\frac{a}{b}\". The contract asks for canonical value (integer or p/q).\n    # Let's assume the library objects have .numerator and .denominator. If not, we might need a different approach, but standard domain libraries usually do.\n    \n    if num is None:\n        # Fallback parsing from string representation if attributes missing? No, that breaks \"exact rational arithmetic\". \n        # We must assume the library objects have these properties or to_latex returns something parseable.\n        # Let's try to access them directly as per standard Fraction implementations in such contexts.\n        pass\n        \n    final_val_str = f\"{num}/{den}\" if den != 1 else str(num)\n\n    return {\n        \"question_text\": f\"Calculate the value of: {' + '.join([f'{p[\"sign\"]}{p[\"left\"]} * {p[\"right\"]}' for p in products])}\",\n        \"correct_answer\": {\"value\": final_val_str},\n        \"oracle_payload\": products\n    }",
+  "evaluator_details": {
+    "runtime_error": "AttributeError: type object 'FractionOps' has no attribute 'zero'",
+    "exception_type": "AttributeError",
+    "exception_message": "type object 'FractionOps' has no attribute 'zero'",
+    "timeout": false,
+    "ledger_stage": "observed",
+    "actual_question_text": null,
+    "evaluation_gates": {
+      "g1_evaluability": {
+        "status": "PASS",
+        "reason": "evaluability_passed",
+        "raw_output_present": true,
+        "extraction_succeeded": true,
+        "candidate_nonempty": true,
+        "parse_succeeded": true,
+        "required_entry_point_present": true
+      },
+      "g2_executability": {
+        "status": "FAIL",
+        "reason": "runtime_failure",
+        "load_succeeded": true,
+        "entry_point_called": true,
+        "timeout": false,
+        "exception_type": "AttributeError",
+        "exception_message": "type object 'FractionOps' has no attribute 'zero'",
+        "return_value_produced": false
+      },
+      "g3_contract_compliance": {
+        "status": "NOT_ASSESSED",
+        "reason": "g2_not_passed"
+      },
+      "g4_semantic_correctness": {
+        "status": "NOT_ASSESSED",
+        "reason": "g2_not_passed"
+      },
+      "g5_problem_presentation": {
+        "status": "NOT_OBSERVED",
+        "reason": "actual_question_text_unavailable",
+        "question_present": false
+      },
+      "g6_math_notation": {
+        "status": "NOT_OBSERVED",
+        "reason": "actual_question_text_unavailable",
+        "uses_latex": false
+      }
+    },
+    "composite_outcomes": {
+      "technical_pass": "FAIL",
+      "presentation_pass": "NOT_OBSERVED",
+      "full_pass": "FAIL"
+    }
+  },
+  "assembly_scanner": {
+    "classification": "REQUIRED_API_NOT_CALLED",
+    "required_apis": [
+      "FractionOps.create",
+      "FractionOps.add",
+      "FractionOps.sub",
+      "FractionOps.mul",
+      "FractionOps.div"
+    ],
+    "called_apis": [
+      "FractionOps.add",
+      "FractionOps.create",
+      "FractionOps.mul",
+      "FractionOps.sub",
+      "FractionOps.to_latex"
+    ],
+    "missing_apis": [
+      "FractionOps.div"
+    ],
+    "forbidden_definitions": [],
+    "reimplemented_helpers": [],
+    "invalid_calls": [],
+    "runtime_library_available": true,
+    "errors": []
+  },
+  "completion_classification": "NATURAL_COMPLETE",
+  "runtime_library_available": true
+}

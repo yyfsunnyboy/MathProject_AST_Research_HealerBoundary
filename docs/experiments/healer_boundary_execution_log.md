@@ -1,3 +1,9 @@
+# Milestone 5B.7C-R ? Runtime Assembly Failure Forensics and Fix
+
+- Offline forensics preserved all 18 raw artifact hashes and found a runtime-loader namespace injection defect.
+- The fixed isolated evaluator injects canonical runtime classes and passes 3/3 synthetic covered-task wrappers.
+- Offline re-evaluation is valid; no model, Healer, repair, replay, or retry calls were made.
+
 # Milestone 5B.7B ? Ab2d Assembly Wiring Fix and Protocol Freeze
 
 - Added a separate `ab2d_assembly` 24-cell protocol; the legacy corrected cohort and Ab1/Ab2g are unchanged.

@@ -1,0 +1,155 @@
+{
+  "cell_id": "qwen3_5_4b__ce115_calc_polynomial_division_l1__ab2d_assembly__seed_2026071302",
+  "model": "qwen3.5:4b",
+  "task": "ce115_calc_polynomial_division_l1",
+  "condition": "ab2d_assembly",
+  "seed": 2026071302,
+  "evaluator": "ce115_assembly_scanner",
+  "complete_request_payload": {
+    "model": "qwen3.5:4b",
+    "messages": [
+      {
+        "role": "user",
+        "content": "# CE115 Ab2d-Assembly domain contract\nfrom core.prompts.domain_function_library import FractionOps, PolynomialOps, RadicalOps\nfrom core.skill_policies.radical_logic import RadicalLogicEngine\n\nRequired APIs:\n- `PolynomialOps.div_qr`\n- `PolynomialOps.format_latex`\n- `PolynomialOps.format_plain`\n\nMUST_CALL: invoke every required API through its canonical name in `generate`.\nDO_NOT_REIMPLEMENT_DOMAIN_LOGIC: do not define domain helper classes/functions or reproduce their algorithms.\nReturn contract: `generate(level=1, **kwargs)` returns a dict with `question_text`, `correct_answer`, and `oracle_payload`.\nExample: `q, r = PolynomialOps.div_qr([1, 0, -1], [1, -1])`.\n\n## Task contract\n# Task Specification: Polynomial Division (General Linear Divisor)\n- Task Name: Polynomial Division with Quotient and Remainder\n- Input Parameters: `dividend_coefficients` (highest degree first) and `divisor_coefficients` (two values: leading and constant of the linear divisor).\n- Output: `question_text` must ask to divide the dividend polynomial by the linear divisor and report the quotient and the remainder.\n- Calculation: `correct_answer` must return the quotient coefficients (highest degree first) and the remainder coefficients computed with exact arithmetic.\n- Data Contract: `oracle_payload` must return exactly the input parameters.\n\nWrite only complete Python source code.\nDo not use Markdown fences, prose, explanations, or prompt echoes.\nImplement exactly one function:\n\ndef generate(level=1, **kwargs):\n\n`generate()` must return exactly the three-key dictionary specified below.\n\nReturn exactly these three top-level keys and no others:\n`question_text`, `correct_answer`, and `oracle_payload`.\nDo not return `answer`, `mode`, or any additional key.\nThe task-specific `correct_answer` schema below supersedes any earlier generic `correct_answer: str` instruction.\n\nRequired return schema:\n{\n  \"question_text\": str,\n  \"correct_answer\": {\n      \"quotient_coefficients\": list[int | str],   # highest degree first; integers, or irreducible fraction strings \"p/q\"\n      \"remainder_coefficients\": list[int | str]   # coefficients of the remainder (degree < divisor degree; one value for a linear divisor)\n  },\n  \"oracle_payload\": dict\n}\n- Formatting rules: exact arithmetic only; integers directly, irreducible \"p/q\" strings when fractional; no float values.\n- Equality: Exact dictionary match. No tolerance.\n\nAb1 answer-contract wording:\ncorrect_answer must be a JSON-compatible dict with exactly quotient_coefficients (highest degree first; int or irreducible p/q strings) and remainder_coefficients (degree lower than the divisor; for a linear divisor, exactly one value). Exact arithmetic; no floats; do not alter frozen parameters.\n\n## Frozen parameters\n{\"dividend_coefficients\": [-6, -4, 3], \"divisor_coefficients\": [1, -2]}\n`oracle_payload` must exactly equal the frozen parameters above.\n"
+      }
+    ],
+    "stream": false,
+    "think": false,
+    "options": {
+      "temperature": 0.0,
+      "seed": 2026071302,
+      "num_ctx": 65536,
+      "num_predict": 24576
+    }
+  },
+  "prompt_hash": "971d93f292eb58332c7783c04eda0ac38061d6b653d20c192716102e23f17db6",
+  "payload_hash": "4f970271e7c0a79d0a34f1d87f3035198cb17ceea3da92fa14c0bce7b64c493b",
+  "protocol_hashes": {
+    "task_api_mapping": "51d3680397de3294e851841d87e8e4d9199cb78def348681416eae0e4d514b4a",
+    "prompt_stubs": {
+      "ce115_calc_radical_simplification_l1": "a1f5e1c646f74f8f8d1a80178640682d81181f5ecc173566f774e19b97dc1781",
+      "ce115_calc_polynomial_division_l1": "389e5bc3770f1f3e13b050cf01c0017fa545557c1b93acaaca75c69e21f4022e",
+      "ce115_calc_exact_rational_expression_l1": "6c47e71efcbc41370d057ce6aa151f47d777c6afb3d3e531802923f936a5a5ce",
+      "ce115_calc_polynomial_factor_roots_l1": "be42d7d781346c8ca9ff0e2a00d406d91443791c433e227127fbc3511130c38c"
+    },
+    "canonical_library": "cbc6ae6b9d4dc3291e64b3170463f6194d275793678dfed4cf3bac5ddfbc0ffd",
+    "assembly_scanner": "775349f7b3ae5f8952f368f225d4909f4e841d3a6936bcd6968897c2c4e381b6",
+    "protocol_manifest": "6038cd56f923898eccacfc553dfaf1f7e80f1778849642fec7e4dfc00e2104c1"
+  },
+  "required_apis": [
+    "PolynomialOps.div_qr"
+  ],
+  "prompt_stub": "# CE115 Ab2d-Assembly domain contract\nfrom core.prompts.domain_function_library import FractionOps, PolynomialOps, RadicalOps\nfrom core.skill_policies.radical_logic import RadicalLogicEngine\n\nRequired APIs:\n- `PolynomialOps.div_qr`\n- `PolynomialOps.format_latex`\n- `PolynomialOps.format_plain`\n\nMUST_CALL: invoke every required API through its canonical name in `generate`.\nDO_NOT_REIMPLEMENT_DOMAIN_LOGIC: do not define domain helper classes/functions or reproduce their algorithms.\nReturn contract: `generate(level=1, **kwargs)` returns a dict with `question_text`, `correct_answer`, and `oracle_payload`.\nExample: `q, r = PolynomialOps.div_qr([1, 0, -1], [1, -1])`.\n",
+  "runtime_library_provenance": "core.prompts.domain_function_library",
+  "raw_output": "```python\ndef generate(level=1, **kwargs):\n    from core.prompts.domain_function_library import PolynomialOps\n    \n    dividend_coeffs = [-6, -4, 3]\n    divisor_leading = 1\n    divisor_const = -2\n    oracle_payload = {\"dividend_coefficients\": dividend_coeffs, \"divisor_coefficients\": [divisor_leading, divisor_const]}\n\n    quotient_coeffs, remainder_val = PolynomialOps.div_qr(dividend_coeffs, [divisor_leading, divisor_const])\n    \n    # Format coefficients: integers as ints, fractions as strings if needed (though exact division here yields ints)\n    def format_coef(c):\n        return c\n    \n    correct_answer = {\n        \"quotient_coefficients\": quotient_coeffs,\n        \"remainder_coefficients\": [format_coef(remainder_val)]\n    }\n\n    # Construct LaTeX and Plain text for the question to ensure clarity without re-implementing logic\n    dividend_str = PolynomialOps.format_latex(dividend_coeffs) if len(dividend_coeffs) > 1 else f\"{dividend_coeffs[0]}\"\n    divisor_str = \"x - {}\".format(abs(divisor_const)) if divisor_leading == 1 and divisor_const < 0 else \"{}\".format(\" \".join(map(str, [divisor_leading] + list(reversed([divisor_const]))))) # Simplified for linear: ax+b\n    \n    # Reconstructing the polynomial string manually to ensure correctness based on coefficients provided\n    dividend_poly = \" -6x^2 - 4x + 3\" if len(dividend_coeffs) == 3 else \"\"\n    \n    question_text = f\"Simplify \\n\\n{dividend_poly} \\\\div (x - {abs(divisor_const)})\\n\\nFind the quotient and remainder.\"\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }\n```",
+  "raw_output_hash": "2b3e0a4f911f2b150eda5d421ac17dab3ac9c3cce957104220a2f1d2f7584434",
+  "token_telemetry": {
+    "prompt_eval_count": 682,
+    "eval_count": 411,
+    "total_duration": 11600583800,
+    "load_duration": 236414200,
+    "prompt_eval_duration": 20322000,
+    "eval_duration": 3793796000
+  },
+  "done": true,
+  "done_reason": "stop",
+  "wall_clock_seconds": 11.622428894042969,
+  "evaluator_outcome": "answer_incorrect",
+  "candidate_extracted": "def generate(level=1, **kwargs):\n    from core.prompts.domain_function_library import PolynomialOps\n    \n    dividend_coeffs = [-6, -4, 3]\n    divisor_leading = 1\n    divisor_const = -2\n    oracle_payload = {\"dividend_coefficients\": dividend_coeffs, \"divisor_coefficients\": [divisor_leading, divisor_const]}\n\n    quotient_coeffs, remainder_val = PolynomialOps.div_qr(dividend_coeffs, [divisor_leading, divisor_const])\n    \n    # Format coefficients: integers as ints, fractions as strings if needed (though exact division here yields ints)\n    def format_coef(c):\n        return c\n    \n    correct_answer = {\n        \"quotient_coefficients\": quotient_coeffs,\n        \"remainder_coefficients\": [format_coef(remainder_val)]\n    }\n\n    # Construct LaTeX and Plain text for the question to ensure clarity without re-implementing logic\n    dividend_str = PolynomialOps.format_latex(dividend_coeffs) if len(dividend_coeffs) > 1 else f\"{dividend_coeffs[0]}\"\n    divisor_str = \"x - {}\".format(abs(divisor_const)) if divisor_leading == 1 and divisor_const < 0 else \"{}\".format(\" \".join(map(str, [divisor_leading] + list(reversed([divisor_const]))))) # Simplified for linear: ax+b\n    \n    # Reconstructing the polynomial string manually to ensure correctness based on coefficients provided\n    dividend_poly = \" -6x^2 - 4x + 3\" if len(dividend_coeffs) == 3 else \"\"\n    \n    question_text = f\"Simplify \\n\\n{dividend_poly} \\\\div (x - {abs(divisor_const)})\\n\\nFind the quotient and remainder.\"\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }\n",
+  "evaluator_details": {
+    "expected_answer": {
+      "quotient_coefficients": [
+        -6,
+        -16
+      ],
+      "remainder_coefficients": [
+        -29
+      ]
+    },
+    "mismatch_reason": "oracle_mismatch",
+    "ledger_stage": "observed",
+    "actual_question_text": "Simplify \n\n -6x^2 - 4x + 3 \\div (x - 2)\n\nFind the quotient and remainder.",
+    "evaluation_gates": {
+      "g1_evaluability": {
+        "status": "PASS",
+        "reason": "evaluability_passed",
+        "raw_output_present": true,
+        "extraction_succeeded": true,
+        "candidate_nonempty": true,
+        "parse_succeeded": true,
+        "required_entry_point_present": true
+      },
+      "g2_executability": {
+        "status": "PASS",
+        "reason": "execution_passed",
+        "load_succeeded": true,
+        "entry_point_called": true,
+        "timeout": false,
+        "exception_type": null,
+        "exception_message": null,
+        "return_value_produced": true
+      },
+      "g3_contract_compliance": {
+        "status": "PASS",
+        "reason": "contract_observed",
+        "schema_valid": true,
+        "missing_keys": [],
+        "unexpected_keys": [],
+        "field_types_valid": true,
+        "frozen_parameters_valid": true,
+        "entry_point_signature_valid": null
+      },
+      "g4_semantic_correctness": {
+        "status": "FAIL",
+        "reason": "oracle_mismatch",
+        "oracle_executed": true,
+        "oracle_match": false,
+        "invariant_checks": null,
+        "mismatch_reason": "oracle_mismatch"
+      },
+      "g5_problem_presentation": {
+        "status": "PASS",
+        "reason": "presentation_checks_passed",
+        "question_present": true,
+        "placeholder_leak": false,
+        "prompt_leak": false,
+        "code_leak": false,
+        "answer_leak": false,
+        "truncation_signal": false,
+        "frozen_parameters_available": true
+      },
+      "g6_math_notation": {
+        "status": "PASS",
+        "reason": "notation_checks_passed",
+        "uses_latex": true,
+        "delimiter_balance": true,
+        "brace_balance": true,
+        "malformed_command": false,
+        "unclosed_math_region": false
+      }
+    },
+    "composite_outcomes": {
+      "technical_pass": "FAIL",
+      "presentation_pass": "PASS",
+      "full_pass": "FAIL"
+    }
+  },
+  "assembly_scanner": {
+    "classification": "ASSEMBLY_COMPLIANT",
+    "required_apis": [
+      "PolynomialOps.div_qr"
+    ],
+    "called_apis": [
+      "PolynomialOps.div_qr",
+      "PolynomialOps.format_latex"
+    ],
+    "missing_apis": [],
+    "forbidden_definitions": [],
+    "reimplemented_helpers": [],
+    "invalid_calls": [],
+    "runtime_library_available": true,
+    "errors": []
+  },
+  "completion_classification": "NATURAL_COMPLETE",
+  "runtime_library_available": true
+}
