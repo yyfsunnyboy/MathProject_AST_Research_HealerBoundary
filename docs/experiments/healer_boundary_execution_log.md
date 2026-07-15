@@ -1,3 +1,9 @@
+# Milestone 5B.7D ? Ab2d-Spec vs Ab2d-Assembly Covered-Subset Comparison
+
+- Compared the 18 paired covered cells by model/task/seed without changing artifacts or calling a model.
+- Spec lacks a matching semantic evaluator outcome, so correctness pass-rate transitions are explicitly NOT_COMPARABLE.
+- Polynomial-factor-roots remains a six-cell structural exclusion.
+
 # Milestone 5B.7C-R ? Runtime Assembly Failure Forensics and Fix
 
 - Offline forensics preserved all 18 raw artifact hashes and found a runtime-loader namespace injection defect.

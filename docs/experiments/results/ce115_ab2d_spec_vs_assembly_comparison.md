@@ -1,0 +1,111 @@
+# Ab2d-Spec vs Ab2d-Assembly covered-subset comparison
+
+```json
+{
+  "pairing": {
+    "spec_cells": 18,
+    "assembly_cells": 18,
+    "paired": 18,
+    "duplicates": 0,
+    "missing_pairs": 0,
+    "covered_tasks": [
+      "ce115_calc_exact_rational_expression_l1",
+      "ce115_calc_polynomial_division_l1",
+      "ce115_calc_radical_simplification_l1"
+    ],
+    "structural_exclusions": 6,
+    "exclusion_reason": "STRUCTURAL_EXCLUSION_ASSEMBLY_COVERAGE_UNAVAILABLE"
+  },
+  "spec_outcomes": {
+    "natural_complete": 13,
+    "semantic_pass": "NOT_COMPARABLE"
+  },
+  "assembly_outcomes": {
+    "passed": 1,
+    "executable_after_fix": 3,
+    "assembly_classifications": {
+      "REQUIRED_API_NOT_CALLED": 4,
+      "INSUFFICIENT_EVIDENCE": 3,
+      "ASSEMBLY_COMPLIANT": 6,
+      "INVALID_API_CALL": 5
+    },
+    "api_exposure_rate": "18/18",
+    "api_call_rate": "9/18"
+  },
+  "paired_transitions": {
+    "NOT_COMPARABLE_SPEC_PASS_TO_ASSEMBLY_PASS": 1,
+    "NOT_COMPARABLE_SPEC_PASS_TO_ASSEMBLY_FAIL": 17
+  },
+  "telemetry": {
+    "output_tokens": {
+      "spec_total": 131365,
+      "assembly_total": 57532,
+      "spec_median": 651.5,
+      "assembly_median": 281.0,
+      "note": "different evaluator/runtime conditions"
+    },
+    "output_chars": {
+      "spec_total": 508313,
+      "assembly_total": 178111,
+      "spec_median": 2461.0,
+      "assembly_median": 1077.5,
+      "note": "different evaluator/runtime conditions"
+    },
+    "wall_seconds": {
+      "spec_total": 1759.97,
+      "assembly_total": 1870.554455280304,
+      "spec_median": 8.975000000000001,
+      "assembly_median": 9.718105673789978,
+      "note": "WALL_CLOCK_NOT_DIRECTLY_COMPARABLE"
+    }
+  },
+  "model_task_summary": [
+    {
+      "model": "qwen3.5:4b",
+      "task": "ce115_calc_exact_rational_expression_l1",
+      "cells": 3,
+      "assembly_compliant": 0
+    },
+    {
+      "model": "qwen3.5:4b",
+      "task": "ce115_calc_polynomial_division_l1",
+      "cells": 3,
+      "assembly_compliant": 3
+    },
+    {
+      "model": "qwen3.5:4b",
+      "task": "ce115_calc_radical_simplification_l1",
+      "cells": 3,
+      "assembly_compliant": 0
+    },
+    {
+      "model": "qwen3.5:9b",
+      "task": "ce115_calc_exact_rational_expression_l1",
+      "cells": 3,
+      "assembly_compliant": 0
+    },
+    {
+      "model": "qwen3.5:9b",
+      "task": "ce115_calc_polynomial_division_l1",
+      "cells": 3,
+      "assembly_compliant": 3
+    },
+    {
+      "model": "qwen3.5:9b",
+      "task": "ce115_calc_radical_simplification_l1",
+      "cells": 3,
+      "assembly_compliant": 0
+    }
+  ],
+  "main_verdict": "ASSEMBLY_REDUCED_CORE_REIMPLEMENTATION_BUT_INTRODUCED_API_USE_FAILURES",
+  "rerun_needed": false,
+  "ab2d_spec_remains_formal": false,
+  "ab2d_assembly_becomes_formal": false,
+  "proceed_to_5b8_ab3": true,
+  "model_healer_repair_replay_retry_calls": 0,
+  "methods": "Paired by model, task, and seed; no raw artifact or generation changed.",
+  "results": "Assembly compliance is measurable after offline runtime repair, while Spec lacks comparable semantic evaluator records.",
+  "interpretation": "API exposure did not guarantee valid API use.",
+  "limitation": "Pass-rate transitions are not comparable because the Spec artifacts do not contain matching semantic evaluator outcomes."
+}
+```
