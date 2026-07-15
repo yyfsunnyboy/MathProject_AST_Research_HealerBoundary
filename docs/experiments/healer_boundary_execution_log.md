@@ -1196,4 +1196,51 @@ Conduct a forensic, read-only root-cause attribution of the 8 leakage cells and 
 Milestone 5B.3 completed with verdict **ROOT_CAUSES_ATTRIBUTED**.
 No code repairs or sandbox compilations were run.
 
+## Milestone 5B.4 — Reproducible Rule Matrix Rebuild and Historical Output-Budget Census
+
+### Goal
+
+Rebuild the 18 × 4 safe generic rule adjudication matrix using a deterministic, token-aware scanner script. Execute a size and token budget census of historical Qwen3/Gemini runs to estimate optimal context (`num_ctx`) and generation (`num_predict`) limits.
+
+### Census & Rebuild Outcomes
+
+*   **Matrix Completeness**: 18 unique cells scanned across 4 rules (72 entries total).
+*   **Rebuilt Counts vs 5B.2**: 100% MATCH rate.
+    *   `R01_markdown_fence_removal`: NOT_APPLICABLE: 18
+    *   `R02_trailing_artifact_removal`: UNSAFE_TRUNCATION: 3, NOT_APPLICABLE: 15
+    *   `R03_thinking_leakage_removal`: UNSAFE_CORE_LOGIC: 8, UNSAFE_TRUNCATION: 3, INSUFFICIENT_EVIDENCE: 1, NOT_APPLICABLE: 6
+    *   `R04_fullwidth_punctuation_normalization`: NOT_APPLICABLE: 18
+*   **Historical Budget Census**:
+    *   Level A records: 60 records with full telemetry, plus 3 formal truncated Qwen3.5 cells.
+    *   Median output size: 2119.0 tokens (overall natural completions), Max: 9485 tokens (Qwen3-8B Ab1).
+    *   Suspected truncation limits: 16384 (historical Qwen3 cap) and 4096 (formal Qwen3.5 cap).
+    *   Recommended limits (Candidate B): `num_ctx = 65536` and `num_predict = 24576` (to prevent repetition/truncation overflows and provide a >150% safety margin).
+
+### Files Created/Tracked
+
+*   **Scanned & Census Reports**:
+    *   `docs/experiments/reports/ce115_safe_generic_rule_matrix_rebuilt.json`
+    *   `docs/experiments/reports/ce115_safe_generic_rule_matrix_rebuilt.md`
+    *   `docs/experiments/reports/ce115_historical_output_budget_census.json`
+    *   `docs/experiments/reports/ce115_historical_output_budget_census.md`
+*   **Rebuild & Census Scripts**:
+    *   `scripts/ce115_rebuild_safe_generic_rule_matrix.py`
+    *   `scripts/ce115_historical_output_budget_census.py`
+*   **Targeted Verification Tests**:
+    *   `tests/finals_rebuild/test_ce115_rebuild_census.py`
+
+### Call Counts & Status
+*   `model_calls` = 0
+*   `healer_calls` = 0
+*   `repair_calls` = 0
+*   `replay_calls` = 0
+*   `retry_calls` = 0
+*   `api_calls` = 0
+
+### Status
+
+Milestone 5B.4 completed with verdict **EVIDENCE_REBUILT_BUDGET_RECOMMENDED**.
+No code repairs, model re-runs, or sandbox replays were executed.
+
+
 
