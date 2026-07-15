@@ -1121,3 +1121,40 @@ Conduct a forensic, read-only empty-block safety adjudication on 5 empty-block c
 ### Status
 Milestone 5B.1 completed with verdict **EMPTY_BLOCK_REPAIR_UNSAFE**.
 No code repairs or sandbox compilations were run.
+
+## Milestone 5B.2 — Safe Generic Historical Rule Candidate Adjudication
+
+### Goal
+
+Conduct a forensic, read-only audit and safety adjudication of the 4 generic rules from the historical Healer codebase against the 18 CE115 taxonomy candidates. Evaluate safety profiles using a complete 18 × 4 matrix under the Governance Freeze Specification.
+
+### Adjudication Outcomes
+
+*   **Candidates Reviewed**: 18 taxonomy candidates
+*   **Rules Adjudicated**: R01_markdown_fence_removal, R02_trailing_artifact_removal, R03_thinking_leakage_removal, R04_fullwidth_punctuation_normalization
+*   **SAFE_PATTERN_MATCH count**: 0/72 entries
+*   **Unique Safe Cells**: 0/18
+*   **Unsafe Truncation Count**: 6 entries (Rules R02/R03 on 3 truncated cells)
+*   **Unsafe Core Logic Count**: 8 entries (Rule R03 on 8 inline thinking leak cells)
+*   **Insufficient Evidence Count**: 1 entry (Rule R03 on 1 English leakage cell)
+*   **Not Applicable Count**: 57 entries
+
+### Files Created/Tracked
+
+*   **Adjudication Reports**:
+    *   `docs/experiments/reports/ce115_safe_generic_rule_adjudication.json`
+    *   `docs/experiments/reports/ce115_safe_generic_rule_adjudication.md`
+
+### Call Counts & Status
+*   `model_calls` = 0
+*   `healer_calls` = 0
+*   `repair_calls` = 0
+*   `replay_calls` = 0
+*   `retry_calls` = 0
+*   `api_calls` = 0
+
+### Status
+
+Milestone 5B.2 completed with verdict **NO_SAFE_GENERIC_RULE_WINDOW**.
+No code repairs or sandbox compilations were run.
+
