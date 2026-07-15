@@ -1,0 +1,14 @@
+# Domain function verification
+
+```json
+{
+  "property_counts": {
+    "polynomial": 100,
+    "fraction": 100,
+    "radical": 100
+  },
+  "counterexamples": [],
+  "all_passed": true,
+  "model_healer_repair_replay_retry_calls": 0
+}
+```

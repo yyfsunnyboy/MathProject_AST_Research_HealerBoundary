@@ -1,3 +1,9 @@
+# Milestone 5B.7F ? Canonical Domain Function Verification and API Hardening
+
+- Verified canonical PolynomialOps, FractionOps, and RadicalOps with 100 deterministic property cases each; no counterexamples.
+- Hardened the assembly prompt contract: `PolynomialOps.div_qr` returns two flat exact coefficient lists, never nested lists or floats.
+- Formal rerun gate is `FORMAL_RERUN_GATE_READY`; no model, healer, repair, replay, or retry calls were made.
+
 # Milestone 5B.7E ? One-Cell Corrected Runtime End-to-End Smoke
 
 - Completed one disposable, non-formal 4B polynomial-division smoke cell using the corrected runtime namespace.
