@@ -1,3 +1,26 @@
 # Formal rerun gate
 
-`FORMAL_RERUN_GATE_READY` ? polynomial flat return-contract smoke confirmed.
+```json
+{
+  "verdict": "FORMAL_RERUN_GATE_READY",
+  "blocking_reasons": [],
+  "checks": {
+    "property_200_each": true,
+    "fixed_edges_passed": true,
+    "exact_evaluator_cases_passed": true,
+    "api_sets_match": true,
+    "canonical_resolution": true,
+    "synthetic_3_of_3": true,
+    "smoke_regression": {
+      "raw_output_hash_preserved": true,
+      "runtime": "success",
+      "assembly": "compliant",
+      "core_calculation": "correct",
+      "exact_schema": "SCHEMA_FAILURE",
+      "formal_correctness": false
+    },
+    "counterexamples": 0,
+    "model_healer_repair_replay_retry_calls": 0
+  }
+}
+```

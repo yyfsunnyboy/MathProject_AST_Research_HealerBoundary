@@ -1,3 +1,9 @@
+# Milestone 5B.7I ? Final Pre-Freeze Covered-Task Hardening and Formal Rerun Preflight
+
+- Froze Ab2d-Assembly protocol v3, verified three covered task paths, and generated the separate 18-cell formal rerun manifest.
+- Preflight is `FORMAL_RERUN_PREFLIGHT_READY`; roots remains six structural exclusions.
+- No formal rerun, model, Healer, repair, replay, or retry call was made.
+
 # Milestone 5B.7H ? Polynomial Division Return-Contract Usage Fix
 
 - Hardened the assembly example to directly unpack quotient/remainder flat lists and assign them directly to the output schema.
