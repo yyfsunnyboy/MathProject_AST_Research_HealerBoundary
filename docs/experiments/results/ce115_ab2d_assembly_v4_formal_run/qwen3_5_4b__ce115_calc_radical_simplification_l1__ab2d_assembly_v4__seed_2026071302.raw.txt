@@ -1,0 +1,159 @@
+```python
+def generate(level=1, **kwargs):
+    from core.prompts.domain_function_library import FractionOps
+    
+    radicand = kwargs.get("radicand", 54)
+    
+    # Factorize to find square factors manually using standard Python logic as per constraints on API usage for control flow/data movement.
+    # We need to extract the largest perfect square factor from 'radicand'.
+    temp_radicand = radicand
+    
+    while True:
+        i = 2
+        found_factor = False
+        
+        # Check divisibility by squares of integers starting from 2 up to sqrt(temp_radicand)
+        limit = int(temp_radicand ** 0.5) + 1
+        for d in range(2, limit):
+            if temp_radicand % (d * d) == 0:
+                square_factor = d * d
+                count = 0
+                
+                # Count how many times the prime factor 'd' appears to determine power of square part
+                while temp_radicand % (d * d) == 0:
+                    temp_radicand //= (d * d)
+                    found_factor = True
+                    
+        if not found_factor or temp_radicand <= 1:
+            break
+            
+    # The remaining 'temp_radicand' is the square-free part.
+    # However, we need to reconstruct the coefficient correctly based on what was divided out.
+    
+    # Let's re-calculate properly by finding all prime factors and their counts.
+    n = radicand
+    simplified_radicand = 1
+    total_square_factor = 1
+    
+    d = 2
+    while d * d <= n:
+        if n % (d * d) == 0:
+            count = 0
+            temp_n = n
+            # Count multiplicity of prime factor d in the original number to determine square part contribution
+            # Actually, simpler approach: divide out squares as much as possible.
+            
+            while True:
+                if n % (d * d) == 0:
+                    k = 1
+                    temp_n = n // (d*d)
+                    count += 2 # We are removing a square of prime p=d
+                    
+                    # Check for higher powers like p^4, etc. which contain two squares
+                    while temp_n % (d * d) == 0:
+                        k *= d 
+                        temp_n //= (d * d)
+                    
+                    simplified_radicand = n // total_square_factor if 'total' in locals() else None # Logic adjustment needed below
+                    
+                break
+            
+            # Correct logic for extracting square factors completely:
+            pass
+
+    # Re-implementing extraction cleanly with standard Python loops to ensure correctness without relying on specific API return types that might not fit the integer math directly.
+    
+    n = radicand
+    sq_free_part = 1
+    
+    d = 2
+    while d * d <= n:
+        if n % (d) == 0:
+            count = 0
+            temp_n = n
+            
+            # Count exponent of prime factor d
+            while temp_n % d == 0:
+                count += 1
+                temp_n //= d
+                
+            # If the exponent is even, it contributes to a perfect square. 
+            # We can move (d^(exponent // 2))^2 out as coefficient and leave d^(exponent % 2) inside.
+            
+            if count >= 2:
+                num_full_squares = count // 2
+                sq_part_base = d ** num_full_squares
+                
+                # Update simplified radicand with the remaining part of this prime factor
+                remainder_exp = count % 2
+                sq_free_part *= (d ** remainder_exp)
+                
+                # Accumulate coefficient base for later multiplication if needed, 
+                # but here we just need to track what remains inside.
+            else:
+                sq_free_part *= d
+                
+        elif n == temp_n and d * d > n:
+             break
+            
+    # Wait, the logic above is slightly flawed because I'm modifying 'n' implicitly or not tracking it right. 
+    # Let's do a clean pass.
+    
+    original_radicand = radicand
+    
+    def get_prime_factorization(n):
+        factors = {}
+        d = 2
+        temp_n = n
+        while d * d <= temp_n:
+            if temp_n % d == 0:
+                count = 0
+                while temp_n % d == 0:
+                    count += 1
+                    temp_n //= d
+                factors[d] = count
+            d += 1
+        if temp_n > 1:
+            factors[temp_n] = 1
+        return factors
+    
+    prime_factors = get_prime_factorization(original_radicand)
+    
+    coefficient_outside = 1
+    radicand_inside = original_radicand
+    
+    for p, exp in prime_factors.items():
+        # Move even exponents to the outside as a square
+        num_squares = exp // 2
+        
+        if num_squares > 0:
+            sq_part = p ** (num_squares * 2)
+            coefficient_outside *= int(sq_part ** 0.5) # This is just p^num_squares
+            
+            radicand_inside //= sq_part
+            
+    simplified_radicand = radicand_inside
+    
+    # Ensure the result matches simplest radical form: coeff * sqrt(rad)
+    # The question asks for outer_coefficient (1 if absent, else provided). 
+    # Here we assume no explicit multiplier was passed in kwargs other than radicand.
+    
+    final_coef = coefficient_outside
+    final_radicand = simplified_radicand
+    
+    # Construct the answer dict as per contract: { "coefficient": int, "radicand": int }
+    correct_answer_dict = {
+        "coefficient": final_coef,
+        "radicand": final_radicand
+    }
+
+    oracle_payload = {"radicand": radicand} # Frozen parameter logic applied here
+    
+    question_text = f"Rewrite the expression 1 * sqrt({radicand}) in simplest radical form as coefficient * sqrt(square_free_radicand)."
+    
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer_dict,
+        "oracle_payload": oracle_payload
+    }
+```

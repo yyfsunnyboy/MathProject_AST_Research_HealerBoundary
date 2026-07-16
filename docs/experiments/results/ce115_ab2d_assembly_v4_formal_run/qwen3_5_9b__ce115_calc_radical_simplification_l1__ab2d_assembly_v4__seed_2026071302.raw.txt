@@ -1,0 +1,66 @@
+def generate(level=1, **kwargs):
+    from core.prompts.domain_function_library import FractionOps, PolynomialOps, RadicalOps
+    
+    # Frozen parameter as per contract
+    radicand = 54
+    
+    # Factorize radicand to find square factors for simplification
+    n = radicand
+    simplified_radical_part = []
+    
+    d = 2
+    while d * d <= n:
+        if n % d == 0:
+            count = 0
+            while n % d == 0:
+                count += 1
+                n //= d
+            # If exponent is even, move to coefficient; odd part stays in radicand
+            coeff_factor = (d ** (count // 2)) if count > 0 else 1
+            remaining_radical_part = d ** (count % 2)
+            
+            simplified_radical_part.append(coeff_factor * remaining_radical_part) # This logic is flawed for accumulation, let's restart with correct math
+            
+    # Correct simplification logic:
+    n_orig = radicand
+    coeff = 1
+    temp_n = n_orig
+    
+    d = 2
+    while d * d <= temp_n:
+        if temp_n % d == 0:
+            count = 0
+            while temp_n % d == 0:
+                count += 1
+                temp_n //= d
+            
+            # Each pair of factors moves to coefficient
+            coeff *= (d ** (count // 2))
+    
+    final_radicand = temp_n
+    
+    outer_coefficient = kwargs.get('outer_coefficient', 1)
+    
+    total_coefficient = outer_coefficient * coeff
+    
+    question_text = f"Rewrite {total_coefficient} * sqrt({radicand}) in simplest radical form." if total_coefficient != 1 else f"Rewrite sqrt({radicand}) in simplest radical form."
+
+    # Ensure radicand > 1 as per schema requirement, though mathematically it could be 1.
+    # The prompt says "square-free integer remaining under the square root (> 1)". 
+    # If input was a perfect square like 4 -> coeff=2, rad=1. But constraint says rad>1?
+    # Let's assume standard simplification where if result is rational (radicand=1), we might need to handle it or trust inputs aren't perfect squares for this specific "Radical" task context requiring a root. 
+    # However, strict adherence: radicand must be > 1. If calculation yields 1, the problem statement implies such cases are excluded or handled differently.
+    # Given frozen param is 54 (not perfect square), final_radicand will be > 1.
+
+    correct_answer = {
+        "coefficient": total_coefficient,
+        "radicand": final_radicand
+    }
+
+    oracle_payload = {"radicand": radicand}
+
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer,
+        "oracle_payload": oracle_payload
+    }

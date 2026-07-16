@@ -1,0 +1,92 @@
+```python
+def generate(level=1, **kwargs):
+    from decimal import Decimal
+    
+    # Frozen input data
+    products = [{"left": "2.79", "right": "89.3", "sign": 1}, {"left": "-0.21", "right": "89.3", "sign": -1}]
+
+    def parse_decimal(s):
+        return Decimal(s)
+
+    # Calculate the expression value using exact rational arithmetic via Decimals
+    total = Decimal(0)
+    
+    for term in products:
+        left_val = parse_decimal(term["left"])
+        right_val = parse_decimal(term["right"])
+        sign = term["sign"]
+        
+        product_value = (sign * left_val * right_val)
+        total += product_value
+
+    # Format the result as a canonical rational number string
+    numerator, denominator = total.as_tuple().digits if hasattr(total, 'as_tuple') else Decimal(total).numerator, Decimal(total).denominator
+    
+    # Handle negative sign separately to ensure positive denominator logic for formatting
+    is_negative = False
+    if denominator < 0:
+        is_negative = True
+        numerator *= -1
+        denominator *= -1
+        
+    final_numerator = int(numerator)
+    final_denominator = int(denominator)
+
+    # Reduce fraction by dividing both by GCD (using integer math for exactness)
+    def gcd(a, b):
+        a, b = abs(int(a)), abs(int(b))
+        while b:
+            a, b = b, a % b
+        return int(a)
+
+    common_divisor = gcd(final_numerator, final_denominator)
+    
+    reduced_num = final_numerator // common_divisor
+    reduced_denom = final_denominator // common_divisor
+    
+    # Format output string: integer if denominator is 1, otherwise "num/den" with positive denom
+    if reduced_denom == 1:
+        answer_str = str(reduced_num)
+    else:
+        sign_prefix = "-" if (reduced_num < 0 and reduced_denom > 0) or (reduced_num > 0 and reduced_denom < 0) else ""
+        abs_val = f"{abs(reduced_num)}"
+        
+        # Ensure positive denominator in output string representation
+        if reduced_denom < 0:
+            sign_prefix += "-"
+            abs_val, reduced_denom = str(abs(int(-reduced_num))), -int(reduced_denom)
+            
+        answer_str = f"{sign_prefix}{abs_val}/{reduced_denom}"
+
+    # Construct question text from the products list
+    terms_parts = []
+    for term in products:
+        left_s = term["left"]
+        right_s = term["right"]
+        sign_char = "+" if term["sign"] == 1 else "-"
+        
+        # Handle negative numbers correctly (e.g., -2.79)
+        num_str = str(term["left"])
+        den_val = Decimal("0")
+        try:
+            int_part, frac_part = divmod(Decimal(num_str), "1" if "." not in num_str else 1) # Simplified logic for string representation
+            # Reconstruct sign-aware string
+            val_s = str(term["left"])
+            
+            term_expr = f"{sign_char}{val_s} * {right_s}"
+        except:
+             pass
+        
+        terms_parts.append(f"({term['sign']} * ({term['left']}) * ({term['right']}))")
+
+    question_text = "Evaluate the following expression exactly:" + "\n".join(terms_parts) if len(products) > 1 else f"Evaluate the following expression exactly: {products[0]['sign']} * ({products[0]['left']}) * ({products[0]['right']})"
+    
+    # Prepare oracle payload (must be exact copy of frozen parameters)
+    oracle_payload = products
+
+    return {
+        "question_text": question_text,
+        "correct_answer": {"value": answer_str},
+        "oracle_payload": oracle_payload
+    }
+```

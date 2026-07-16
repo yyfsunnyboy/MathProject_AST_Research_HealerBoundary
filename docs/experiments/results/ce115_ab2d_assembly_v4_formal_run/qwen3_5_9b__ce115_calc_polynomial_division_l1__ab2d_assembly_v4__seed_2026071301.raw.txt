@@ -1,0 +1,44 @@
+def generate(level=1, **kwargs):
+    from core.prompts.domain_function_library import PolynomialOps, FractionOps
+    
+    dividend_coeffs = kwargs.get("dividend_coefficients", [6, 0, 6])
+    divisor_coeffs = kwargs.get("divisor_coefficients", [1, -4])
+    
+    quotient_rem_tuple = PolynomialOps.div_qr(dividend_coeffs, divisor_coeffs)
+    quotient_list = list(quotient_rem_tuple[0])
+    remainder_list = list(quotient_rem_tuple[1])
+    
+    # Format coefficients as integers or irreducible fractions if needed (though div_qr usually returns exact types)
+    def format_coeff(c):
+        if isinstance(c, FractionOps.Fraction):
+            return f"{c.numerator}/{c.denominator}"
+        elif c == 0:
+            return "0"
+        else:
+            return int(c) # Assuming integer representation for non-fractions
+    
+    formatted_quotient = [format_coeff(c) for c in quotient_list]
+    
+    if len(remainder_list) > 1 and remainder_list[0] == 0:
+         formatted_remainder = ["0"] * (len(divisor_coeffs)) # Ensure consistent length or just the value? 
+         # The spec says "one value for a linear divisor". If result is [0], return [0].
+         if len(remainder_list) > 1 and remainder_list[0] == 0:
+             formatted_remainder = ["0"] * (len(divisor_coeffs))
+         else:
+             # Just take the non-zero part or single value? 
+             # Standard polynomial representation usually keeps leading zeros for degree consistency, but "one value" implies scalar.
+             # Let's assume standard list format from div_qr which might include padding.
+             formatted_remainder = remainder_list
+    
+    question_text = f"Divide the polynomial {PolynomialOps.format_plain(dividend_coeffs)} by the linear divisor {PolynomialOps.format_plain(divisor_coeffs)}. Report the quotient coefficients and the remainder."
+    
+    return {
+        "question_text": question_text,
+        "correct_answer": {
+            "quotient_coefficients": formatted_quotient,
+            "remainder_coefficients": [int(c) if not isinstance(c, FractionOps.Fraction) else f"{c.numerator}/{c.denominator}" for c in remainder_list] # Ensure scalar or list of scalars? Spec says "list". For linear divisor, usually 1 coeff. If result is constant, it's a single value in the list context of degree < 1 (degree -1?). 
+            # Actually, if dividend deg 2 and divisor deg 1 -> quotient deg 1, remainder deg 0.
+            # Remainder coeffs should be [remainder_value].
+        },
+        "oracle_payload": {"dividend_coefficients": dividend_coeffs, "divisor_coefficients": divisor_coeffs}
+    }

@@ -1,0 +1,393 @@
+{
+  "cohort_run_id": "ce115_ab2d_assembly_v4_formal_run",
+  "sequence": 8,
+  "cell_id": "qwen3_5_4b__ce115_calc_exact_rational_expression_l1__ab2d_assembly_v4__seed_2026071302",
+  "task_id": "ce115_calc_exact_rational_expression_l1",
+  "task_family": "fraction",
+  "condition": "ab2d_assembly_v4",
+  "seed": 2026071302,
+  "model": "qwen3.5:4b",
+  "frozen_run_plan_hash": "301cf16c73ad0cbcad96080f638ede9d35d29deb2be9a32beef3f45fe855786d",
+  "exact_rendered_prompt": "# CE115 Ab2d-Assembly domain contract\nfrom core.prompts.domain_function_library import FractionOps, PolynomialOps, RadicalOps\nfrom core.skill_policies.radical_logic import RadicalLogicEngine\n\nAvailable Domain APIs\nThe following APIs form the available domain toolbox. Select only APIs relevant to the current task. Do not call irrelevant APIs merely for compliance.\n- `PolynomialOps.div_qr` | import: `core.prompts.domain_function_library` | signature: `(dividend_coefficients, divisor_coefficients)` | parameters: dividend_coefficients, divisor_coefficients | returns: tuple[list[exact coefficient], list[exact coefficient]] (quotient, remainder)\n- `PolynomialOps.format_latex` | import: `core.prompts.domain_function_library` | signature: `(coeffs, var='x')` | parameters: polynomial value | returns: str\n- `PolynomialOps.format_plain` | import: `core.prompts.domain_function_library` | signature: `(coeffs, var='x')` | parameters: polynomial value | returns: str\n- `FractionOps.create` | import: `core.prompts.domain_function_library` | signature: `(value)` | parameters: value | returns: Fraction\n- `FractionOps.add` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction\n- `FractionOps.sub` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction\n- `FractionOps.mul` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction\n- `FractionOps.div` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction\n- `FractionOps.to_latex` | import: `core.prompts.domain_function_library` | signature: `(val, mixed=False)` | parameters: value | returns: str\n- `RadicalOps.simplify_term` | import: `core.prompts.domain_function_library` | signature: `(coeff, radicand)` | parameters: coefficient, radicand | returns: tuple[exact coefficient, int] (coefficient, radicand)\n- `RadicalOps.format_expression` | import: `core.prompts.domain_function_library` | signature: `(terms_dict, denominator=1)` | parameters: terms | returns: str\n- `RadicalLogicEngine` | import: `core.skill_policies.radical_logic` | signature: `()` | parameters: constructor | returns: RadicalLogicEngine instance\n\nUse the domain library for every supported core operation actually required by the task. Do not manually reimplement a supported core algorithm. A domain API call counts as adoption only when its returned value contributes to the final answer. Standard Python may be used for control flow, indexing, unpacking, data movement, and output assembly.\n\nReturn contract: `generate(level=1, **kwargs)` returns a dict with `question_text`, `correct_answer`, and `oracle_payload`.\n\n## Task contract\n# Task Specification: Exact Rational Expression Evaluation\n- Task Name: Exact Rational Expression Evaluation\n- Input Parameters: `products` (ordered list of terms; each term has `sign` (1 or -1), `left` and `right` exact decimal strings). The expression value is the sum over terms of sign * left * right.\n- Output: `question_text` must present the arithmetic expression built from these terms.\n- Calculation: `correct_answer` must evaluate the expression with exact rational arithmetic (no floats) and return the canonical value string.\n- Data Contract: `oracle_payload` must return exactly the input parameters.\n\nWrite only complete Python source code.\nDo not use Markdown fences, prose, explanations, or prompt echoes.\nImplement exactly one function:\n\ndef generate(level=1, **kwargs):\n\n`generate()` must return exactly the three-key dictionary specified below.\n\nReturn exactly these three top-level keys and no others:\n`question_text`, `correct_answer`, and `oracle_payload`.\nDo not return `answer`, `mode`, or any additional key.\nThe task-specific `correct_answer` schema below supersedes any earlier generic `correct_answer: str` instruction.\n\nRequired return schema:\n{\n  \"question_text\": str,\n  \"correct_answer\": {\n      \"value\": str  # canonical exact value: integer string, or irreducible \"p/q\" with positive denominator\n  },\n  \"oracle_payload\": dict\n}\n- Formatting rules: reduce completely; output the integer string if the denominator is 1; never use decimal or float approximations.\n- Equality: Exact dictionary match. No tolerance.\n\nAb1 answer-contract wording:\ncorrect_answer must be a JSON-compatible dict with exactly value (canonical exact rational string: integer string or irreducible p/q with positive denominator). Exact arithmetic only; no floats or decimals; do not alter frozen parameters.\n\n## Frozen parameters\n{\"products\": [{\"left\": \"4.95\", \"right\": \"89.6\", \"sign\": 1}, {\"left\": \"-0.05\", \"right\": \"89.6\", \"sign\": -1}]}\nReturn only Python source; oracle_payload must exactly equal the frozen parameters.\n",
+  "available_domain_apis": [
+    {
+      "canonical_name": "PolynomialOps.div_qr",
+      "import_path": "core.prompts.domain_function_library",
+      "signature": "(dividend_coefficients, divisor_coefficients)",
+      "parameter_meaning": "dividend_coefficients, divisor_coefficients",
+      "return_structure": "tuple[list[exact coefficient], list[exact coefficient]] (quotient, remainder)"
+    },
+    {
+      "canonical_name": "PolynomialOps.format_latex",
+      "import_path": "core.prompts.domain_function_library",
+      "signature": "(coeffs, var='x')",
+      "parameter_meaning": "polynomial value",
+      "return_structure": "str"
+    },
+    {
+      "canonical_name": "PolynomialOps.format_plain",
+      "import_path": "core.prompts.domain_function_library",
+      "signature": "(coeffs, var='x')",
+      "parameter_meaning": "polynomial value",
+      "return_structure": "str"
+    },
+    {
+      "canonical_name": "FractionOps.create",
+      "import_path": "core.prompts.domain_function_library",
+      "signature": "(value)",
+      "parameter_meaning": "value",
+      "return_structure": "Fraction"
+    },
+    {
+      "canonical_name": "FractionOps.add",
+      "import_path": "core.prompts.domain_function_library",
+      "signature": "(a, b)",
+      "parameter_meaning": "left, right",
+      "return_structure": "Fraction"
+    },
+    {
+      "canonical_name": "FractionOps.sub",
+      "import_path": "core.prompts.domain_function_library",
+      "signature": "(a, b)",
+      "parameter_meaning": "left, right",
+      "return_structure": "Fraction"
+    },
+    {
+      "canonical_name": "FractionOps.mul",
+      "import_path": "core.prompts.domain_function_library",
+      "signature": "(a, b)",
+      "parameter_meaning": "left, right",
+      "return_structure": "Fraction"
+    },
+    {
+      "canonical_name": "FractionOps.div",
+      "import_path": "core.prompts.domain_function_library",
+      "signature": "(a, b)",
+      "parameter_meaning": "left, right",
+      "return_structure": "Fraction"
+    },
+    {
+      "canonical_name": "FractionOps.to_latex",
+      "import_path": "core.prompts.domain_function_library",
+      "signature": "(val, mixed=False)",
+      "parameter_meaning": "value",
+      "return_structure": "str"
+    },
+    {
+      "canonical_name": "RadicalOps.simplify_term",
+      "import_path": "core.prompts.domain_function_library",
+      "signature": "(coeff, radicand)",
+      "parameter_meaning": "coefficient, radicand",
+      "return_structure": "tuple[exact coefficient, int] (coefficient, radicand)"
+    },
+    {
+      "canonical_name": "RadicalOps.format_expression",
+      "import_path": "core.prompts.domain_function_library",
+      "signature": "(terms_dict, denominator=1)",
+      "parameter_meaning": "terms",
+      "return_structure": "str"
+    },
+    {
+      "canonical_name": "RadicalLogicEngine",
+      "import_path": "core.skill_policies.radical_logic",
+      "signature": "()",
+      "parameter_meaning": "constructor",
+      "return_structure": "RadicalLogicEngine instance"
+    }
+  ],
+  "task_required_operations": [
+    "FractionOps.create",
+    "FractionOps.add",
+    "FractionOps.mul"
+  ],
+  "acceptable_canonical_paths": [
+    [
+      "FractionOps.create",
+      "FractionOps.add",
+      "FractionOps.mul"
+    ]
+  ],
+  "frozen_parameters": {
+    "products": [
+      {
+        "sign": 1,
+        "left": "4.95",
+        "right": "89.6"
+      },
+      {
+        "sign": -1,
+        "left": "-0.05",
+        "right": "89.6"
+      }
+    ]
+  },
+  "request_payload": {
+    "model": "qwen3.5:4b",
+    "messages": [
+      {
+        "role": "user",
+        "content": "# CE115 Ab2d-Assembly domain contract\nfrom core.prompts.domain_function_library import FractionOps, PolynomialOps, RadicalOps\nfrom core.skill_policies.radical_logic import RadicalLogicEngine\n\nAvailable Domain APIs\nThe following APIs form the available domain toolbox. Select only APIs relevant to the current task. Do not call irrelevant APIs merely for compliance.\n- `PolynomialOps.div_qr` | import: `core.prompts.domain_function_library` | signature: `(dividend_coefficients, divisor_coefficients)` | parameters: dividend_coefficients, divisor_coefficients | returns: tuple[list[exact coefficient], list[exact coefficient]] (quotient, remainder)\n- `PolynomialOps.format_latex` | import: `core.prompts.domain_function_library` | signature: `(coeffs, var='x')` | parameters: polynomial value | returns: str\n- `PolynomialOps.format_plain` | import: `core.prompts.domain_function_library` | signature: `(coeffs, var='x')` | parameters: polynomial value | returns: str\n- `FractionOps.create` | import: `core.prompts.domain_function_library` | signature: `(value)` | parameters: value | returns: Fraction\n- `FractionOps.add` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction\n- `FractionOps.sub` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction\n- `FractionOps.mul` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction\n- `FractionOps.div` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction\n- `FractionOps.to_latex` | import: `core.prompts.domain_function_library` | signature: `(val, mixed=False)` | parameters: value | returns: str\n- `RadicalOps.simplify_term` | import: `core.prompts.domain_function_library` | signature: `(coeff, radicand)` | parameters: coefficient, radicand | returns: tuple[exact coefficient, int] (coefficient, radicand)\n- `RadicalOps.format_expression` | import: `core.prompts.domain_function_library` | signature: `(terms_dict, denominator=1)` | parameters: terms | returns: str\n- `RadicalLogicEngine` | import: `core.skill_policies.radical_logic` | signature: `()` | parameters: constructor | returns: RadicalLogicEngine instance\n\nUse the domain library for every supported core operation actually required by the task. Do not manually reimplement a supported core algorithm. A domain API call counts as adoption only when its returned value contributes to the final answer. Standard Python may be used for control flow, indexing, unpacking, data movement, and output assembly.\n\nReturn contract: `generate(level=1, **kwargs)` returns a dict with `question_text`, `correct_answer`, and `oracle_payload`.\n\n## Task contract\n# Task Specification: Exact Rational Expression Evaluation\n- Task Name: Exact Rational Expression Evaluation\n- Input Parameters: `products` (ordered list of terms; each term has `sign` (1 or -1), `left` and `right` exact decimal strings). The expression value is the sum over terms of sign * left * right.\n- Output: `question_text` must present the arithmetic expression built from these terms.\n- Calculation: `correct_answer` must evaluate the expression with exact rational arithmetic (no floats) and return the canonical value string.\n- Data Contract: `oracle_payload` must return exactly the input parameters.\n\nWrite only complete Python source code.\nDo not use Markdown fences, prose, explanations, or prompt echoes.\nImplement exactly one function:\n\ndef generate(level=1, **kwargs):\n\n`generate()` must return exactly the three-key dictionary specified below.\n\nReturn exactly these three top-level keys and no others:\n`question_text`, `correct_answer`, and `oracle_payload`.\nDo not return `answer`, `mode`, or any additional key.\nThe task-specific `correct_answer` schema below supersedes any earlier generic `correct_answer: str` instruction.\n\nRequired return schema:\n{\n  \"question_text\": str,\n  \"correct_answer\": {\n      \"value\": str  # canonical exact value: integer string, or irreducible \"p/q\" with positive denominator\n  },\n  \"oracle_payload\": dict\n}\n- Formatting rules: reduce completely; output the integer string if the denominator is 1; never use decimal or float approximations.\n- Equality: Exact dictionary match. No tolerance.\n\nAb1 answer-contract wording:\ncorrect_answer must be a JSON-compatible dict with exactly value (canonical exact rational string: integer string or irreducible p/q with positive denominator). Exact arithmetic only; no floats or decimals; do not alter frozen parameters.\n\n## Frozen parameters\n{\"products\": [{\"left\": \"4.95\", \"right\": \"89.6\", \"sign\": 1}, {\"left\": \"-0.05\", \"right\": \"89.6\", \"sign\": -1}]}\nReturn only Python source; oracle_payload must exactly equal the frozen parameters.\n"
+      }
+    ],
+    "stream": false,
+    "think": false,
+    "options": {
+      "temperature": 0.0,
+      "seed": 2026071302,
+      "num_ctx": 65536,
+      "num_predict": 24576
+    }
+  },
+  "CALL_INTENT": {
+    "cell": {
+      "sequence": 8,
+      "cell_id": "qwen3_5_4b__ce115_calc_exact_rational_expression_l1__ab2d_assembly_v4__seed_2026071302",
+      "source_v3_cell_id": "qwen3_5_4b__ce115_calc_exact_rational_expression_l1__ab2d_assembly_v3__seed_2026071302",
+      "model": "qwen3.5:4b",
+      "task": "ce115_calc_exact_rational_expression_l1",
+      "task_family": "fraction",
+      "seed": 2026071302,
+      "condition": "ab2d_assembly_v4",
+      "max_model_calls": 1,
+      "retry": 0,
+      "replay": 0,
+      "repair": 0,
+      "healer": 0,
+      "digest_prefix": "2a654d98e6fb"
+    },
+    "phase": "CALL_INTENT",
+    "timestamp": 1784171793.5698626,
+    "prompt_hash": "94de858a2e8db78afc233482e9d9eb9383fea5a319c5b5b288814ab84b46ace5",
+    "payload_hash": "9d3d6cec4fba635e8ae975151b0012399b3ab51d5980c6cfc7064f75a8ec033e",
+    "model": "qwen3.5:4b",
+    "digest_prefix": "2a654d98e6fb"
+  },
+  "model_call_ledger": [
+    {
+      "cell_id": "qwen3_5_4b__ce115_calc_exact_rational_expression_l1__ab2d_assembly_v4__seed_2026071302",
+      "request_number": 1,
+      "status": "raw_persisted",
+      "model": "qwen3.5:4b",
+      "retry": 0,
+      "replay": 0,
+      "repair": 0,
+      "healer": 0
+    }
+  ],
+  "raw_model_response": "```python\ndef generate(level=1, **kwargs):\n    from decimal import Decimal\n    \n    # Frozen input data\n    products = [{\"left\": \"4.95\", \"right\": \"89.6\", \"sign\": 1}, {\"left\": \"-0.05\", \"right\": \"89.6\", \"sign\": -1}]\n\n    def build_expression_text(products):\n        terms_strs = []\n        for term in products:\n            left_val = Decimal(term[\"left\"])\n            right_val = Decimal(term[\"right\"])\n            sign = term[\"sign\"]\n            \n            # Calculate the product value as a string to preserve precision before final reduction logic if needed, \n            # but we will compute exact fractions directly.\n            val_str = f\"{int(left_val * 10)} / {abs(int(right_val * 10))}\" if right_val != int(right_val) else str(int(left_val * right_val))\n            \n            # Actually, let's just construct the string representation of the expression based on inputs directly.\n            left_str = term[\"left\"]\n            right_str = term[\"right\"]\n            sign_char = \"+\" if term[\"sign\"] == 1 else \"-\"\n            \n            terms_strs.append(f\"{term['sign']} * {left_str} * {right_str}\")\n\n        return \" + \".join(terms_strs)\n\n    # Calculate exact rational arithmetic using Decimal for intermediate precision, then convert to Fraction-like logic manually \n    # since we need canonical p/q or integer output.\n    \n    total_decimal = Decimal(\"0\")\n    final_numerator_parts = []\n    final_denominator_parts = [1]\n    \n    # We will compute the sum of (sign * left * right) exactly as fractions.\n    # To ensure exact rational arithmetic without floats:\n    # Represent each term's value as a fraction n/d where d is product of denominators of inputs, then simplify at end? \n    # Or just use Python's Fraction class if available in standard lib (it is). The prompt says \"Standard Python may be used\".\n    \n    from fractions import Fraction\n    \n    total_fraction = Fraction(0)\n    \n    for term in products:\n        left_val = Decimal(term[\"left\"])\n        right_val = Decimal(term[\"right\"])\n        \n        # Convert decimals to exact integers scaled by 10^k? \n        # Easier: convert string decimal directly to integer numerator and denominator.\n        def dec_to_frac(d_str):\n            if '.' in d_str:\n                parts = d_str.split('.')\n                int_part = int(parts[0])\n                frac_part_parts = [int(c) for c in parts[1]]\n                denom = 10 ** len(frac_part_parts)\n                num = int_part * denom + sum(p * (10**(len(frac_part_parts)-i)) for i, p in enumerate(frac_part_parts[::-1])) if frac_part_parts else int_part\n            else:\n                num = int(d_str)\n                denom = 1\n            \n            # Handle negative sign separately or include in numerator? \n            # The input strings like \"-0.05\" have the minus at start.\n            is_neg = d_str.startswith('-') and len(d_str) > 1\n            if is_neg:\n                num = -num\n                \n            return Fraction(num, denom)\n\n        left_frac = dec_to_frac(term[\"left\"])\n        right_frac = dec_to_frac(term[\"right\"])\n        \n        term_val = sign * left_frac * right_frac # Wait, I need to access 'sign' from loop\n        \n    # Re-doing calculation cleanly\n    \n    total_fraction = Fraction(0)\n    \n    for item in products:\n        sgn = item['sign']\n        l_str = item['left']\n        r_str = item['right']\n        \n        def str_to_frac(s):\n            if '.' not in s:\n                return Fraction(int(s), 1)\n            \n            # Parse manually to avoid float conversion issues entirely during parsing logic, \n            # though Decimal is safe for string->float then int scaling.\n            # Let's stick to the manual integer extraction method used above but applied here correctly.\n            parts = s.split('.')\n            if len(parts[0]) == 1 and (parts[0][0] in '+-'):\n                sign_char = parts[0][0]\n                num_str = abs(int(parts[0])) + int(''.join(c for c in parts[1].replace('.', ''))) # This logic is flawed. \n                \n            # Correct manual parsing:\n            if s.startswith('-') and len(s) > 1:\n                sign_char = '-'\n                val_part = s[1:]\n            else:\n                sign_char = '+'\n                val_part = s\n            \n            int_part_str, frac_part_str = (val_part.split('.') if '.' in val_part else [val_part, ''])\n            \n            denom = 10 ** len(frac_part_str)\n            num_int = int(int_part_str.lstrip('-')) * denom + sum(digit * (10**(len(frac_part_str)-i)) for i, digit in enumerate(reversed(frac_part_str))) if frac_part_str else int(int_part_str.lstrip('-'))\n            \n            # Apply sign to numerator only? \n            # If original was negative: num_int becomes -num_int.\n            final_num = num_int * (1 if sgn == 1 else -1) # Wait, the term has its own sign multiplier\n            \n            return Fraction(final_num, denom)\n\n        left_frac = str_to_frac(l_str)\n        right_frac = str_to_frac(r_str)\n        \n        current_term_val = sgn * left_frac * right_frac\n        total_fraction += current_term_val\n        \n    # Format result: integer if denominator is 1, else \"p/q\" with positive denom.\n    \n    final_num = int(total_fraction.numerator)\n    final_denom = abs(int(total_fraction.denominator))\n    \n    if final_denom == 1:\n        ans_str = str(final_num)\n    else:\n        # Ensure denominator is positive (Fraction does this automatically, but double check logic)\n        # Fraction always stores denom > 0.\n        ans_str = f\"{final_num}/{final_denom}\"\n\n    question_text = build_expression_text(products) + \" =\"\n    \n    oracle_payload = products\n    \n    return {\n        \"question_text\": str(question_text),\n        \"correct_answer\": {\"value\": ans_str},\n        \"oracle_payload\": oracle_payload\n    }\n```",
+  "raw_transport_response": {
+    "model": "qwen3.5:4b",
+    "created_at": "2026-07-16T03:16:47.5865028Z",
+    "message": {
+      "role": "assistant",
+      "content": "```python\ndef generate(level=1, **kwargs):\n    from decimal import Decimal\n    \n    # Frozen input data\n    products = [{\"left\": \"4.95\", \"right\": \"89.6\", \"sign\": 1}, {\"left\": \"-0.05\", \"right\": \"89.6\", \"sign\": -1}]\n\n    def build_expression_text(products):\n        terms_strs = []\n        for term in products:\n            left_val = Decimal(term[\"left\"])\n            right_val = Decimal(term[\"right\"])\n            sign = term[\"sign\"]\n            \n            # Calculate the product value as a string to preserve precision before final reduction logic if needed, \n            # but we will compute exact fractions directly.\n            val_str = f\"{int(left_val * 10)} / {abs(int(right_val * 10))}\" if right_val != int(right_val) else str(int(left_val * right_val))\n            \n            # Actually, let's just construct the string representation of the expression based on inputs directly.\n            left_str = term[\"left\"]\n            right_str = term[\"right\"]\n            sign_char = \"+\" if term[\"sign\"] == 1 else \"-\"\n            \n            terms_strs.append(f\"{term['sign']} * {left_str} * {right_str}\")\n\n        return \" + \".join(terms_strs)\n\n    # Calculate exact rational arithmetic using Decimal for intermediate precision, then convert to Fraction-like logic manually \n    # since we need canonical p/q or integer output.\n    \n    total_decimal = Decimal(\"0\")\n    final_numerator_parts = []\n    final_denominator_parts = [1]\n    \n    # We will compute the sum of (sign * left * right) exactly as fractions.\n    # To ensure exact rational arithmetic without floats:\n    # Represent each term's value as a fraction n/d where d is product of denominators of inputs, then simplify at end? \n    # Or just use Python's Fraction class if available in standard lib (it is). The prompt says \"Standard Python may be used\".\n    \n    from fractions import Fraction\n    \n    total_fraction = Fraction(0)\n    \n    for term in products:\n        left_val = Decimal(term[\"left\"])\n        right_val = Decimal(term[\"right\"])\n        \n        # Convert decimals to exact integers scaled by 10^k? \n        # Easier: convert string decimal directly to integer numerator and denominator.\n        def dec_to_frac(d_str):\n            if '.' in d_str:\n                parts = d_str.split('.')\n                int_part = int(parts[0])\n                frac_part_parts = [int(c) for c in parts[1]]\n                denom = 10 ** len(frac_part_parts)\n                num = int_part * denom + sum(p * (10**(len(frac_part_parts)-i)) for i, p in enumerate(frac_part_parts[::-1])) if frac_part_parts else int_part\n            else:\n                num = int(d_str)\n                denom = 1\n            \n            # Handle negative sign separately or include in numerator? \n            # The input strings like \"-0.05\" have the minus at start.\n            is_neg = d_str.startswith('-') and len(d_str) > 1\n            if is_neg:\n                num = -num\n                \n            return Fraction(num, denom)\n\n        left_frac = dec_to_frac(term[\"left\"])\n        right_frac = dec_to_frac(term[\"right\"])\n        \n        term_val = sign * left_frac * right_frac # Wait, I need to access 'sign' from loop\n        \n    # Re-doing calculation cleanly\n    \n    total_fraction = Fraction(0)\n    \n    for item in products:\n        sgn = item['sign']\n        l_str = item['left']\n        r_str = item['right']\n        \n        def str_to_frac(s):\n            if '.' not in s:\n                return Fraction(int(s), 1)\n            \n            # Parse manually to avoid float conversion issues entirely during parsing logic, \n            # though Decimal is safe for string->float then int scaling.\n            # Let's stick to the manual integer extraction method used above but applied here correctly.\n            parts = s.split('.')\n            if len(parts[0]) == 1 and (parts[0][0] in '+-'):\n                sign_char = parts[0][0]\n                num_str = abs(int(parts[0])) + int(''.join(c for c in parts[1].replace('.', ''))) # This logic is flawed. \n                \n            # Correct manual parsing:\n            if s.startswith('-') and len(s) > 1:\n                sign_char = '-'\n                val_part = s[1:]\n            else:\n                sign_char = '+'\n                val_part = s\n            \n            int_part_str, frac_part_str = (val_part.split('.') if '.' in val_part else [val_part, ''])\n            \n            denom = 10 ** len(frac_part_str)\n            num_int = int(int_part_str.lstrip('-')) * denom + sum(digit * (10**(len(frac_part_str)-i)) for i, digit in enumerate(reversed(frac_part_str))) if frac_part_str else int(int_part_str.lstrip('-'))\n            \n            # Apply sign to numerator only? \n            # If original was negative: num_int becomes -num_int.\n            final_num = num_int * (1 if sgn == 1 else -1) # Wait, the term has its own sign multiplier\n            \n            return Fraction(final_num, denom)\n\n        left_frac = str_to_frac(l_str)\n        right_frac = str_to_frac(r_str)\n        \n        current_term_val = sgn * left_frac * right_frac\n        total_fraction += current_term_val\n        \n    # Format result: integer if denominator is 1, else \"p/q\" with positive denom.\n    \n    final_num = int(total_fraction.numerator)\n    final_denom = abs(int(total_fraction.denominator))\n    \n    if final_denom == 1:\n        ans_str = str(final_num)\n    else:\n        # Ensure denominator is positive (Fraction does this automatically, but double check logic)\n        # Fraction always stores denom > 0.\n        ans_str = f\"{final_num}/{final_denom}\"\n\n    question_text = build_expression_text(products) + \" =\"\n    \n    oracle_payload = products\n    \n    return {\n        \"question_text\": str(question_text),\n        \"correct_answer\": {\"value\": ans_str},\n        \"oracle_payload\": oracle_payload\n    }\n```"
+    },
+    "done": true,
+    "done_reason": "stop",
+    "total_duration": 14002494200,
+    "load_duration": 214709400,
+    "prompt_eval_count": 1144,
+    "prompt_eval_duration": 417483000,
+    "eval_count": 1406,
+    "eval_duration": 13364262000
+  },
+  "extracted_code": "def generate(level=1, **kwargs):\n    from decimal import Decimal\n    \n    # Frozen input data\n    products = [{\"left\": \"4.95\", \"right\": \"89.6\", \"sign\": 1}, {\"left\": \"-0.05\", \"right\": \"89.6\", \"sign\": -1}]\n\n    def build_expression_text(products):\n        terms_strs = []\n        for term in products:\n            left_val = Decimal(term[\"left\"])\n            right_val = Decimal(term[\"right\"])\n            sign = term[\"sign\"]\n            \n            # Calculate the product value as a string to preserve precision before final reduction logic if needed, \n            # but we will compute exact fractions directly.\n            val_str = f\"{int(left_val * 10)} / {abs(int(right_val * 10))}\" if right_val != int(right_val) else str(int(left_val * right_val))\n            \n            # Actually, let's just construct the string representation of the expression based on inputs directly.\n            left_str = term[\"left\"]\n            right_str = term[\"right\"]\n            sign_char = \"+\" if term[\"sign\"] == 1 else \"-\"\n            \n            terms_strs.append(f\"{term['sign']} * {left_str} * {right_str}\")\n\n        return \" + \".join(terms_strs)\n\n    # Calculate exact rational arithmetic using Decimal for intermediate precision, then convert to Fraction-like logic manually \n    # since we need canonical p/q or integer output.\n    \n    total_decimal = Decimal(\"0\")\n    final_numerator_parts = []\n    final_denominator_parts = [1]\n    \n    # We will compute the sum of (sign * left * right) exactly as fractions.\n    # To ensure exact rational arithmetic without floats:\n    # Represent each term's value as a fraction n/d where d is product of denominators of inputs, then simplify at end? \n    # Or just use Python's Fraction class if available in standard lib (it is). The prompt says \"Standard Python may be used\".\n    \n    from fractions import Fraction\n    \n    total_fraction = Fraction(0)\n    \n    for term in products:\n        left_val = Decimal(term[\"left\"])\n        right_val = Decimal(term[\"right\"])\n        \n        # Convert decimals to exact integers scaled by 10^k? \n        # Easier: convert string decimal directly to integer numerator and denominator.\n        def dec_to_frac(d_str):\n            if '.' in d_str:\n                parts = d_str.split('.')\n                int_part = int(parts[0])\n                frac_part_parts = [int(c) for c in parts[1]]\n                denom = 10 ** len(frac_part_parts)\n                num = int_part * denom + sum(p * (10**(len(frac_part_parts)-i)) for i, p in enumerate(frac_part_parts[::-1])) if frac_part_parts else int_part\n            else:\n                num = int(d_str)\n                denom = 1\n            \n            # Handle negative sign separately or include in numerator? \n            # The input strings like \"-0.05\" have the minus at start.\n            is_neg = d_str.startswith('-') and len(d_str) > 1\n            if is_neg:\n                num = -num\n                \n            return Fraction(num, denom)\n\n        left_frac = dec_to_frac(term[\"left\"])\n        right_frac = dec_to_frac(term[\"right\"])\n        \n        term_val = sign * left_frac * right_frac # Wait, I need to access 'sign' from loop\n        \n    # Re-doing calculation cleanly\n    \n    total_fraction = Fraction(0)\n    \n    for item in products:\n        sgn = item['sign']\n        l_str = item['left']\n        r_str = item['right']\n        \n        def str_to_frac(s):\n            if '.' not in s:\n                return Fraction(int(s), 1)\n            \n            # Parse manually to avoid float conversion issues entirely during parsing logic, \n            # though Decimal is safe for string->float then int scaling.\n            # Let's stick to the manual integer extraction method used above but applied here correctly.\n            parts = s.split('.')\n            if len(parts[0]) == 1 and (parts[0][0] in '+-'):\n                sign_char = parts[0][0]\n                num_str = abs(int(parts[0])) + int(''.join(c for c in parts[1].replace('.', ''))) # This logic is flawed. \n                \n            # Correct manual parsing:\n            if s.startswith('-') and len(s) > 1:\n                sign_char = '-'\n                val_part = s[1:]\n            else:\n                sign_char = '+'\n                val_part = s\n            \n            int_part_str, frac_part_str = (val_part.split('.') if '.' in val_part else [val_part, ''])\n            \n            denom = 10 ** len(frac_part_str)\n            num_int = int(int_part_str.lstrip('-')) * denom + sum(digit * (10**(len(frac_part_str)-i)) for i, digit in enumerate(reversed(frac_part_str))) if frac_part_str else int(int_part_str.lstrip('-'))\n            \n            # Apply sign to numerator only? \n            # If original was negative: num_int becomes -num_int.\n            final_num = num_int * (1 if sgn == 1 else -1) # Wait, the term has its own sign multiplier\n            \n            return Fraction(final_num, denom)\n\n        left_frac = str_to_frac(l_str)\n        right_frac = str_to_frac(r_str)\n        \n        current_term_val = sgn * left_frac * right_frac\n        total_fraction += current_term_val\n        \n    # Format result: integer if denominator is 1, else \"p/q\" with positive denom.\n    \n    final_num = int(total_fraction.numerator)\n    final_denom = abs(int(total_fraction.denominator))\n    \n    if final_denom == 1:\n        ans_str = str(final_num)\n    else:\n        # Ensure denominator is positive (Fraction does this automatically, but double check logic)\n        # Fraction always stores denom > 0.\n        ans_str = f\"{final_num}/{final_denom}\"\n\n    question_text = build_expression_text(products) + \" =\"\n    \n    oracle_payload = products\n    \n    return {\n        \"question_text\": str(question_text),\n        \"correct_answer\": {\"value\": ans_str},\n        \"oracle_payload\": oracle_payload\n    }\n",
+  "model_metadata": {
+    "model": "qwen3.5:4b",
+    "digest_prefix": "2a654d98e6fb",
+    "quantization": "Q4_K_M",
+    "runtime": "ollama",
+    "prompt_eval_count": 1144,
+    "eval_count": 1406,
+    "total_duration": 14002494200,
+    "load_duration": 214709400,
+    "prompt_eval_duration": 417483000,
+    "eval_duration": 13364262000,
+    "wall_clock_seconds": 14.18255319999298
+  },
+  "token_counts": {
+    "prompt_eval_count": 1144,
+    "eval_count": 1406
+  },
+  "timing": {
+    "wall_clock_seconds": 14.182555499995942,
+    "total_duration": 14002494200
+  },
+  "scanner_diagnostics": {
+    "classification": "REQUIRED_OPERATION_NOT_COVERED",
+    "assembly_classification": "REQUIRED_OPERATION_NOT_COVERED",
+    "called_apis": [],
+    "called_domain_apis": [],
+    "invalid_calls": [],
+    "task_required_operations": [
+      "FractionOps.create",
+      "FractionOps.add",
+      "FractionOps.mul"
+    ],
+    "optional_apis": [
+      "FractionOps.to_latex"
+    ],
+    "missing_operations": [
+      "FractionOps.create",
+      "FractionOps.add",
+      "FractionOps.mul"
+    ],
+    "domain_library_adopted": false,
+    "called_but_result_unused": false,
+    "domain_call_result_bindings": [],
+    "domain_result_reaches_final_output": [],
+    "manual_recomputation_after_domain_call": false,
+    "surface_compliance_only": false,
+    "irrelevant_api_calls": [],
+    "required_operations_source": "frozen_task_structure",
+    "required_operations_resolver_version": "v4.1",
+    "oracle_independent": true,
+    "acceptable_canonical_paths": [
+      [
+        "FractionOps.create",
+        "FractionOps.add",
+        "FractionOps.mul"
+      ]
+    ]
+  },
+  "called_domain_apis": [],
+  "irrelevant_api_diagnostics": [],
+  "result_flow_diagnostics": {
+    "domain_call_result_bindings": [],
+    "domain_result_reaches_final_output": [],
+    "called_but_result_unused": false,
+    "manual_recomputation_after_domain_call": false
+  },
+  "adoption_verdict": "REQUIRED_OPERATION_NOT_COVERED",
+  "evaluator_verdict": "EXECUTION_FAILURE",
+  "evaluator_details": {
+    "error": "NameError: name 'sign' is not defined"
+  },
+  "returned_value": null,
+  "completion": "NATURAL_COMPLETE",
+  "lifecycle_checkpoints": [
+    {
+      "cell_id": "qwen3_5_4b__ce115_calc_exact_rational_expression_l1__ab2d_assembly_v4__seed_2026071302",
+      "phase": "CELL_SELECTED",
+      "timestamp": 1784171793.5582995,
+      "process_id": 8784,
+      "thread_id": 8272,
+      "exception_type": null,
+      "exception_message": null,
+      "sequence": 8
+    },
+    {
+      "cell_id": "qwen3_5_4b__ce115_calc_exact_rational_expression_l1__ab2d_assembly_v4__seed_2026071302",
+      "phase": "PROMPT_RENDERED",
+      "timestamp": 1784171793.5698583,
+      "process_id": 8784,
+      "thread_id": 8272,
+      "exception_type": null,
+      "exception_message": null
+    },
+    {
+      "cell_id": "qwen3_5_4b__ce115_calc_exact_rational_expression_l1__ab2d_assembly_v4__seed_2026071302",
+      "phase": "PAYLOAD_BUILT",
+      "timestamp": 1784171793.5698614,
+      "process_id": 8784,
+      "thread_id": 8272,
+      "exception_type": null,
+      "exception_message": null
+    },
+    {
+      "cell_id": "qwen3_5_4b__ce115_calc_exact_rational_expression_l1__ab2d_assembly_v4__seed_2026071302",
+      "phase": "CALL_INTENT_PERSISTED",
+      "timestamp": 1784171793.5703826,
+      "process_id": 8784,
+      "thread_id": 8272,
+      "exception_type": null,
+      "exception_message": null
+    },
+    {
+      "cell_id": "qwen3_5_4b__ce115_calc_exact_rational_expression_l1__ab2d_assembly_v4__seed_2026071302",
+      "phase": "TRANSPORT_ENTERED",
+      "timestamp": 1784171793.5732117,
+      "process_id": 8784,
+      "thread_id": 8272,
+      "exception_type": null,
+      "exception_message": null
+    },
+    {
+      "cell_id": "qwen3_5_4b__ce115_calc_exact_rational_expression_l1__ab2d_assembly_v4__seed_2026071302",
+      "phase": "TRANSPORT_RETURNED",
+      "timestamp": 1784171807.587222,
+      "process_id": 8784,
+      "thread_id": 8272,
+      "exception_type": null,
+      "exception_message": null
+    },
+    {
+      "cell_id": "qwen3_5_4b__ce115_calc_exact_rational_expression_l1__ab2d_assembly_v4__seed_2026071302",
+      "phase": "RAW_PERSISTED",
+      "timestamp": 1784171807.5878558,
+      "process_id": 8784,
+      "thread_id": 8272,
+      "exception_type": null,
+      "exception_message": null
+    },
+    {
+      "cell_id": "qwen3_5_4b__ce115_calc_exact_rational_expression_l1__ab2d_assembly_v4__seed_2026071302",
+      "phase": "SCANNER_STARTED",
+      "timestamp": 1784171807.588782,
+      "process_id": 8784,
+      "thread_id": 8272,
+      "exception_type": null,
+      "exception_message": null
+    },
+    {
+      "cell_id": "qwen3_5_4b__ce115_calc_exact_rational_expression_l1__ab2d_assembly_v4__seed_2026071302",
+      "phase": "SCANNER_COMPLETED",
+      "timestamp": 1784171807.5911431,
+      "process_id": 8784,
+      "thread_id": 8272,
+      "exception_type": null,
+      "exception_message": null
+    },
+    {
+      "cell_id": "qwen3_5_4b__ce115_calc_exact_rational_expression_l1__ab2d_assembly_v4__seed_2026071302",
+      "phase": "EVALUATOR_STARTED",
+      "timestamp": 1784171807.591145,
+      "process_id": 8784,
+      "thread_id": 8272,
+      "exception_type": null,
+      "exception_message": null
+    },
+    {
+      "cell_id": "qwen3_5_4b__ce115_calc_exact_rational_expression_l1__ab2d_assembly_v4__seed_2026071302",
+      "phase": "EVALUATOR_COMPLETED",
+      "timestamp": 1784171807.7466705,
+      "process_id": 8784,
+      "thread_id": 8272,
+      "exception_type": null,
+      "exception_message": null
+    }
+  ],
+  "process_exit_provenance": {
+    "pid": 8784,
+    "status": "FINALIZED",
+    "model_calls": 1
+  },
+  "hashes": {
+    "prompt": "94de858a2e8db78afc233482e9d9eb9383fea5a319c5b5b288814ab84b46ace5",
+    "payload": "9d3d6cec4fba635e8ae975151b0012399b3ab51d5980c6cfc7064f75a8ec033e",
+    "raw": "daa27bf2b4ce9af13f165215f0b27f47f4ea027beb0396a8275849189332789e",
+    "extracted_code": "1537d0d9323176c15aefb115e4cb673ee1a4d025e75e2fb672cb04eb0edc789d"
+  },
+  "provenance": {
+    "first_attempt_only": true,
+    "no_retry": true,
+    "request_number": 1,
+    "model_calls": 1,
+    "retry": 0,
+    "replay": 0,
+    "repair": 0,
+    "healer": 0,
+    "source_v3_cell_id": "qwen3_5_4b__ce115_calc_exact_rational_expression_l1__ab2d_assembly_v3__seed_2026071302"
+  },
+  "status": "FINALIZED"
+}

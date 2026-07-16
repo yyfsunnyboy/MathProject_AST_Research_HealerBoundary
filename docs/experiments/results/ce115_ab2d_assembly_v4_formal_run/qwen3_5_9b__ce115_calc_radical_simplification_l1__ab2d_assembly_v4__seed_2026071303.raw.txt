@@ -1,0 +1,221 @@
+def generate(level=1, **kwargs):
+    from core.prompts.domain_function_library import FractionOps, PolynomialOps, RadicalOps
+    
+    # Frozen parameter as per contract
+    radicand = 112
+    
+    # Factorize radicand to find square factors for simplification
+    n = radicand
+    simplified_radical_part = []
+    
+    d = 2
+    while d * d <= n:
+        if n % d == 0:
+            count = 0
+            while n % d == 0:
+                count += 1
+                n //= d
+            # If exponent is even, pull out sqrt(d^even) -> integer factor
+            # If odd, leave one inside and pull out rest
+            if count >= 2:
+                power = count // 2 * 2
+                extracted_factor = d ** (count // 2)
+                simplified_radical_part.append(extracted_factor)
+        d += 1
+    
+    remaining_n = n
+    # Handle the case where a prime factor remains with exponent 1 or odd > 1
+    if remaining_n > 1:
+        count = 0
+        temp = remaining_n
+        while temp % remaining_n == 0 and temp // remaining_n >= 2: 
+            pass
+        
+        # Re-evaluate logic for the final n which is now square-free part of original after removing even powers?
+        # Actually, let's restart factorization cleanly.
+
+    def get_simplified_form(n):
+        """Returns (coefficient, radicand) where coefficient = sqrt(square_part), radicand = square_free_part"""
+        if n <= 0:
+            return None
+        
+        factors = {}
+        d = 2
+        temp_n = n
+        while d * d <= temp_n:
+            while temp_n % d == 0:
+                factors[d] = factors.get(d, 0) + 1
+                temp_n //= d
+            d += 1
+        
+        if temp_n > 1:
+            factors[temp_n] = factors.get(temp_n, 0) + 1
+            
+        coefficient = 1
+        radicand = 1
+        for base, exp in factors.items():
+            # We want sqrt(base^exp). 
+            # If exp is even k*2 -> pull out base^k. Inside: none (or handled by other bases if composite? No, prime factorization)
+            # Actually standard form: a * sqrt(b) where b is square free.
+            # So for each p^e in n = product(p_i ^ e_i):
+            # contribution to coefficient: p^(floor(e/2))
+            # contribution to radicand: p^(e % 2)
+            
+            coeff_part = base ** (exp // 2)
+            rad_part_base = base if exp % 2 == 1 else 1
+            
+            coefficient *= coeff_part
+            radicand *= rad_part_base
+            
+        return coefficient, radicand
+
+    outer_coefficient = kwargs.get('outer_coefficient', 1)
+    
+    # Simplify the inner radical first (assuming input is just sqrt(radicand))
+    # The task says: rewrite outer_coefficient * sqrt(radicand)
+    # So we simplify sqrt(112). 
+    coeff_inner, rad_inner = get_simplified_form(radican d=kwargs.get('radicand', 112))
+
+# Correction to the function body logic above (re-writing cleanly inside generate):
+
+def generate(level=1, **kwargs):
+    from core.prompts.domain_function_library import FractionOps
+    
+    # Frozen parameter as per contract instructions: radicand is fixed at 112 unless overridden by kwargs? 
+    # The prompt says "Frozen parameters {"radicand": 112}". So we use this.
+    
+    frozen_radicand = kwargs.get('radicand', 112)
+    outer_coefficient = kwargs.get('outer_coefficient', 1)
+    
+    def get_simplified_form(n):
+        if n <= 0: return None, None
+        factors = {}
+        d = 2
+        temp_n = n
+        while d * d <= temp_n:
+            while temp_n % d == 0:
+                factors[d] = factors.get(d, 0) + 1
+                temp_n //= d
+            d += 1
+        
+        if temp_n > 1:
+            factors[temp_n] = factors.get(temp_n, 0) + 1
+            
+        coefficient = 1
+        radicand = 1
+        for base, exp in factors.items():
+            coeff_part = base ** (exp // 2)
+            rad_part_base = base if exp % 2 == 1 else 1
+            coefficient *= coeff_part
+            radicand *= rad_part_base
+            
+        return coefficient, radicand
+
+    # Simplify sqrt(frozen_radicand)
+    inner_coeff, inner_rad = get_simplified_form(frozen_radicand)
+    
+    # Total simplified form: (outer * inner_coeff) * sqrt(inner_rad)
+    total_coefficient = outer_coefficient * inner_coeff
+    
+    question_text = f"Rewrite {total_coefficient} * sqrt({frozen_radicand}) in simplest radical form as coefficient * sqrt(square_free_radicand)." 
+    # Wait, the prompt says "question_text must ask to rewrite outer_coefficient * sqrt(radicand)".
+    # If outer is 1 (default), it's just sqrt(112). But if user passes outer=3, it should be 3*sqrt(...).
+    # Let's construct the string dynamically.
+    
+    display_outer = f"{outer_coefficient} * " if outer_coefficient != 1 else ""
+    question_text = f"Rewrite {display_outer}sqr{frozen_radicand}) in simplest radical form." 
+    # Correction: syntax error above. Let's fix the string construction properly.
+
+# Final clean implementation without intermediate errors:
+
+def generate(level=1, **kwargs):
+    from core.prompts.domain_function_library import FractionOps
+    
+    frozen_radicand = kwargs.get('radicand', 112)
+    outer_coefficient = kwargs.get('outer_coefficient', 1)
+    
+    def get_simplified_form(n):
+        if n <= 0: return None, None
+        factors = {}
+        d = 2
+        temp_n = n
+        while d * d <= temp_n:
+            while temp_n % d == 0:
+                factors[d] = factors.get(d, 0) + 1
+                temp_n //= d
+            d += 1
+        
+        if temp_n > 1:
+            factors[temp_n] = factors.get(temp_n, 0) + 1
+            
+        coefficient = 1
+        radicand = 1
+        for base, exp in factors.items():
+            coeff_part = base ** (exp // 2)
+            rad_part_base = base if exp % 2 == 1 else 1
+            coefficient *= coeff_part
+            radicand *= rad_part_base
+            
+        return coefficient, radicand
+
+    inner_coeff, inner_rad = get_simplified_form(frozen_radicand)
+    
+    total_coefficient = outer_coefficient * inner_coeff
+    
+    # Construct question text carefully to match "rewrite X in simplest radical form"
+    if outer_coefficient == 1:
+        expr_str = f"sqr{frozen_radicand})" 
+        # Fix syntax again. It should be sqrt(radicand).
+        
+# Let's write the final correct code block directly without debug prints or errors.
+
+def generate(level=1, **kwargs):
+    from core.prompts.domain_function_library import FractionOps
+    
+    frozen_radicand = kwargs.get('radicand', 112)
+    outer_coefficient = kwargs.get('outer_coefficient', 1)
+    
+    def get_simplified_form(n):
+        if n <= 0: return None, None
+        factors = {}
+        d = 2
+        temp_n = n
+        while d * d <= temp_n:
+            while temp_n % d == 0:
+                factors[d] = factors.get(d, 0) + 1
+                temp_n //= d
+            d += 1
+        
+        if temp_n > 1:
+            factors[temp_n] = factors.get(temp_n, 0) + 1
+            
+        coefficient = 1
+        radicand = 1
+        for base, exp in factors.items():
+            coeff_part = base ** (exp // 2)
+            rad_part_base = base if exp % 2 == 1 else 1
+            coefficient *= coeff_part
+            radicand *= rad_part_base
+            
+        return coefficient, radicand
+
+    inner_coeff, inner_rad = get_simplified_form(frozen_radicand)
+    
+    total_coefficient = outer_coefficient * inner_coeff
+    
+    # Build question text: "Rewrite [outer] sqrt([radicand]) in simplest radical form."
+    if outer_coefficient == 1:
+        expr_str = f"sqrt({frozen_radicand})"
+    else:
+        expr_str = f"{outer_coefficient} * sqrt({frozen_radicand})"
+        
+    question_text = f"Rewrite {expr_str} in simplest radical form as coefficient * sqrt(square_free_radicand)."
+
+    return {
+        "question_text": question_text,
+        "correct_answer": {
+            "coefficient": total_coefficient,
+            "radicand": inner_rad
+        },
+        "oracle_payload": {"radicand": frozen_radicand}
+    }

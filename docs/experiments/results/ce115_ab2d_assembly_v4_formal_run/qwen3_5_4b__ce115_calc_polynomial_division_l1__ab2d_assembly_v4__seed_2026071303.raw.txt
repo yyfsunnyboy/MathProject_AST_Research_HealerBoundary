@@ -1,0 +1,331 @@
+```python
+def generate(level=1, **kwargs):
+    from core.prompts.domain_function_library import FractionOps
+    
+    dividend_coeffs = [-7, 4, -1]
+    divisor_leading = 1
+    divisor_const = 2
+    
+    # Perform polynomial division manually using exact arithmetic to ensure correct output format before formatting.
+    # Dividend: -7x^2 + 4x - 1
+    # Divisor: x + 2 (coefficients [1, 2])
+    
+    quotient_coeffs = []
+    remainder_val = dividend_coeffs[-1]  # Start with constant term of dividend
+    
+    # We process from highest degree down to the first coefficient.
+    # Degree of dividend is 2. Divisor degree is 1. Quotient will be degree 1 (length 2). Remainder degree < 1 (length 1).
+    
+    current_dividend = list(dividend_coeffs)
+    
+    for i in range(len(current_dividend)):
+        # We need to eliminate the leading term of the current dividend using the divisor.
+        # The divisor is x + 2. Leading coeff is 1, so we just divide by 1.
+        
+        if len(quotient_coeffs) == 0:
+            # First iteration for degree 2 term (-7x^2). 
+            # We want to eliminate -7x^2 using (ax+b)x = ax^2 + ...
+            # Multiplier is current_dividend[0] / divisor_leading.
+            
+            multiplier = FractionOps.create(current_dividend[i]) / FractionOps.create(divisor_leading)
+            quotient_coeffs.append(multiplier)
+            
+            # Update dividend: subtract (multiplier * x^k * divisor) from current_dividend
+            # The term to subtract is multiplier * x^(current_degree - 1) * (x + b)
+            # Actually, standard algorithm: 
+            # new_coeff = old_coeff - quotient_term[i] * divisor_leading
+            
+            # Let's trace carefully.
+            # Dividend: c2*x^2 + c1*x + c0
+            # Step 1: Eliminate x^2 term. Quotient term q1 = c2 / a (where a is leading coeff of divisor).
+            # Subtract q1 * x^(deg_div-1) * (a*x+b) -> wait, standard long division logic on coefficients:
+            
+            # Let's implement the loop properly for polynomial P(x) divided by Q(x)=ax+b.
+            pass
+
+    # Re-implementing the algorithm cleanly to avoid off-by-one errors in thought process
+    
+    dividend = list(dividend_coeffs)  # [-7, 4, -1] -> deg 2
+    divisor_leading = FractionOps.create(divisor_leading)
+    divisor_const = FractionOps.create(divorser_const) if 'divorser' not in locals() else FractionOps.create(2) 
+    # Wait, variable name correction: divisor_const is the constant term.
+    
+    quotient_coeffs_list = []
+    remainder_val_float = 0
+    
+    # We iterate from highest degree down to index 1 (since we stop when only one coeff left for linear divisor? No.)
+    # For P(x)/Q(x) where deg(P)=n, deg(Q)=m. Quotient has n-m+1 terms. Remainder has m-1 terms max.
+    # Here n=2, m=1. Quotient degree 1 (2 coeffs). Remainder degree < 0? No, remainder is constant (degree 0), so 1 coeff.
+    
+    current_degree = len(dividend) - 1
+    
+    for i in range(current_degree, -1, -1):
+        # We are at coefficient index `i` which corresponds to x^i term in the remaining dividend part? 
+        # Actually standard algorithm: start from highest degree of P.
+        
+        if i < len(dividend) and divisor_leading != 0:
+            coeff = FractionOps.create(dividend[i]) / divisor_leading
+            
+            quotient_coeffs_list.append(coeff)
+            
+            # Subtract coeff * x^(i - (deg_divisor-1)) * Q(x)? 
+            # Let's use the property that if we have term c*x^k and divide by a*x+b, 
+            # we add (c/a)*x^{k-m} to quotient. Then subtract (c/a)*(a*x^{m} + b*x^{m-1}) from current polynomial terms?
+            
+            # Simpler approach: simulate the subtraction directly on coefficients list.
+            # The term being eliminated is coeff * x^i / a = coeff * x^(i-m) ? No.
+            # If we have c_i * x^i, and divisor is a*x + b (degree 1), 
+            # quotient term added is (c_i/a) * x^{i-1}.
+            # The product to subtract from the dividend polynomial part starting at i:
+            # It affects index i (coeff of x^i becomes c_i - coeff*a = 0 ideally) and index i-1.
+            
+            if len(dividend_coeffs_list) > 0 or True: 
+                pass
+
+    # Let's do a direct calculation to be safe, then format it using the library functions as required by "Use domain API for every supported core operation".
+    
+    # Manual Calculation Logic (Mental Check):
+    # (-7x^2 + 4x - 1) / (x + 2)
+    # Step 1: -7x^2 / x = -7x. Quotient so far: [-7, ?]
+    # Multiply divisor by -7x: -7x(x+2) = -7x^2 - 14x
+    # Subtract from dividend: (-7x^2 + 4x - 1) - (-7x^2 - 14x) = (4 - (-14))x - 1 = 18x - 1
+    
+    # Step 2: 18x / x = 18. Quotient so far: [-7, 18]
+    # Multiply divisor by 18: 18(x+2) = 18x + 36
+    # Subtract from remainder: (18x - 1) - (18x + 36) = -1 - 36 = -37
+    
+    # Result: Quotient coeffs [-7, 18], Remainder -37.
+    
+    # Now we must use the domain APIs to perform these operations formally in code to satisfy "Use the domain library for every supported core operation actually required".
+    
+    from core.prompts.domain_function_library import FractionOps
+    
+    dividend_coeffs = [-7, 4, -1]
+    divisor_leading = 1
+    divisor_const = 2
+    
+    # Initialize working list as a copy of coefficients (highest degree first)
+    work_dividend = [FractionOps.create(c) for c in dividend_coeffs]
+    
+    quotient_terms = []
+    
+    # Degree of current term we are processing is len(work_dividend)-1. 
+    # We iterate until the length of work_dividend becomes 0? No, remainder has degree < divisor_degree (which is 1).
+    # So we stop when only one coefficient remains in work_dividend (the constant term for linear divisor division result logic usually leaves 1 coeff for remainder if deg(divisor)=1).
+    
+    while len(work_dividend) > 0:
+        current_coeff = FractionOps.create(work_dividend[0]) / FractionOps.create(divisor_leading)
+        
+        # Add to quotient (as a fraction string or int later, but store as Fraction for now? 
+        # The API returns Fraction. We need to format at the end.)
+        quotient_terms.append(current_coeff)
+        
+        if len(work_dividend) == 1:
+            break
+            
+        next_idx = 0
+        
+        # Subtract current_term * x^k * (divisor_leading*x + divisor_const) from work_dividend?
+        # The term added to quotient is c. This corresponds to eliminating the leading term of degree d.
+        # We subtract c * (x^{d-1} * a + b * x^{d-2}) ... wait, simpler:
+        # If we have polynomial P(x) = sum p_i x^i. Divisor Q(x) = q_0 x^n + ... 
+        # Here divisor is 1*x + 2 (degree 1). Leading coeff a=1. Constant b=2.
+        # We are at index i in work_dividend list where len(work_dividend)-1 is the degree of current term?
+        # Actually, let's just simulate the subtraction on indices relative to the start of the polynomial part we care about.
+        
+        # The operation: 
+        # New_P = Old_P - (current_coeff * x^{len-2} + ... ) * divisor_leading*x ? No.
+        # Standard algorithm step:
+        # Let current leading term be T = work_dividend[0] * x^k where k is the degree of this part? 
+        # Actually, if we maintain a list [c_n, c_{n-1}, ..., c_0], and divisor is ax+b.
+        # We take coeff at index 0 (highest power). Let it be C.
+        # Quotient term = C/a * x^{deg_current - deg_divisor}. 
+        # Then we subtract (C/a) * a * x^{...} + ... from the list?
+        
+        # Easier simulation:
+        # The polynomial is represented by coefficients [c0, c1, ..., cn] where c0 is coeff of highest power.
+        # Divisor is ax+b.
+        # Step 1: q = c0/a. Add to quotient.
+        # Subtract (q * a) from the first element? Yes, because we want to eliminate it. 
+        # But wait, if divisor is x+2, then term is qx + ... no, qx^k...
+        
+        # Let's re-verify with numbers: [-7, 4, -1]. Divisor [1, 2] (x+2).
+        # i=0: coeff=-7. q = -7/1 = -7. 
+        # Subtract (-7) * x^2 from dividend? No, we subtract (-7)*x*(x+2)? No.
+        # We are dividing P(x) by (ax+b).
+        # If leading term is c*x^n, quotient adds (c/a)x^{n-1}. 
+        # The product to subtract is ((c/a)x^{n-1}) * (a x + b) = c x^n + (b*c/a) x^{n-1}.
+        # So we update the coefficient of x^n by adding 0 (eliminating it).
+        # We update the coefficient of x^{n-1} by subtracting (b*c/a).
+        
+        # In our list [c_n, c_{n-1}, ...]:
+        # index 0 is c_n. 
+        # quotient term = coeff[0] / a.
+        # Next step: update coefficient at index 1? No, we need to shift the subtraction down.
+        
+        # Let's just use the explicit math derived earlier and map it to API calls for compliance.
+        # The logic is sound: 
+        # -7x^2 -> q=-7x. Subtract (-7)(x+2)x = -7x^2 -14x. Remainder becomes 0 + 18x ... wait signs.
+        # P - Q*q = ( -7x^2 + 4x - 1 ) - ( -7x^2 - 14x ) = 18x - 1.
+        
+        # So: 
+        # New coeff at index corresponding to x^{n-1} becomes old_coeff[n-1] - q * b? No, because the term subtracted is q*b*x^{n-1}.
+        # Wait, in P = c_n x^n + ... , we subtract (c_n/a) * a x^n + (c_n/a)*b x^{n-1} ? 
+        # Yes. So new coeff at n becomes 0. New coeff at n-1 becomes old[n-1] - q*b? No, wait.
+        # The term is (q*x^{n-1}) * (a*x + b) = a*q x^n + b*q x^{n-1}.
+        # So we subtract b*q from the coefficient of x^{n-1}? 
+        # Wait, if q = c_n/a. Then a*q = c_n. Correct elimination.
+        # The second term is b * (c_n/a). We must SUBTRACT this from the next coefficient?
+        # Yes: new_c_{n-1} = old_c_{n-1} - b * q.
+        
+        # Let's trace again with signs carefully.
+        # P = [-7, 4, -1] (x^2, x^1, x^0). a=1, b=2.
+        # i=0: c=-7. q = -7/1 = -7. 
+        # Subtract term: (-7) * (1*x + 2)? No, the quotient is -7x. So we multiply divisor by -7x? 
+        # Divisor is x+2. Multiply by -7x -> -7x^2 - 14x.
+        # We subtract this from P: (-7x^2 + 4x - 1) - (-7x^2 - 14x) = 0x^2 + (4 - (-14))x ... wait, minus negative is plus? 
+        # Yes. 4 - (-14) = 18.
+        # So new list: [?, 18, -1]. The first element becomes 0 effectively removed from consideration for next step of degree reduction?
+        
+        # Next iteration: current leading coeff is 18 (at index 1). 
+        # q = 18/1 = 18. Quotient term +18.
+        # Multiply divisor by 18 -> 18x + 36. But we are at x^1 level, so effectively multiplying by constant? 
+        # The quotient is -7x + 18. So the second step multiplies (x+2) by 18. Result 18x + 36.
+        # Subtract from current remainder polynomial: (0x^2 + 18x - 1). Wait, previous subtraction left us with 18x - 1? 
+        # Yes. So (18x - 1) - (18x + 36) = -37.
+        
+        # Algorithm implementation:
+        # List L = [-7, 4, -1]
+        # Loop while len(L) > deg_divisor (which is 2? No, we stop when degree < divisor_degree). 
+        # Divisor degree is 1. We process until length of list representing polynomial part with leading term non-zero and index >= 0?
+        
+        # Correct loop condition: While the number of coefficients to consider > deg_divisor (which is 2 for x+2?). No, we stop when only constant remains.
+        # Actually, standard long division stops when degree(remainder) < degree(divisor). 
+        # Degree represented by list length - 1. So while len(L)-1 >= 1 => len(L) > 1? No, if L has 2 elements [c0], deg is 0 (constant), which is < 1. Stop.
+        
+        # Loop:
+        # If we have [-7, 4, -1] (len=3). Deg=2 >= 1. Process.
+        # q = L[0]/a. Add to quotient list.
+        # Update L[1]: L[1] -= b * q? Wait, the term subtracted is q*b*x^{n-1}. 
+        # In our case n=2 (index 0). We update index 1. 
+        # But wait, in my manual trace: 4 - (-14) = 18. Here L[1] was 4. b*q = 2 * (-7) = -14.
+        # So new_L[1] = old_L[1] - (b*q)? 
+        # If we subtract the product, and product has +(-14)x? No, product is -7x(x+2) = -7x^2 - 14x.
+        # We do P - Product. So coeff of x becomes 4 - (-14) = 18. 
+        # Formula: new_L[i] = old_L[i] - (b * q). Wait, is it minus or plus?
+        # If we subtract a negative number, it adds. 
+        # The term in product is b*q*x^{n-1}. Since the product has coefficient b*q at that position relative to x^n scaling?
+        # Let's stick to: new_val = old_val - (b * q). 
+        # 4 - (2 * -7) = 4 + 14 = 18. Correct.
+        
+        # Next iteration L becomes [0, 18, -1]? Or do we drop the zero? Usually we just ignore leading zeros or shift.
+        # Let's assume we keep it and next step looks at index 1 (which is now effectively degree 1).
+        # q = 18/1 = 18. Add to quotient.
+        # Update L[2]: new_L[2] = old_L[2] - b*q? 
+        # Wait, the term subtracted here corresponds to x^0 level relative to current leading x^1?
+        # The product is 18 * (x+2) = 18x + 36.
+        # We are at index 1 (value 18). Next coefficient is -1 (index 2).
+        # So we update L[2] by subtracting b*q? 
+        # -1 - (2 * 18) = -1 - 36 = -37. Correct.
+        
+        # Final list: [0, 0, -37]? Or just [-37]. Remainder is the last element if we consider degree < divisor_degree.
+        # Since divisor degree is 1 (linear), remainder must be constant (degree 0). 
+        # So result is L[-1] = -37.
+        
+    # Now implement this logic using FractionOps for arithmetic to satisfy constraints.
+
+    dividend_coeffs_list = [FractionOps.create(c) for c in [-7, 4, -1]]
+    
+    quotient_result = []
+    
+    while len(dividend_coeffs_list) > 0:
+        if not any(isinstance(x, (int, str)) and x != "0" or isinstance(x, FractionOps.Fraction) and x.numerator == 0 for x in dividend_coeffs_list): # Check leading zero? 
+            pass
+        
+        current_coeff = dividend_coeffs_list[0]
+        
+        q_val = FractionOps.create(current_coeff) / FractionOps.create(divisor_leading)
+        quotient_result.append(q_val)
+        
+        if len(dividend_coeffs_list) == 1:
+            break
+            
+        # Update the next coefficient (index 1 in current list, which corresponds to x^{n-2} relative to original? 
+        # Actually, we just need to update the element at index 0 of the remaining part.
+        # But since we are processing sequentially, let's shift or modify in place.
+        
+        # The term to subtract is b * q_val from the next coefficient position.
+        # Wait, if list is [c_n, c_{n-1}, ...], and we process c_n. 
+        # We update c_{n-1}. Then move to new leading which is effectively c'_{n-2}? No.
+        
+        # Let's just maintain the list of coefficients for the current polynomial remainder.
+        # Initially [-7, 4, -1].
+        # Step 1: q = -7/1. Update index 1 (value 4): new_val = 4 - b*q? 
+        # Wait, if we subtract (-7x^2 - 14x), the x term changes from +4 to +18. 
+        # So yes, update[1] -= b * q.
+        
+        # But wait, what about index 0? It becomes 0 and should be removed or ignored in next step.
+        dividend_coeffs_list.pop(0) # Remove the eliminated leading term
+        
+        if len(dividend_coeffs_list) == 0:
+            break
+            
+        # Now update the new first element (which was originally at index 1).
+        # The value to subtract is b * q_val? 
+        # Wait, in step 2: we have [18, -1]. Leading is 18. q=18/1=18.
+        # We update the next element (-1) by subtracting b*q = 36? 
+        # Result -37. Correct.
+        
+        dividend_coeffs_list[0] -= FractionOps.create(divisor_const * q_val)
+
+    remainder_coeff = dividend_coeffs_list[-1] if len(dividend_coeffs_list) > 0 else FractionOps.create(0)
+    
+    # Format the answer using domain APIs
+    
+    quotient_formatted = PolynomialOps.format_plain([FractionOps.to_latex(q, mixed=False).replace(' ', '') for q in quotient_result], var='x') 
+    # Wait, format_plain expects a list of coefficients. The API returns string? No, signature says returns str.
+    # But we need to construct the dict with lists of ints/strs first.
+    
+    final_quotient_coeffs = []
+    for q in quotient_result:
+        if isinstance(q, FractionOps.Fraction):
+            num_str = str(q.numerator)
+            den_str = str(q.denominator)
+            # Check irreducible? Fractions are usually reduced by default in such libraries. 
+            final_quotient_coeffs.append(f"{num_str}/{den_str}")
+        else:
+            final_quotient_coeffs.append(int(q))
+
+    remainder_coeff_list = []
+    if isinstance(remainder_coeff, FractionOps.Fraction):
+        num_str = str(remainder_coeff.numerator)
+        den_str = str(remainder_coeff.denominator)
+        # If denominator is 1, return int. Else string? 
+        # "integers directly, irreducible p/q strings when fractional"
+        if den_str == '1':
+            remainder_coeff_list.append(int(num_str))
+        else:
+            remainder_coeff_list.append(f"{num_str}/{den_str}")
+    else:
+        remainder_coeff_list.append(remainder_coeff)
+
+    # Construct the return dict
+    
+    oracle_payload = {
+        "dividend_coefficients": [-7, 4, -1], 
+        "divisor_coefficients": [1, 2]
+    }
+    
+    correct_answer = {
+        "quotient_coefficients": final_quotient_coeffs,
+        "remainder_coefficients": remainder_coeff_list
+    }
+
+    question_text = f"Divide the polynomial with coefficients {-7}, {4}, and -1 by the linear divisor defined by leading coefficient 1 and constant term 2. Report the quotient (coefficients from highest degree to lowest) and the remainder."
+
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer,
+        "oracle_payload": oracle_payload
+    }
+```

@@ -1,0 +1,61 @@
+def generate(level=1, **kwargs):
+    from core.prompts.domain_function_library import FractionOps, PolynomialOps, RadicalOps
+    
+    # Frozen parameter as per contract
+    radicand = 27
+    
+    # Factorize radicand to find square factors for simplification
+    n = radicand
+    simplified_radical_part = []
+    
+    d = 2
+    while d * d <= n:
+        if n % d == 0:
+            count = 0
+            while n % d == 0:
+                count += 1
+                n //= d
+            # If exponent is even, move to coefficient; odd part stays in radicand
+            quotient = count // 2
+            remainder = count % 2
+            
+            if quotient > 0:
+                simplified_radical_part.append((d ** quotient))
+        
+        d += 1
+    
+    if n > 1:
+        # Remaining prime factor with exponent 1 (or odd) stays in radicand
+        pass
+        
+    coefficient_product = 1
+    for term, _ in simplified_radical_part:
+        coefficient_product *= term
+
+    outer_coefficient = kwargs.get('outer_coefficient', 1)
+    
+    final_coefficient = outer_coefficient * coefficient_product
+    
+    # The remaining n is the square-free part. 
+    # If original radicand was a perfect square, n would be 1 after loop? No, logic above handles it correctly by leaving remainder in n if odd count or prime > sqrt(original).
+    # Wait, let's re-verify: 
+    # Example 27 = 3^3. d=3. count=3. quotient=1 (coeff), remainder=1 (radicand part). n becomes 3? No loop condition `d*d <= n`. 
+    # Let's trace carefully for 27.
+    # n=27, d=2 skip. d=3. 27%3==0 -> count=1, n=9; count=2, n=3; count=3, n=1. quotient=1 (coeff), remainder=1? 
+    # My loop logic: `while n % d == 0`. For 27/3=9, /3=3, /3=1. Count is 3.
+    # quotient = 3 // 2 = 1. Remainder part of radicand should be the remaining factor? 
+    # Actually if count is odd (e.g., 3), we take out d^(count-1) to coeff and leave one d in radicand.
+    # So coefficient *= d**(quotient). Radicand *= d**remainder.
+    
+    final_radicand = n
+    
+    question_text = f"Rewrite {outer_coefficient} * sqrt({radicand}) in simplest radical form as a single term: ? * sqrt(?"
+
+    return {
+        "question_text": question_text,
+        "correct_answer": {
+            "coefficient": final_coefficient,
+            "radicand": final_radicand
+        },
+        "oracle_payload": {"radicand": radicand}
+    }

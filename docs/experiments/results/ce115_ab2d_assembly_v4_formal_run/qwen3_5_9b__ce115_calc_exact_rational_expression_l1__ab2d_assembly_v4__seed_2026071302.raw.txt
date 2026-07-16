@@ -1,0 +1,27 @@
+def generate(level=1, **kwargs):
+    from core.prompts.domain_function_library import FractionOps
+    
+    products = [{"left": "4.95", "right": "89.6", "sign": 1}, {"left": "-0.05", "right": "89.6", "sign": -1}]
+    
+    total_fraction = None
+    for term in products:
+        left_val = FractionOps.create(term["left"])
+        right_val = FractionOps.create(term["right"])
+        
+        if term["sign"] == 1:
+            product_term = FractionOps.mul(left_val, right_val)
+        else:
+            product_term = FractionOps.sub(FractionOps.zero(), FractionOps.mul(left_val, right_val)) # Assuming zero exists or using logic to negate
+        
+        if total_fraction is None:
+            total_fraction = product_term
+        else:
+            total_fraction = FractionOps.add(total_fraction, product_term)
+
+    latex_str = FractionOps.to_latex(total_fraction)
+    
+    return {
+        "question_text": f"Calculate the value of the expression: {' + '.join([f'{t["sign"]}{t["left"]} * {t["right"]}' for t in products])}",
+        "correct_answer": {"value": latex_str},
+        "oracle_payload": products
+    }

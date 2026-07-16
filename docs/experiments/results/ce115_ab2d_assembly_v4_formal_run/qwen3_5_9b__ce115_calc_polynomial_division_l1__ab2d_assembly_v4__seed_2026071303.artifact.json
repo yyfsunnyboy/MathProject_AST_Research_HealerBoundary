@@ -1,0 +1,456 @@
+{
+  "cohort_run_id": "ce115_ab2d_assembly_v4_formal_run",
+  "sequence": 15,
+  "cell_id": "qwen3_5_9b__ce115_calc_polynomial_division_l1__ab2d_assembly_v4__seed_2026071303",
+  "task_id": "ce115_calc_polynomial_division_l1",
+  "task_family": "polynomial",
+  "condition": "ab2d_assembly_v4",
+  "seed": 2026071303,
+  "model": "qwen3.5:9b",
+  "frozen_run_plan_hash": "301cf16c73ad0cbcad96080f638ede9d35d29deb2be9a32beef3f45fe855786d",
+  "exact_rendered_prompt": "# CE115 Ab2d-Assembly domain contract\nfrom core.prompts.domain_function_library import FractionOps, PolynomialOps, RadicalOps\nfrom core.skill_policies.radical_logic import RadicalLogicEngine\n\nAvailable Domain APIs\nThe following APIs form the available domain toolbox. Select only APIs relevant to the current task. Do not call irrelevant APIs merely for compliance.\n- `PolynomialOps.div_qr` | import: `core.prompts.domain_function_library` | signature: `(dividend_coefficients, divisor_coefficients)` | parameters: dividend_coefficients, divisor_coefficients | returns: tuple[list[exact coefficient], list[exact coefficient]] (quotient, remainder)\n- `PolynomialOps.format_latex` | import: `core.prompts.domain_function_library` | signature: `(coeffs, var='x')` | parameters: polynomial value | returns: str\n- `PolynomialOps.format_plain` | import: `core.prompts.domain_function_library` | signature: `(coeffs, var='x')` | parameters: polynomial value | returns: str\n- `FractionOps.create` | import: `core.prompts.domain_function_library` | signature: `(value)` | parameters: value | returns: Fraction\n- `FractionOps.add` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction\n- `FractionOps.sub` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction\n- `FractionOps.mul` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction\n- `FractionOps.div` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction\n- `FractionOps.to_latex` | import: `core.prompts.domain_function_library` | signature: `(val, mixed=False)` | parameters: value | returns: str\n- `RadicalOps.simplify_term` | import: `core.prompts.domain_function_library` | signature: `(coeff, radicand)` | parameters: coefficient, radicand | returns: tuple[exact coefficient, int] (coefficient, radicand)\n- `RadicalOps.format_expression` | import: `core.prompts.domain_function_library` | signature: `(terms_dict, denominator=1)` | parameters: terms | returns: str\n- `RadicalLogicEngine` | import: `core.skill_policies.radical_logic` | signature: `()` | parameters: constructor | returns: RadicalLogicEngine instance\n\nUse the domain library for every supported core operation actually required by the task. Do not manually reimplement a supported core algorithm. A domain API call counts as adoption only when its returned value contributes to the final answer. Standard Python may be used for control flow, indexing, unpacking, data movement, and output assembly.\n\nReturn contract: `generate(level=1, **kwargs)` returns a dict with `question_text`, `correct_answer`, and `oracle_payload`.\n\n## Task contract\n# Task Specification: Polynomial Division (General Linear Divisor)\n- Task Name: Polynomial Division with Quotient and Remainder\n- Input Parameters: `dividend_coefficients` (highest degree first) and `divisor_coefficients` (two values: leading and constant of the linear divisor).\n- Output: `question_text` must ask to divide the dividend polynomial by the linear divisor and report the quotient and the remainder.\n- Calculation: `correct_answer` must return the quotient coefficients (highest degree first) and the remainder coefficients computed with exact arithmetic.\n- Data Contract: `oracle_payload` must return exactly the input parameters.\n\nWrite only complete Python source code.\nDo not use Markdown fences, prose, explanations, or prompt echoes.\nImplement exactly one function:\n\ndef generate(level=1, **kwargs):\n\n`generate()` must return exactly the three-key dictionary specified below.\n\nReturn exactly these three top-level keys and no others:\n`question_text`, `correct_answer`, and `oracle_payload`.\nDo not return `answer`, `mode`, or any additional key.\nThe task-specific `correct_answer` schema below supersedes any earlier generic `correct_answer: str` instruction.\n\nRequired return schema:\n{\n  \"question_text\": str,\n  \"correct_answer\": {\n      \"quotient_coefficients\": list[int | str],   # highest degree first; integers, or irreducible fraction strings \"p/q\"\n      \"remainder_coefficients\": list[int | str]   # coefficients of the remainder (degree < divisor degree; one value for a linear divisor)\n  },\n  \"oracle_payload\": dict\n}\n- Formatting rules: exact arithmetic only; integers directly, irreducible \"p/q\" strings when fractional; no float values.\n- Equality: Exact dictionary match. No tolerance.\n\nAb1 answer-contract wording:\ncorrect_answer must be a JSON-compatible dict with exactly quotient_coefficients (highest degree first; int or irreducible p/q strings) and remainder_coefficients (degree lower than the divisor; for a linear divisor, exactly one value). Exact arithmetic; no floats; do not alter frozen parameters.\n\n## Frozen parameters\n{\"dividend_coefficients\": [-7, 4, -1], \"divisor_coefficients\": [1, 2]}\nReturn only Python source; oracle_payload must exactly equal the frozen parameters.\n",
+  "available_domain_apis": [
+    {
+      "canonical_name": "PolynomialOps.div_qr",
+      "import_path": "core.prompts.domain_function_library",
+      "signature": "(dividend_coefficients, divisor_coefficients)",
+      "parameter_meaning": "dividend_coefficients, divisor_coefficients",
+      "return_structure": "tuple[list[exact coefficient], list[exact coefficient]] (quotient, remainder)"
+    },
+    {
+      "canonical_name": "PolynomialOps.format_latex",
+      "import_path": "core.prompts.domain_function_library",
+      "signature": "(coeffs, var='x')",
+      "parameter_meaning": "polynomial value",
+      "return_structure": "str"
+    },
+    {
+      "canonical_name": "PolynomialOps.format_plain",
+      "import_path": "core.prompts.domain_function_library",
+      "signature": "(coeffs, var='x')",
+      "parameter_meaning": "polynomial value",
+      "return_structure": "str"
+    },
+    {
+      "canonical_name": "FractionOps.create",
+      "import_path": "core.prompts.domain_function_library",
+      "signature": "(value)",
+      "parameter_meaning": "value",
+      "return_structure": "Fraction"
+    },
+    {
+      "canonical_name": "FractionOps.add",
+      "import_path": "core.prompts.domain_function_library",
+      "signature": "(a, b)",
+      "parameter_meaning": "left, right",
+      "return_structure": "Fraction"
+    },
+    {
+      "canonical_name": "FractionOps.sub",
+      "import_path": "core.prompts.domain_function_library",
+      "signature": "(a, b)",
+      "parameter_meaning": "left, right",
+      "return_structure": "Fraction"
+    },
+    {
+      "canonical_name": "FractionOps.mul",
+      "import_path": "core.prompts.domain_function_library",
+      "signature": "(a, b)",
+      "parameter_meaning": "left, right",
+      "return_structure": "Fraction"
+    },
+    {
+      "canonical_name": "FractionOps.div",
+      "import_path": "core.prompts.domain_function_library",
+      "signature": "(a, b)",
+      "parameter_meaning": "left, right",
+      "return_structure": "Fraction"
+    },
+    {
+      "canonical_name": "FractionOps.to_latex",
+      "import_path": "core.prompts.domain_function_library",
+      "signature": "(val, mixed=False)",
+      "parameter_meaning": "value",
+      "return_structure": "str"
+    },
+    {
+      "canonical_name": "RadicalOps.simplify_term",
+      "import_path": "core.prompts.domain_function_library",
+      "signature": "(coeff, radicand)",
+      "parameter_meaning": "coefficient, radicand",
+      "return_structure": "tuple[exact coefficient, int] (coefficient, radicand)"
+    },
+    {
+      "canonical_name": "RadicalOps.format_expression",
+      "import_path": "core.prompts.domain_function_library",
+      "signature": "(terms_dict, denominator=1)",
+      "parameter_meaning": "terms",
+      "return_structure": "str"
+    },
+    {
+      "canonical_name": "RadicalLogicEngine",
+      "import_path": "core.skill_policies.radical_logic",
+      "signature": "()",
+      "parameter_meaning": "constructor",
+      "return_structure": "RadicalLogicEngine instance"
+    }
+  ],
+  "task_required_operations": [
+    "PolynomialOps.div_qr"
+  ],
+  "acceptable_canonical_paths": [
+    [
+      "PolynomialOps.div_qr"
+    ]
+  ],
+  "frozen_parameters": {
+    "dividend_coefficients": [
+      -7,
+      4,
+      -1
+    ],
+    "divisor_coefficients": [
+      1,
+      2
+    ]
+  },
+  "request_payload": {
+    "model": "qwen3.5:9b",
+    "messages": [
+      {
+        "role": "user",
+        "content": "# CE115 Ab2d-Assembly domain contract\nfrom core.prompts.domain_function_library import FractionOps, PolynomialOps, RadicalOps\nfrom core.skill_policies.radical_logic import RadicalLogicEngine\n\nAvailable Domain APIs\nThe following APIs form the available domain toolbox. Select only APIs relevant to the current task. Do not call irrelevant APIs merely for compliance.\n- `PolynomialOps.div_qr` | import: `core.prompts.domain_function_library` | signature: `(dividend_coefficients, divisor_coefficients)` | parameters: dividend_coefficients, divisor_coefficients | returns: tuple[list[exact coefficient], list[exact coefficient]] (quotient, remainder)\n- `PolynomialOps.format_latex` | import: `core.prompts.domain_function_library` | signature: `(coeffs, var='x')` | parameters: polynomial value | returns: str\n- `PolynomialOps.format_plain` | import: `core.prompts.domain_function_library` | signature: `(coeffs, var='x')` | parameters: polynomial value | returns: str\n- `FractionOps.create` | import: `core.prompts.domain_function_library` | signature: `(value)` | parameters: value | returns: Fraction\n- `FractionOps.add` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction\n- `FractionOps.sub` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction\n- `FractionOps.mul` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction\n- `FractionOps.div` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction\n- `FractionOps.to_latex` | import: `core.prompts.domain_function_library` | signature: `(val, mixed=False)` | parameters: value | returns: str\n- `RadicalOps.simplify_term` | import: `core.prompts.domain_function_library` | signature: `(coeff, radicand)` | parameters: coefficient, radicand | returns: tuple[exact coefficient, int] (coefficient, radicand)\n- `RadicalOps.format_expression` | import: `core.prompts.domain_function_library` | signature: `(terms_dict, denominator=1)` | parameters: terms | returns: str\n- `RadicalLogicEngine` | import: `core.skill_policies.radical_logic` | signature: `()` | parameters: constructor | returns: RadicalLogicEngine instance\n\nUse the domain library for every supported core operation actually required by the task. Do not manually reimplement a supported core algorithm. A domain API call counts as adoption only when its returned value contributes to the final answer. Standard Python may be used for control flow, indexing, unpacking, data movement, and output assembly.\n\nReturn contract: `generate(level=1, **kwargs)` returns a dict with `question_text`, `correct_answer`, and `oracle_payload`.\n\n## Task contract\n# Task Specification: Polynomial Division (General Linear Divisor)\n- Task Name: Polynomial Division with Quotient and Remainder\n- Input Parameters: `dividend_coefficients` (highest degree first) and `divisor_coefficients` (two values: leading and constant of the linear divisor).\n- Output: `question_text` must ask to divide the dividend polynomial by the linear divisor and report the quotient and the remainder.\n- Calculation: `correct_answer` must return the quotient coefficients (highest degree first) and the remainder coefficients computed with exact arithmetic.\n- Data Contract: `oracle_payload` must return exactly the input parameters.\n\nWrite only complete Python source code.\nDo not use Markdown fences, prose, explanations, or prompt echoes.\nImplement exactly one function:\n\ndef generate(level=1, **kwargs):\n\n`generate()` must return exactly the three-key dictionary specified below.\n\nReturn exactly these three top-level keys and no others:\n`question_text`, `correct_answer`, and `oracle_payload`.\nDo not return `answer`, `mode`, or any additional key.\nThe task-specific `correct_answer` schema below supersedes any earlier generic `correct_answer: str` instruction.\n\nRequired return schema:\n{\n  \"question_text\": str,\n  \"correct_answer\": {\n      \"quotient_coefficients\": list[int | str],   # highest degree first; integers, or irreducible fraction strings \"p/q\"\n      \"remainder_coefficients\": list[int | str]   # coefficients of the remainder (degree < divisor degree; one value for a linear divisor)\n  },\n  \"oracle_payload\": dict\n}\n- Formatting rules: exact arithmetic only; integers directly, irreducible \"p/q\" strings when fractional; no float values.\n- Equality: Exact dictionary match. No tolerance.\n\nAb1 answer-contract wording:\ncorrect_answer must be a JSON-compatible dict with exactly quotient_coefficients (highest degree first; int or irreducible p/q strings) and remainder_coefficients (degree lower than the divisor; for a linear divisor, exactly one value). Exact arithmetic; no floats; do not alter frozen parameters.\n\n## Frozen parameters\n{\"dividend_coefficients\": [-7, 4, -1], \"divisor_coefficients\": [1, 2]}\nReturn only Python source; oracle_payload must exactly equal the frozen parameters.\n"
+      }
+    ],
+    "stream": false,
+    "think": false,
+    "options": {
+      "temperature": 0.0,
+      "seed": 2026071303,
+      "num_ctx": 65536,
+      "num_predict": 24576
+    }
+  },
+  "CALL_INTENT": {
+    "cell": {
+      "sequence": 15,
+      "cell_id": "qwen3_5_9b__ce115_calc_polynomial_division_l1__ab2d_assembly_v4__seed_2026071303",
+      "source_v3_cell_id": "qwen3_5_9b__ce115_calc_polynomial_division_l1__ab2d_assembly_v3__seed_2026071303",
+      "model": "qwen3.5:9b",
+      "task": "ce115_calc_polynomial_division_l1",
+      "task_family": "polynomial",
+      "seed": 2026071303,
+      "condition": "ab2d_assembly_v4",
+      "max_model_calls": 1,
+      "retry": 0,
+      "replay": 0,
+      "repair": 0,
+      "healer": 0,
+      "digest_prefix": "6488c96fa5fa"
+    },
+    "phase": "CALL_INTENT",
+    "timestamp": 1784174152.3096197,
+    "prompt_hash": "d4dc6dcbaafe9f314865066defe56bd601e7b16d9a0da84a0e83b0c19ae88ea9",
+    "payload_hash": "3d32514870dcc14e0a05bd2a456352e4d952094e2df2f727835fbeb764a573e0",
+    "model": "qwen3.5:9b",
+    "digest_prefix": "6488c96fa5fa"
+  },
+  "model_call_ledger": [
+    {
+      "cell_id": "qwen3_5_9b__ce115_calc_polynomial_division_l1__ab2d_assembly_v4__seed_2026071303",
+      "request_number": 1,
+      "status": "raw_persisted",
+      "model": "qwen3.5:9b",
+      "retry": 0,
+      "replay": 0,
+      "repair": 0,
+      "healer": 0
+    }
+  ],
+  "raw_model_response": "def generate(level=1, **kwargs):\n    from core.prompts.domain_function_library import PolynomialOps, FractionOps\n    \n    dividend_coeffs = [-7, 4, -1]\n    divisor_coeffs = [1, 2]\n    \n    quotient_coefficients, remainder_coefficients = PolynomialOps.div_qr(dividend_coeffs, divisor_coeffs)\n    \n    question_text = f\"Divide the polynomial {PolynomialOps.format_plain(quotient_coefficients)} by the linear divisor defined by coefficients {divisor_coeffs}. Report the resulting quotient and remainder.\"\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": {\n            \"quotient_coefficients\": quotient_coefficients,\n            \"remainder_coefficients\": remainder_coefficients\n        },\n        \"oracle_payload\": {\"dividend_coefficients\": dividend_coeffs, \"divisor_coefficients\": divisor_coeffs}\n    }",
+  "raw_transport_response": {
+    "model": "qwen3.5:9b",
+    "created_at": "2026-07-16T03:55:56.0100603Z",
+    "message": {
+      "role": "assistant",
+      "content": "def generate(level=1, **kwargs):\n    from core.prompts.domain_function_library import PolynomialOps, FractionOps\n    \n    dividend_coeffs = [-7, 4, -1]\n    divisor_coeffs = [1, 2]\n    \n    quotient_coefficients, remainder_coefficients = PolynomialOps.div_qr(dividend_coeffs, divisor_coeffs)\n    \n    question_text = f\"Divide the polynomial {PolynomialOps.format_plain(quotient_coefficients)} by the linear divisor defined by coefficients {divisor_coeffs}. Report the resulting quotient and remainder.\"\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": {\n            \"quotient_coefficients\": quotient_coefficients,\n            \"remainder_coefficients\": remainder_coefficients\n        },\n        \"oracle_payload\": {\"dividend_coefficients\": dividend_coeffs, \"divisor_coefficients\": divisor_coeffs}\n    }"
+    },
+    "done": true,
+    "done_reason": "stop",
+    "total_duration": 3687955600,
+    "load_duration": 221223600,
+    "prompt_eval_count": 1170,
+    "prompt_eval_duration": 631380000,
+    "eval_count": 189,
+    "eval_duration": 2829144000
+  },
+  "extracted_code": "def generate(level=1, **kwargs):\n    from core.prompts.domain_function_library import PolynomialOps, FractionOps\n    \n    dividend_coeffs = [-7, 4, -1]\n    divisor_coeffs = [1, 2]\n    \n    quotient_coefficients, remainder_coefficients = PolynomialOps.div_qr(dividend_coeffs, divisor_coeffs)\n    \n    question_text = f\"Divide the polynomial {PolynomialOps.format_plain(quotient_coefficients)} by the linear divisor defined by coefficients {divisor_coeffs}. Report the resulting quotient and remainder.\"\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": {\n            \"quotient_coefficients\": quotient_coefficients,\n            \"remainder_coefficients\": remainder_coefficients\n        },\n        \"oracle_payload\": {\"dividend_coefficients\": dividend_coeffs, \"divisor_coefficients\": divisor_coeffs}\n    }",
+  "model_metadata": {
+    "model": "qwen3.5:9b",
+    "digest_prefix": "6488c96fa5fa",
+    "quantization": "Q4_K_M",
+    "runtime": "ollama",
+    "prompt_eval_count": 1170,
+    "eval_count": 189,
+    "total_duration": 3687955600,
+    "load_duration": 221223600,
+    "prompt_eval_duration": 631380000,
+    "eval_duration": 2829144000,
+    "wall_clock_seconds": 3.874390400000266
+  },
+  "token_counts": {
+    "prompt_eval_count": 1170,
+    "eval_count": 189
+  },
+  "timing": {
+    "wall_clock_seconds": 3.87439219999942,
+    "total_duration": 3687955600
+  },
+  "scanner_diagnostics": {
+    "classification": "ASSEMBLY_COMPLIANT",
+    "assembly_classification": "ASSEMBLY_COMPLIANT",
+    "called_apis": [
+      "PolynomialOps.div_qr",
+      "PolynomialOps.format_plain"
+    ],
+    "called_domain_apis": [
+      "PolynomialOps.div_qr",
+      "PolynomialOps.format_plain"
+    ],
+    "invalid_calls": [],
+    "task_required_operations": [
+      "PolynomialOps.div_qr"
+    ],
+    "optional_apis": [
+      "PolynomialOps.format_latex",
+      "PolynomialOps.format_plain"
+    ],
+    "missing_operations": [],
+    "domain_library_adopted": true,
+    "called_but_result_unused": true,
+    "domain_call_result_bindings": [
+      {
+        "api": "PolynomialOps.div_qr",
+        "binding": "quotient_coefficients",
+        "reaches_final_output": true
+      },
+      {
+        "api": "PolynomialOps.div_qr",
+        "binding": "remainder_coefficients",
+        "reaches_final_output": true
+      }
+    ],
+    "domain_result_reaches_final_output": [
+      "PolynomialOps.div_qr"
+    ],
+    "manual_recomputation_after_domain_call": false,
+    "surface_compliance_only": false,
+    "irrelevant_api_calls": [],
+    "required_operations_source": "frozen_task_structure",
+    "required_operations_resolver_version": "v4.1",
+    "oracle_independent": true,
+    "acceptable_canonical_paths": [
+      [
+        "PolynomialOps.div_qr"
+      ]
+    ]
+  },
+  "called_domain_apis": [
+    "PolynomialOps.div_qr",
+    "PolynomialOps.format_plain"
+  ],
+  "irrelevant_api_diagnostics": [],
+  "result_flow_diagnostics": {
+    "domain_call_result_bindings": [
+      {
+        "api": "PolynomialOps.div_qr",
+        "binding": "quotient_coefficients",
+        "reaches_final_output": true
+      },
+      {
+        "api": "PolynomialOps.div_qr",
+        "binding": "remainder_coefficients",
+        "reaches_final_output": true
+      }
+    ],
+    "domain_result_reaches_final_output": [
+      "PolynomialOps.div_qr"
+    ],
+    "called_but_result_unused": true,
+    "manual_recomputation_after_domain_call": false
+  },
+  "adoption_verdict": "ASSEMBLY_COMPLIANT",
+  "evaluator_verdict": "PASSED",
+  "evaluator_details": {
+    "oracle_type": "polynomial_division_general",
+    "is_correct": true,
+    "expected_answer": {
+      "quotient_coefficients": [
+        -7,
+        18
+      ],
+      "remainder_coefficients": [
+        -37
+      ]
+    },
+    "submitted_answer": {
+      "quotient_coefficients": [
+        -7,
+        18
+      ],
+      "remainder_coefficients": [
+        -37
+      ]
+    },
+    "error": null
+  },
+  "returned_value": {
+    "question_text": "Divide the polynomial -7x+18 by the linear divisor defined by coefficients [1, 2]. Report the resulting quotient and remainder.",
+    "correct_answer": {
+      "quotient_coefficients": [
+        -7,
+        18
+      ],
+      "remainder_coefficients": [
+        -37
+      ]
+    },
+    "oracle_payload": {
+      "dividend_coefficients": [
+        -7,
+        4,
+        -1
+      ],
+      "divisor_coefficients": [
+        1,
+        2
+      ]
+    }
+  },
+  "completion": "NATURAL_COMPLETE",
+  "lifecycle_checkpoints": [
+    {
+      "cell_id": "qwen3_5_9b__ce115_calc_polynomial_division_l1__ab2d_assembly_v4__seed_2026071303",
+      "phase": "CELL_SELECTED",
+      "timestamp": 1784174152.298455,
+      "process_id": 30080,
+      "thread_id": 31240,
+      "exception_type": null,
+      "exception_message": null,
+      "sequence": 15
+    },
+    {
+      "cell_id": "qwen3_5_9b__ce115_calc_polynomial_division_l1__ab2d_assembly_v4__seed_2026071303",
+      "phase": "PROMPT_RENDERED",
+      "timestamp": 1784174152.3096147,
+      "process_id": 30080,
+      "thread_id": 31240,
+      "exception_type": null,
+      "exception_message": null
+    },
+    {
+      "cell_id": "qwen3_5_9b__ce115_calc_polynomial_division_l1__ab2d_assembly_v4__seed_2026071303",
+      "phase": "PAYLOAD_BUILT",
+      "timestamp": 1784174152.3096185,
+      "process_id": 30080,
+      "thread_id": 31240,
+      "exception_type": null,
+      "exception_message": null
+    },
+    {
+      "cell_id": "qwen3_5_9b__ce115_calc_polynomial_division_l1__ab2d_assembly_v4__seed_2026071303",
+      "phase": "CALL_INTENT_PERSISTED",
+      "timestamp": 1784174152.3101313,
+      "process_id": 30080,
+      "thread_id": 31240,
+      "exception_type": null,
+      "exception_message": null
+    },
+    {
+      "cell_id": "qwen3_5_9b__ce115_calc_polynomial_division_l1__ab2d_assembly_v4__seed_2026071303",
+      "phase": "TRANSPORT_ENTERED",
+      "timestamp": 1784174152.3110523,
+      "process_id": 30080,
+      "thread_id": 31240,
+      "exception_type": null,
+      "exception_message": null
+    },
+    {
+      "cell_id": "qwen3_5_9b__ce115_calc_polynomial_division_l1__ab2d_assembly_v4__seed_2026071303",
+      "phase": "TRANSPORT_RETURNED",
+      "timestamp": 1784174156.0108476,
+      "process_id": 30080,
+      "thread_id": 31240,
+      "exception_type": null,
+      "exception_message": null
+    },
+    {
+      "cell_id": "qwen3_5_9b__ce115_calc_polynomial_division_l1__ab2d_assembly_v4__seed_2026071303",
+      "phase": "RAW_PERSISTED",
+      "timestamp": 1784174156.0114994,
+      "process_id": 30080,
+      "thread_id": 31240,
+      "exception_type": null,
+      "exception_message": null
+    },
+    {
+      "cell_id": "qwen3_5_9b__ce115_calc_polynomial_division_l1__ab2d_assembly_v4__seed_2026071303",
+      "phase": "SCANNER_STARTED",
+      "timestamp": 1784174156.0125327,
+      "process_id": 30080,
+      "thread_id": 31240,
+      "exception_type": null,
+      "exception_message": null
+    },
+    {
+      "cell_id": "qwen3_5_9b__ce115_calc_polynomial_division_l1__ab2d_assembly_v4__seed_2026071303",
+      "phase": "SCANNER_COMPLETED",
+      "timestamp": 1784174156.0132117,
+      "process_id": 30080,
+      "thread_id": 31240,
+      "exception_type": null,
+      "exception_message": null
+    },
+    {
+      "cell_id": "qwen3_5_9b__ce115_calc_polynomial_division_l1__ab2d_assembly_v4__seed_2026071303",
+      "phase": "EVALUATOR_STARTED",
+      "timestamp": 1784174156.0132136,
+      "process_id": 30080,
+      "thread_id": 31240,
+      "exception_type": null,
+      "exception_message": null
+    },
+    {
+      "cell_id": "qwen3_5_9b__ce115_calc_polynomial_division_l1__ab2d_assembly_v4__seed_2026071303",
+      "phase": "EVALUATOR_COMPLETED",
+      "timestamp": 1784174156.178869,
+      "process_id": 30080,
+      "thread_id": 31240,
+      "exception_type": null,
+      "exception_message": null
+    }
+  ],
+  "process_exit_provenance": {
+    "pid": 30080,
+    "status": "FINALIZED",
+    "model_calls": 1
+  },
+  "hashes": {
+    "prompt": "d4dc6dcbaafe9f314865066defe56bd601e7b16d9a0da84a0e83b0c19ae88ea9",
+    "payload": "3d32514870dcc14e0a05bd2a456352e4d952094e2df2f727835fbeb764a573e0",
+    "raw": "101f9963999fab02d212b254fb36a8c6acb45ffb4f2cf4541854c6953bd70fba",
+    "extracted_code": "101f9963999fab02d212b254fb36a8c6acb45ffb4f2cf4541854c6953bd70fba"
+  },
+  "provenance": {
+    "first_attempt_only": true,
+    "no_retry": true,
+    "request_number": 1,
+    "model_calls": 1,
+    "retry": 0,
+    "replay": 0,
+    "repair": 0,
+    "healer": 0,
+    "source_v3_cell_id": "qwen3_5_9b__ce115_calc_polynomial_division_l1__ab2d_assembly_v3__seed_2026071303"
+  },
+  "status": "FINALIZED"
+}

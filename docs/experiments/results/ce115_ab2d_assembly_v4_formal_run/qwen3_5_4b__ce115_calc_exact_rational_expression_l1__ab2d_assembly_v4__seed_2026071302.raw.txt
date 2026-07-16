@@ -1,0 +1,141 @@
+```python
+def generate(level=1, **kwargs):
+    from decimal import Decimal
+    
+    # Frozen input data
+    products = [{"left": "4.95", "right": "89.6", "sign": 1}, {"left": "-0.05", "right": "89.6", "sign": -1}]
+
+    def build_expression_text(products):
+        terms_strs = []
+        for term in products:
+            left_val = Decimal(term["left"])
+            right_val = Decimal(term["right"])
+            sign = term["sign"]
+            
+            # Calculate the product value as a string to preserve precision before final reduction logic if needed, 
+            # but we will compute exact fractions directly.
+            val_str = f"{int(left_val * 10)} / {abs(int(right_val * 10))}" if right_val != int(right_val) else str(int(left_val * right_val))
+            
+            # Actually, let's just construct the string representation of the expression based on inputs directly.
+            left_str = term["left"]
+            right_str = term["right"]
+            sign_char = "+" if term["sign"] == 1 else "-"
+            
+            terms_strs.append(f"{term['sign']} * {left_str} * {right_str}")
+
+        return " + ".join(terms_strs)
+
+    # Calculate exact rational arithmetic using Decimal for intermediate precision, then convert to Fraction-like logic manually 
+    # since we need canonical p/q or integer output.
+    
+    total_decimal = Decimal("0")
+    final_numerator_parts = []
+    final_denominator_parts = [1]
+    
+    # We will compute the sum of (sign * left * right) exactly as fractions.
+    # To ensure exact rational arithmetic without floats:
+    # Represent each term's value as a fraction n/d where d is product of denominators of inputs, then simplify at end? 
+    # Or just use Python's Fraction class if available in standard lib (it is). The prompt says "Standard Python may be used".
+    
+    from fractions import Fraction
+    
+    total_fraction = Fraction(0)
+    
+    for term in products:
+        left_val = Decimal(term["left"])
+        right_val = Decimal(term["right"])
+        
+        # Convert decimals to exact integers scaled by 10^k? 
+        # Easier: convert string decimal directly to integer numerator and denominator.
+        def dec_to_frac(d_str):
+            if '.' in d_str:
+                parts = d_str.split('.')
+                int_part = int(parts[0])
+                frac_part_parts = [int(c) for c in parts[1]]
+                denom = 10 ** len(frac_part_parts)
+                num = int_part * denom + sum(p * (10**(len(frac_part_parts)-i)) for i, p in enumerate(frac_part_parts[::-1])) if frac_part_parts else int_part
+            else:
+                num = int(d_str)
+                denom = 1
+            
+            # Handle negative sign separately or include in numerator? 
+            # The input strings like "-0.05" have the minus at start.
+            is_neg = d_str.startswith('-') and len(d_str) > 1
+            if is_neg:
+                num = -num
+                
+            return Fraction(num, denom)
+
+        left_frac = dec_to_frac(term["left"])
+        right_frac = dec_to_frac(term["right"])
+        
+        term_val = sign * left_frac * right_frac # Wait, I need to access 'sign' from loop
+        
+    # Re-doing calculation cleanly
+    
+    total_fraction = Fraction(0)
+    
+    for item in products:
+        sgn = item['sign']
+        l_str = item['left']
+        r_str = item['right']
+        
+        def str_to_frac(s):
+            if '.' not in s:
+                return Fraction(int(s), 1)
+            
+            # Parse manually to avoid float conversion issues entirely during parsing logic, 
+            # though Decimal is safe for string->float then int scaling.
+            # Let's stick to the manual integer extraction method used above but applied here correctly.
+            parts = s.split('.')
+            if len(parts[0]) == 1 and (parts[0][0] in '+-'):
+                sign_char = parts[0][0]
+                num_str = abs(int(parts[0])) + int(''.join(c for c in parts[1].replace('.', ''))) # This logic is flawed. 
+                
+            # Correct manual parsing:
+            if s.startswith('-') and len(s) > 1:
+                sign_char = '-'
+                val_part = s[1:]
+            else:
+                sign_char = '+'
+                val_part = s
+            
+            int_part_str, frac_part_str = (val_part.split('.') if '.' in val_part else [val_part, ''])
+            
+            denom = 10 ** len(frac_part_str)
+            num_int = int(int_part_str.lstrip('-')) * denom + sum(digit * (10**(len(frac_part_str)-i)) for i, digit in enumerate(reversed(frac_part_str))) if frac_part_str else int(int_part_str.lstrip('-'))
+            
+            # Apply sign to numerator only? 
+            # If original was negative: num_int becomes -num_int.
+            final_num = num_int * (1 if sgn == 1 else -1) # Wait, the term has its own sign multiplier
+            
+            return Fraction(final_num, denom)
+
+        left_frac = str_to_frac(l_str)
+        right_frac = str_to_frac(r_str)
+        
+        current_term_val = sgn * left_frac * right_frac
+        total_fraction += current_term_val
+        
+    # Format result: integer if denominator is 1, else "p/q" with positive denom.
+    
+    final_num = int(total_fraction.numerator)
+    final_denom = abs(int(total_fraction.denominator))
+    
+    if final_denom == 1:
+        ans_str = str(final_num)
+    else:
+        # Ensure denominator is positive (Fraction does this automatically, but double check logic)
+        # Fraction always stores denom > 0.
+        ans_str = f"{final_num}/{final_denom}"
+
+    question_text = build_expression_text(products) + " ="
+    
+    oracle_payload = products
+    
+    return {
+        "question_text": str(question_text),
+        "correct_answer": {"value": ans_str},
+        "oracle_payload": oracle_payload
+    }
+```
