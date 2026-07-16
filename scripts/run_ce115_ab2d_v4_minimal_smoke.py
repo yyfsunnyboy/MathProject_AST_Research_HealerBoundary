@@ -61,4 +61,49 @@ def persist_run_rows(output, planned, executor):
   (output/'zero_model_call_ledger.json').write_text(json.dumps(ledger,indent=2)+'\n')
   (output/'smoke_summary.json').write_text(json.dumps({'planned':len(planned),'executed':len(rows),'artifacts':len(rows),'calls':len(ledger),'retry':0,'replay':0,'repair':0,'healer':0,'finalized':True},indent=2)+'\n')
  return rows
-if __name__=='__main__':print(json.dumps(run(),indent=2))
+
+
+
+def production_path_run(output, plans, transport, *, render=None):
+    """Instrumented production lifecycle; transport is real HTTP or deterministic fake."""
+    output=Path(output)
+    if output.exists(): raise RuntimeError("refusing overwrite existing smoke directory")
+    output.mkdir(parents=True); checkpoints=[]; ledger=[]; rows=[]; run_id=output.name
+    def mark(phase, cell_id=None, sequence=None, exc=None):
+        checkpoints.append({"run_id":run_id,"cell_id":cell_id,"sequence_number":sequence,"phase":phase,"timestamp":time.time(),"process_id":__import__('os').getpid(),"thread_id":__import__('threading').get_ident(),"exception_type":type(exc).__name__ if exc else None,"exception_message":str(exc) if exc else None})
+    mark("RUN_STARTED")
+    try:
+        mark("PREFLIGHT_COMPLETED"); mark("LOOP_ENTERED")
+        for n, plan in enumerate(plans,1):
+            cid=plan['cell_id']; mark("EACH_CELL_ADVANCE",cid,n); last="CELL_SELECTED"
+            try:
+                mark(last,cid,n); prompt=(render or (lambda x:x['prompt']))(plan); last="PROMPT_RENDERED";mark(last,cid,n)
+                payload={"model":MODEL,"messages":[{"role":"user","content":prompt}],"stream":False};last="PAYLOAD_BUILT";mark(last,cid,n)
+                ledger.append({"cell_id":cid,"request_number":n,"status":"intent","retry":0});last="CALL_INTENT_PERSISTED";mark(last,cid,n)
+                mark("TRANSPORT_ENTERED",cid,n); reply=transport(payload,n); mark("TRANSPORT_RETURNED",cid,n)
+                raw=reply.get('message',{}).get('content','');(output/f'{cid}.raw.txt').write_text(raw,encoding='utf8');last="RAW_PERSISTED";mark(last,cid,n)
+                mark("SCANNER_STARTED",cid,n); code=extract_code(raw).extracted_code or ''; scan=scan_toolbox(code,plan['task'],plan.get('frozen'));mark("SCANNER_COMPLETED",cid,n)
+                mark("EVALUATOR_STARTED",cid,n)
+                try: ns=runtime_namespace();exec(compile(code,'<candidate>','exec'),ns,ns);ns['generate'](); ev="COMPLETED"
+                except BaseException as exc: ev="EXECUTION_FAILURE"; evaluator_error=f'{type(exc).__name__}: {exc}'
+                mark("EVALUATOR_COMPLETED",cid,n)
+                row={"cell_id":cid,"task":plan['task'],"completion":"NATURAL_COMPLETE","scanner":scan,"evaluator":ev,"last_successful_phase":last,"provenance":{"retry":0,"replay":0,"repair":0,"healer":0}}
+                if ev!="COMPLETED":row['evaluator_error']=evaluator_error
+            except BaseException as exc:
+                row={"cell_id":cid,"task":plan['task'],"completion":"SYSTEM_FAILURE","scanner":{"classification":"INSUFFICIENT_EVIDENCE"},"evaluator":"SYSTEM_DEFECT","last_successful_phase":last,"exception_type":type(exc).__name__,"exception_message":str(exc),"provenance":{"retry":0,"replay":0,"repair":0,"healer":0}}
+                mark("CELL_EXCEPTION",cid,n,exc)
+            (output/f'{cid}.json').write_text(json.dumps(row,indent=2,default=str)+'\n');rows.append(row);ledger[-1]['status']='finalized' if ledger else 'no_call';mark("CELL_FINALIZED",cid,n)
+        mark("LOOP_COMPLETED")
+    except BaseException as exc: mark("RUN_EXCEPTION",exc=exc)
+    finally:
+        mark("SUMMARY_STARTED");(output/'production_checkpoints.json').write_text(json.dumps(checkpoints,indent=2)+'\n');(output/'model_call_ledger.json').write_text(json.dumps(ledger,indent=2)+'\n');(output/'smoke_summary.json').write_text(json.dumps({"planned":len(plans),"executed":len(rows),"artifacts":len(rows),"calls":len(ledger),"finalized":True},indent=2)+'\n');mark("SUMMARY_WRITTEN");mark("RUN_FINALIZED");(output/'production_checkpoints.json').write_text(json.dumps(checkpoints,indent=2)+'\n')
+    return rows
+
+
+def _fake_cli():
+    parser=argparse.ArgumentParser();parser.add_argument('--fake-transport',action='store_true');parser.add_argument('--output',type=Path);args=parser.parse_args()
+    if not args.fake_transport: return print(json.dumps(run(),indent=2))
+    plans=[{'cell_id':f'fake_{f}','task':t,'prompt':stub_for_task(t),'frozen':{}} for f,t in TASKS]
+    def fake(payload,n): return {'message':{'content':'def generate(level=1, **kwargs):\n return {"question_text":"q","correct_answer":0,"oracle_payload":{}}\n'}}
+    print(json.dumps({'rows':len(production_path_run(args.output,plans,fake))},indent=2))
+if __name__=='__main__':_fake_cli()
