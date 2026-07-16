@@ -1,7 +1,7 @@
-"""Research-only Healer rule protocol (H1).
+"""Research-only Healer rule protocol (H1+) / frozen multi-rule provenance (H5).
 
-Defines the unified rule outcome record and pass provenance schema.
-No transform rules live here; this module is schema + validation only.
+Defines the unified rule outcome record, pass provenance schema, and the
+frozen multi-rule execution policy constants. No transform rules live here.
 """
 
 from __future__ import annotations
@@ -28,13 +28,43 @@ RULE_PROTOCOL_FIELDS: tuple[str, ...] = (
     "stop_reason",
 )
 
+# H5 frozen provenance — every pass record must expose these keys.
 PROVENANCE_FIELDS: tuple[str, ...] = (
     "pass_index",
     "candidate_rules_checked",
     "selected_rule_id",
     "selection_priority",
+    "applicable",
+    "triggered",
+    "changed",
+    "guard_results",
+    "before_hash",
+    "after_hash",
+    "validation",
+    "stop_reason",
     "stopped_after_change",
+    "final_status",
 )
+
+# Frozen multi-rule execution policy (H5). Do not soften without a new milestone.
+DEFAULT_MAX_PASSES: int = 1
+
+FROZEN_EXECUTION_POLICY: dict[str, Any] = {
+    "policy_id": "ce115_research_healer_execution_policy_h5",
+    "allowlist_only": True,
+    "fixed_priority": True,
+    "priority_order": "ascending",
+    "one_change_per_pass": True,
+    "stop_pass_after_first_changed": True,
+    "reparse_after_change": True,
+    "revalidate_after_change": True,
+    "reevaluate_after_change_when_task_present": True,
+    "repair_attempt_requires_changed": True,
+    "max_passes_required": True,
+    "default_max_passes": DEFAULT_MAX_PASSES,
+    "fail_closed_on_max_passes_exceeded": True,
+    "forbid_legacy_pipelines": True,
+}
 
 ALLOWED_LAYERS: frozenset[str] = frozenset({"L1", "L2", "L3", "L4", "L5", "META"})
 
@@ -49,11 +79,13 @@ ALLOWED_STOP_REASONS: frozenset[str | None] = frozenset(
         "allowlist_empty",
         "no_candidate_selected",
         "validation_failed",
+        "max_passes_exceeded",
+        "stable_no_further_change",
     }
 )
 
 FINAL_STATUSES: frozenset[str] = frozenset(
-    {"no_op", "changed", "validation_failed", "error"}
+    {"no_op", "changed", "validation_failed", "max_passes_exceeded", "error"}
 )
 
 
@@ -85,13 +117,22 @@ class RuleOutcome:
 
 @dataclass(frozen=True)
 class PassProvenance:
-    """Selection provenance for one runner pass (independent of rule fields)."""
+    """Complete H5 provenance for one runner pass."""
 
     pass_index: int
     candidate_rules_checked: tuple[str, ...]
     selected_rule_id: str | None
     selection_priority: int | None
+    applicable: bool
+    triggered: bool
+    changed: bool
+    guard_results: Mapping[str, Any]
+    before_hash: str
+    after_hash: str
+    validation: Mapping[str, Any]
+    stop_reason: str | None
     stopped_after_change: bool
+    final_status: str
 
 
 @dataclass(frozen=True)
@@ -108,6 +149,10 @@ class ResearchHealerResult:
     real_model_calls: int = 0
     protected_snapshot: Mapping[str, Any] = field(default_factory=dict)
     notes: tuple[str, ...] = ()
+    max_passes: int = DEFAULT_MAX_PASSES
+    execution_policy: Mapping[str, Any] = field(
+        default_factory=lambda: dict(FROZEN_EXECUTION_POLICY)
+    )
 
 
 def rule_outcome_to_dict(outcome: RuleOutcome) -> dict[str, Any]:
@@ -133,7 +178,16 @@ def provenance_to_dict(prov: PassProvenance) -> dict[str, Any]:
         "candidate_rules_checked": list(prov.candidate_rules_checked),
         "selected_rule_id": prov.selected_rule_id,
         "selection_priority": prov.selection_priority,
+        "applicable": prov.applicable,
+        "triggered": prov.triggered,
+        "changed": prov.changed,
+        "guard_results": dict(prov.guard_results),
+        "before_hash": prov.before_hash,
+        "after_hash": prov.after_hash,
+        "validation": dict(prov.validation),
+        "stop_reason": prov.stop_reason,
         "stopped_after_change": prov.stopped_after_change,
+        "final_status": prov.final_status,
     }
 
 
@@ -142,6 +196,8 @@ def research_result_to_dict(result: ResearchHealerResult) -> dict[str, Any]:
         "input_hash": result.input_hash,
         "output_hash": result.output_hash,
         "final_status": result.final_status,
+        "max_passes": result.max_passes,
+        "execution_policy": dict(result.execution_policy),
         "rule_outcomes": [rule_outcome_to_dict(o) for o in result.rule_outcomes],
         "provenance": [provenance_to_dict(p) for p in result.provenance],
         "real_model_calls": result.real_model_calls,
@@ -194,6 +250,13 @@ def validate_rule_outcome(outcome: RuleOutcome) -> None:
     if not outcome.changed and outcome.before_hash != outcome.after_hash:
         raise RuleProtocolError("before_hash != after_hash requires changed=True")
 
+    # H5: never claim a repair attempt unless the source actually changed.
+    if "repair_attempted" in outcome.validation:
+        if bool(outcome.validation["repair_attempted"]) and not outcome.changed:
+            raise RuleProtocolError(
+                "validation.repair_attempted=True is forbidden when changed=False"
+            )
+
 
 def validate_provenance(prov: PassProvenance) -> None:
     for name in PROVENANCE_FIELDS:
@@ -212,10 +275,38 @@ def validate_provenance(prov: PassProvenance) -> None:
         raise RuleProtocolError("selected_rule_id must be None or a non-empty string")
     if prov.selection_priority is not None and not isinstance(prov.selection_priority, int):
         raise RuleProtocolError("selection_priority must be None or an int")
-    if not isinstance(prov.stopped_after_change, bool):
-        raise RuleProtocolError("stopped_after_change must be a bool")
+    for flag in ("applicable", "triggered", "changed", "stopped_after_change"):
+        if not isinstance(getattr(prov, flag), bool):
+            raise RuleProtocolError(f"{flag} must be a bool")
+    if not isinstance(prov.guard_results, Mapping):
+        raise RuleProtocolError("guard_results must be a mapping")
+    if not isinstance(prov.before_hash, str) or not _SHA256_RE.match(prov.before_hash):
+        raise RuleProtocolError("before_hash must be 64-char lowercase hex SHA-256")
+    if not isinstance(prov.after_hash, str) or not _SHA256_RE.match(prov.after_hash):
+        raise RuleProtocolError("after_hash must be 64-char lowercase hex SHA-256")
+    if not isinstance(prov.validation, Mapping):
+        raise RuleProtocolError("validation must be a mapping")
+    if prov.stop_reason not in ALLOWED_STOP_REASONS:
+        allowed = sorted(r for r in ALLOWED_STOP_REASONS if r is not None) + [None]
+        raise RuleProtocolError(
+            f"stop_reason must be one of {allowed}, got {prov.stop_reason!r}"
+        )
+    if prov.final_status not in FINAL_STATUSES:
+        raise RuleProtocolError(
+            f"final_status must be one of {sorted(FINAL_STATUSES)}, got {prov.final_status!r}"
+        )
     if prov.stopped_after_change and prov.selected_rule_id is None:
         raise RuleProtocolError("stopped_after_change=True requires selected_rule_id")
+    if prov.stopped_after_change and not prov.changed:
+        raise RuleProtocolError("stopped_after_change=True requires changed=True")
+    if prov.changed and not prov.triggered:
+        raise RuleProtocolError("provenance changed=True requires triggered=True")
+    if prov.triggered and not prov.applicable:
+        raise RuleProtocolError("provenance triggered=True requires applicable=True")
+    if prov.changed and prov.before_hash == prov.after_hash:
+        raise RuleProtocolError("provenance changed=True requires before_hash != after_hash")
+    if not prov.changed and prov.before_hash != prov.after_hash:
+        raise RuleProtocolError("provenance hash delta requires changed=True")
 
 
 def validate_research_result(result: ResearchHealerResult) -> None:
@@ -225,6 +316,8 @@ def validate_research_result(result: ResearchHealerResult) -> None:
         )
     if result.real_model_calls != 0:
         raise RuleProtocolError("research healer must record real_model_calls=0")
+    if not isinstance(result.max_passes, int) or result.max_passes < 1:
+        raise RuleProtocolError("max_passes must be an int >= 1")
     if result.input_hash != sha256_text(result.input_source):
         raise RuleProtocolError("input_hash must match input_source")
     if result.output_hash != sha256_text(result.output_source):
@@ -237,10 +330,21 @@ def validate_research_result(result: ResearchHealerResult) -> None:
     if result.final_status == "changed":
         if result.input_hash == result.output_hash:
             raise RuleProtocolError("changed status requires input_hash != output_hash")
+    if result.final_status == "max_passes_exceeded":
+        if result.input_hash == result.output_hash and any(
+            o.changed for o in result.rule_outcomes
+        ):
+            # allow either changed-then-exhausted or exhausted with prior changes
+            pass
     for outcome in result.rule_outcomes:
         validate_rule_outcome(outcome)
     for prov in result.provenance:
         validate_provenance(prov)
+    if result.provenance:
+        if result.provenance[-1].final_status != result.final_status:
+            raise RuleProtocolError(
+                "last provenance.final_status must match result.final_status"
+            )
 
 
 def make_parse_validation(source: str) -> dict[str, Any]:

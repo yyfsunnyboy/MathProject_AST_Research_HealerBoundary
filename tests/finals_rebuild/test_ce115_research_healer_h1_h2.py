@@ -113,7 +113,16 @@ def test_provenance_required_fields():
         "candidate_rules_checked",
         "selected_rule_id",
         "selection_priority",
+        "applicable",
+        "triggered",
+        "changed",
+        "guard_results",
+        "before_hash",
+        "after_hash",
+        "validation",
+        "stop_reason",
         "stopped_after_change",
+        "final_status",
     }
 
 
@@ -298,7 +307,8 @@ def test_runner_one_change_per_pass_and_priority_with_test_doubles():
         registry=registry,
         max_passes=1,
     )
-    assert result.final_status == "changed"
+    # Two mutating rules remain after first change ⇒ fail closed under max_passes=1.
+    assert result.final_status == "max_passes_exceeded"
     assert result.real_model_calls == 0
     # Fixed priority: priority 10 fires first and stops the pass.
     assert result.provenance[0].selected_rule_id == "high_prio_change"
@@ -306,7 +316,7 @@ def test_runner_one_change_per_pass_and_priority_with_test_doubles():
     assert result.provenance[0].stopped_after_change is True
     changed_ids = [o.rule_id for o in result.rule_outcomes if o.changed]
     assert changed_ids == ["high_prio_change"]
-    # Lower-priority mutate rule must not also run after first change.
+    # Lower-priority mutate rule must not also run after first change in the same pass.
     assert "low_prio_change" not in [o.rule_id for o in result.rule_outcomes]
     assert result.output_source.endswith("# healed\n")
     # Re-parse after change recorded.
@@ -449,6 +459,15 @@ def test_protocol_dict_coverage_helpers():
             "candidate_rules_checked": [],
             "selected_rule_id": None,
             "selection_priority": None,
+            "applicable": False,
+            "triggered": False,
+            "changed": False,
+            "guard_results": {},
+            "before_hash": h,
+            "after_hash": h,
+            "validation": {},
+            "stop_reason": "allowlist_empty",
             "stopped_after_change": False,
+            "final_status": "no_op",
         }
     )
