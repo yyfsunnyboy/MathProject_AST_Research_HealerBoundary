@@ -1,0 +1,379 @@
+{
+  "cohort_run_id": "ce115_v4_process_isolated",
+  "cell_id": "process_fraction_2026071301",
+  "task_id": "ce115_calc_exact_rational_expression_l1",
+  "task_family": "fraction",
+  "seed": 2026071301,
+  "frozen_run_plan_hash": "0142d34c24ca929c663ae83cc3a967944e36dcb4e7b3193c67cdd343be65f3bc",
+  "exact_rendered_prompt": "# CE115 Ab2d-Assembly domain contract\nfrom core.prompts.domain_function_library import FractionOps, PolynomialOps, RadicalOps\nfrom core.skill_policies.radical_logic import RadicalLogicEngine\n\nAvailable Domain APIs\nThe following APIs form the available domain toolbox. Select only APIs relevant to the current task. Do not call irrelevant APIs merely for compliance.\n- `PolynomialOps.div_qr` | import: `core.prompts.domain_function_library` | signature: `(dividend_coefficients, divisor_coefficients)` | parameters: dividend_coefficients, divisor_coefficients | returns: tuple[list[exact coefficient], list[exact coefficient]] (quotient, remainder)\n- `PolynomialOps.format_latex` | import: `core.prompts.domain_function_library` | signature: `(coeffs, var='x')` | parameters: polynomial value | returns: str\n- `PolynomialOps.format_plain` | import: `core.prompts.domain_function_library` | signature: `(coeffs, var='x')` | parameters: polynomial value | returns: str\n- `FractionOps.create` | import: `core.prompts.domain_function_library` | signature: `(value)` | parameters: value | returns: Fraction\n- `FractionOps.add` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction\n- `FractionOps.sub` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction\n- `FractionOps.mul` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction\n- `FractionOps.div` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction\n- `FractionOps.to_latex` | import: `core.prompts.domain_function_library` | signature: `(val, mixed=False)` | parameters: value | returns: str\n- `RadicalOps.simplify_term` | import: `core.prompts.domain_function_library` | signature: `(coeff, radicand)` | parameters: coefficient, radicand | returns: tuple[exact coefficient, int] (coefficient, radicand)\n- `RadicalOps.format_expression` | import: `core.prompts.domain_function_library` | signature: `(terms_dict, denominator=1)` | parameters: terms | returns: str\n- `RadicalLogicEngine` | import: `core.skill_policies.radical_logic` | signature: `()` | parameters: constructor | returns: RadicalLogicEngine instance\n\nUse the domain library for every supported core operation actually required by the task. Do not manually reimplement a supported core algorithm. A domain API call counts as adoption only when its returned value contributes to the final answer. Standard Python may be used for control flow, indexing, unpacking, data movement, and output assembly.\n\nReturn contract: `generate(level=1, **kwargs)` returns a dict with `question_text`, `correct_answer`, and `oracle_payload`.\n\n## Task contract\n# Task Specification: Exact Rational Expression Evaluation\n- Task Name: Exact Rational Expression Evaluation\n- Input Parameters: `products` (ordered list of terms; each term has `sign` (1 or -1), `left` and `right` exact decimal strings). The expression value is the sum over terms of sign * left * right.\n- Output: `question_text` must present the arithmetic expression built from these terms.\n- Calculation: `correct_answer` must evaluate the expression with exact rational arithmetic (no floats) and return the canonical value string.\n- Data Contract: `oracle_payload` must return exactly the input parameters.\n\nWrite only complete Python source code.\nDo not use Markdown fences, prose, explanations, or prompt echoes.\nImplement exactly one function:\n\ndef generate(level=1, **kwargs):\n\n`generate()` must return exactly the three-key dictionary specified below.\n\nReturn exactly these three top-level keys and no others:\n`question_text`, `correct_answer`, and `oracle_payload`.\nDo not return `answer`, `mode`, or any additional key.\nThe task-specific `correct_answer` schema below supersedes any earlier generic `correct_answer: str` instruction.\n\nRequired return schema:\n{\n  \"question_text\": str,\n  \"correct_answer\": {\n      \"value\": str  # canonical exact value: integer string, or irreducible \"p/q\" with positive denominator\n  },\n  \"oracle_payload\": dict\n}\n- Formatting rules: reduce completely; output the integer string if the denominator is 1; never use decimal or float approximations.\n- Equality: Exact dictionary match. No tolerance.\n\nAb1 answer-contract wording:\ncorrect_answer must be a JSON-compatible dict with exactly value (canonical exact rational string: integer string or irreducible p/q with positive denominator). Exact arithmetic only; no floats or decimals; do not alter frozen parameters.\n\n## Frozen parameters\n{\"products\": [{\"left\": \"2.79\", \"right\": \"89.3\", \"sign\": 1}, {\"left\": \"-0.21\", \"right\": \"89.3\", \"sign\": -1}]}\nReturn only Python source; oracle_payload must exactly equal the frozen parameters.\n",
+  "available_domain_apis": [
+    {
+      "canonical_name": "PolynomialOps.div_qr",
+      "import_path": "core.prompts.domain_function_library",
+      "signature": "(dividend_coefficients, divisor_coefficients)",
+      "parameter_meaning": "dividend_coefficients, divisor_coefficients",
+      "return_structure": "tuple[list[exact coefficient], list[exact coefficient]] (quotient, remainder)"
+    },
+    {
+      "canonical_name": "PolynomialOps.format_latex",
+      "import_path": "core.prompts.domain_function_library",
+      "signature": "(coeffs, var='x')",
+      "parameter_meaning": "polynomial value",
+      "return_structure": "str"
+    },
+    {
+      "canonical_name": "PolynomialOps.format_plain",
+      "import_path": "core.prompts.domain_function_library",
+      "signature": "(coeffs, var='x')",
+      "parameter_meaning": "polynomial value",
+      "return_structure": "str"
+    },
+    {
+      "canonical_name": "FractionOps.create",
+      "import_path": "core.prompts.domain_function_library",
+      "signature": "(value)",
+      "parameter_meaning": "value",
+      "return_structure": "Fraction"
+    },
+    {
+      "canonical_name": "FractionOps.add",
+      "import_path": "core.prompts.domain_function_library",
+      "signature": "(a, b)",
+      "parameter_meaning": "left, right",
+      "return_structure": "Fraction"
+    },
+    {
+      "canonical_name": "FractionOps.sub",
+      "import_path": "core.prompts.domain_function_library",
+      "signature": "(a, b)",
+      "parameter_meaning": "left, right",
+      "return_structure": "Fraction"
+    },
+    {
+      "canonical_name": "FractionOps.mul",
+      "import_path": "core.prompts.domain_function_library",
+      "signature": "(a, b)",
+      "parameter_meaning": "left, right",
+      "return_structure": "Fraction"
+    },
+    {
+      "canonical_name": "FractionOps.div",
+      "import_path": "core.prompts.domain_function_library",
+      "signature": "(a, b)",
+      "parameter_meaning": "left, right",
+      "return_structure": "Fraction"
+    },
+    {
+      "canonical_name": "FractionOps.to_latex",
+      "import_path": "core.prompts.domain_function_library",
+      "signature": "(val, mixed=False)",
+      "parameter_meaning": "value",
+      "return_structure": "str"
+    },
+    {
+      "canonical_name": "RadicalOps.simplify_term",
+      "import_path": "core.prompts.domain_function_library",
+      "signature": "(coeff, radicand)",
+      "parameter_meaning": "coefficient, radicand",
+      "return_structure": "tuple[exact coefficient, int] (coefficient, radicand)"
+    },
+    {
+      "canonical_name": "RadicalOps.format_expression",
+      "import_path": "core.prompts.domain_function_library",
+      "signature": "(terms_dict, denominator=1)",
+      "parameter_meaning": "terms",
+      "return_structure": "str"
+    },
+    {
+      "canonical_name": "RadicalLogicEngine",
+      "import_path": "core.skill_policies.radical_logic",
+      "signature": "()",
+      "parameter_meaning": "constructor",
+      "return_structure": "RadicalLogicEngine instance"
+    }
+  ],
+  "task_required_operations": [
+    "FractionOps.create",
+    "FractionOps.add",
+    "FractionOps.mul"
+  ],
+  "acceptable_canonical_paths": [
+    [
+      "FractionOps.create",
+      "FractionOps.add",
+      "FractionOps.mul"
+    ]
+  ],
+  "frozen_parameters": {
+    "products": [
+      {
+        "left": "2.79",
+        "right": "89.3",
+        "sign": 1
+      },
+      {
+        "left": "-0.21",
+        "right": "89.3",
+        "sign": -1
+      }
+    ]
+  },
+  "request_payload": {
+    "model": "qwen3.5:4b",
+    "messages": [
+      {
+        "role": "user",
+        "content": "# CE115 Ab2d-Assembly domain contract\nfrom core.prompts.domain_function_library import FractionOps, PolynomialOps, RadicalOps\nfrom core.skill_policies.radical_logic import RadicalLogicEngine\n\nAvailable Domain APIs\nThe following APIs form the available domain toolbox. Select only APIs relevant to the current task. Do not call irrelevant APIs merely for compliance.\n- `PolynomialOps.div_qr` | import: `core.prompts.domain_function_library` | signature: `(dividend_coefficients, divisor_coefficients)` | parameters: dividend_coefficients, divisor_coefficients | returns: tuple[list[exact coefficient], list[exact coefficient]] (quotient, remainder)\n- `PolynomialOps.format_latex` | import: `core.prompts.domain_function_library` | signature: `(coeffs, var='x')` | parameters: polynomial value | returns: str\n- `PolynomialOps.format_plain` | import: `core.prompts.domain_function_library` | signature: `(coeffs, var='x')` | parameters: polynomial value | returns: str\n- `FractionOps.create` | import: `core.prompts.domain_function_library` | signature: `(value)` | parameters: value | returns: Fraction\n- `FractionOps.add` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction\n- `FractionOps.sub` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction\n- `FractionOps.mul` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction\n- `FractionOps.div` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction\n- `FractionOps.to_latex` | import: `core.prompts.domain_function_library` | signature: `(val, mixed=False)` | parameters: value | returns: str\n- `RadicalOps.simplify_term` | import: `core.prompts.domain_function_library` | signature: `(coeff, radicand)` | parameters: coefficient, radicand | returns: tuple[exact coefficient, int] (coefficient, radicand)\n- `RadicalOps.format_expression` | import: `core.prompts.domain_function_library` | signature: `(terms_dict, denominator=1)` | parameters: terms | returns: str\n- `RadicalLogicEngine` | import: `core.skill_policies.radical_logic` | signature: `()` | parameters: constructor | returns: RadicalLogicEngine instance\n\nUse the domain library for every supported core operation actually required by the task. Do not manually reimplement a supported core algorithm. A domain API call counts as adoption only when its returned value contributes to the final answer. Standard Python may be used for control flow, indexing, unpacking, data movement, and output assembly.\n\nReturn contract: `generate(level=1, **kwargs)` returns a dict with `question_text`, `correct_answer`, and `oracle_payload`.\n\n## Task contract\n# Task Specification: Exact Rational Expression Evaluation\n- Task Name: Exact Rational Expression Evaluation\n- Input Parameters: `products` (ordered list of terms; each term has `sign` (1 or -1), `left` and `right` exact decimal strings). The expression value is the sum over terms of sign * left * right.\n- Output: `question_text` must present the arithmetic expression built from these terms.\n- Calculation: `correct_answer` must evaluate the expression with exact rational arithmetic (no floats) and return the canonical value string.\n- Data Contract: `oracle_payload` must return exactly the input parameters.\n\nWrite only complete Python source code.\nDo not use Markdown fences, prose, explanations, or prompt echoes.\nImplement exactly one function:\n\ndef generate(level=1, **kwargs):\n\n`generate()` must return exactly the three-key dictionary specified below.\n\nReturn exactly these three top-level keys and no others:\n`question_text`, `correct_answer`, and `oracle_payload`.\nDo not return `answer`, `mode`, or any additional key.\nThe task-specific `correct_answer` schema below supersedes any earlier generic `correct_answer: str` instruction.\n\nRequired return schema:\n{\n  \"question_text\": str,\n  \"correct_answer\": {\n      \"value\": str  # canonical exact value: integer string, or irreducible \"p/q\" with positive denominator\n  },\n  \"oracle_payload\": dict\n}\n- Formatting rules: reduce completely; output the integer string if the denominator is 1; never use decimal or float approximations.\n- Equality: Exact dictionary match. No tolerance.\n\nAb1 answer-contract wording:\ncorrect_answer must be a JSON-compatible dict with exactly value (canonical exact rational string: integer string or irreducible p/q with positive denominator). Exact arithmetic only; no floats or decimals; do not alter frozen parameters.\n\n## Frozen parameters\n{\"products\": [{\"left\": \"2.79\", \"right\": \"89.3\", \"sign\": 1}, {\"left\": \"-0.21\", \"right\": \"89.3\", \"sign\": -1}]}\nReturn only Python source; oracle_payload must exactly equal the frozen parameters.\n"
+      }
+    ],
+    "stream": false,
+    "think": false,
+    "options": {
+      "temperature": 0.0,
+      "seed": 2026071301,
+      "num_ctx": 65536,
+      "num_predict": 24576
+    }
+  },
+  "CALL_INTENT": {
+    "cell": {
+      "cell_id": "process_fraction_2026071301",
+      "family": "fraction",
+      "task": "ce115_calc_exact_rational_expression_l1",
+      "seed": 2026071301,
+      "max_model_calls": 1,
+      "retry": 0,
+      "replay": 0,
+      "repair": 0,
+      "healer": 0
+    },
+    "phase": "CALL_INTENT",
+    "timestamp": 1784167395.8304486,
+    "prompt_hash": "a060783bd1a67196b4e1145f1eb044a9c42521156f5639420aab341c2651d36e",
+    "payload_hash": "4ce6bf28cb2d6437945f16e92fa879c3b7ed089e3188fd33e1a020424863c33d",
+    "model": "qwen3.5:4b"
+  },
+  "model_call_ledger": [
+    {
+      "cell_id": "process_fraction_2026071301",
+      "request_number": 1,
+      "status": "raw_persisted",
+      "retry": 0,
+      "replay": 0,
+      "repair": 0,
+      "healer": 0
+    }
+  ],
+  "raw_model_response": "```python\ndef generate(level=1, **kwargs):\n    from decimal import Decimal\n    \n    # Frozen input data\n    products = [{\"left\": \"2.79\", \"right\": \"89.3\", \"sign\": 1}, {\"left\": \"-0.21\", \"right\": \"89.3\", \"sign\": -1}]\n\n    def parse_decimal(s):\n        return Decimal(s)\n\n    # Calculate the expression value using exact rational arithmetic via Decimals\n    total = Decimal(0)\n    \n    for term in products:\n        left_val = parse_decimal(term[\"left\"])\n        right_val = parse_decimal(term[\"right\"])\n        sign = term[\"sign\"]\n        \n        product_value = (sign * left_val * right_val)\n        total += product_value\n\n    # Format the result as a canonical rational number string\n    numerator, denominator = total.as_tuple().digits if hasattr(total, 'as_tuple') else Decimal(total).numerator, Decimal(total).denominator\n    \n    # Handle negative sign separately to ensure positive denominator logic for formatting\n    is_negative = False\n    if denominator < 0:\n        is_negative = True\n        numerator *= -1\n        denominator *= -1\n        \n    final_numerator = int(numerator)\n    final_denominator = int(denominator)\n\n    # Reduce fraction by dividing both by GCD (using integer math for exactness)\n    def gcd(a, b):\n        a, b = abs(int(a)), abs(int(b))\n        while b:\n            a, b = b, a % b\n        return int(a)\n\n    common_divisor = gcd(final_numerator, final_denominator)\n    \n    reduced_num = final_numerator // common_divisor\n    reduced_denom = final_denominator // common_divisor\n    \n    # Format output string: integer if denominator is 1, otherwise \"num/den\" with positive denom\n    if reduced_denom == 1:\n        answer_str = str(reduced_num)\n    else:\n        sign_prefix = \"-\" if (reduced_num < 0 and reduced_denom > 0) or (reduced_num > 0 and reduced_denom < 0) else \"\"\n        abs_val = f\"{abs(reduced_num)}\"\n        \n        # Ensure positive denominator in output string representation\n        if reduced_denom < 0:\n            sign_prefix += \"-\"\n            abs_val, reduced_denom = str(abs(int(-reduced_num))), -int(reduced_denom)\n            \n        answer_str = f\"{sign_prefix}{abs_val}/{reduced_denom}\"\n\n    # Construct question text from the products list\n    terms_parts = []\n    for term in products:\n        left_s = term[\"left\"]\n        right_s = term[\"right\"]\n        sign_char = \"+\" if term[\"sign\"] == 1 else \"-\"\n        \n        # Handle negative numbers correctly (e.g., -2.79)\n        num_str = str(term[\"left\"])\n        den_val = Decimal(\"0\")\n        try:\n            int_part, frac_part = divmod(Decimal(num_str), \"1\" if \".\" not in num_str else 1) # Simplified logic for string representation\n            # Reconstruct sign-aware string\n            val_s = str(term[\"left\"])\n            \n            term_expr = f\"{sign_char}{val_s} * {right_s}\"\n        except:\n             pass\n        \n        terms_parts.append(f\"({term['sign']} * ({term['left']}) * ({term['right']}))\")\n\n    question_text = \"Evaluate the following expression exactly:\" + \"\\n\".join(terms_parts) if len(products) > 1 else f\"Evaluate the following expression exactly: {products[0]['sign']} * ({products[0]['left']}) * ({products[0]['right']})\"\n    \n    # Prepare oracle payload (must be exact copy of frozen parameters)\n    oracle_payload = products\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": {\"value\": answer_str},\n        \"oracle_payload\": oracle_payload\n    }\n```",
+  "raw_transport_response": {
+    "model": "qwen3.5:4b",
+    "created_at": "2026-07-16T02:03:24.9023376Z",
+    "message": {
+      "role": "assistant",
+      "content": "```python\ndef generate(level=1, **kwargs):\n    from decimal import Decimal\n    \n    # Frozen input data\n    products = [{\"left\": \"2.79\", \"right\": \"89.3\", \"sign\": 1}, {\"left\": \"-0.21\", \"right\": \"89.3\", \"sign\": -1}]\n\n    def parse_decimal(s):\n        return Decimal(s)\n\n    # Calculate the expression value using exact rational arithmetic via Decimals\n    total = Decimal(0)\n    \n    for term in products:\n        left_val = parse_decimal(term[\"left\"])\n        right_val = parse_decimal(term[\"right\"])\n        sign = term[\"sign\"]\n        \n        product_value = (sign * left_val * right_val)\n        total += product_value\n\n    # Format the result as a canonical rational number string\n    numerator, denominator = total.as_tuple().digits if hasattr(total, 'as_tuple') else Decimal(total).numerator, Decimal(total).denominator\n    \n    # Handle negative sign separately to ensure positive denominator logic for formatting\n    is_negative = False\n    if denominator < 0:\n        is_negative = True\n        numerator *= -1\n        denominator *= -1\n        \n    final_numerator = int(numerator)\n    final_denominator = int(denominator)\n\n    # Reduce fraction by dividing both by GCD (using integer math for exactness)\n    def gcd(a, b):\n        a, b = abs(int(a)), abs(int(b))\n        while b:\n            a, b = b, a % b\n        return int(a)\n\n    common_divisor = gcd(final_numerator, final_denominator)\n    \n    reduced_num = final_numerator // common_divisor\n    reduced_denom = final_denominator // common_divisor\n    \n    # Format output string: integer if denominator is 1, otherwise \"num/den\" with positive denom\n    if reduced_denom == 1:\n        answer_str = str(reduced_num)\n    else:\n        sign_prefix = \"-\" if (reduced_num < 0 and reduced_denom > 0) or (reduced_num > 0 and reduced_denom < 0) else \"\"\n        abs_val = f\"{abs(reduced_num)}\"\n        \n        # Ensure positive denominator in output string representation\n        if reduced_denom < 0:\n            sign_prefix += \"-\"\n            abs_val, reduced_denom = str(abs(int(-reduced_num))), -int(reduced_denom)\n            \n        answer_str = f\"{sign_prefix}{abs_val}/{reduced_denom}\"\n\n    # Construct question text from the products list\n    terms_parts = []\n    for term in products:\n        left_s = term[\"left\"]\n        right_s = term[\"right\"]\n        sign_char = \"+\" if term[\"sign\"] == 1 else \"-\"\n        \n        # Handle negative numbers correctly (e.g., -2.79)\n        num_str = str(term[\"left\"])\n        den_val = Decimal(\"0\")\n        try:\n            int_part, frac_part = divmod(Decimal(num_str), \"1\" if \".\" not in num_str else 1) # Simplified logic for string representation\n            # Reconstruct sign-aware string\n            val_s = str(term[\"left\"])\n            \n            term_expr = f\"{sign_char}{val_s} * {right_s}\"\n        except:\n             pass\n        \n        terms_parts.append(f\"({term['sign']} * ({term['left']}) * ({term['right']}))\")\n\n    question_text = \"Evaluate the following expression exactly:\" + \"\\n\".join(terms_parts) if len(products) > 1 else f\"Evaluate the following expression exactly: {products[0]['sign']} * ({products[0]['left']}) * ({products[0]['right']})\"\n    \n    # Prepare oracle payload (must be exact copy of frozen parameters)\n    oracle_payload = products\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": {\"value\": answer_str},\n        \"oracle_payload\": oracle_payload\n    }\n```"
+    },
+    "done": true,
+    "done_reason": "stop",
+    "total_duration": 9059665700,
+    "load_duration": 221790000,
+    "prompt_eval_count": 1144,
+    "prompt_eval_duration": 294270000,
+    "eval_count": 882,
+    "eval_duration": 8495478999
+  },
+  "extracted_code": "def generate(level=1, **kwargs):\n    from decimal import Decimal\n    \n    # Frozen input data\n    products = [{\"left\": \"2.79\", \"right\": \"89.3\", \"sign\": 1}, {\"left\": \"-0.21\", \"right\": \"89.3\", \"sign\": -1}]\n\n    def parse_decimal(s):\n        return Decimal(s)\n\n    # Calculate the expression value using exact rational arithmetic via Decimals\n    total = Decimal(0)\n    \n    for term in products:\n        left_val = parse_decimal(term[\"left\"])\n        right_val = parse_decimal(term[\"right\"])\n        sign = term[\"sign\"]\n        \n        product_value = (sign * left_val * right_val)\n        total += product_value\n\n    # Format the result as a canonical rational number string\n    numerator, denominator = total.as_tuple().digits if hasattr(total, 'as_tuple') else Decimal(total).numerator, Decimal(total).denominator\n    \n    # Handle negative sign separately to ensure positive denominator logic for formatting\n    is_negative = False\n    if denominator < 0:\n        is_negative = True\n        numerator *= -1\n        denominator *= -1\n        \n    final_numerator = int(numerator)\n    final_denominator = int(denominator)\n\n    # Reduce fraction by dividing both by GCD (using integer math for exactness)\n    def gcd(a, b):\n        a, b = abs(int(a)), abs(int(b))\n        while b:\n            a, b = b, a % b\n        return int(a)\n\n    common_divisor = gcd(final_numerator, final_denominator)\n    \n    reduced_num = final_numerator // common_divisor\n    reduced_denom = final_denominator // common_divisor\n    \n    # Format output string: integer if denominator is 1, otherwise \"num/den\" with positive denom\n    if reduced_denom == 1:\n        answer_str = str(reduced_num)\n    else:\n        sign_prefix = \"-\" if (reduced_num < 0 and reduced_denom > 0) or (reduced_num > 0 and reduced_denom < 0) else \"\"\n        abs_val = f\"{abs(reduced_num)}\"\n        \n        # Ensure positive denominator in output string representation\n        if reduced_denom < 0:\n            sign_prefix += \"-\"\n            abs_val, reduced_denom = str(abs(int(-reduced_num))), -int(reduced_denom)\n            \n        answer_str = f\"{sign_prefix}{abs_val}/{reduced_denom}\"\n\n    # Construct question text from the products list\n    terms_parts = []\n    for term in products:\n        left_s = term[\"left\"]\n        right_s = term[\"right\"]\n        sign_char = \"+\" if term[\"sign\"] == 1 else \"-\"\n        \n        # Handle negative numbers correctly (e.g., -2.79)\n        num_str = str(term[\"left\"])\n        den_val = Decimal(\"0\")\n        try:\n            int_part, frac_part = divmod(Decimal(num_str), \"1\" if \".\" not in num_str else 1) # Simplified logic for string representation\n            # Reconstruct sign-aware string\n            val_s = str(term[\"left\"])\n            \n            term_expr = f\"{sign_char}{val_s} * {right_s}\"\n        except:\n             pass\n        \n        terms_parts.append(f\"({term['sign']} * ({term['left']}) * ({term['right']}))\")\n\n    question_text = \"Evaluate the following expression exactly:\" + \"\\n\".join(terms_parts) if len(products) > 1 else f\"Evaluate the following expression exactly: {products[0]['sign']} * ({products[0]['left']}) * ({products[0]['right']})\"\n    \n    # Prepare oracle payload (must be exact copy of frozen parameters)\n    oracle_payload = products\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": {\"value\": answer_str},\n        \"oracle_payload\": oracle_payload\n    }\n",
+  "model_metadata": {
+    "model": "qwen3.5:4b",
+    "digest_prefix": "2a654d98e6fb",
+    "prompt_eval_count": 1144,
+    "eval_count": 882,
+    "total_duration": 9059665700,
+    "load_duration": 221790000,
+    "prompt_eval_duration": 294270000,
+    "eval_duration": 8495478999,
+    "wall_clock_seconds": 9.077097000001231
+  },
+  "token_counts": {
+    "prompt_eval_count": 1144,
+    "eval_count": 882
+  },
+  "timing": {
+    "wall_clock_seconds": 9.077097000001231,
+    "total_duration": 9059665700
+  },
+  "scanner_diagnostics": {
+    "classification": "REQUIRED_OPERATION_NOT_COVERED",
+    "assembly_classification": "REQUIRED_OPERATION_NOT_COVERED",
+    "called_apis": [],
+    "called_domain_apis": [],
+    "invalid_calls": [],
+    "task_required_operations": [
+      "FractionOps.create",
+      "FractionOps.add",
+      "FractionOps.mul"
+    ],
+    "optional_apis": [
+      "FractionOps.to_latex"
+    ],
+    "missing_operations": [
+      "FractionOps.create",
+      "FractionOps.add",
+      "FractionOps.mul"
+    ],
+    "domain_library_adopted": false,
+    "called_but_result_unused": false,
+    "domain_call_result_bindings": [],
+    "domain_result_reaches_final_output": [],
+    "manual_recomputation_after_domain_call": false,
+    "surface_compliance_only": false,
+    "irrelevant_api_calls": [],
+    "required_operations_source": "frozen_task_structure",
+    "required_operations_resolver_version": "v4.1",
+    "oracle_independent": true,
+    "acceptable_canonical_paths": [
+      [
+        "FractionOps.create",
+        "FractionOps.add",
+        "FractionOps.mul"
+      ]
+    ]
+  },
+  "called_domain_apis": [],
+  "irrelevant_api_diagnostics": [],
+  "result_flow_diagnostics": {
+    "domain_call_result_bindings": [],
+    "domain_result_reaches_final_output": [],
+    "called_but_result_unused": false
+  },
+  "adoption_verdict": "REQUIRED_OPERATION_NOT_COVERED",
+  "evaluator_verdict": "EXECUTION_FAILURE",
+  "evaluator_details": {
+    "error": "AttributeError: 'decimal.Decimal' object has no attribute 'denominator'"
+  },
+  "returned_value": null,
+  "completion": "NATURAL_COMPLETE",
+  "lifecycle_checkpoints": [
+    {
+      "cell_id": "process_fraction_2026071301",
+      "phase": "CELL_SELECTED",
+      "timestamp": 1784167395.8198035,
+      "process_id": 32316,
+      "thread_id": 17292,
+      "exception_type": null,
+      "exception_message": null
+    },
+    {
+      "cell_id": "process_fraction_2026071301",
+      "phase": "PROMPT_RENDERED",
+      "timestamp": 1784167395.830443,
+      "process_id": 32316,
+      "thread_id": 17292,
+      "exception_type": null,
+      "exception_message": null
+    },
+    {
+      "cell_id": "process_fraction_2026071301",
+      "phase": "PAYLOAD_BUILT",
+      "timestamp": 1784167395.830447,
+      "process_id": 32316,
+      "thread_id": 17292,
+      "exception_type": null,
+      "exception_message": null
+    },
+    {
+      "cell_id": "process_fraction_2026071301",
+      "phase": "CALL_INTENT_PERSISTED",
+      "timestamp": 1784167395.8304474,
+      "process_id": 32316,
+      "thread_id": 17292,
+      "exception_type": null,
+      "exception_message": null
+    },
+    {
+      "cell_id": "process_fraction_2026071301",
+      "phase": "TRANSPORT_ENTERED",
+      "timestamp": 1784167395.831869,
+      "process_id": 32316,
+      "thread_id": 17292,
+      "exception_type": null,
+      "exception_message": null
+    },
+    {
+      "cell_id": "process_fraction_2026071301",
+      "phase": "TRANSPORT_RETURNED",
+      "timestamp": 1784167404.9030085,
+      "process_id": 32316,
+      "thread_id": 17292,
+      "exception_type": null,
+      "exception_message": null
+    },
+    {
+      "cell_id": "process_fraction_2026071301",
+      "phase": "RAW_PERSISTED",
+      "timestamp": 1784167404.9037066,
+      "process_id": 32316,
+      "thread_id": 17292,
+      "exception_type": null,
+      "exception_message": null
+    },
+    {
+      "cell_id": "process_fraction_2026071301",
+      "phase": "SCANNER_STARTED",
+      "timestamp": 1784167404.9047663,
+      "process_id": 32316,
+      "thread_id": 17292,
+      "exception_type": null,
+      "exception_message": null
+    },
+    {
+      "cell_id": "process_fraction_2026071301",
+      "phase": "SCANNER_COMPLETED",
+      "timestamp": 1784167404.9077055,
+      "process_id": 32316,
+      "thread_id": 17292,
+      "exception_type": null,
+      "exception_message": null
+    },
+    {
+      "cell_id": "process_fraction_2026071301",
+      "phase": "EVALUATOR_STARTED",
+      "timestamp": 1784167404.9081745,
+      "process_id": 32316,
+      "thread_id": 17292,
+      "exception_type": null,
+      "exception_message": null
+    },
+    {
+      "cell_id": "process_fraction_2026071301",
+      "phase": "EVALUATOR_COMPLETED",
+      "timestamp": 1784167404.9089644,
+      "process_id": 32316,
+      "thread_id": 17292,
+      "exception_type": null,
+      "exception_message": null
+    }
+  ],
+  "process_exit_provenance": {
+    "pid": 32316,
+    "status": "FINALIZED",
+    "model_calls": 1
+  },
+  "hashes": {
+    "prompt": "a060783bd1a67196b4e1145f1eb044a9c42521156f5639420aab341c2651d36e",
+    "payload": "4ce6bf28cb2d6437945f16e92fa879c3b7ed089e3188fd33e1a020424863c33d",
+    "raw": "95fd21ee710d0bcfeb12f59fb8996142ac4366d34abf280b4c3df24c06c254f5",
+    "extracted_code": "24fb06778a8f9d73632def056194ec69ef481f5c898337046908f15ff1726edf"
+  },
+  "provenance": {
+    "first_attempt_only": true,
+    "no_retry": true,
+    "request_number": 1,
+    "model_calls": 1,
+    "retry": 0,
+    "replay": 0,
+    "repair": 0,
+    "healer": 0,
+    "source_frozen_cell_id": "qwen3_5_4b__ce115_calc_exact_rational_expression_l1__ab2d_assembly_v3__seed_2026071301"
+  },
+  "status": "FINALIZED"
+}

@@ -1,0 +1,91 @@
+```python
+def generate(level=1, **kwargs):
+    from core.prompts.domain_function_library import FractionOps
+    
+    # Frozen input data
+    dividend_coeffs = [6, 0, 6]      # Represents 6x^2 + 0x + 6
+    divisor_coeffs = [1, -4]         # Represents x - 4 (linear)
+
+    def poly_to_fraction_list(coeffs):
+        """Converts a list of integer coefficients to a list of Fraction objects."""
+        return [FractionOps.create(c) for c in coeffs]
+
+    dividend_poly_frac = poly_to_fraction_list(dividend_coeffs)
+    
+    # Perform polynomial division using the domain API
+    quotient, remainder = PolynomialOps.div_qr(
+        dividend_coefficients=dividend_coeffs, 
+        divisor_coefficients=[1, -4]  # The second argument expects [leading, constant] for linear as per context of div_qr usually taking full list or specific format. 
+                                      # However, looking at the provided signature `(dividend_coefficients, divisor_coefficients)` and typical polynomial division logic where a linear is just two coeffs:
+                                      # We assume standard long division algorithm implementation in `PolynomialOps.div_qr` expects the coefficients of the dividend and the full coefficient list of the divisor.
+    )
+
+    # Format results for exact arithmetic output (integers or p/q strings)
+    
+    def format_val(val):
+        if isinstance(val, int):
+            return val
+        else:
+            num = FractionOps.create(int(val))
+            den = FractionOps.create(1)
+            frac = FractionOps.div(num, den) # Just to ensure it's a fraction object if needed, but usually we check type.
+            # Actually simpler logic for formatting based on the requirement "integers directly, irreducible p/q strings"
+            return f"{val}"
+
+    quotient_formatted = []
+    remainder_formatted = []
+
+    for q in quotient:
+        val_str = str(q) if isinstance(q, int) else (f"{q.numerator}/{q.denominator}" if not isinstance(q, int) else "N/A") # Wait, FractionOps.div_qr returns exact coefficients. They might be Fractions or ints depending on implementation details of the library provided in context.
+        # Assuming standard behavior: if result is integer-like fraction (denom=1), output int string; otherwise p/q.
+        # Let's refine based on typical domain lib usage where it handles fractions internally.
+        pass
+
+    # Re-evaluating format logic to ensure strict compliance with "integers directly, irreducible p/q strings"
+    
+    quotient_formatted = []
+    remainder_formatted = []
+
+    for q in quotient:
+        if isinstance(q, int):
+            quotient_formatted.append(str(int(q)))
+        else:
+            # It's a Fraction object from the library or similar. 
+            # We need to convert it to string "p/q" only if not integer.
+            num = str(FractionOps.create(int(q.numerator)) if hasattr(q, 'numerator') and q.denominator != 1 else int(q) )
+            den = str(FractionOps.create(1)) 
+            # Actually simpler: just use the string representation logic required.
+            # If it's a Fraction object from `FractionOps`, we can access .numerator and .denominator.
+            if hasattr(q, 'numerator') and q.denominator != 1:
+                quotient_formatted.append(f"{q.numerator}/{q.denominator}")
+            else:
+                quotient_formatted.append(str(int(q)))
+
+    for r in remainder:
+        if isinstance(r, int):
+            remainder_formatted.append(str(int(r)))
+        elif hasattr(r, 'numerator') and r.denominator != 1:
+            remainder_formatted.append(f"{r.numerator}/{r.denominator}")
+        else:
+            remainder_formatted.append(str(int(r)))
+
+    # Construct the question text
+    dividend_str = PolynomialOps.format_plain(dividend_coeffs)
+    divisor_str = PolynomialOps.format_plain([1, -4])
+    
+    question_text = f"Divide the polynomial {dividend_str} by the linear divisor x - 4. Report the quotient and remainder."
+
+    # Construct correct answer dict
+    correct_answer = {
+        "quotient_coefficients": quotient_formatted,
+        "remainder_coefficients": remainder_formatted
+    }
+
+    oracle_payload = {"dividend_coefficients": dividend_coeffs, "divisor_coefficients": divisor_coeffs}
+
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer,
+        "oracle_payload": oracle_payload
+    }
+```
