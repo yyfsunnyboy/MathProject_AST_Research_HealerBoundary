@@ -13,6 +13,7 @@ untouched as historical lineage.
 from __future__ import annotations
 
 import hashlib
+from pathlib import Path
 from typing import Any, Mapping
 
 from agent_tools.finals_rebuild.math_boundary_pilot import build_ab1_prompt
@@ -113,7 +114,48 @@ FORBIDDEN_AB2G_DOMAIN_MARKERS = (
 
 
 def prompt_sha256(text: str) -> str:
+    """SHA-256 of a canonical in-memory prompt string (UTF-8)."""
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def universal_newlines(text: str) -> str:
+    """Normalize CRLF/CR to LF. Does not claim byte-identity with on-disk files."""
+    return text.replace("\r\n", "\n").replace("\r", "\n")
+
+
+def file_byte_hash(path: str | Path) -> str:
+    """SHA-256 of on-disk raw bytes (no newline normalization)."""
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def canonical_text_hash(text: str) -> str:
+    """SHA-256 of UTF-8 text after universal-newline normalization."""
+    return hashlib.sha256(universal_newlines(text).encode("utf-8")).hexdigest()
+
+
+def canonical_file_text_hash(path: str | Path) -> str:
+    """SHA-256 of on-disk file decoded as UTF-8 then universal-newline normalized."""
+    return canonical_text_hash(Path(path).read_bytes().decode("utf-8"))
+
+
+def canonical_prompt_hash(text: str) -> str:
+    """Preferred name for the hash of the builder-emitted prompt string.
+
+    Builder strings already use LF; for on-disk prompt.txt prefer
+    ``canonical_file_text_hash`` (universal-newline) vs ``prompt_file_byte_hash``.
+    """
+    return prompt_sha256(text)
+
+
+def prompt_file_byte_hash(path: str | Path) -> str:
+    """SHA-256 of on-disk prompt file bytes (may differ from canonical string hash)."""
+    return file_byte_hash(path)
+
+
+CANONICALIZATION_DEFINITION = (
+    "SHA-256 of UTF-8 text after universal-newline normalization "
+    "(CRLF/CR -> LF); does not claim byte-identity with on-disk files."
+)
 
 
 def generic_section() -> str:
@@ -233,6 +275,8 @@ def section_identity(prompt: str, condition: str) -> dict[str, Any]:
             "domain_chars": 0,
             "total_chars": len(prompt),
             "total_lines": prompt.count("\n") + 1,
+            "canonical_prompt_hash": prompt_sha256(prompt),
+            # Deprecated alias — same value as canonical_prompt_hash.
             "prompt_hash": prompt_sha256(prompt),
         }
     if base_end < 0:
@@ -250,6 +294,7 @@ def section_identity(prompt: str, condition: str) -> dict[str, Any]:
         "domain_chars": len(domain),
         "total_chars": len(prompt),
         "total_lines": prompt.count("\n") + 1,
+        "canonical_prompt_hash": prompt_sha256(prompt),
         "prompt_hash": prompt_sha256(prompt),
         "generic_hash": prompt_sha256(generic),
         "domain_hash": prompt_sha256(domain) if domain else None,

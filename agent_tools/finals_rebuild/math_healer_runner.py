@@ -9,7 +9,8 @@ Research path (H1+)
 Allowlist research runner exported from ``ce115_research_healer_runner``:
 ``MathHealerRunner``, ``RULE_ALLOWLIST``, ``run_research_healer``.
 
-H3 allowlist includes ``L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP`` only.
+Production allowlist is approved ``L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP`` only
+(frozen-oracle-assisted). L1 drafts are experimental and not production-approved.
 The research path must not be wired through the legacy Regex/AST/
 AntiDuplication/UnifiedCleanup pipeline.
 """

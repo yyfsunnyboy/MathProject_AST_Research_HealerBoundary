@@ -69,7 +69,10 @@ def build_plan(output_dir: Path) -> dict[str, Any]:
             cells.append({
                 "cell_id": cell_id, "task_id": task_id, "family": task["skill_id"],
                 "condition": condition, "seed": SEED, "model": MODEL_ID,
-                "frozen_parameters": params, "prompt": prompt, "prompt_hash": _hash(prompt),
+                "frozen_parameters": params, "prompt": prompt,
+                "canonical_prompt_hash": _hash(prompt),
+                # Deprecated alias of canonical_prompt_hash (builder string, not file bytes).
+                "prompt_hash": _hash(prompt),
                 "prompt_lineage": LINEAGE_ID,
                 "first_attempt_only": True, "retry": 0, "healer": 0,
             })

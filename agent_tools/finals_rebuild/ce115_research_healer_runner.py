@@ -1,15 +1,13 @@
-"""Research-only allowlist Healer runner (H1+) / frozen multi-rule policy (H5).
+"""Research-only allowlist Healer runner (H1+) / frozen multi-rule policy (H5+audit).
 
-Frozen execution policy (H5):
-- allowlist only
+Frozen execution policy:
+- allowlist only (production: approved L2 only; L1 paused/experimental)
 - fixed priority (ascending)
 - one change per pass; stop that pass after the first changed rule
 - after any change: re-parse / re-validate / re-evaluate (when task present)
 - never claim repair_attempted unless changed=True
-- max_passes is mandatory and explicit; exceed ⇒ fail closed
+- max_passes mandatory; exceed ⇒ transactional rollback to input (Option A)
 - must not call legacy Regex / AST / AntiDuplication / UnifiedCleanup pipelines
-
-H3 registers L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP only; H5 adds no new repair rules.
 """
 
 from __future__ import annotations
@@ -31,6 +29,14 @@ from agent_tools.finals_rebuild.ce115_research_healer_protocol import (
     validate_research_result,
     validate_rule_outcome,
 )
+from agent_tools.finals_rebuild.ce115_research_healer_rules_l1 import (
+    LAYER as _L1_LAYER,
+    PRIORITY as _L1_PRIORITY,
+    RULE_ID as L1_COMMENT_ONLY_IF_INSERT_PASS,
+    apply as _l1_apply,
+    is_applicable as _l1_is_applicable,
+    is_triggered as _l1_is_triggered,
+)
 from agent_tools.finals_rebuild.ce115_research_healer_rules_l2 import (
     LAYER as _L2_LAYER,
     PRIORITY as _L2_PRIORITY,
@@ -40,6 +46,7 @@ from agent_tools.finals_rebuild.ce115_research_healer_rules_l2 import (
     is_triggered as _l2_is_triggered,
 )
 
+# Production allowlist — audit-approved L2 only. L1 is paused.
 RULE_ALLOWLIST: tuple[str, ...] = (L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP,)
 
 FORBIDDEN_LEGACY_IMPORTS: frozenset[str] = frozenset(
@@ -83,6 +90,7 @@ class _RegisteredRule:
     apply: Callable[[str, Mapping[str, Any]], tuple[str, Mapping[str, Any], str]]
 
 
+# Production registry: approved L2 only.
 RULE_REGISTRY: dict[str, _RegisteredRule] = {
     L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP: _RegisteredRule(
         rule_id=L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP,
@@ -91,6 +99,18 @@ RULE_REGISTRY: dict[str, _RegisteredRule] = {
         is_applicable=_l2_is_applicable,
         is_triggered=_l2_is_triggered,
         apply=_l2_apply,
+    ),
+}
+
+# Experimental / paused rules — not on production allowlist.
+EXPERIMENTAL_RULE_REGISTRY: dict[str, _RegisteredRule] = {
+    L1_COMMENT_ONLY_IF_INSERT_PASS: _RegisteredRule(
+        rule_id=L1_COMMENT_ONLY_IF_INSERT_PASS,
+        layer=_L1_LAYER,
+        priority=_L1_PRIORITY,
+        is_applicable=_l1_is_applicable,
+        is_triggered=_l1_is_triggered,
+        apply=_l1_apply,
     ),
 }
 
@@ -112,7 +132,13 @@ def select_allowlisted_rules(
     registry: Mapping[str, _RegisteredRule] | None = None,
 ) -> list[_RegisteredRule]:
     """Return allowlisted rules sorted by fixed priority (then rule_id)."""
-    reg = RULE_REGISTRY if registry is None else registry
+    if registry is None:
+        reg: dict[str, _RegisteredRule] = {
+            **EXPERIMENTAL_RULE_REGISTRY,
+            **RULE_REGISTRY,
+        }
+    else:
+        reg = dict(registry)
     selected: list[_RegisteredRule] = []
     missing: list[str] = []
     for rule_id in allowlist:
@@ -230,7 +256,11 @@ def _finish(
     notes: list[str],
     protected: Mapping[str, Any],
     max_passes: int,
+    rolled_back: bool = False,
+    consumer_may_use_output: bool | None = None,
 ) -> ResearchHealerResult:
+    if consumer_may_use_output is None:
+        consumer_may_use_output = final_status not in {"max_passes_exceeded", "error", "validation_failed"}
     # Stamp last provenance final_status to match run result.
     if provenance:
         last = provenance[-1]
@@ -264,9 +294,42 @@ def _finish(
         notes=tuple(notes),
         max_passes=max_passes,
         execution_policy=dict(FROZEN_EXECUTION_POLICY),
+        rolled_back=rolled_back,
+        consumer_may_use_output=consumer_may_use_output,
     )
     validate_research_result(result)
     return result
+
+
+def _fail_closed_max_passes(
+    *,
+    source: str,
+    input_hash: str,
+    outcomes: list[RuleOutcome],
+    provenance: list[PassProvenance],
+    notes: list[str],
+    protected: Mapping[str, Any],
+    max_passes: int,
+) -> ResearchHealerResult:
+    """Option A: roll back to original source; consumer must not use partial output."""
+    notes = list(notes) + [
+        "fail_closed_max_passes_exceeded",
+        "transaction_rollback_to_input",
+        "consumer_may_use_output=false",
+    ]
+    return _finish(
+        source=source,
+        current=source,
+        input_hash=input_hash,
+        final_status="max_passes_exceeded",
+        outcomes=outcomes,
+        provenance=provenance,
+        notes=notes,
+        protected=protected,
+        max_passes=max_passes,
+        rolled_back=True,
+        consumer_may_use_output=False,
+    )
 
 
 def run_research_healer(
@@ -529,12 +592,9 @@ def run_research_healer(
             # Continue to next pass only while budget remains.
             if pass_index + 1 >= max_passes:
                 if _any_rule_would_change(current, rules, ctx):
-                    notes.append("fail_closed_max_passes_exceeded")
-                    return _finish(
+                    return _fail_closed_max_passes(
                         source=source,
-                        current=current,
                         input_hash=input_hash,
-                        final_status="max_passes_exceeded",
                         outcomes=outcomes,
                         provenance=provenance,
                         notes=notes,
@@ -572,12 +632,9 @@ def run_research_healer(
 
     # All passes consumed without early return.
     if changed_any and _any_rule_would_change(current, rules, ctx):
-        notes.append("fail_closed_max_passes_exceeded")
-        return _finish(
+        return _fail_closed_max_passes(
             source=source,
-            current=current,
             input_hash=input_hash,
-            final_status="max_passes_exceeded",
             outcomes=outcomes,
             provenance=provenance,
             notes=notes,
@@ -647,7 +704,7 @@ def load_regression_manifest(path: str | Path) -> dict[str, Any]:
 
 
 def iter_manifest_cases(manifest: Mapping[str, Any]) -> list[dict[str, Any]]:
-    """Return cases in stable order; used by parametric tests for accumulation."""
+    """Return production cases in stable order (excludes exploratory drafts)."""
     cases = list(manifest["cases"])
     case_fields = (
         "case_id",
@@ -665,3 +722,23 @@ def iter_manifest_cases(manifest: Mapping[str, Any]) -> list[dict[str, Any]]:
                 f"case {case.get('case_id')!r} missing fields: {missing}"
             )
     return cases
+
+
+def iter_exploratory_cases(manifest: Mapping[str, Any]) -> list[dict[str, Any]]:
+    """Return paused/exploratory cases (not production allowlist expectations)."""
+    cases = list(manifest.get("exploratory_cases") or [])
+    for case in cases:
+        if "case_id" not in case or "source_artifact" not in case:
+            raise RuleProtocolError(
+                f"exploratory case missing case_id/source_artifact: {case!r}"
+            )
+        if case.get("production_approved") is True:
+            raise RuleProtocolError(
+                f"exploratory case {case['case_id']!r} must not set production_approved=True"
+            )
+    return cases
+
+
+def experimental_allowlist() -> tuple[str, ...]:
+    """Explicit allowlist for paused experimental rules (tests / probes only)."""
+    return (L1_COMMENT_ONLY_IF_INSERT_PASS, L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP)

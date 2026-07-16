@@ -46,11 +46,11 @@ PROVENANCE_FIELDS: tuple[str, ...] = (
     "final_status",
 )
 
-# Frozen multi-rule execution policy (H5). Do not soften without a new milestone.
+# Frozen multi-rule execution policy (H5 + audit). Do not soften without a new milestone.
 DEFAULT_MAX_PASSES: int = 1
 
 FROZEN_EXECUTION_POLICY: dict[str, Any] = {
-    "policy_id": "ce115_research_healer_execution_policy_h5",
+    "policy_id": "ce115_research_healer_execution_policy_h5_audit",
     "allowlist_only": True,
     "fixed_priority": True,
     "priority_order": "ascending",
@@ -62,11 +62,25 @@ FROZEN_EXECUTION_POLICY: dict[str, Any] = {
     "repair_attempt_requires_changed": True,
     "max_passes_required": True,
     "default_max_passes": DEFAULT_MAX_PASSES,
+    # Option A (frozen): exceed max_passes ⇒ transactional rollback to input source.
+    "max_passes_semantics": "transactional_rollback",
     "fail_closed_on_max_passes_exceeded": True,
+    "rollback_on_max_passes_exceeded": True,
+    "consumer_may_use_output_when_max_passes_exceeded": False,
     "forbid_legacy_pipelines": True,
+    "production_allowlist_only_approved_rules": True,
 }
 
-ALLOWED_LAYERS: frozenset[str] = frozenset({"L1", "L2", "L3", "L4", "L5", "META"})
+ALLOWED_LAYERS: frozenset[str] = frozenset(
+    {"L0", "L1", "L2", "L3", "L4", "L5", "L6", "META"}
+)
+
+# Task-difficulty suffix in task_id (e.g. ce115_calc_*_l1) is NOT a failure layer.
+TASK_DIFFICULTY_SUFFIX_PATTERN = "_l1"
+TASK_DIFFICULTY_VS_FAILURE_LAYER_NOTE = (
+    "task_id difficulty markers such as '_l1' name sampler difficulty rank; "
+    "failure taxonomy layers are L0–L6/META and must not be inferred from task_id."
+)
 
 ALLOWED_STOP_REASONS: frozenset[str | None] = frozenset(
     {
@@ -81,6 +95,7 @@ ALLOWED_STOP_REASONS: frozenset[str | None] = frozenset(
         "validation_failed",
         "max_passes_exceeded",
         "stable_no_further_change",
+        "transaction_rollback",
     }
 )
 
@@ -153,6 +168,8 @@ class ResearchHealerResult:
     execution_policy: Mapping[str, Any] = field(
         default_factory=lambda: dict(FROZEN_EXECUTION_POLICY)
     )
+    rolled_back: bool = False
+    consumer_may_use_output: bool = True
 
 
 def rule_outcome_to_dict(outcome: RuleOutcome) -> dict[str, Any]:
@@ -198,6 +215,8 @@ def research_result_to_dict(result: ResearchHealerResult) -> dict[str, Any]:
         "final_status": result.final_status,
         "max_passes": result.max_passes,
         "execution_policy": dict(result.execution_policy),
+        "rolled_back": result.rolled_back,
+        "consumer_may_use_output": result.consumer_may_use_output,
         "rule_outcomes": [rule_outcome_to_dict(o) for o in result.rule_outcomes],
         "provenance": [provenance_to_dict(p) for p in result.provenance],
         "real_model_calls": result.real_model_calls,
@@ -330,12 +349,27 @@ def validate_research_result(result: ResearchHealerResult) -> None:
     if result.final_status == "changed":
         if result.input_hash == result.output_hash:
             raise RuleProtocolError("changed status requires input_hash != output_hash")
+        if not result.consumer_may_use_output:
+            raise RuleProtocolError("changed status requires consumer_may_use_output=True")
+        if result.rolled_back:
+            raise RuleProtocolError("changed status forbids rolled_back=True")
     if result.final_status == "max_passes_exceeded":
-        if result.input_hash == result.output_hash and any(
-            o.changed for o in result.rule_outcomes
-        ):
-            # allow either changed-then-exhausted or exhausted with prior changes
-            pass
+        # Option A: transactional rollback — consumer must not use partial output.
+        if result.input_hash != result.output_hash:
+            raise RuleProtocolError(
+                "max_passes_exceeded requires transactional rollback "
+                "(input_hash == output_hash)"
+            )
+        if result.output_source != result.input_source:
+            raise RuleProtocolError(
+                "max_passes_exceeded requires output_source == input_source"
+            )
+        if not result.rolled_back:
+            raise RuleProtocolError("max_passes_exceeded requires rolled_back=True")
+        if result.consumer_may_use_output:
+            raise RuleProtocolError(
+                "max_passes_exceeded requires consumer_may_use_output=False"
+            )
     for outcome in result.rule_outcomes:
         validate_rule_outcome(outcome)
     for prov in result.provenance:

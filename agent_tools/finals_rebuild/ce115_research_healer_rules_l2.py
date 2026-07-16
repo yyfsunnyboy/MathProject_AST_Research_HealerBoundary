@@ -1,9 +1,18 @@
-"""L2 allowlist rule: single-key oracle_payload scalar wrap (H3).
+"""L2 allowlist rule: frozen-oracle-assisted deterministic structural repair (H3).
 
 Rule id: L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP
 
-Transforms only the return-dict value of ``oracle_payload`` when a single
-frozen key's scalar was returned bare instead of ``{key: scalar}``.
+Research positioning
+--------------------
+This is a **frozen-oracle-assisted deterministic structural repair**.
+It reads frozen parameter key/value(s) from the evaluation context to wrap a
+bare scalar ``oracle_payload`` into ``{frozen_key: scalar}``.
+
+It is **not** oracle-free. Do not claim "no oracle contamination".
+Evidence is limited to the single approved fixture
+``fail_radical_ab1_l2`` (schema_failure → passed) and must not be
+generalized without new adjudicated cases.
+
 Does not call legacy healer pipelines and does not touch other AST nodes.
 """
 
@@ -365,6 +374,17 @@ def apply(source: str, context: Mapping[str, Any]) -> tuple[str, Mapping[str, An
 
     validation["correct_answer_guard"] = True
     validation["wrapped_as"] = {frozen_key: scalar}
+    validation["research_positioning"] = (
+        "frozen-oracle-assisted deterministic structural repair"
+    )
+    validation["oracle_assisted"] = True
+    validation["oracle_free_claimed"] = False
+    validation["frozen_oracle_fields_read"] = {
+        "keys": [frozen_key],
+        "values": {frozen_key: scalar},
+        "source": "context.frozen",
+    }
+    validation["evidence_scope"] = "single_fixture_fail_radical_ab1_l2_only"
 
     # Optional evaluator rerun (does not modify evaluator).
     task = context.get("task")

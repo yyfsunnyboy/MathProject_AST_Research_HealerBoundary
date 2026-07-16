@@ -81,6 +81,7 @@ def build_plan(output_dir: Path) -> dict[str, Any]:
                 "frozen_parameters": params,
                 "prompt": prompt,
                 "prompt_hash": _hash(prompt),
+                "canonical_prompt_hash": _hash(prompt),
                 "prompt_lineage": LINEAGE_ID,
                 "request_think": sample_payload["think"],
                 "request_api": "/api/chat",

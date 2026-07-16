@@ -209,7 +209,9 @@ def test_applicable_triggered_changed_semantics_distinguishable():
 
 def test_math_healer_runner_exports_allowlist_surface():
     assert mhr.RULE_ALLOWLIST == RULE_ALLOWLIST
-    assert "L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP" in RULE_ALLOWLIST
+    assert RULE_ALLOWLIST == ("L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP",)
+    assert "L1_COMMENT_ONLY_IF_INSERT_PASS" not in RULE_ALLOWLIST
+    assert "L1_COMMENT_ONLY_IF_INSERT_PASS" not in RULE_REGISTRY
     assert "L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP" in RULE_REGISTRY
     assert callable(mhr.run_research_healer)
     assert mhr.MathHealerRunner is MathHealerRunner
@@ -310,6 +312,11 @@ def test_runner_one_change_per_pass_and_priority_with_test_doubles():
     # Two mutating rules remain after first change ⇒ fail closed under max_passes=1.
     assert result.final_status == "max_passes_exceeded"
     assert result.real_model_calls == 0
+    assert result.rolled_back is True
+    assert result.consumer_may_use_output is False
+    # Option A: transactional rollback to original input.
+    assert result.output_source == source
+    assert result.output_hash == result.input_hash
     # Fixed priority: priority 10 fires first and stops the pass.
     assert result.provenance[0].selected_rule_id == "high_prio_change"
     assert result.provenance[0].selection_priority == 10
@@ -318,8 +325,7 @@ def test_runner_one_change_per_pass_and_priority_with_test_doubles():
     assert changed_ids == ["high_prio_change"]
     # Lower-priority mutate rule must not also run after first change in the same pass.
     assert "low_prio_change" not in [o.rule_id for o in result.rule_outcomes]
-    assert result.output_source.endswith("# healed\n")
-    # Re-parse after change recorded.
+    # Re-parse after change recorded on the (rolled-back) outcome trail.
     changed_outcome = next(o for o in result.rule_outcomes if o.changed)
     assert changed_outcome.validation["ast_parse_success"] is True
     assert changed_outcome.before_hash != changed_outcome.after_hash
@@ -333,7 +339,9 @@ def test_runner_one_change_per_pass_and_priority_with_test_doubles():
 def test_manifest_schema_and_required_case_fields():
     manifest = _load_manifest()
     assert manifest["manifest_id"] == "ce115_research_healer_regression_v1"
-    assert manifest["allowlist_expected"] == ["L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP"]
+    assert manifest["allowlist_expected"] == [
+        "L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP",
+    ]
     cases = iter_manifest_cases(manifest)
     assert len(cases) >= 5
     ids = {c["case_id"] for c in cases}
@@ -344,6 +352,9 @@ def test_manifest_schema_and_required_case_fields():
         "noop_multikey_frozen",
         "noop_value_mismatch",
     } <= ids
+    assert "fail_exact_ab2d_l1" not in ids
+    exploratory = {c["case_id"] for c in manifest.get("exploratory_cases", [])}
+    assert "fail_exact_ab2d_l1" in exploratory
 
 
 @pytest.mark.parametrize("case_id", _case_ids())

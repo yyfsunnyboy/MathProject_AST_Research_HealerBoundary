@@ -74,6 +74,9 @@ def test_frozen_execution_policy_constants():
     assert FROZEN_EXECUTION_POLICY["one_change_per_pass"] is True
     assert FROZEN_EXECUTION_POLICY["stop_pass_after_first_changed"] is True
     assert FROZEN_EXECUTION_POLICY["fail_closed_on_max_passes_exceeded"] is True
+    assert FROZEN_EXECUTION_POLICY["rollback_on_max_passes_exceeded"] is True
+    assert FROZEN_EXECUTION_POLICY["max_passes_semantics"] == "transactional_rollback"
+    assert FROZEN_EXECUTION_POLICY["consumer_may_use_output_when_max_passes_exceeded"] is False
     assert FROZEN_EXECUTION_POLICY["repair_attempt_requires_changed"] is True
     assert FROZEN_EXECUTION_POLICY["forbid_legacy_pipelines"] is True
     assert set(PROVENANCE_FIELDS) == {
@@ -95,12 +98,13 @@ def test_frozen_execution_policy_constants():
 
 
 def test_single_rule_changed_stops_pass():
+    source = "x = 1\n"
     registry = {
         "first_change": _reg("first_change", 10, mutate=True, marker="# A\n"),
         "second_change": _reg("second_change", 20, mutate=True, marker="# B\n"),
     }
     result = run_research_healer(
-        "x = 1\n",
+        source,
         allowlist=("first_change", "second_change"),
         registry=registry,
         max_passes=1,
@@ -109,6 +113,9 @@ def test_single_rule_changed_stops_pass():
     # With max_passes=1 and second rule still wanting to change ⇒ fail closed.
     assert result.final_status == "max_passes_exceeded"
     assert result.max_passes == 1
+    assert result.rolled_back is True
+    assert result.consumer_may_use_output is False
+    assert result.output_source == source
     changed = [o for o in result.rule_outcomes if o.changed]
     assert len(changed) == 1
     assert changed[0].rule_id == "first_change"
@@ -225,12 +232,13 @@ def test_change_requires_reparse_and_evaluate():
 
 
 def test_max_passes_fail_closed():
+    source = "x = 1\n"
     registry = {
         "r1": _reg("r1", 10, mutate=True, marker="#1\n"),
         "r2": _reg("r2", 20, mutate=True, marker="#2\n"),
     }
     result = run_research_healer(
-        "x = 1\n",
+        source,
         allowlist=("r1", "r2"),
         registry=registry,
         max_passes=1,
@@ -239,8 +247,13 @@ def test_max_passes_fail_closed():
     assert result.max_passes == 1
     assert result.provenance[-1].final_status == "max_passes_exceeded"
     assert any("fail_closed_max_passes_exceeded" in n for n in result.notes)
-    # Source may include first repair only.
-    assert result.output_source.count("#") == 1
+    assert any("transaction_rollback_to_input" in n for n in result.notes)
+    # Option A: transactional rollback — no partial output for consumers.
+    assert result.rolled_back is True
+    assert result.consumer_may_use_output is False
+    assert result.output_source == source
+    assert result.output_hash == result.input_hash
+    assert FROZEN_EXECUTION_POLICY["max_passes_semantics"] == "transactional_rollback"
 
 
 def test_empty_allowlist_all_noop():
@@ -277,6 +290,7 @@ def test_h3_l2_repair_to_pass_not_regressed():
         context={"frozen": frozen, "task": task},
         max_passes=DEFAULT_MAX_PASSES,
     )
+    assert L2 in RULE_ALLOWLIST
     assert RULE_ALLOWLIST == (L2,)
     assert result.final_status == "changed"
     assert result.real_model_calls == 0

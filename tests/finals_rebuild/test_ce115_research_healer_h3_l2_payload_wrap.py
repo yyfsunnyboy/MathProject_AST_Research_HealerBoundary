@@ -72,6 +72,7 @@ def _normalize_oracle_payload_value(source: str) -> str:
 def test_rule_id_and_priority():
     assert RULE_ID == RULE
     assert PRIORITY == 100
+    assert RULE in RULE_ALLOWLIST
     assert RULE_ALLOWLIST == (RULE,)
 
 
