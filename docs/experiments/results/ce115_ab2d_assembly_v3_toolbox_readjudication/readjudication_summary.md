@@ -1,0 +1,32 @@
+# V3 toolbox readjudication
+
+```json
+{
+  "original_counts": {
+    "REQUIRED_API_NOT_CALLED": 9,
+    "INSUFFICIENT_EVIDENCE": 3,
+    "ASSEMBLY_COMPLIANT": 5,
+    "INVALID_API_CALL": 1
+  },
+  "readjudicated_counts": {
+    "REQUIRED_OPERATION_NOT_COVERED": 6,
+    "ASSEMBLY_COMPLIANT": 8,
+    "INSUFFICIENT_EVIDENCE": 3,
+    "INVALID_API_CALL": 1
+  },
+  "transitions": {
+    "REQUIRED_API_NOT_CALLED->REQUIRED_OPERATION_NOT_COVERED": 6,
+    "REQUIRED_API_NOT_CALLED->ASSEMBLY_COMPLIANT": 3,
+    "INSUFFICIENT_EVIDENCE->INSUFFICIENT_EVIDENCE": 3,
+    "ASSEMBLY_COMPLIANT->ASSEMBLY_COMPLIANT": 5,
+    "INVALID_API_CALL->INVALID_API_CALL": 1
+  },
+  "missing_api_dispositions": {
+    "REQUIRED_OPERATION_NOT_COVERED": 6,
+    "FALSE_FAILURE_UNUSED_TOOLBOX_API": 3
+  },
+  "correctness_unchanged": true,
+  "model_healer_repair_replay_retry_calls": 0,
+  "verdict": "TOOLBOX_CONTRACT_REPAIRED_OFFLINE_READJUDICATION_COMPLETE"
+}
+```

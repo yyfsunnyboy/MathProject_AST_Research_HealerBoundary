@@ -1,3 +1,9 @@
+# Milestone 5B.7K ? Domain Toolbox Contract Repair and Offline Re-adjudication
+
+- Committed the immutable v3 18-cell cohort, then repaired the toolbox contract with task-specific operation resolution.
+- Offline readjudication preserved all 18 raw hashes and corrected three false missing-toolbox failures; six genuine operation-coverage failures remain.
+- Protocol v4 is `DRAFT_OFFLINE_VALIDATED`; no model, Healer, repair, replay, or retry calls were made.
+
 # Milestone 5B.7I ? Final Pre-Freeze Covered-Task Hardening and Formal Rerun Preflight
 
 - Froze Ab2d-Assembly protocol v3, verified three covered task paths, and generated the separate 18-cell formal rerun manifest.

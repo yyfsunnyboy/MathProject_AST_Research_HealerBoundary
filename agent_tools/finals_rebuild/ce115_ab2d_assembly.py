@@ -121,3 +121,19 @@ def build_protocol(source_commit: str) -> dict:
     protocol = {"protocol_id": "ce115_ab2d_assembly_protocol", "source_commit": source_commit, "condition_semantics": {"ab2d_spec": "legacy specification-only condition; excluded", "ab2d_assembly": "thin wrapper with canonical runtime library and must-call contract"}, "models": models, "tasks": tasks, "seeds": [2026071301, 2026071302, 2026071303], "planned_cell_count": len(cells), "cells": cells, "generation": {"num_ctx": 65536, "num_predict": 24576, "think": False, "temperature": 0.0, "first_attempt_only": True, "retry": 0, "healer": 0, "repair": 0, "replay": 0}, "result_directory": "docs/experiments/results/ce115_ab2d_assembly_formal_run", "hashes": {"task_api_mapping": sha256_text(mapping_text), "prompt_stubs": stub_hashes, "canonical_library": hashlib.sha256(library_file.read_bytes()).hexdigest(), "assembly_scanner": sha256_text(inspect.getsource(scan_assembly))}}
     protocol["hashes"]["protocol_manifest"] = sha256_text(json.dumps(protocol, sort_keys=True, ensure_ascii=False))
     return protocol
+
+
+def resolve_task_operations(task_id, frozen_payload=None):
+    if task_id == "ce115_calc_polynomial_division_l1": return {"required":["PolynomialOps.div_qr"],"optional":["PolynomialOps.format_latex","PolynomialOps.format_plain"]}
+    if task_id == "ce115_calc_exact_rational_expression_l1":
+        return {"required":["FractionOps.create","FractionOps.mul"] + (["FractionOps.add"] if len((frozen_payload or {}).get("products",[]))>1 else []),"optional":["FractionOps.sub","FractionOps.div","FractionOps.to_latex"]}
+    if task_id == "ce115_calc_radical_simplification_l1": return {"required":["RadicalOps.simplify_term"],"optional":["RadicalLogicEngine","RadicalOps.format_expression"]}
+    raise KeyError(task_id)
+
+def scan_toolbox(source, task_id, frozen_payload=None):
+    base=scan_assembly(source,task_id); policy=resolve_task_operations(task_id,frozen_payload)
+    if base["classification"] == "INSUFFICIENT_EVIDENCE":
+        base.update({"task_required_operations":policy["required"],"domain_library_adopted":False}); return base
+    missing=[x for x in policy["required"] if x not in base.get("called_apis",[])]
+    category="DOMAIN_LOGIC_REIMPLEMENTED" if base.get("forbidden_definitions") else "INVALID_API_CALL" if base.get("invalid_calls") else "REQUIRED_OPERATION_NOT_COVERED" if missing else "ASSEMBLY_COMPLIANT"
+    base.update({"task_required_operations":policy["required"],"optional_apis":policy["optional"],"missing_operations":missing,"domain_library_adopted":bool(base.get("called_apis")),"assembly_classification":category,"classification":category}); return base
