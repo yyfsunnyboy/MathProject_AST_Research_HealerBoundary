@@ -1,4 +1,18 @@
-"""Offline, deterministic Ab2g-to-Ab3 source derivation."""
+"""Offline healer runners.
+
+Legacy path
+-----------
+``derive_ab3`` — deterministic Ab2g→Ab3 derivation via UnifiedCleanupHealer.
+
+Research path (H1+)
+-------------------
+Allowlist research runner exported from ``ce115_research_healer_runner``:
+``MathHealerRunner``, ``RULE_ALLOWLIST``, ``run_research_healer``.
+
+H3 allowlist includes ``L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP`` only.
+The research path must not be wired through the legacy Regex/AST/
+AntiDuplication/UnifiedCleanup pipeline.
+"""
 from __future__ import annotations
 
 import argparse
@@ -12,6 +26,22 @@ from typing import Any, Callable, Sequence
 
 from core.healers.unified_cleanup_healer import UnifiedCleanupHealer
 from core.validators.code_validator import validate_python_code
+
+# Research-only allowlist surface (empty in H1/H2).
+from agent_tools.finals_rebuild.ce115_research_healer_runner import (  # noqa: E402
+    RULE_ALLOWLIST,
+    MathHealerRunner,
+    run_research_healer,
+)
+
+__all__ = [
+    "MathHealerDerivationError",
+    "derive_ab3",
+    "main",
+    "RULE_ALLOWLIST",
+    "MathHealerRunner",
+    "run_research_healer",
+]
 
 
 class MathHealerDerivationError(ValueError):

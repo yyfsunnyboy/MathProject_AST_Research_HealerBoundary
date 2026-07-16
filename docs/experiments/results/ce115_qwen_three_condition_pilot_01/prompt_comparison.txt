@@ -1,0 +1,277 @@
+====================================================================================================
+TASK: ce115_calc_polynomial_division_l1
+CONDITION: ab1
+PROMPT_HASH: edae46aa1af20606b47ece722c7f05344ed3acd0059eee560a9f1ef4dfcef45a
+----------------------------------------------------------------------------------------------------
+Write only Python source. Implement def generate(level=1, **kwargs).
+Task: ce115_calc_polynomial_division_l1 (polynomials, difficulty level 1).
+Task specification: polynomial_division_general.
+Frozen sampled parameters: {"dividend_coefficients": [6, 0, 6], "divisor_coefficients": [1, -4]}
+generate() must return a dict with exactly question_text, correct_answer, and oracle_payload. correct_answer must be a JSON-compatible dict with exactly quotient_coefficients (highest degree first; int or irreducible p/q strings) and remainder_coefficients (degree lower than the divisor; for a linear divisor, exactly one value). Exact arithmetic; no floats. oracle_payload must exactly equal the frozen sampled parameters. Do not use input, files, network, subprocess, Markdown fences, or explanations.
+
+====================================================================================================
+TASK: ce115_calc_polynomial_division_l1
+CONDITION: ab2g
+PROMPT_HASH: 2edf54e2680b8ec00587b6ba7c5d82086cf58a8f8b8024589d73f843c75160aa
+----------------------------------------------------------------------------------------------------
+Write only Python source. Implement def generate(level=1, **kwargs).
+Task: ce115_calc_polynomial_division_l1 (polynomials, difficulty level 1).
+Task specification: polynomial_division_general.
+Frozen sampled parameters: {"dividend_coefficients": [6, 0, 6], "divisor_coefficients": [1, -4]}
+generate() must return a dict with exactly question_text, correct_answer, and oracle_payload. correct_answer must be a JSON-compatible dict with exactly quotient_coefficients (highest degree first; int or irreducible p/q strings) and remainder_coefficients (degree lower than the divisor; for a linear divisor, exactly one value). Exact arithmetic; no floats. oracle_payload must exactly equal the frozen sampled parameters. Do not use input, files, network, subprocess, Markdown fences, or explanations.
+
+Generic Safety-and-Format Scaffold: output only complete Python source, with no Markdown fences and no explanatory prose. Define generate() exactly as specified above. Use the frozen sampled parameters exactly as given, without altering any value. Before returning, verify that field names, types, and structure match the required schema, and that question_text, correct_answer, and oracle_payload are mutually consistent.
+
+====================================================================================================
+TASK: ce115_calc_polynomial_division_l1
+CONDITION: ab2d
+PROMPT_HASH: dbe4f2fc0dc4ccb62992db92039376842b6effd74ebb1b1ed1025850441f4920
+----------------------------------------------------------------------------------------------------
+# CE115 Ab2d-Assembly domain contract
+from core.prompts.domain_function_library import FractionOps, PolynomialOps, RadicalOps
+from core.skill_policies.radical_logic import RadicalLogicEngine
+
+Available Domain APIs
+The following APIs form the available domain toolbox. Select only APIs relevant to the current task. Do not call irrelevant APIs merely for compliance.
+- `PolynomialOps.div_qr` | import: `core.prompts.domain_function_library` | signature: `(dividend_coefficients, divisor_coefficients)` | parameters: dividend_coefficients, divisor_coefficients | returns: tuple[list[exact coefficient], list[exact coefficient]] (quotient, remainder)
+- `PolynomialOps.format_latex` | import: `core.prompts.domain_function_library` | signature: `(coeffs, var='x')` | parameters: polynomial value | returns: str
+- `PolynomialOps.format_plain` | import: `core.prompts.domain_function_library` | signature: `(coeffs, var='x')` | parameters: polynomial value | returns: str
+- `FractionOps.create` | import: `core.prompts.domain_function_library` | signature: `(value)` | parameters: value | returns: Fraction
+- `FractionOps.add` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction
+- `FractionOps.sub` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction
+- `FractionOps.mul` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction
+- `FractionOps.div` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction
+- `FractionOps.to_latex` | import: `core.prompts.domain_function_library` | signature: `(val, mixed=False)` | parameters: value | returns: str
+- `RadicalOps.simplify_term` | import: `core.prompts.domain_function_library` | signature: `(coeff, radicand)` | parameters: coefficient, radicand | returns: tuple[exact coefficient, int] (coefficient, radicand)
+- `RadicalOps.format_expression` | import: `core.prompts.domain_function_library` | signature: `(terms_dict, denominator=1)` | parameters: terms | returns: str
+- `RadicalLogicEngine` | import: `core.skill_policies.radical_logic` | signature: `()` | parameters: constructor | returns: RadicalLogicEngine instance
+
+Use the domain library for every supported core operation actually required by the task. Do not manually reimplement a supported core algorithm. A domain API call counts as adoption only when its returned value contributes to the final answer. Standard Python may be used for control flow, indexing, unpacking, data movement, and output assembly.
+
+Return contract: `generate(level=1, **kwargs)` returns a dict with `question_text`, `correct_answer`, and `oracle_payload`.
+
+## Task contract
+# Task Specification: Polynomial Division (General Linear Divisor)
+- Task Name: Polynomial Division with Quotient and Remainder
+- Input Parameters: `dividend_coefficients` (highest degree first) and `divisor_coefficients` (two values: leading and constant of the linear divisor).
+- Output: `question_text` must ask to divide the dividend polynomial by the linear divisor and report the quotient and the remainder.
+- Calculation: `correct_answer` must return the quotient coefficients (highest degree first) and the remainder coefficients computed with exact arithmetic.
+- Data Contract: `oracle_payload` must return exactly the input parameters.
+
+Write only complete Python source code.
+Do not use Markdown fences, prose, explanations, or prompt echoes.
+Implement exactly one function:
+
+def generate(level=1, **kwargs):
+
+`generate()` must return exactly the three-key dictionary specified below.
+
+Return exactly these three top-level keys and no others:
+`question_text`, `correct_answer`, and `oracle_payload`.
+Do not return `answer`, `mode`, or any additional key.
+The task-specific `correct_answer` schema below supersedes any earlier generic `correct_answer: str` instruction.
+
+Required return schema:
+{
+  "question_text": str,
+  "correct_answer": {
+      "quotient_coefficients": list[int | str],   # highest degree first; integers, or irreducible fraction strings "p/q"
+      "remainder_coefficients": list[int | str]   # coefficients of the remainder (degree < divisor degree; one value for a linear divisor)
+  },
+  "oracle_payload": dict
+}
+- Formatting rules: exact arithmetic only; integers directly, irreducible "p/q" strings when fractional; no float values.
+- Equality: Exact dictionary match. No tolerance.
+
+Ab1 answer-contract wording:
+correct_answer must be a JSON-compatible dict with exactly quotient_coefficients (highest degree first; int or irreducible p/q strings) and remainder_coefficients (degree lower than the divisor; for a linear divisor, exactly one value). Exact arithmetic; no floats; do not alter frozen parameters.
+
+## Frozen parameters
+{"dividend_coefficients": [6, 0, 6], "divisor_coefficients": [1, -4]}
+Return only Python source; oracle_payload must exactly equal the frozen parameters.
+
+
+====================================================================================================
+TASK: ce115_calc_radical_simplification_l1
+CONDITION: ab1
+PROMPT_HASH: ca3190bd5660c86e7dec45d531507b0a6e6f2c0d47cb32de15ad3f17821b2e82
+----------------------------------------------------------------------------------------------------
+Write only Python source. Implement def generate(level=1, **kwargs).
+Task: ce115_calc_radical_simplification_l1 (radicals, difficulty level 1).
+Task specification: radical_simplification.
+Frozen sampled parameters: {"radicand": 27}
+generate() must return a dict with exactly question_text, correct_answer, and oracle_payload. correct_answer must be a JSON-compatible dict with exactly coefficient (positive int) and radicand (square-free int > 1) for simplest radical form. Exact integers only; no floats. oracle_payload must exactly equal the frozen sampled parameters. Do not use input, files, network, subprocess, Markdown fences, or explanations.
+
+====================================================================================================
+TASK: ce115_calc_radical_simplification_l1
+CONDITION: ab2g
+PROMPT_HASH: 96bfe9e870f6dfa2c943f72f8ddb1c08ac239c9d4950eae8042033aca1a8f101
+----------------------------------------------------------------------------------------------------
+Write only Python source. Implement def generate(level=1, **kwargs).
+Task: ce115_calc_radical_simplification_l1 (radicals, difficulty level 1).
+Task specification: radical_simplification.
+Frozen sampled parameters: {"radicand": 27}
+generate() must return a dict with exactly question_text, correct_answer, and oracle_payload. correct_answer must be a JSON-compatible dict with exactly coefficient (positive int) and radicand (square-free int > 1) for simplest radical form. Exact integers only; no floats. oracle_payload must exactly equal the frozen sampled parameters. Do not use input, files, network, subprocess, Markdown fences, or explanations.
+
+Generic Safety-and-Format Scaffold: output only complete Python source, with no Markdown fences and no explanatory prose. Define generate() exactly as specified above. Use the frozen sampled parameters exactly as given, without altering any value. Before returning, verify that field names, types, and structure match the required schema, and that question_text, correct_answer, and oracle_payload are mutually consistent.
+
+====================================================================================================
+TASK: ce115_calc_radical_simplification_l1
+CONDITION: ab2d
+PROMPT_HASH: 5e2470ecc84e5cd5b6aa68cbd1885dab9d59b469db5083adab44a1d7f6364507
+----------------------------------------------------------------------------------------------------
+# CE115 Ab2d-Assembly domain contract
+from core.prompts.domain_function_library import FractionOps, PolynomialOps, RadicalOps
+from core.skill_policies.radical_logic import RadicalLogicEngine
+
+Available Domain APIs
+The following APIs form the available domain toolbox. Select only APIs relevant to the current task. Do not call irrelevant APIs merely for compliance.
+- `PolynomialOps.div_qr` | import: `core.prompts.domain_function_library` | signature: `(dividend_coefficients, divisor_coefficients)` | parameters: dividend_coefficients, divisor_coefficients | returns: tuple[list[exact coefficient], list[exact coefficient]] (quotient, remainder)
+- `PolynomialOps.format_latex` | import: `core.prompts.domain_function_library` | signature: `(coeffs, var='x')` | parameters: polynomial value | returns: str
+- `PolynomialOps.format_plain` | import: `core.prompts.domain_function_library` | signature: `(coeffs, var='x')` | parameters: polynomial value | returns: str
+- `FractionOps.create` | import: `core.prompts.domain_function_library` | signature: `(value)` | parameters: value | returns: Fraction
+- `FractionOps.add` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction
+- `FractionOps.sub` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction
+- `FractionOps.mul` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction
+- `FractionOps.div` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction
+- `FractionOps.to_latex` | import: `core.prompts.domain_function_library` | signature: `(val, mixed=False)` | parameters: value | returns: str
+- `RadicalOps.simplify_term` | import: `core.prompts.domain_function_library` | signature: `(coeff, radicand)` | parameters: coefficient, radicand | returns: tuple[exact coefficient, int] (coefficient, radicand)
+- `RadicalOps.format_expression` | import: `core.prompts.domain_function_library` | signature: `(terms_dict, denominator=1)` | parameters: terms | returns: str
+- `RadicalLogicEngine` | import: `core.skill_policies.radical_logic` | signature: `()` | parameters: constructor | returns: RadicalLogicEngine instance
+
+Use the domain library for every supported core operation actually required by the task. Do not manually reimplement a supported core algorithm. A domain API call counts as adoption only when its returned value contributes to the final answer. Standard Python may be used for control flow, indexing, unpacking, data movement, and output assembly.
+
+Return contract: `generate(level=1, **kwargs)` returns a dict with `question_text`, `correct_answer`, and `oracle_payload`.
+
+## Task contract
+# Task Specification: Radical Simplification
+- Task Name: Radical Simplification
+- Input Parameters: `radicand` (positive integer under the square root) and optional `outer_coefficient` (positive integer multiplier outside the root; treat as 1 when absent).
+- Output: `question_text` must ask to rewrite outer_coefficient * sqrt(radicand) in simplest radical form coefficient * sqrt(square_free_radicand).
+- Calculation: `correct_answer` must return the simplified integer coefficient and the square-free radicand.
+- Data Contract: `oracle_payload` must return exactly the input parameters.
+
+Write only complete Python source code.
+Do not use Markdown fences, prose, explanations, or prompt echoes.
+Implement exactly one function:
+
+def generate(level=1, **kwargs):
+
+`generate()` must return exactly the three-key dictionary specified below.
+
+Return exactly these three top-level keys and no others:
+`question_text`, `correct_answer`, and `oracle_payload`.
+Do not return `answer`, `mode`, or any additional key.
+The task-specific `correct_answer` schema below supersedes any earlier generic `correct_answer: str` instruction.
+
+Required return schema:
+{
+  "question_text": str,
+  "correct_answer": {
+      "coefficient": int,  # simplified positive integer coefficient outside the square root
+      "radicand": int      # square-free integer remaining under the square root (> 1)
+  },
+  "oracle_payload": dict
+}
+- Formatting rules: integers only; the radicand must be square-free; do not use float values.
+- Equality: Exact dictionary match. No tolerance.
+
+Ab1 answer-contract wording:
+correct_answer must be a JSON-compatible dict with exactly coefficient (positive int) and radicand (square-free int > 1) for simplest radical form. Exact integers only; no floats; do not alter frozen parameters.
+
+## Frozen parameters
+{"radicand": 27}
+Return only Python source; oracle_payload must exactly equal the frozen parameters.
+
+
+====================================================================================================
+TASK: ce115_calc_exact_rational_expression_l1
+CONDITION: ab1
+PROMPT_HASH: 91037cae451180d2e8d7ff27bd635e65afddc92968f9af553e1b540b67e81f39
+----------------------------------------------------------------------------------------------------
+Write only Python source. Implement def generate(level=1, **kwargs).
+Task: ce115_calc_exact_rational_expression_l1 (rational_arithmetic, difficulty level 1).
+Task specification: exact_rational_expression.
+Frozen sampled parameters: {"products": [{"left": "2.79", "right": "89.3", "sign": 1}, {"left": "-0.21", "right": "89.3", "sign": -1}]}
+generate() must return a dict with exactly question_text, correct_answer, and oracle_payload. correct_answer must be a JSON-compatible dict with exactly value (canonical exact rational string: integer string or irreducible p/q with positive denominator). Exact arithmetic only; no floats. oracle_payload must exactly equal the frozen sampled parameters. Do not use input, files, network, subprocess, Markdown fences, or explanations.
+
+====================================================================================================
+TASK: ce115_calc_exact_rational_expression_l1
+CONDITION: ab2g
+PROMPT_HASH: a223b914a84c048e785dba1a38f4f9c75b786a3ef8c4a8d765d04f55653bdb49
+----------------------------------------------------------------------------------------------------
+Write only Python source. Implement def generate(level=1, **kwargs).
+Task: ce115_calc_exact_rational_expression_l1 (rational_arithmetic, difficulty level 1).
+Task specification: exact_rational_expression.
+Frozen sampled parameters: {"products": [{"left": "2.79", "right": "89.3", "sign": 1}, {"left": "-0.21", "right": "89.3", "sign": -1}]}
+generate() must return a dict with exactly question_text, correct_answer, and oracle_payload. correct_answer must be a JSON-compatible dict with exactly value (canonical exact rational string: integer string or irreducible p/q with positive denominator). Exact arithmetic only; no floats. oracle_payload must exactly equal the frozen sampled parameters. Do not use input, files, network, subprocess, Markdown fences, or explanations.
+
+Generic Safety-and-Format Scaffold: output only complete Python source, with no Markdown fences and no explanatory prose. Define generate() exactly as specified above. Use the frozen sampled parameters exactly as given, without altering any value. Before returning, verify that field names, types, and structure match the required schema, and that question_text, correct_answer, and oracle_payload are mutually consistent.
+
+====================================================================================================
+TASK: ce115_calc_exact_rational_expression_l1
+CONDITION: ab2d
+PROMPT_HASH: a060783bd1a67196b4e1145f1eb044a9c42521156f5639420aab341c2651d36e
+----------------------------------------------------------------------------------------------------
+# CE115 Ab2d-Assembly domain contract
+from core.prompts.domain_function_library import FractionOps, PolynomialOps, RadicalOps
+from core.skill_policies.radical_logic import RadicalLogicEngine
+
+Available Domain APIs
+The following APIs form the available domain toolbox. Select only APIs relevant to the current task. Do not call irrelevant APIs merely for compliance.
+- `PolynomialOps.div_qr` | import: `core.prompts.domain_function_library` | signature: `(dividend_coefficients, divisor_coefficients)` | parameters: dividend_coefficients, divisor_coefficients | returns: tuple[list[exact coefficient], list[exact coefficient]] (quotient, remainder)
+- `PolynomialOps.format_latex` | import: `core.prompts.domain_function_library` | signature: `(coeffs, var='x')` | parameters: polynomial value | returns: str
+- `PolynomialOps.format_plain` | import: `core.prompts.domain_function_library` | signature: `(coeffs, var='x')` | parameters: polynomial value | returns: str
+- `FractionOps.create` | import: `core.prompts.domain_function_library` | signature: `(value)` | parameters: value | returns: Fraction
+- `FractionOps.add` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction
+- `FractionOps.sub` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction
+- `FractionOps.mul` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction
+- `FractionOps.div` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction
+- `FractionOps.to_latex` | import: `core.prompts.domain_function_library` | signature: `(val, mixed=False)` | parameters: value | returns: str
+- `RadicalOps.simplify_term` | import: `core.prompts.domain_function_library` | signature: `(coeff, radicand)` | parameters: coefficient, radicand | returns: tuple[exact coefficient, int] (coefficient, radicand)
+- `RadicalOps.format_expression` | import: `core.prompts.domain_function_library` | signature: `(terms_dict, denominator=1)` | parameters: terms | returns: str
+- `RadicalLogicEngine` | import: `core.skill_policies.radical_logic` | signature: `()` | parameters: constructor | returns: RadicalLogicEngine instance
+
+Use the domain library for every supported core operation actually required by the task. Do not manually reimplement a supported core algorithm. A domain API call counts as adoption only when its returned value contributes to the final answer. Standard Python may be used for control flow, indexing, unpacking, data movement, and output assembly.
+
+Return contract: `generate(level=1, **kwargs)` returns a dict with `question_text`, `correct_answer`, and `oracle_payload`.
+
+## Task contract
+# Task Specification: Exact Rational Expression Evaluation
+- Task Name: Exact Rational Expression Evaluation
+- Input Parameters: `products` (ordered list of terms; each term has `sign` (1 or -1), `left` and `right` exact decimal strings). The expression value is the sum over terms of sign * left * right.
+- Output: `question_text` must present the arithmetic expression built from these terms.
+- Calculation: `correct_answer` must evaluate the expression with exact rational arithmetic (no floats) and return the canonical value string.
+- Data Contract: `oracle_payload` must return exactly the input parameters.
+
+Write only complete Python source code.
+Do not use Markdown fences, prose, explanations, or prompt echoes.
+Implement exactly one function:
+
+def generate(level=1, **kwargs):
+
+`generate()` must return exactly the three-key dictionary specified below.
+
+Return exactly these three top-level keys and no others:
+`question_text`, `correct_answer`, and `oracle_payload`.
+Do not return `answer`, `mode`, or any additional key.
+The task-specific `correct_answer` schema below supersedes any earlier generic `correct_answer: str` instruction.
+
+Required return schema:
+{
+  "question_text": str,
+  "correct_answer": {
+      "value": str  # canonical exact value: integer string, or irreducible "p/q" with positive denominator
+  },
+  "oracle_payload": dict
+}
+- Formatting rules: reduce completely; output the integer string if the denominator is 1; never use decimal or float approximations.
+- Equality: Exact dictionary match. No tolerance.
+
+Ab1 answer-contract wording:
+correct_answer must be a JSON-compatible dict with exactly value (canonical exact rational string: integer string or irreducible p/q with positive denominator). Exact arithmetic only; no floats or decimals; do not alter frozen parameters.
+
+## Frozen parameters
+{"products": [{"left": "2.79", "right": "89.3", "sign": 1}, {"left": "-0.21", "right": "89.3", "sign": -1}]}
+Return only Python source; oracle_payload must exactly equal the frozen parameters.
+

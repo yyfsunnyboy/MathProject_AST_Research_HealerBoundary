@@ -1,0 +1,274 @@
+"""Research-only Healer rule protocol (H1).
+
+Defines the unified rule outcome record and pass provenance schema.
+No transform rules live here; this module is schema + validation only.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import re
+from dataclasses import dataclass, field
+from typing import Any, Mapping
+
+_SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+
+RULE_PROTOCOL_FIELDS: tuple[str, ...] = (
+    "rule_id",
+    "layer",
+    "priority",
+    "applicable",
+    "triggered",
+    "changed",
+    "guard_results",
+    "reason",
+    "before_hash",
+    "after_hash",
+    "validation",
+    "stop_reason",
+)
+
+PROVENANCE_FIELDS: tuple[str, ...] = (
+    "pass_index",
+    "candidate_rules_checked",
+    "selected_rule_id",
+    "selection_priority",
+    "stopped_after_change",
+)
+
+ALLOWED_LAYERS: frozenset[str] = frozenset({"L1", "L2", "L3", "L4", "L5", "META"})
+
+ALLOWED_STOP_REASONS: frozenset[str | None] = frozenset(
+    {
+        None,
+        "not_applicable",
+        "not_triggered",
+        "guards_blocked",
+        "no_change",
+        "changed_stop_pass",
+        "allowlist_empty",
+        "no_candidate_selected",
+        "validation_failed",
+    }
+)
+
+FINAL_STATUSES: frozenset[str] = frozenset(
+    {"no_op", "changed", "validation_failed", "error"}
+)
+
+
+class RuleProtocolError(ValueError):
+    """Raised when a rule outcome or provenance record violates protocol."""
+
+
+def sha256_text(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+@dataclass(frozen=True)
+class RuleOutcome:
+    """One allowlisted rule's decision for one runner pass."""
+
+    rule_id: str
+    layer: str
+    priority: int
+    applicable: bool
+    triggered: bool
+    changed: bool
+    guard_results: Mapping[str, Any]
+    reason: str
+    before_hash: str
+    after_hash: str
+    validation: Mapping[str, Any]
+    stop_reason: str | None
+
+
+@dataclass(frozen=True)
+class PassProvenance:
+    """Selection provenance for one runner pass (independent of rule fields)."""
+
+    pass_index: int
+    candidate_rules_checked: tuple[str, ...]
+    selected_rule_id: str | None
+    selection_priority: int | None
+    stopped_after_change: bool
+
+
+@dataclass(frozen=True)
+class ResearchHealerResult:
+    """Full research-healer run result (zero model calls by construction)."""
+
+    input_source: str
+    output_source: str
+    input_hash: str
+    output_hash: str
+    final_status: str
+    rule_outcomes: tuple[RuleOutcome, ...]
+    provenance: tuple[PassProvenance, ...]
+    real_model_calls: int = 0
+    protected_snapshot: Mapping[str, Any] = field(default_factory=dict)
+    notes: tuple[str, ...] = ()
+
+
+def rule_outcome_to_dict(outcome: RuleOutcome) -> dict[str, Any]:
+    return {
+        "rule_id": outcome.rule_id,
+        "layer": outcome.layer,
+        "priority": outcome.priority,
+        "applicable": outcome.applicable,
+        "triggered": outcome.triggered,
+        "changed": outcome.changed,
+        "guard_results": dict(outcome.guard_results),
+        "reason": outcome.reason,
+        "before_hash": outcome.before_hash,
+        "after_hash": outcome.after_hash,
+        "validation": dict(outcome.validation),
+        "stop_reason": outcome.stop_reason,
+    }
+
+
+def provenance_to_dict(prov: PassProvenance) -> dict[str, Any]:
+    return {
+        "pass_index": prov.pass_index,
+        "candidate_rules_checked": list(prov.candidate_rules_checked),
+        "selected_rule_id": prov.selected_rule_id,
+        "selection_priority": prov.selection_priority,
+        "stopped_after_change": prov.stopped_after_change,
+    }
+
+
+def research_result_to_dict(result: ResearchHealerResult) -> dict[str, Any]:
+    return {
+        "input_hash": result.input_hash,
+        "output_hash": result.output_hash,
+        "final_status": result.final_status,
+        "rule_outcomes": [rule_outcome_to_dict(o) for o in result.rule_outcomes],
+        "provenance": [provenance_to_dict(p) for p in result.provenance],
+        "real_model_calls": result.real_model_calls,
+        "protected_snapshot": dict(result.protected_snapshot),
+        "notes": list(result.notes),
+        "source_changed": result.input_hash != result.output_hash,
+    }
+
+
+def validate_rule_outcome(outcome: RuleOutcome) -> None:
+    """Validate protocol fields and applicable/triggered/changed semantics."""
+    for name in RULE_PROTOCOL_FIELDS:
+        if not hasattr(outcome, name):
+            raise RuleProtocolError(f"missing protocol field: {name}")
+
+    if not isinstance(outcome.rule_id, str) or not outcome.rule_id.strip():
+        raise RuleProtocolError("rule_id must be a non-empty string")
+    if outcome.layer not in ALLOWED_LAYERS:
+        raise RuleProtocolError(
+            f"layer must be one of {sorted(ALLOWED_LAYERS)}, got {outcome.layer!r}"
+        )
+    if not isinstance(outcome.priority, int):
+        raise RuleProtocolError("priority must be an int")
+    for flag in ("applicable", "triggered", "changed"):
+        if not isinstance(getattr(outcome, flag), bool):
+            raise RuleProtocolError(f"{flag} must be a bool")
+    if not isinstance(outcome.guard_results, Mapping):
+        raise RuleProtocolError("guard_results must be a mapping")
+    if not isinstance(outcome.reason, str) or not outcome.reason.strip():
+        raise RuleProtocolError("reason must be a non-empty string")
+    if not isinstance(outcome.before_hash, str) or not _SHA256_RE.match(outcome.before_hash):
+        raise RuleProtocolError("before_hash must be 64-char lowercase hex SHA-256")
+    if not isinstance(outcome.after_hash, str) or not _SHA256_RE.match(outcome.after_hash):
+        raise RuleProtocolError("after_hash must be 64-char lowercase hex SHA-256")
+    if not isinstance(outcome.validation, Mapping):
+        raise RuleProtocolError("validation must be a mapping")
+    if outcome.stop_reason not in ALLOWED_STOP_REASONS:
+        allowed = sorted(r for r in ALLOWED_STOP_REASONS if r is not None) + [None]
+        raise RuleProtocolError(
+            f"stop_reason must be one of {allowed}, got {outcome.stop_reason!r}"
+        )
+
+    # Semantic ladder: changed ⇒ triggered ⇒ applicable
+    if outcome.changed and not outcome.triggered:
+        raise RuleProtocolError("changed=True requires triggered=True")
+    if outcome.triggered and not outcome.applicable:
+        raise RuleProtocolError("triggered=True requires applicable=True")
+    if outcome.changed and outcome.before_hash == outcome.after_hash:
+        raise RuleProtocolError("changed=True requires before_hash != after_hash")
+    if not outcome.changed and outcome.before_hash != outcome.after_hash:
+        raise RuleProtocolError("before_hash != after_hash requires changed=True")
+
+
+def validate_provenance(prov: PassProvenance) -> None:
+    for name in PROVENANCE_FIELDS:
+        if not hasattr(prov, name):
+            raise RuleProtocolError(f"missing provenance field: {name}")
+    if not isinstance(prov.pass_index, int) or prov.pass_index < 0:
+        raise RuleProtocolError("pass_index must be a non-negative int")
+    if not isinstance(prov.candidate_rules_checked, tuple):
+        raise RuleProtocolError("candidate_rules_checked must be a tuple")
+    for rule_id in prov.candidate_rules_checked:
+        if not isinstance(rule_id, str) or not rule_id.strip():
+            raise RuleProtocolError("candidate_rules_checked entries must be non-empty strings")
+    if prov.selected_rule_id is not None and (
+        not isinstance(prov.selected_rule_id, str) or not prov.selected_rule_id.strip()
+    ):
+        raise RuleProtocolError("selected_rule_id must be None or a non-empty string")
+    if prov.selection_priority is not None and not isinstance(prov.selection_priority, int):
+        raise RuleProtocolError("selection_priority must be None or an int")
+    if not isinstance(prov.stopped_after_change, bool):
+        raise RuleProtocolError("stopped_after_change must be a bool")
+    if prov.stopped_after_change and prov.selected_rule_id is None:
+        raise RuleProtocolError("stopped_after_change=True requires selected_rule_id")
+
+
+def validate_research_result(result: ResearchHealerResult) -> None:
+    if result.final_status not in FINAL_STATUSES:
+        raise RuleProtocolError(
+            f"final_status must be one of {sorted(FINAL_STATUSES)}, got {result.final_status!r}"
+        )
+    if result.real_model_calls != 0:
+        raise RuleProtocolError("research healer must record real_model_calls=0")
+    if result.input_hash != sha256_text(result.input_source):
+        raise RuleProtocolError("input_hash must match input_source")
+    if result.output_hash != sha256_text(result.output_source):
+        raise RuleProtocolError("output_hash must match output_source")
+    if result.final_status == "no_op":
+        if result.input_hash != result.output_hash:
+            raise RuleProtocolError("no_op requires input_hash == output_hash")
+        if any(o.changed for o in result.rule_outcomes):
+            raise RuleProtocolError("no_op forbids any changed rule outcome")
+    if result.final_status == "changed":
+        if result.input_hash == result.output_hash:
+            raise RuleProtocolError("changed status requires input_hash != output_hash")
+    for outcome in result.rule_outcomes:
+        validate_rule_outcome(outcome)
+    for prov in result.provenance:
+        validate_provenance(prov)
+
+
+def make_parse_validation(source: str) -> dict[str, Any]:
+    """Lightweight re-parse validation used after every potential change."""
+    import ast
+
+    try:
+        ast.parse(source)
+    except SyntaxError as exc:
+        return {
+            "ast_parse_success": False,
+            "parse_error": str(exc),
+            "source_len": len(source),
+        }
+    return {
+        "ast_parse_success": True,
+        "parse_error": None,
+        "source_len": len(source),
+    }
+
+
+def assert_protocol_field_coverage(record: Mapping[str, Any]) -> None:
+    missing = [name for name in RULE_PROTOCOL_FIELDS if name not in record]
+    if missing:
+        raise RuleProtocolError(f"rule protocol missing fields: {missing}")
+
+
+def assert_provenance_field_coverage(record: Mapping[str, Any]) -> None:
+    missing = [name for name in PROVENANCE_FIELDS if name not in record]
+    if missing:
+        raise RuleProtocolError(f"provenance missing fields: {missing}")

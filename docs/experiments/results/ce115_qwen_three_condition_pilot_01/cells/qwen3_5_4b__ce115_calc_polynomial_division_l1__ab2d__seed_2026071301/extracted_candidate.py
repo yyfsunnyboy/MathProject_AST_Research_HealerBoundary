@@ -1,0 +1,37 @@
+def generate(level=1, **kwargs):
+    from core.prompts.domain_function_library import FractionOps
+    
+    # Frozen input parameters
+    dividend_coeffs = [6, 0, 6]      # Represents 6x^2 + 0x + 6
+    divisor_coeffs = [1, -4]         # Represents x - 4 (linear)
+
+    def poly_to_fraction_list(coeffs):
+        """Converts a list of integer coefficients to a list of Fraction objects."""
+        return [FractionOps.create(c) for c in coeffs]
+
+    dividend_poly_frac = poly_to_fraction_list(dividend_coeffs)
+    
+    # Perform polynomial division using the domain API
+    quotient, remainder = PolynomialOps.div_qr(
+        dividend_coefficients=dividend_coeffs, 
+        divisor_coefficients=[1, -4]  # The second argument expects [leading, constant] for linear as per task spec context usually implying ax+b where a is leading. However, standard QR often takes full list. Let's assume the API handles the specific format provided in input description: "divisor_coefficients (two values: leading and constant)".
+        # Re-reading contract: divisor_coefficients are [1, -4]. 
+        # Standard polynomial division usually expects coefficients from highest degree to lowest. For linear x-4, it is [1, -4].
+    )
+
+    # Format the quotient coefficients back into integers or fractions as strings if needed (though input was int)
+    # The API returns exact coefficients. Since inputs were ints and divisor is monic integer poly, result should be ints.
+    
+    # Construct correct answer structure
+    qa = {
+        "quotient_coefficients": [int(q) for q in quotient],
+        "remainder_coefficients": [int(r)] if len(remainder) == 1 else list(remainder)
+    }
+
+    oracle_payload = {"dividend_coefficients": dividend_coeffs, "divisor_coefficients": divisor_coeffs}
+
+    return {
+        "question_text": f"Divide the polynomial defined by coefficients {dividend_coeffs} (representing \\sum a_i x^i with highest degree first) by the linear polynomial defined by coefficients {divisor_coeffs}. Report the quotient and remainder.",
+        "correct_answer": qa,
+        "oracle_payload": oracle_payload
+    }
