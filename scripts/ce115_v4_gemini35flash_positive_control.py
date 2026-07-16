@@ -36,13 +36,19 @@ from scripts.ce115_v4_gemini_transport import (  # noqa: E402
 )
 
 SOURCE_COHORT = ROOT / "docs/experiments/results/ce115_ab2d_assembly_v4_formal_run"
-DEFAULT_OUT = (
+BLOCKED_01 = (
     ROOT
     / "docs/experiments/results/ce115_ab2d_assembly_v4_gemini35flash_positive_control_01"
 )
+DEFAULT_OUT = (
+    ROOT
+    / "docs/experiments/results/ce115_ab2d_assembly_v4_gemini35flash_positive_control_02"
+)
 EXPECTED_PROTOCOL_HASH = "1b86e94b291803b0aa1987af7d728ada756a183bf0bf2039a1563a47a7d70897"
+EXPECTED_PROMPT_HASH = "dbe4f2fc0dc4ccb62992db92039376842b6effd74ebb1b1ed1025850441f4920"
 SOURCE_SEQUENCE = 13
 SOURCE_EDGE_MODEL = "qwen3.5:9b"
+TRANSPORT_PATH = ROOT / "scripts/ce115_v4_gemini_transport.py"
 
 
 def _write_json(path: Path, obj: object) -> None:
@@ -73,12 +79,38 @@ def _source_edge_artifact(cell_id: str) -> dict:
     return json.loads(path.read_text(encoding="utf8"))
 
 
-def build_run_plan() -> dict:
+def _transport_is_flask_free() -> bool:
+    src = TRANSPORT_PATH.read_text(encoding="utf8")
+    return (
+        "from flask" not in src
+        and "import flask" not in src
+        and "GoogleAIClient" not in src
+        and ("google.generativeai" in src or "google.genai" in src)
+    )
+
+
+def _blocked_01_unmodified() -> bool:
+    if not BLOCKED_01.is_dir():
+        return False
+    probe = subprocess.run(
+        ["git", "status", "--porcelain", "--", str(BLOCKED_01.relative_to(ROOT))],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    return probe.returncode == 0 and not (probe.stdout or "").strip()
+
+
+def build_run_plan(out: Path | None = None) -> dict:
+    out = Path(out) if out is not None else DEFAULT_OUT
+    run_id = out.name
     edge = _source_edge_cell()
+    suffix = run_id.rsplit("_", 1)[-1] if run_id.rsplit("_", 1)[-1].isdigit() else "xx"
     cell = {
         "cell_id": (
             "gemini_3_5_flash__ce115_calc_polynomial_division_l1__"
-            "ab2d_assembly_v4_positive_control__seed_2026071301"
+            f"ab2d_assembly_v4_positive_control_{suffix}__seed_2026071301"
         ),
         "source_sequence": SOURCE_SEQUENCE,
         "source_edge_cell_id": edge["cell_id"],
@@ -98,11 +130,14 @@ def build_run_plan() -> dict:
         "healer": 0,
     }
     body = {
-        "run_id": "ce115_ab2d_assembly_v4_gemini35flash_positive_control_01",
+        "run_id": run_id,
         "condition": "ab2d_assembly_v4",
         "protocol_id": "ce115_ab2d_assembly_protocol_v4",
         "source_cohort": str(SOURCE_COHORT.relative_to(ROOT)).replace("\\", "/"),
         "source_sequence": SOURCE_SEQUENCE,
+        "supersedes_blocked_run": str(BLOCKED_01.relative_to(ROOT)).replace("\\", "/")
+        if out.resolve() != BLOCKED_01.resolve()
+        else None,
         "planned_cells": 1,
         "model_calls_planned": 1,
         "resume": False,
@@ -114,14 +149,17 @@ def build_run_plan() -> dict:
 
 
 def run_preflight(out: Path) -> dict:
+    out = Path(out)
     if out.exists():
         raise RuntimeError(f"refusing overwrite existing directory: {out}")
+    if out.resolve() == BLOCKED_01.resolve():
+        raise RuntimeError("refusing to write into immutable blocked _01 directory")
 
     protocol = json.loads(PROTOCOL.read_text(encoding="utf8"))
     protocol_hash = _h(PROTOCOL.read_text(encoding="utf8"))
     edge = _source_edge_cell()
     art = _source_edge_artifact(edge["cell_id"])
-    plan = build_run_plan()
+    plan = build_run_plan(out)
     cell = plan["cells"][0]
 
     prompt, frozen = _render_formal_prompt(cell["task"], int(cell["seed"]))
@@ -131,6 +169,11 @@ def run_preflight(out: Path) -> dict:
         raise RuntimeError("rendered prompt drifted from source seq 13 artifact")
     if cell["task"] != art.get("task_id"):
         raise RuntimeError("task id mismatch vs source artifact")
+    prompt_hash = _h(prompt)
+    if prompt_hash != EXPECTED_PROMPT_HASH:
+        raise RuntimeError(
+            f"prompt hash mismatch: got={prompt_hash} expected={EXPECTED_PROMPT_HASH}"
+        )
 
     from agent_tools.finals_rebuild.ce115_ab2d_assembly import (
         resolve_task_operations,
@@ -207,6 +250,9 @@ def run_preflight(out: Path) -> dict:
             and art.get("evaluator_verdict") == "EXECUTION_FAILURE"
         ),
         "output_dir_absent": not out.exists(),
+        "blocked_01_present": BLOCKED_01.is_dir(),
+        "blocked_01_unmodified": _blocked_01_unmodified(),
+        "transport_flask_free": _transport_is_flask_free(),
         "planned_cells": plan["planned_cells"],
         "cell_id_unique": True,
         "family": cell["task_family"],
@@ -223,12 +269,13 @@ def run_preflight(out: Path) -> dict:
         "prompt_checks_passed": all(prompt_ok.values()),
         "task_params_match_source": frozen == art.get("frozen_parameters"),
         "prompt_match_source": prompt == art.get("exact_rendered_prompt"),
+        "prompt_hash_ok": prompt_hash == EXPECTED_PROMPT_HASH,
         "ops_match_source": ops["required"] == art.get("task_required_operations"),
         "runtime_version": runtime_version(),
         **key,
         "real_model_calls": 0,
         "run_plan_hash": plan["hash"],
-        "prompt_hash": _h(prompt),
+        "prompt_hash": prompt_hash,
         "blocker": None,
     }
     if not checks["api_key_present"]:
@@ -243,12 +290,16 @@ def run_preflight(out: Path) -> dict:
             checks["protocol_hash_ok"],
             checks["source_matches_expected_edge"],
             checks["output_dir_absent"],
+            checks["blocked_01_present"],
+            checks["blocked_01_unmodified"],
+            checks["transport_flask_free"],
             checks["max_model_calls_ok"],
             checks["retry_resume_replacement_repair_replay_healer_disabled"],
             checks["model_id_ok"],
             checks["prompt_checks_passed"],
             checks["task_params_match_source"],
             checks["prompt_match_source"],
+            checks["prompt_hash_ok"],
             checks["ops_match_source"],
             checks["api_key_present"],
         ]
@@ -824,16 +875,31 @@ def run_cell_subprocess(out: Path) -> dict:
         timeout=900,
         env=os.environ.copy(),
     )
-    if proc.returncode != 0 and not (out / "raw_response.txt").exists():
+    artifact = out / "cell_artifact.json"
+    raw = out / "raw_response.txt"
+    if artifact.exists():
+        art = json.loads(artifact.read_text(encoding="utf8"))
+        return {
+            "status": art.get("status", "FINALIZED"),
+            "cell_id": art.get("cell_id"),
+            "model_calls": art.get("provenance", {}).get("model_calls", 1),
+            "subprocess_returncode": proc.returncode,
+        }
+    if proc.returncode != 0 and not raw.exists():
         raise RuntimeError(
             f"isolated cell process failed rc={proc.returncode}: {(proc.stderr or proc.stdout)[:2000]}"
         )
-    try:
-        # last JSON object from stdout
-        lines = [ln for ln in (proc.stdout or "").splitlines() if ln.strip().startswith("{")]
-        return json.loads(lines[-1]) if lines else {"status": "UNKNOWN", "returncode": proc.returncode}
-    except Exception:
-        return {"status": "UNKNOWN", "returncode": proc.returncode, "stdout_tail": (proc.stdout or "")[-500:]}
+    if raw.exists():
+        return {
+            "status": "RAW_SAVED_OFFLINE_ADJUDICATION_ONLY",
+            "model_calls": 1,
+            "subprocess_returncode": proc.returncode,
+        }
+    return {
+        "status": "UNKNOWN",
+        "returncode": proc.returncode,
+        "stdout_tail": (proc.stdout or "")[-500:],
+    }
 
 
 def main(argv: list[str] | None = None) -> int:

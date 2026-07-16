@@ -15,7 +15,10 @@ from scripts.ce115_v4_gemini_transport import (
     build_redacted_request,
 )
 from scripts.ce115_v4_gemini35flash_positive_control import (
+    DEFAULT_OUT,
+    EXPECTED_PROMPT_HASH,
     SOURCE_SEQUENCE,
+    _transport_is_flask_free,
     build_run_plan,
     _source_edge_cell,
 )
@@ -67,14 +70,25 @@ def test_source_seq13_identity_matches_formal_plan():
 
 
 def test_positive_control_plan_is_single_cell_budget_one():
-    plan = build_run_plan()
+    plan = build_run_plan(DEFAULT_OUT)
+    assert plan["run_id"].endswith("positive_control_02")
     assert plan["planned_cells"] == 1
     assert len(plan["cells"]) == 1
     cell = plan["cells"][0]
     assert cell["max_model_calls"] == 1
     assert cell["model"] == MODEL_ID
+    assert "positive_control_02" in cell["cell_id"]
     assert all(int(cell[k]) == 0 for k in ("retry", "resume", "replacement", "replay", "repair", "healer"))
     assert cell["source_sequence"] == 13
+
+
+def test_transport_does_not_import_flask():
+    assert _transport_is_flask_free() is True
+    src = Path(__file__).resolve().parents[2] / "scripts/ce115_v4_gemini_transport.py"
+    text = src.read_text(encoding="utf8")
+    assert "import flask" not in text
+    assert "from flask" not in text
+    assert "GoogleAIClient" not in text
 
 
 def test_prompt_matches_source_artifact_contract():
@@ -90,6 +104,9 @@ def test_prompt_matches_source_artifact_contract():
     prompt, frozen = _render_formal_prompt(edge["task"], int(edge["seed"]))
     assert frozen == art["frozen_parameters"]
     assert prompt == art["exact_rendered_prompt"]
+    import hashlib
+
+    assert hashlib.sha256(prompt.encode()).hexdigest() == EXPECTED_PROMPT_HASH
     assert "Available Domain APIs" in prompt
     assert "Required APIs" not in prompt
     assert "MUST_CALL" not in prompt
