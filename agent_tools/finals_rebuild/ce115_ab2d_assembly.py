@@ -124,16 +124,72 @@ def build_protocol(source_commit: str) -> dict:
 
 
 def resolve_task_operations(task_id, frozen_payload=None):
-    if task_id == "ce115_calc_polynomial_division_l1": return {"required":["PolynomialOps.div_qr"],"optional":["PolynomialOps.format_latex","PolynomialOps.format_plain"]}
+    """Resolve operations from frozen task structure, never an answer oracle (v4)."""
+    payload = frozen_payload or {}
+    common = {"required_operations_source": "frozen_task_structure", "required_operations_resolver_version": "v4.1", "oracle_independent": True}
+    if task_id == "ce115_calc_polynomial_division_l1":
+        return {**common, "required":["PolynomialOps.div_qr"], "optional":["PolynomialOps.format_latex","PolynomialOps.format_plain"], "acceptable_canonical_paths":[["PolynomialOps.div_qr"]]}
     if task_id == "ce115_calc_exact_rational_expression_l1":
-        return {"required":["FractionOps.create","FractionOps.mul"] + (["FractionOps.add"] if len((frozen_payload or {}).get("products",[]))>1 else []),"optional":["FractionOps.sub","FractionOps.div","FractionOps.to_latex"]}
-    if task_id == "ce115_calc_radical_simplification_l1": return {"required":["RadicalOps.simplify_term"],"optional":["RadicalLogicEngine","RadicalOps.format_expression"]}
+        tokens = payload.get("operations") or payload.get("operation_sequence") or []
+        tokens = [str(x).lower().replace("fractionops.", "") for x in tokens]
+        if not tokens:
+            tokens = ["mul"] + (["add"] if len(payload.get("products", [])) > 1 else [])
+        required = ["FractionOps.create"] + [f"FractionOps.{x}" for x in ("add", "sub", "mul", "div") if x in tokens]
+        return {**common, "required":required, "optional":["FractionOps.to_latex"], "acceptable_canonical_paths":[required]}
+    if task_id == "ce115_calc_radical_simplification_l1":
+        return {**common, "required":["RadicalOps.simplify_term"], "optional":["RadicalLogicEngine","RadicalOps.format_expression"], "acceptable_canonical_paths":[["RadicalOps.simplify_term"], ["RadicalLogicEngine"]]}
     raise KeyError(task_id)
 
+
 def scan_toolbox(source, task_id, frozen_payload=None):
-    base=scan_assembly(source,task_id); policy=resolve_task_operations(task_id,frozen_payload)
-    if base["classification"] == "INSUFFICIENT_EVIDENCE":
-        base.update({"task_required_operations":policy["required"],"domain_library_adopted":False}); return base
-    missing=[x for x in policy["required"] if x not in base.get("called_apis",[])]
-    category="DOMAIN_LOGIC_REIMPLEMENTED" if base.get("forbidden_definitions") else "INVALID_API_CALL" if base.get("invalid_calls") else "REQUIRED_OPERATION_NOT_COVERED" if missing else "ASSEMBLY_COMPLIANT"
-    base.update({"task_required_operations":policy["required"],"optional_apis":policy["optional"],"missing_operations":missing,"domain_library_adopted":bool(base.get("called_apis")),"assembly_classification":category,"classification":category}); return base
+    """v4 AST scanner: a domain call counts only when its result reaches output."""
+    policy = resolve_task_operations(task_id, frozen_payload)
+    try: tree = ast.parse(source)
+    except SyntaxError: return {"classification":"INSUFFICIENT_EVIDENCE", "assembly_classification":"INSUFFICIENT_EVIDENCE", "task_required_operations":policy["required"], "called_apis":[], "called_domain_apis":[], "invalid_calls":[], "missing_operations":policy["required"], "domain_library_adopted":False, "called_but_result_unused":False, "domain_call_result_bindings":[], "domain_result_reaches_final_output":[], "manual_recomputation_after_domain_call":False, "surface_compliance_only":False, **policy}
+    known = {"PolynomialOps.div_qr":2, "PolynomialOps.format_latex":1, "PolynomialOps.format_plain":1, "FractionOps.create":1, "FractionOps.add":2, "FractionOps.sub":2, "FractionOps.mul":2, "FractionOps.div":2, "FractionOps.to_latex":1, "RadicalOps.simplify_term":2, "RadicalOps.format_expression":1, "RadicalLogicEngine":None}
+    aliases, rows, bindings, returned = {}, [], [], set()
+    def dotted(n):
+        if isinstance(n, ast.Name): return aliases.get(n.id, n.id)
+        if isinstance(n, ast.Attribute):
+            base=dotted(n.value); return f"{base}.{n.attr}" if base else n.attr
+        return ""
+    for n in ast.walk(tree):
+        if isinstance(n, (ast.Import, ast.ImportFrom)):
+            for a in n.names:
+                if a.name in ("PolynomialOps", "FractionOps", "RadicalOps", "RadicalLogicEngine"): aliases[a.asname or a.name]=a.name
+        if isinstance(n, ast.Assign) and isinstance(n.value, (ast.Name, ast.Attribute)):
+            val=dotted(n.value)
+            if val in known:
+                for t in n.targets:
+                    if isinstance(t, ast.Name): aliases[t.id]=val
+    dependencies = {}
+    for n in ast.walk(tree):
+        if isinstance(n, ast.Assign):
+            value_names = {x.id for x in ast.walk(n.value) if isinstance(x, ast.Name)}
+            for target in n.targets:
+                if isinstance(target, ast.Name): dependencies[target.id] = value_names
+    for n in ast.walk(tree):
+        if isinstance(n, ast.Return):
+            returned |= {x.id for x in ast.walk(n.value) if isinstance(x, ast.Name)}
+            pending = list(returned)
+            while pending:
+                name = pending.pop()
+                for dependency in dependencies.get(name, set()):
+                    if dependency not in returned: returned.add(dependency); pending.append(dependency)
+        if isinstance(n, ast.Call):
+            api=dotted(n.func)
+            if api in known:
+                assignment=next((p for p in ast.walk(tree) if isinstance(p, (ast.Assign, ast.AnnAssign)) and p.value is n), None)
+                names=[]
+                if assignment:
+                    target=assignment.targets[0] if isinstance(assignment, ast.Assign) else assignment.target
+                    names=[x.id for x in ast.walk(target) if isinstance(x, ast.Name)]
+                valid=known[api] is None or len(n.args)==known[api]
+                rows.append({"api":api,"valid":valid,"bindings":names})
+                bindings.extend({"api":api,"binding":x,"reaches_final_output":x in returned} for x in names)
+    called=[x["api"] for x in rows if x["valid"]]; invalid=[x["api"] for x in rows if not x["valid"]]
+    reaches={x["api"] for x in rows if x["valid"] and x["bindings"] and all(b in returned for b in x["bindings"])}
+    unused=any(x["valid"] and (not x["bindings"] or not any(b in returned for b in x["bindings"])) for x in rows)
+    missing=[x for x in policy["required"] if x not in reaches]
+    manual=bool(called and missing); category="INVALID_API_CALL" if invalid else "REQUIRED_OPERATION_NOT_COVERED" if missing else "ASSEMBLY_COMPLIANT"
+    return {"classification":category,"assembly_classification":category,"called_apis":called,"called_domain_apis":called,"invalid_calls":invalid,"task_required_operations":policy["required"],"optional_apis":policy["optional"],"missing_operations":missing,"domain_library_adopted":not missing and bool(reaches),"called_but_result_unused":unused,"domain_call_result_bindings":bindings,"domain_result_reaches_final_output":sorted(reaches),"manual_recomputation_after_domain_call":manual,"surface_compliance_only":manual, **{k:v for k,v in policy.items() if k not in ("required","optional")}}

@@ -1,11 +1,45 @@
 {
   "protocol_id": "ce115_ab2d_assembly_protocol_v4",
   "condition": "ab2d_toolbox_v4",
-  "status": "DRAFT_OFFLINE_VALIDATED",
+  "status": "FROZEN_ZERO_MODEL_VALIDATED",
   "semantics": "full toolbox exposed; only task-relevant operations required; optional APIs never required",
   "prompt_stubs": {
     "ce115_calc_exact_rational_expression_l1": "# CE115 Ab2d-Assembly domain contract\nfrom core.prompts.domain_function_library import FractionOps, PolynomialOps, RadicalOps\nfrom core.skill_policies.radical_logic import RadicalLogicEngine\n\nRequired APIs:\n- `FractionOps.create`\n- `FractionOps.add`\n- `FractionOps.sub`\n- `FractionOps.mul`\n- `FractionOps.div`\n- `FractionOps.to_latex`\n\nMUST_CALL: invoke every required API through its canonical name in `generate`.\nDO_NOT_REIMPLEMENT_DOMAIN_LOGIC: do not define domain helper classes/functions or reproduce their algorithms.\nPolynomialOps.div_qr(dividend_coefficients, divisor_coefficients) returns exactly `(quotient_coefficients, remainder_coefficients)` as two flat exact coefficient lists; never nest either list or use floats.\nReturn contract: `generate(level=1, **kwargs)` returns a dict with `question_text`, `correct_answer`, and `oracle_payload`.\nExample: `quotient_coefficients, remainder_coefficients = PolynomialOps.div_qr(dividend_coefficients, divisor_coefficients)`; assign both returned flat lists directly to `correct_answer` without wrapping either list.\n",
     "ce115_calc_polynomial_division_l1": "# CE115 Ab2d-Assembly domain contract\nfrom core.prompts.domain_function_library import FractionOps, PolynomialOps, RadicalOps\nfrom core.skill_policies.radical_logic import RadicalLogicEngine\n\nRequired APIs:\n- `PolynomialOps.div_qr`\n- `PolynomialOps.format_latex`\n- `PolynomialOps.format_plain`\n\nMUST_CALL: invoke every required API through its canonical name in `generate`.\nDO_NOT_REIMPLEMENT_DOMAIN_LOGIC: do not define domain helper classes/functions or reproduce their algorithms.\nPolynomialOps.div_qr(dividend_coefficients, divisor_coefficients) returns exactly `(quotient_coefficients, remainder_coefficients)` as two flat exact coefficient lists; never nest either list or use floats.\nReturn contract: `generate(level=1, **kwargs)` returns a dict with `question_text`, `correct_answer`, and `oracle_payload`.\nExample: `quotient_coefficients, remainder_coefficients = PolynomialOps.div_qr(dividend_coefficients, divisor_coefficients)`; assign both returned flat lists directly to `correct_answer` without wrapping either list.\n",
     "ce115_calc_radical_simplification_l1": "# CE115 Ab2d-Assembly domain contract\nfrom core.prompts.domain_function_library import FractionOps, PolynomialOps, RadicalOps\nfrom core.skill_policies.radical_logic import RadicalLogicEngine\n\nRequired APIs:\n- `RadicalLogicEngine`\n- `RadicalOps.simplify_term`\n- `RadicalOps.format_expression`\n\nMUST_CALL: invoke every required API through its canonical name in `generate`.\nDO_NOT_REIMPLEMENT_DOMAIN_LOGIC: do not define domain helper classes/functions or reproduce their algorithms.\nPolynomialOps.div_qr(dividend_coefficients, divisor_coefficients) returns exactly `(quotient_coefficients, remainder_coefficients)` as two flat exact coefficient lists; never nest either list or use floats.\nReturn contract: `generate(level=1, **kwargs)` returns a dict with `question_text`, `correct_answer`, and `oracle_payload`.\nExample: `quotient_coefficients, remainder_coefficients = PolynomialOps.div_qr(dividend_coefficients, divisor_coefficients)`; assign both returned flat lists directly to `correct_answer` without wrapping either list.\n"
+  },
+  "freeze_gate": {
+    "synthetic_cases": 12,
+    "synthetic_passed": true,
+    "oracle_independence": true,
+    "scanner_evaluator_independence": {
+      "compliant_evaluator_failure": true,
+      "noncompliant_evaluator_pass": true,
+      "examples": [
+        "synthetic compliant + evaluator EXECUTION_FAILURE",
+        "synthetic noncompliant + evaluator PASSED"
+      ],
+      "scanner_does_not_read_evaluator_verdict": true
+    },
+    "raw_hash_integrity": {
+      "cells": 18,
+      "all_preserved": true
+    },
+    "original_counts": {
+      "REQUIRED_API_NOT_CALLED": 9,
+      "INSUFFICIENT_EVIDENCE": 3,
+      "ASSEMBLY_COMPLIANT": 5,
+      "INVALID_API_CALL": 1
+    },
+    "v4_counts": {
+      "REQUIRED_OPERATION_NOT_COVERED": 8,
+      "INSUFFICIENT_EVIDENCE": 3,
+      "ASSEMBLY_COMPLIANT": 6,
+      "INVALID_API_CALL": 1
+    },
+    "reporting_schema_passed": true,
+    "model_healer_repair_replay_retry_calls": 0,
+    "freeze_gate_passed": true,
+    "verdict": "FROZEN_ZERO_MODEL_VALIDATED"
   }
 }
