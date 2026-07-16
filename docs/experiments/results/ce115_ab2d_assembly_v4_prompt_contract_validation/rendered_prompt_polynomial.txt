@@ -1,0 +1,22 @@
+# CE115 Ab2d-Assembly domain contract
+from core.prompts.domain_function_library import FractionOps, PolynomialOps, RadicalOps
+from core.skill_policies.radical_logic import RadicalLogicEngine
+
+Available Domain APIs
+The following APIs form the available domain toolbox. Select only APIs relevant to the current task. Do not call irrelevant APIs merely for compliance.
+- `PolynomialOps.div_qr` | import: `core.prompts.domain_function_library` | signature: `(dividend_coefficients, divisor_coefficients)` | parameters: dividend_coefficients, divisor_coefficients | returns: tuple[list[exact coefficient], list[exact coefficient]] (quotient, remainder)
+- `PolynomialOps.format_latex` | import: `core.prompts.domain_function_library` | signature: `(coeffs, var='x')` | parameters: polynomial value | returns: str
+- `PolynomialOps.format_plain` | import: `core.prompts.domain_function_library` | signature: `(coeffs, var='x')` | parameters: polynomial value | returns: str
+- `FractionOps.create` | import: `core.prompts.domain_function_library` | signature: `(value)` | parameters: value | returns: Fraction
+- `FractionOps.add` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction
+- `FractionOps.sub` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction
+- `FractionOps.mul` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction
+- `FractionOps.div` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | parameters: left, right | returns: Fraction
+- `FractionOps.to_latex` | import: `core.prompts.domain_function_library` | signature: `(val, mixed=False)` | parameters: value | returns: str
+- `RadicalOps.simplify_term` | import: `core.prompts.domain_function_library` | signature: `(coeff, radicand)` | parameters: coefficient, radicand | returns: tuple[exact coefficient, int] (coefficient, radicand)
+- `RadicalOps.format_expression` | import: `core.prompts.domain_function_library` | signature: `(terms_dict, denominator=1)` | parameters: terms | returns: str
+- `RadicalLogicEngine` | import: `core.skill_policies.radical_logic` | signature: `()` | parameters: constructor | returns: RadicalLogicEngine instance
+
+Use the domain library for every supported core operation actually required by the task. Do not manually reimplement a supported core algorithm. A domain API call counts as adoption only when its returned value contributes to the final answer. Standard Python may be used for control flow, indexing, unpacking, data movement, and output assembly.
+
+Return contract: `generate(level=1, **kwargs)` returns a dict with `question_text`, `correct_answer`, and `oracle_payload`.

@@ -32,22 +32,46 @@ def sha256_text(value: str) -> str:
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
 
 
+TOOLBOX_RETURN_STRUCTURES = {
+    "PolynomialOps.div_qr": "tuple[list[exact coefficient], list[exact coefficient]] (quotient, remainder)",
+    "PolynomialOps.format_latex": "str", "PolynomialOps.format_plain": "str",
+    "FractionOps.create": "Fraction", "FractionOps.add": "Fraction", "FractionOps.sub": "Fraction", "FractionOps.mul": "Fraction", "FractionOps.div": "Fraction", "FractionOps.to_latex": "str",
+    "RadicalOps.simplify_term": "tuple[exact coefficient, int] (coefficient, radicand)", "RadicalOps.format_expression": "str", "RadicalLogicEngine": "RadicalLogicEngine instance",
+}
+TOOLBOX_PARAMETER_MEANINGS = {
+    "PolynomialOps.div_qr": "dividend_coefficients, divisor_coefficients", "PolynomialOps.format_latex": "polynomial value", "PolynomialOps.format_plain": "polynomial value",
+    "FractionOps.create": "value", "FractionOps.add": "left, right", "FractionOps.sub": "left, right", "FractionOps.mul": "left, right", "FractionOps.div": "left, right", "FractionOps.to_latex": "value",
+    "RadicalOps.simplify_term": "coefficient, radicand", "RadicalOps.format_expression": "terms", "RadicalLogicEngine": "constructor",
+}
+
+
+def runtime_toolbox_inventory() -> list[dict]:
+    """Runtime truth used for both rendered prompts and prompt-contract validation."""
+    namespace = runtime_namespace()
+    names = ["PolynomialOps.div_qr", "PolynomialOps.format_latex", "PolynomialOps.format_plain", "FractionOps.create", "FractionOps.add", "FractionOps.sub", "FractionOps.mul", "FractionOps.div", "FractionOps.to_latex", "RadicalOps.simplify_term", "RadicalOps.format_expression", "RadicalLogicEngine"]
+    inventory=[]
+    for name in names:
+        obj=namespace[name] if "." not in name else getattr(namespace[name.split(".")[0]], name.split(".")[1])
+        inventory.append({"canonical_name":name,"import_path":LIBRARY_PATH if name != "RadicalLogicEngine" else "core.skill_policies.radical_logic","signature":str(inspect.signature(obj)),"parameter_meaning":TOOLBOX_PARAMETER_MEANINGS[name],"return_structure":TOOLBOX_RETURN_STRUCTURES[name]})
+    return inventory
+
+
 def stub_for_task(task_id: str) -> str:
     spec = TASK_API_MAPPING[task_id]
     if spec.get("coverage"):
         return f"# {spec['coverage']}: {spec['reason']}\n"
-    apis = "\n".join(f"- `{api}`" for api in spec["required"] + spec["optional"])
+    lines="\n".join(f"- `{x['canonical_name']}` | import: `{x['import_path']}` | signature: `{x['signature']}` | parameters: {x['parameter_meaning']} | returns: {x['return_structure']}" for x in runtime_toolbox_inventory())
     return f"""# CE115 Ab2d-Assembly domain contract
 from {LIBRARY_PATH} import FractionOps, PolynomialOps, RadicalOps
 from core.skill_policies.radical_logic import RadicalLogicEngine
 
-Required APIs:\n{apis}
+Available Domain APIs
+The following APIs form the available domain toolbox. Select only APIs relevant to the current task. Do not call irrelevant APIs merely for compliance.
+{lines}
 
-MUST_CALL: invoke every required API through its canonical name in `generate`.
-DO_NOT_REIMPLEMENT_DOMAIN_LOGIC: do not define domain helper classes/functions or reproduce their algorithms.
-PolynomialOps.div_qr(dividend_coefficients, divisor_coefficients) returns exactly `(quotient_coefficients, remainder_coefficients)` as two flat exact coefficient lists; never nest either list or use floats.
+Use the domain library for every supported core operation actually required by the task. Do not manually reimplement a supported core algorithm. A domain API call counts as adoption only when its returned value contributes to the final answer. Standard Python may be used for control flow, indexing, unpacking, data movement, and output assembly.
+
 Return contract: `generate(level=1, **kwargs)` returns a dict with `question_text`, `correct_answer`, and `oracle_payload`.
-Example: `quotient_coefficients, remainder_coefficients = PolynomialOps.div_qr(dividend_coefficients, divisor_coefficients)`; assign both returned flat lists directly to `correct_answer` without wrapping either list.
 """
 
 
