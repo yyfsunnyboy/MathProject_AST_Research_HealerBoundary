@@ -1,0 +1,30 @@
+# V3 formal rerun
+
+```json
+{
+  "planned": 18,
+  "executed": 18,
+  "unique_artifacts": 18,
+  "model_calls": 18,
+  "completion_counts": {
+    "NATURAL_COMPLETE": 18
+  },
+  "assembly_counts": {
+    "INVALID_API_CALL": 1,
+    "REQUIRED_API_NOT_CALLED": 9,
+    "INSUFFICIENT_EVIDENCE": 3,
+    "ASSEMBLY_COMPLIANT": 5
+  },
+  "evaluator_counts": {
+    "EXECUTION_FAILURE": 13,
+    "PASSED": 5
+  },
+  "passed": 5,
+  "evaluable": 18,
+  "executable": 5,
+  "roots_exclusions": 6,
+  "system_defects": 0,
+  "healer_repair_replay_retry": 0,
+  "verdict": "FORMAL_RERUN_COMPLETED_WITH_MODEL_FAILURES"
+}
+```

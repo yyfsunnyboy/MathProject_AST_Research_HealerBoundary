@@ -1,0 +1,81 @@
+{
+  "cell_id": "qwen3_5_9b__ce115_calc_radical_simplification_l1__ab2d_assembly_v3__seed_2026071303",
+  "model": "qwen3.5:9b",
+  "task": "ce115_calc_radical_simplification_l1",
+  "seed": 2026071303,
+  "condition": "ab2d_assembly_v3",
+  "run_id": "ce115_ab2d_assembly_v3_formal_rerun",
+  "retry": 0,
+  "healer": 0,
+  "repair": 0,
+  "replay": 0,
+  "output_path": "docs/experiments/results/ce115_ab2d_assembly_v3_formal_rerun/qwen3_5_9b__ce115_calc_radical_simplification_l1__seed_2026071303.json",
+  "source_commit": "baf461a6",
+  "protocol_version": "v3",
+  "protocol_hash": "6c9ca1ab66ee151dd9da2f4e514ba9c31870708e68fbffb73dca5ead1ae748b4",
+  "manifest_hash": "2071b7f9c5c63acbe09e893da5cc760f340fe8968aca36f2236d078d762d2e74",
+  "prompt_hash": "034804d18d427909fcbac39cebb831ba34043d8f50415df1ba73b170e621aa9d",
+  "payload_hash": "5f29fb9552211084c79738d2829bd12e54410d2c667d7bf055446bdb63faa127",
+  "complete_request_payload": {
+    "model": "qwen3.5:9b",
+    "messages": [
+      {
+        "role": "user",
+        "content": "# CE115 Ab2d-Assembly domain contract\nfrom core.prompts.domain_function_library import FractionOps, PolynomialOps, RadicalOps\nfrom core.skill_policies.radical_logic import RadicalLogicEngine\n\nRequired APIs:\n- `RadicalLogicEngine`\n- `RadicalOps.simplify_term`\n- `RadicalOps.format_expression`\n\nMUST_CALL: invoke every required API through its canonical name in `generate`.\nDO_NOT_REIMPLEMENT_DOMAIN_LOGIC: do not define domain helper classes/functions or reproduce their algorithms.\nPolynomialOps.div_qr(dividend_coefficients, divisor_coefficients) returns exactly `(quotient_coefficients, remainder_coefficients)` as two flat exact coefficient lists; never nest either list or use floats.\nReturn contract: `generate(level=1, **kwargs)` returns a dict with `question_text`, `correct_answer`, and `oracle_payload`.\nExample: `quotient_coefficients, remainder_coefficients = PolynomialOps.div_qr(dividend_coefficients, divisor_coefficients)`; assign both returned flat lists directly to `correct_answer` without wrapping either list.\n\n## Task contract\n# Task Specification: Radical Simplification\n- Task Name: Radical Simplification\n- Input Parameters: `radicand` (positive integer under the square root) and optional `outer_coefficient` (positive integer multiplier outside the root; treat as 1 when absent).\n- Output: `question_text` must ask to rewrite outer_coefficient * sqrt(radicand) in simplest radical form coefficient * sqrt(square_free_radicand).\n- Calculation: `correct_answer` must return the simplified integer coefficient and the square-free radicand.\n- Data Contract: `oracle_payload` must return exactly the input parameters.\n\nWrite only complete Python source code.\nDo not use Markdown fences, prose, explanations, or prompt echoes.\nImplement exactly one function:\n\ndef generate(level=1, **kwargs):\n\n`generate()` must return exactly the three-key dictionary specified below.\n\nReturn exactly these three top-level keys and no others:\n`question_text`, `correct_answer`, and `oracle_payload`.\nDo not return `answer`, `mode`, or any additional key.\nThe task-specific `correct_answer` schema below supersedes any earlier generic `correct_answer: str` instruction.\n\nRequired return schema:\n{\n  \"question_text\": str,\n  \"correct_answer\": {\n      \"coefficient\": int,  # simplified positive integer coefficient outside the square root\n      \"radicand\": int      # square-free integer remaining under the square root (> 1)\n  },\n  \"oracle_payload\": dict\n}\n- Formatting rules: integers only; the radicand must be square-free; do not use float values.\n- Equality: Exact dictionary match. No tolerance.\n\nAb1 answer-contract wording:\ncorrect_answer must be a JSON-compatible dict with exactly coefficient (positive int) and radicand (square-free int > 1) for simplest radical form. Exact integers only; no floats; do not alter frozen parameters.\n\n## Frozen parameters\n{\"radicand\": 112}\nReturn only Python source; oracle_payload must exactly equal the frozen parameters.\n"
+      }
+    ],
+    "stream": false,
+    "think": false,
+    "options": {
+      "temperature": 0.0,
+      "seed": 2026071303,
+      "num_ctx": 65536,
+      "num_predict": 24576
+    }
+  },
+  "raw_output": "from core.prompts.domain_function_library import FractionOps, PolynomialOps, RadicalOps\nfrom core.skill_policies.radical_logic import RadicalLogicEngine\n\ndef generate(level=1, **kwargs):\n    radicand = 112\n    \n    simplified_coefficient, square_free_radicand = RadicalLogicEngine.simplify_radical(radicand)\n    \n    question_text = f\"Rewrite {simplified_coefficient} * sqrt({radicand}) in simplest radical form as coefficient * sqrt(square-free radicand).\" if simplified_coefficient > 1 else f\"Rewrite sqrt({radicand}) in simplest radical form.\"\n\n    correct_answer = {\n        \"coefficient\": simplified_coefficient,\n        \"radicand\": square_free_radicand\n    }\n\n    oracle_payload = {\"radicand\": radicand}\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+  "raw_output_hash": "600b632511ac61212577f2e1241c4952822effdcedc29d029b714e4754c7d3e9",
+  "extracted_code": "from core.prompts.domain_function_library import FractionOps, PolynomialOps, RadicalOps\nfrom core.skill_policies.radical_logic import RadicalLogicEngine\n\ndef generate(level=1, **kwargs):\n    radicand = 112\n    \n    simplified_coefficient, square_free_radicand = RadicalLogicEngine.simplify_radical(radicand)\n    \n    question_text = f\"Rewrite {simplified_coefficient} * sqrt({radicand}) in simplest radical form as coefficient * sqrt(square-free radicand).\" if simplified_coefficient > 1 else f\"Rewrite sqrt({radicand}) in simplest radical form.\"\n\n    correct_answer = {\n        \"coefficient\": simplified_coefficient,\n        \"radicand\": square_free_radicand\n    }\n\n    oracle_payload = {\"radicand\": radicand}\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+  "completion_classification": "NATURAL_COMPLETE",
+  "required_apis": [
+    "RadicalLogicEngine",
+    "RadicalOps.simplify_term",
+    "RadicalOps.format_expression"
+  ],
+  "called_apis": [],
+  "missing_apis": [
+    "RadicalLogicEngine",
+    "RadicalOps.simplify_term",
+    "RadicalOps.format_expression"
+  ],
+  "invalid_apis": [],
+  "assembly_classification": "REQUIRED_API_NOT_CALLED",
+  "canonical_module_path": "core.prompts.domain_function_library",
+  "canonical_library_hash_verification": true,
+  "runtime_namespace_result": false,
+  "evaluator_result": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    import sys;sys.path.insert(0,sys.argv[1]);from agent_tools.finals_rebuild.ce115_ab2d_assembly import runtime_namespace;ns=runtime_namespace();exec(compile(sys.stdin.read(),\"<v3>\",\"exec\"),ns,ns);print(ns[\"generate\"]())\n                                                                                                                                                                                                            ~~~~~~~~~~~~~~^^\n  File \"<v3>\", line 7, in generate\nAttributeError: type object 'RadicalLogicEngine' has no attribute 'simplify_radical'",
+  "exact_schema_result": "EXECUTION_FAILURE",
+  "semantic_correctness_result": "EXECUTION_FAILURE",
+  "oracle_payload_result": "NOT_ASSESSED",
+  "final_taxonomy": "EXECUTION_FAILURE",
+  "passed": false,
+  "evaluable": true,
+  "executable": false,
+  "token_telemetry": {
+    "prompt_eval_count": 679,
+    "eval_count": 208,
+    "total_duration": 3636676200,
+    "load_duration": 221125500,
+    "prompt_eval_duration": 276941000,
+    "eval_duration": 3132969000
+  },
+  "wall_clock_seconds": 3.7119057178497314,
+  "exception_detail": null,
+  "model_healer_repair_replay_retry_counts": {
+    "model": 1,
+    "healer": 0,
+    "repair": 0,
+    "replay": 0,
+    "retry": 0
+  }
+}
