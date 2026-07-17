@@ -27,7 +27,13 @@ SEED = 20260714
 
 def _tasks() -> dict[str, dict]:
     rows = [json.loads(line) for line in MANIFEST.read_text(encoding="utf-8").splitlines() if line]
-    return {row["skill_id"]: row for row in rows if row["skill_id"] in FAMILIES and row["difficulty_level"] == 1}
+    # Prefer the first L1 row per skill (historical ce115_q*_l1) so later calc rows
+    # with the same skill_id do not overwrite qualification fixtures.
+    selected: dict[str, dict] = {}
+    for row in rows:
+        if row["skill_id"] in FAMILIES and row["difficulty_level"] == 1 and row["skill_id"] not in selected:
+            selected[row["skill_id"]] = row
+    return selected
 
 
 def _parts(family: str) -> tuple[dict, dict, str]:
@@ -64,7 +70,13 @@ def test_prompt_contains_only_required_sections_and_local_primitive() -> None:
 
 
 def test_local_prompt_is_less_than_half_of_existing_ab2d_full_prompt() -> None:
-    for family in FAMILIES:
+    # common_factor uses clean-incremental Ab2d (DOMAIN FractionOps), not legacy
+    # skill-registry Ab2d routing via build_ab2d_prompt.
+    legacy_comparable = tuple(
+        family for family in FAMILIES if family != "common_factor_quadratic_root_ordering"
+    )
+    assert legacy_comparable, "expected at least one legacy-comparable family"
+    for family in legacy_comparable:
         task, frozen, contract = _parts(family)
         local = assemble_ab2d_local_prompt(family, contract, frozen)
         full = build_ab2d_prompt(task, {"oracle_payload": frozen})

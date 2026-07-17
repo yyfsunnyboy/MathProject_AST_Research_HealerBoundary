@@ -81,6 +81,29 @@ TASK_DOMAIN_APIS: dict[str, tuple[dict[str, str], ...]] = {
             "necessity": "Accumulate the sum of product terms into the final exact value.",
         },
     ),
+    "ce115_calc_common_factor_quadratic_root_ordering_l1": (
+        {
+            "name": "FractionOps.create",
+            "import": LIBRARY,
+            "signature": "(value)",
+            "returns": "Fraction",
+            "necessity": "Construct exact root values from the two linear factors.",
+        },
+        {
+            "name": "FractionOps.mul",
+            "import": LIBRARY,
+            "signature": "(a, b)",
+            "returns": "Fraction",
+            "necessity": "Scale ordered roots by the frozen linear-combination coefficients.",
+        },
+        {
+            "name": "FractionOps.add",
+            "import": LIBRARY,
+            "signature": "(a, b)",
+            "returns": "Fraction",
+            "necessity": "Accumulate the exact linear combination into correct_answer.value.",
+        },
+    ),
 }
 
 GENERIC_BUDGET = (250, 400)

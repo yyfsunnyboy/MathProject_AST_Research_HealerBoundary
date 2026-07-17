@@ -140,7 +140,12 @@ def evaluate_alternating_sequence_threshold(oracle_payload: dict[str, Any], subm
 
 
 def evaluate_common_factor_quadratic_root_ordering(oracle_payload: dict[str, Any], submitted_answer: Any) -> dict[str, Any]:
-    """Evaluate (leading*x - subtracted) * (x + shared_shift) = 0 exactly."""
+    """Evaluate (leading*x - subtracted) * (x + shared_shift) = 0 exactly.
+
+    Expected answer carries ordered roots (a>b), labeled a/b, and the linear
+    combination value. Values are computed from frozen parameters only — never
+    hardcoded exam answers.
+    """
     oracle_type = "common_factor_quadratic_root_ordering"
     try:
         shift = _integer(oracle_payload["shared_shift"], "shared_shift")
@@ -156,7 +161,14 @@ def evaluate_common_factor_quadratic_root_ordering(oracle_payload: dict[str, Any
         if roots[0] == roots[1]:
             raise ValueError("two distinct roots are required")
         a, b = sorted(roots, reverse=True)
-        expected = {"value": _canonical_number(coefficient_a * a + coefficient_b * b)}
+        if not (a > b):
+            raise ValueError("root_order a>b requires strictly ordered distinct roots")
+        expected = {
+            "roots": [_canonical_number(a), _canonical_number(b)],
+            "a": _canonical_number(a),
+            "b": _canonical_number(b),
+            "value": _canonical_number(coefficient_a * a + coefficient_b * b),
+        }
         return _result(oracle_type, expected, submitted_answer)
     except (KeyError, ValueError, TypeError) as exc:
         return _result(oracle_type, None, submitted_answer, str(exc))

@@ -41,9 +41,26 @@ def test_ce115_q09_common_factor_reconstruction_is_exact_and_not_run() -> None:
         "root_order": "a>b",
         "linear_combination": {"a": 1, "b": 2},
     }
-    verdict = evaluate_math_task_oracle("common_factor_quadratic_root_ordering", payload, {"value": -9})
-    assert verdict["is_correct"] is True and verdict["expected_answer"] == {"value": -9}
-    assert evaluate_math_task_oracle("common_factor_quadratic_root_ordering", payload, {"value": 3})["is_correct"] is False
+    verdict = evaluate_math_task_oracle("common_factor_quadratic_root_ordering", payload, {
+        "roots": [5, -7],
+        "a": 5,
+        "b": -7,
+        "value": -9,
+    })
+    assert verdict["is_correct"] is True and verdict["expected_answer"] == {
+        "roots": [5, -7],
+        "a": 5,
+        "b": -7,
+        "value": -9,
+    }
+    assert evaluate_math_task_oracle(
+        "common_factor_quadratic_root_ordering", payload, {"value": 3}
+    )["is_correct"] is False
+    assert evaluate_math_task_oracle(
+        "common_factor_quadratic_root_ordering",
+        payload,
+        {"roots": [5, -7], "a": 5, "b": -7, "value": 3},
+    )["is_correct"] is False
     assert "alternating_training_progression_threshold" not in runner.FAMILIES
 
 

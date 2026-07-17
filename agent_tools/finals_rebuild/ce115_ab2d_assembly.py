@@ -162,6 +162,13 @@ def resolve_task_operations(task_id, frozen_payload=None):
         return {**common, "required":required, "optional":["FractionOps.to_latex"], "acceptable_canonical_paths":[required]}
     if task_id == "ce115_calc_radical_simplification_l1":
         return {**common, "required":["RadicalOps.simplify_term"], "optional":["RadicalLogicEngine","RadicalOps.format_expression"], "acceptable_canonical_paths":[["RadicalOps.simplify_term"], ["RadicalLogicEngine"]]}
+    if task_id == "ce115_calc_common_factor_quadratic_root_ordering_l1":
+        return {
+            **common,
+            "required": ["FractionOps.create", "FractionOps.mul", "FractionOps.add"],
+            "optional": [],
+            "acceptable_canonical_paths": [["FractionOps.create", "FractionOps.mul", "FractionOps.add"]],
+        }
     raise KeyError(task_id)
 
 

@@ -109,6 +109,12 @@ def build_ab1_prompt(task: dict[str, Any], frozen: dict[str, Any]) -> str:
             "correct_answer must be a JSON-compatible dict with exactly roots (two distinct exact rationals "
             "as int or irreducible p/q strings) in ascending numeric order. Exact arithmetic; no floats. "
         )
+    elif task["oracle_type"] == "common_factor_quadratic_root_ordering":
+        answer_contract = (
+            "correct_answer must be a JSON-compatible dict with exactly roots (two distinct exact rationals "
+            "as int or irreducible p/q strings ordered a>b), a (larger root), b (smaller root), and value "
+            "(exact linear combination coeff_a*a + coeff_b*b). Exact arithmetic; no floats. "
+        )
     return (
         "Write only Python source. Implement def generate(level=1, **kwargs).\n"
         f"Task: {task['task_id']} ({task['domain']}, difficulty level {task['difficulty_level']}).\n"

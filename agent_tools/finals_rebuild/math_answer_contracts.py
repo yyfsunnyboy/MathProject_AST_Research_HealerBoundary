@@ -69,7 +69,7 @@ NEUTRAL_TASK_STATEMENTS = {
 - Task Name: Common-Factor Quadratic Root Ordering
 - Input Parameters: `shared_shift`, `leading_factor`, `subtracted_factor`, `root_order`, and `linear_combination`.
 - Output: `question_text` must ask to solve (leading_factor*x - subtracted_factor) * (x + shared_shift) = 0, name the roots according to root_order, and evaluate the requested linear combination.
-- Calculation: factor the shared binomial, solve both linear factors, order the roots as stated, and return only the requested exact value.
+- Calculation: factor the shared binomial, solve both linear factors, order the roots as a>b, and return roots, labeled a/b, and the exact linear combination value.
 - Data Contract: `oracle_payload` must return exactly the input parameters."""
 }
 
@@ -125,11 +125,15 @@ COMMON_FACTOR_QUADRATIC_ROOT_ORDERING_CONTRACT = """Required return schema:
 {
   "question_text": str,
   "correct_answer": {
-      "value": int | str  # exact requested linear combination; use irreducible "p/q" if fractional
+      "roots": list[int | str],  # the two distinct roots ordered as a>b (a first, then b)
+      "a": int | str,            # larger root under root_order a>b
+      "b": int | str,            # smaller root under root_order a>b
+      "value": int | str         # exact linear combination coeff_a*a + coeff_b*b; irreducible "p/q" if fractional
   },
   "oracle_payload": dict
 }
 - Formatting rules: exact arithmetic only; integers directly, irreducible "p/q" strings when fractional; no float values.
+- Ordering: a must be strictly greater than b; roots must equal [a, b].
 - Equality: Exact dictionary match. No tolerance."""
 
 RADICAL_SIMPLIFICATION_CONTRACT = """Required return schema:
