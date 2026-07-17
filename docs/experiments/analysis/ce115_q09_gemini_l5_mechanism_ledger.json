@@ -1,0 +1,539 @@
+{
+  "experiment": "ce115_q09_gemini_l5_mechanism_forensic",
+  "status": "frozen",
+  "real_model_calls": 0,
+  "healer_rules_added": 0,
+  "scope": {
+    "models": [
+      "gemini-3.5-flash"
+    ],
+    "exclude": [
+      "qwen"
+    ],
+    "sources": [
+      "docs/experiments/results/ce115_q09_gemini_clean_incremental_pilot_01/",
+      "docs/experiments/results/ce115_q09_sign_pairing_gemini_01/"
+    ],
+    "evidence_policy": "visible raw_response / extracted_candidate.py / evaluator records only; no hidden CoT"
+  },
+  "oracle_identity": "(leading_factor*x - subtracted_factor)*(x + shared_shift)=0 → roots [subtracted/leading, -shared_shift] ordered a>b",
+  "secondary_taxonomy": {
+    "note": "Secondary labels refine primary L5 candidates; not Healer rules.",
+    "SHIFT_PM_SUBTRACTED": {
+      "primary": "PARAMETER_ARITHMETIC_TEMPLATE",
+      "also": [
+        "LINEAR_COEFFICIENT_IGNORED"
+      ],
+      "formula": "roots = shared_shift ± subtracted_factor"
+    },
+    "PARAMS_COPIED_AS_ROOTS": {
+      "primary": "FACTOR_CONSTANT_COPIED_AS_ROOT",
+      "also": [
+        "HARDCODED_OR_FABRICATED_ROOTS"
+      ],
+      "formula": "roots = {shared_shift, subtracted_factor}"
+    },
+    "SHIFT_AND_SHIFT_MINUS_SUB": {
+      "primary": "PARAMETER_ARITHMETIC_TEMPLATE",
+      "formula": "r1=shared_shift; r2=shared_shift - subtracted_factor"
+    },
+    "SHIFT_AND_SHIFT_PLUS_SUB_NO_DIV": {
+      "primary": "LINEAR_COEFFICIENT_IGNORED",
+      "also": [
+        "PARAMETER_ARITHMETIC_TEMPLATE"
+      ],
+      "formula": "r1=shared_shift; r2=shared_shift + subtracted_factor (no /leading)"
+    },
+    "SHIFT_PM_SUB_OVER_LEADING": {
+      "primary": "PARAMETER_ARITHMETIC_TEMPLATE",
+      "formula": "roots = shared_shift ± subtracted_factor/leading_factor (neither root equals -shift or subtracted/leading alone as oracle requires)"
+    },
+    "SPURIOUS_SHARED_BINOMIAL_SQUARE_TEMPLATE": {
+      "primary": "EQUATION_RECONSTRUCTION_WRONG",
+      "formula": "r1=shared_shift; r2=shared_shift + subtracted_factor/leading_factor",
+      "equation_form": "leading*(x - shared_shift)^2 - subtracted*(x - shared_shift)=0",
+      "vs_oracle": "uses (x - shift) common factor instead of (leading*x - subtracted)*(x + shift)"
+    }
+  },
+  "same_answer_vs_same_mechanism": {
+    "[12,7]": {
+      "cells": [
+        "sign:xp7_2xm10 ab1/ab2g/ab2d",
+        "pilot:ab1",
+        "pilot:ab2d"
+      ],
+      "same_mechanism": true,
+      "mechanism": "SPURIOUS_SHARED_BINOMIAL_SQUARE_TEMPLATE"
+    },
+    "[7,2]": {
+      "cells": [
+        "sign:xp7_2xp10 ab1/ab2g"
+      ],
+      "same_mechanism": true,
+      "mechanism": "SPURIOUS_SHARED_BINOMIAL_SQUARE_TEMPLATE (subtracted_factor=-10)"
+    },
+    "[3,-17]": {
+      "cells": [
+        "sign:xm7_2xm10 ab2g/ab2d"
+      ],
+      "same_mechanism": true,
+      "mechanism": "SHIFT_PM_SUBTRACTED"
+    },
+    "[-7,-10]": {
+      "cells": [
+        "sign:xm7_2xp10 ab2g/ab2d"
+      ],
+      "same_mechanism": true,
+      "mechanism": "PARAMS_COPIED_AS_ROOTS"
+    },
+    "cross_answer_same_family": {
+      "[12,7] / [-2,-7] / [7,2]": "same SPURIOUS_SHARED_BINOMIAL_SQUARE_TEMPLATE; different numeric outputs from different payloads"
+    }
+  },
+  "mechanism_counts_primary": {
+    "EQUATION_RECONSTRUCTION_WRONG": 8,
+    "PARAMETER_ARITHMETIC_TEMPLATE": 4,
+    "FACTOR_CONSTANT_COPIED_AS_ROOT": 2,
+    "LINEAR_COEFFICIENT_IGNORED": 1,
+    "NOT_VERIFIED": 0
+  },
+  "cells": [
+    {
+      "cell_id": "gemini_3_5_flash__xp7_2xm10__ab1__seed_2026071301",
+      "cohort": "sign_pairing",
+      "instance": "xp7_2xm10",
+      "condition": "ab1",
+      "observed_status": "ANSWER_INCORRECT",
+      "expected_roots": [
+        5,
+        -7
+      ],
+      "predicted_roots": [
+        12,
+        7
+      ],
+      "factor_representation_used": "2(x - 7)^2 - 10(x - 7)=0",
+      "root1_derivation": "r1 = shared_shift = 7",
+      "root2_derivation": "r2 = shared_shift + subtracted_factor/leading_factor = 7 + 10/2 = 12",
+      "ordering_logic": "sort a>b → [12, 7]",
+      "final_value_derivation": "1*12 + 2*7 = 26",
+      "earliest_observable_error_step": "equation comment/template uses (x - shared_shift) common-factor form instead of oracle (2x-10)(x+7)=0",
+      "L5_mechanism": "EQUATION_RECONSTRUCTION_WRONG",
+      "secondary_label": "SPURIOUS_SHARED_BINOMIAL_SQUARE_TEMPLATE",
+      "evidence": [
+        "extracted_candidate.py L12-14: Equation: leading*(x-shared_shift)^2 - subtracted*(x-shared_shift)=0; r1=shared_shift; r2=shared_shift+Fraction(subtracted,leading)",
+        "actual_question_text: 2(x - 7)^2 - 10(x - 7) = 0"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cell_id": "gemini_3_5_flash__xp7_2xm10__ab2g__seed_2026071301",
+      "cohort": "sign_pairing",
+      "instance": "xp7_2xm10",
+      "condition": "ab2g",
+      "observed_status": "ANSWER_INCORRECT",
+      "expected_roots": [
+        5,
+        -7
+      ],
+      "predicted_roots": [
+        12,
+        7
+      ],
+      "factor_representation_used": "2(x - 7)^2 - 10(x - 7)=0",
+      "root1_derivation": "r1 = shared_shift = 7",
+      "root2_derivation": "r2 = 7 + 10/2 = 12",
+      "ordering_logic": "a>b → [12, 7]",
+      "final_value_derivation": "12 + 2*7 = 26",
+      "earliest_observable_error_step": "same wrong shared-binomial equation template",
+      "L5_mechanism": "EQUATION_RECONSTRUCTION_WRONG",
+      "secondary_label": "SPURIOUS_SHARED_BINOMIAL_SQUARE_TEMPLATE",
+      "evidence": [
+        "extracted_candidate.py comments: r1=shared_shift; r2=shared_shift+subtracted/leading",
+        "question_text embeds 2(x - 7)^2 - 10(x - 7)=0"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cell_id": "gemini_3_5_flash__xp7_2xm10__ab2d__seed_2026071301",
+      "cohort": "sign_pairing",
+      "instance": "xp7_2xm10",
+      "condition": "ab2d",
+      "observed_status": "ANSWER_INCORRECT",
+      "expected_roots": [
+        5,
+        -7
+      ],
+      "predicted_roots": [
+        12,
+        7
+      ],
+      "factor_representation_used": "2(x - 7)^2 - 10(x - 7)=0",
+      "root1_derivation": "r1 = shared_shift = 7",
+      "root2_derivation": "r2 = 7 + 10/2 = 12",
+      "ordering_logic": "sorted reverse → [12, 7]",
+      "final_value_derivation": "FractionOps linear combo → 26",
+      "earliest_observable_error_step": "same wrong shared-binomial equation template (despite DOMAIN FractionOps)",
+      "L5_mechanism": "EQUATION_RECONSTRUCTION_WRONG",
+      "secondary_label": "SPURIOUS_SHARED_BINOMIAL_SQUARE_TEMPLATE",
+      "evidence": [
+        "extracted_candidate.py: Roots of leading*(x-shared_shift)^2 - subtracted*(x-shared_shift)=0 are x=shared_shift and x=shared_shift+subtracted/leading"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cell_id": "gemini_3_5_flash__xm7_2xm10__ab1__seed_2026071301",
+      "cohort": "sign_pairing",
+      "instance": "xm7_2xm10",
+      "condition": "ab1",
+      "observed_status": "ANSWER_INCORRECT",
+      "expected_roots": [
+        7,
+        5
+      ],
+      "predicted_roots": [
+        -2,
+        -7
+      ],
+      "factor_representation_used": "2(x + 7)^2 - 10(x + 7)=0",
+      "root1_derivation": "r1 = shared_shift = -7",
+      "root2_derivation": "r2 = -7 + 10/2 = -2",
+      "ordering_logic": "a>b → [-2, -7]",
+      "final_value_derivation": "-2 + 2*(-7) = -16",
+      "earliest_observable_error_step": "SHARED_BINOMIAL_U_TEMPLATE with negative shared_shift (term rendered as x+7)",
+      "L5_mechanism": "EQUATION_RECONSTRUCTION_WRONG",
+      "secondary_label": "SPURIOUS_SHARED_BINOMIAL_SQUARE_TEMPLATE",
+      "evidence": [
+        "same r1/r2 formulas as xp7 cells",
+        "question_text: 2(x + 7)^2 - 10(x + 7)=0"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cell_id": "gemini_3_5_flash__xm7_2xm10__ab2g__seed_2026071301",
+      "cohort": "sign_pairing",
+      "instance": "xm7_2xm10",
+      "condition": "ab2g",
+      "observed_status": "ANSWER_INCORRECT",
+      "expected_roots": [
+        7,
+        5
+      ],
+      "predicted_roots": [
+        3,
+        -17
+      ],
+      "factor_representation_used": "expanded 2x^2 + 28x - 102=0 from fabricated roots",
+      "root1_derivation": "r1 = shared_shift + subtracted_factor = -7+10 = 3",
+      "root2_derivation": "r2 = shared_shift - subtracted_factor = -7-10 = -17",
+      "ordering_logic": "max/min → [3, -17]",
+      "final_value_derivation": "3 + 2*(-17) = -31",
+      "earliest_observable_error_step": "root formulas r = shift ± subtracted (leading ignored)",
+      "L5_mechanism": "PARAMETER_ARITHMETIC_TEMPLATE",
+      "secondary_label": "SHIFT_PM_SUBTRACTED",
+      "evidence": [
+        "extracted_candidate.py: r1 = shared_shift + subtracted_factor; r2 = shared_shift - subtracted_factor",
+        "leading_factor used only later for expanded quadratic coefficients"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cell_id": "gemini_3_5_flash__xm7_2xm10__ab2d__seed_2026071301",
+      "cohort": "sign_pairing",
+      "instance": "xm7_2xm10",
+      "condition": "ab2d",
+      "observed_status": "ANSWER_INCORRECT",
+      "expected_roots": [
+        7,
+        5
+      ],
+      "predicted_roots": [
+        3,
+        -17
+      ],
+      "factor_representation_used": "expanded 2x^2 + 28x - 102=0",
+      "root1_derivation": "a_val = shared_shift + subtracted_factor = 3",
+      "root2_derivation": "b_val = shared_shift - subtracted_factor = -17",
+      "ordering_logic": "comment assumes shift+sub > shift-sub",
+      "final_value_derivation": "FractionOps → -31",
+      "earliest_observable_error_step": "same shift ± subtracted template as ab2g",
+      "L5_mechanism": "PARAMETER_ARITHMETIC_TEMPLATE",
+      "secondary_label": "SHIFT_PM_SUBTRACTED",
+      "evidence": [
+        "a_val = shared_shift + subtracted_factor; b_val = shared_shift - subtracted_factor",
+        "comment explicitly describes that arithmetic"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cell_id": "gemini_3_5_flash__xp7_2xp10__ab1__seed_2026071301",
+      "cohort": "sign_pairing",
+      "instance": "xp7_2xp10",
+      "condition": "ab1",
+      "observed_status": "ANSWER_INCORRECT",
+      "expected_roots": [
+        -5,
+        -7
+      ],
+      "predicted_roots": [
+        7,
+        2
+      ],
+      "factor_representation_used": "2(x - 7)^2 + 10(x - 7)=0",
+      "root1_derivation": "r1 = shared_shift = 7",
+      "root2_derivation": "r2 = 7 + (-10)/2 = 2",
+      "ordering_logic": "a>b → [7, 2]",
+      "final_value_derivation": "7 + 2*2 = 11",
+      "earliest_observable_error_step": "SHARED_BINOMIAL_U_TEMPLATE with subtracted_factor=-10",
+      "L5_mechanism": "EQUATION_RECONSTRUCTION_WRONG",
+      "secondary_label": "SPURIOUS_SHARED_BINOMIAL_SQUARE_TEMPLATE",
+      "evidence": [
+        "r1=Fraction(shared_shift); r2=Fraction(shared_shift)+Fraction(subtracted_factor, leading_factor)",
+        "question_text: 2(x - 7)^2 + 10(x - 7)=0"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cell_id": "gemini_3_5_flash__xp7_2xp10__ab2g__seed_2026071301",
+      "cohort": "sign_pairing",
+      "instance": "xp7_2xp10",
+      "condition": "ab2g",
+      "observed_status": "ANSWER_INCORRECT",
+      "expected_roots": [
+        -5,
+        -7
+      ],
+      "predicted_roots": [
+        7,
+        2
+      ],
+      "factor_representation_used": "2(x - 7)^2 + 10(x - 7)=0",
+      "root1_derivation": "r1 = 7",
+      "root2_derivation": "r2 = 7 + (-10)/2 = 2",
+      "ordering_logic": "a>b → [7, 2]",
+      "final_value_derivation": "11",
+      "earliest_observable_error_step": "same SHARED_BINOMIAL_U_TEMPLATE",
+      "L5_mechanism": "EQUATION_RECONSTRUCTION_WRONG",
+      "secondary_label": "SPURIOUS_SHARED_BINOMIAL_SQUARE_TEMPLATE",
+      "evidence": [
+        "explicit equation comment matching shared-binomial template",
+        "identical numeric path to ab1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cell_id": "gemini_3_5_flash__xp7_2xp10__ab2d__seed_2026071301",
+      "cohort": "sign_pairing",
+      "instance": "xp7_2xp10",
+      "condition": "ab2d",
+      "observed_status": "ANSWER_INCORRECT",
+      "expected_roots": [
+        -5,
+        -7
+      ],
+      "predicted_roots": [
+        7,
+        -3
+      ],
+      "factor_representation_used": "2(x - 7)^2 + 20(x - 7)=0",
+      "root1_derivation": "r1 = shared_shift = 7",
+      "root2_derivation": "r2 = shared_shift + subtracted_factor = 7 + (-10) = -3 (no /leading)",
+      "ordering_logic": "a>b → [7, -3]",
+      "final_value_derivation": "7 + 2*(-3) = 1",
+      "earliest_observable_error_step": "r2 = shift + subtracted without dividing by leading_factor",
+      "L5_mechanism": "LINEAR_COEFFICIENT_IGNORED",
+      "secondary_label": "SHIFT_AND_SHIFT_PLUS_SUB_NO_DIV",
+      "evidence": [
+        "FractionOps.add(create(shared_shift), create(subtracted_factor)) — no leading_factor in root2",
+        "question uses +20(x-7) (= -leading*subtracted), inconsistent with /leading root formula"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cell_id": "gemini_3_5_flash__xm7_2xp10__ab1__seed_2026071301",
+      "cohort": "sign_pairing",
+      "instance": "xm7_2xp10",
+      "condition": "ab1",
+      "observed_status": "ANSWER_INCORRECT",
+      "expected_roots": [
+        7,
+        -5
+      ],
+      "predicted_roots": [
+        3,
+        -7
+      ],
+      "factor_representation_used": "expanded 2x^2 + 8x - 42=0 from {r1,r2}",
+      "root1_derivation": "r1 = shared_shift = -7",
+      "root2_derivation": "r2 = shared_shift - subtracted_factor = -7 - (-10) = 3",
+      "ordering_logic": "a>b → [3, -7]",
+      "final_value_derivation": "3 + 2*(-7) = -11",
+      "earliest_observable_error_step": "root formulas {shift, shift - subtracted} instead of oracle {-shift, subtracted/leading}",
+      "L5_mechanism": "PARAMETER_ARITHMETIC_TEMPLATE",
+      "secondary_label": "SHIFT_AND_SHIFT_MINUS_SUB",
+      "evidence": [
+        "extracted_candidate.py: r1 = shared_shift; r2 = shared_shift - subtracted_factor",
+        "no comment linking to oracle factor form"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cell_id": "gemini_3_5_flash__xm7_2xp10__ab2g__seed_2026071301",
+      "cohort": "sign_pairing",
+      "instance": "xm7_2xp10",
+      "condition": "ab2g",
+      "observed_status": "ANSWER_INCORRECT",
+      "expected_roots": [
+        7,
+        -5
+      ],
+      "predicted_roots": [
+        -7,
+        -10
+      ],
+      "factor_representation_used": "expanded 2x^2+34x+140=0 from {shift, subtracted}",
+      "root1_derivation": "r1 = shared_shift = -7",
+      "root2_derivation": "r2 = subtracted_factor = -10",
+      "ordering_logic": "a>b → [-7, -10]",
+      "final_value_derivation": "-7 + 2*(-10) = -27",
+      "earliest_observable_error_step": "parameters copied directly as roots",
+      "L5_mechanism": "FACTOR_CONSTANT_COPIED_AS_ROOT",
+      "secondary_label": "PARAMS_COPIED_AS_ROOTS",
+      "evidence": [
+        "r1 = shared_shift; r2 = subtracted_factor",
+        "comment absent beyond Roots assignment"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cell_id": "gemini_3_5_flash__xm7_2xp10__ab2d__seed_2026071301",
+      "cohort": "sign_pairing",
+      "instance": "xm7_2xp10",
+      "condition": "ab2d",
+      "observed_status": "ANSWER_INCORRECT",
+      "expected_roots": [
+        7,
+        -5
+      ],
+      "predicted_roots": [
+        -7,
+        -10
+      ],
+      "factor_representation_used": "expanded 2x^2 + 34x + 140=0",
+      "root1_derivation": "r1 = shared_shift = -7",
+      "root2_derivation": "r2 = subtracted_factor = -10",
+      "ordering_logic": "compare fractions → [-7, -10]",
+      "final_value_derivation": "-27",
+      "earliest_observable_error_step": "comment: Roots are shared_shift and subtracted_factor",
+      "L5_mechanism": "FACTOR_CONSTANT_COPIED_AS_ROOT",
+      "secondary_label": "PARAMS_COPIED_AS_ROOTS",
+      "evidence": [
+        "# Roots are shared_shift and subtracted_factor",
+        "r1 = shared_shift; r2 = subtracted_factor"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cell_id": "gemini_3_5_flash__ce115_calc_common_factor_quadratic_root_ordering_l1__ab1__seed_2026071301",
+      "cohort": "formal_pilot",
+      "instance": "xp7_2xm10_equiv_formal_q09",
+      "condition": "ab1",
+      "observed_status": "ANSWER_INCORRECT",
+      "expected_roots": [
+        5,
+        -7
+      ],
+      "predicted_roots": [
+        12,
+        7
+      ],
+      "factor_representation_used": "2(x - 7)^2 - 10(x - 7)=0",
+      "root1_derivation": "r1 = 7",
+      "root2_derivation": "r2 = 7 + 10/2 = 12",
+      "ordering_logic": "a>b → [12, 7]",
+      "final_value_derivation": "26",
+      "earliest_observable_error_step": "identical SHARED_BINOMIAL_U_TEMPLATE as sign-pairing xp7_2xm10",
+      "L5_mechanism": "EQUATION_RECONSTRUCTION_WRONG",
+      "secondary_label": "SPURIOUS_SHARED_BINOMIAL_SQUARE_TEMPLATE",
+      "evidence": [
+        "extracted_candidate.py same template as sign xp7 ab1",
+        "actual_question_text matches 2(x-7)^2-10(x-7)=0"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cell_id": "gemini_3_5_flash__ce115_calc_common_factor_quadratic_root_ordering_l1__ab2g__seed_2026071301",
+      "cohort": "formal_pilot",
+      "instance": "xp7_2xm10_equiv_formal_q09",
+      "condition": "ab2g",
+      "observed_status": "ANSWER_INCORRECT",
+      "expected_roots": [
+        5,
+        -7
+      ],
+      "predicted_roots": [
+        12,
+        2
+      ],
+      "factor_representation_used": "expanded 2x^2 - 28x + 48=0",
+      "root1_derivation": "a = (2*shared_shift + subtracted_factor)/2 = (14+10)/2 = 12",
+      "root2_derivation": "b = (2*shared_shift - subtracted_factor)/2 = (14-10)/2 = 2",
+      "ordering_logic": "a_val/b_val assigned directly (12>2)",
+      "final_value_derivation": "12 + 2*2 = 16",
+      "earliest_observable_error_step": "root formulas shift ± subtracted/leading with both roots offset from shift (no oracle -shift root)",
+      "L5_mechanism": "PARAMETER_ARITHMETIC_TEMPLATE",
+      "secondary_label": "SHIFT_PM_SUB_OVER_LEADING",
+      "evidence": [
+        "a_val = Fraction(2*shared_shift + subtracted_factor, 2); b_val = Fraction(2*shared_shift - subtracted_factor, 2)",
+        "no equation comment stating oracle factor identity",
+        "question_text built from Vieta of fabricated roots"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cell_id": "gemini_3_5_flash__ce115_calc_common_factor_quadratic_root_ordering_l1__ab2d__seed_2026071301",
+      "cohort": "formal_pilot",
+      "instance": "xp7_2xm10_equiv_formal_q09",
+      "condition": "ab2d",
+      "observed_status": "ANSWER_INCORRECT",
+      "expected_roots": [
+        5,
+        -7
+      ],
+      "predicted_roots": [
+        12,
+        7
+      ],
+      "factor_representation_used": "2(x - 7)^2 - 10(x - 7)=0",
+      "root1_derivation": "r1 = 7",
+      "root2_derivation": "r2 = 12",
+      "ordering_logic": "sorted reverse → [12, 7]",
+      "final_value_derivation": "26",
+      "earliest_observable_error_step": "SHARED_BINOMIAL_U_TEMPLATE (same as sign xp7 ab2d)",
+      "L5_mechanism": "EQUATION_RECONSTRUCTION_WRONG",
+      "secondary_label": "SPURIOUS_SHARED_BINOMIAL_SQUARE_TEMPLATE",
+      "evidence": [
+        "comment lists roots of leading*(x-shared_shift)^2 - subtracted*(x-shared_shift)=0"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "notes": [
+    "actual_question_text is model-generated question_text, not a pre-authored stem; it is evidence of reconstruction, not an external gold equation.",
+    "Ordering and linear combination steps are consistent with each cell's fabricated roots; earliest failure is root/equation construction.",
+    "ROOT_SIGN_NOT_NEGATED is a consequence of SHARED_BINOMIAL_U_TEMPLATE (using +shift as a root of (x-shift)=0) but is not the earliest step.",
+    "No CORRECT_ROOTS_* mechanisms observed."
+  ],
+  "mechanism_name_freeze": {
+    "primary": "EQUATION_RECONSTRUCTION_WRONG",
+    "secondary_canonical": "SPURIOUS_SHARED_BINOMIAL_SQUARE_TEMPLATE",
+    "alias_retired": "SHARED_BINOMIAL_U_TEMPLATE",
+    "other_confirmed_secondaries": [
+      "SHIFT_PM_SUBTRACTED",
+      "PARAMS_COPIED_AS_ROOTS",
+      "SHIFT_AND_SHIFT_MINUS_SUB",
+      "SHIFT_AND_SHIFT_PLUS_SUB_NO_DIV",
+      "SHIFT_PM_SUB_OVER_LEADING"
+    ]
+  }
+}

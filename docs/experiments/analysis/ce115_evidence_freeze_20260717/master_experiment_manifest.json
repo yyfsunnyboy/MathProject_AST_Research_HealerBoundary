@@ -1,0 +1,144 @@
+{
+  "manifest_id": "ce115_evidence_freeze_master_v1",
+  "frozen_date": "2026-07-17",
+  "real_model_calls": 0,
+  "status": "evidence_freeze",
+  "mechanism_name_freeze": {
+    "primary": "EQUATION_RECONSTRUCTION_WRONG",
+    "secondary_canonical": "SPURIOUS_SHARED_BINOMIAL_SQUARE_TEMPLATE",
+    "alias_retired": "SHARED_BINOMIAL_U_TEMPLATE",
+    "other_confirmed_secondaries": [
+      "SHIFT_PM_SUBTRACTED",
+      "PARAMS_COPIED_AS_ROOTS",
+      "SHIFT_AND_SHIFT_MINUS_SUB",
+      "SHIFT_AND_SHIFT_PLUS_SUB_NO_DIV",
+      "SHIFT_PM_SUB_OVER_LEADING"
+    ]
+  },
+  "cohorts": [
+    {
+      "cohort_id": "A_core_clean_pilot",
+      "purpose": "Core clean-incremental pilot on CE115 tasks 3/5/7 (exact_rational, polynomial_division, radical_simplification) under Ab1/Ab2g/Ab2d.",
+      "tasks": [
+        "ce115_calc_exact_rational_expression_l1",
+        "ce115_calc_polynomial_division_l1",
+        "ce115_calc_radical_simplification_l1"
+      ],
+      "models": [
+        "gemini-3.5-flash",
+        "qwen3.5:4b"
+      ],
+      "conditions": [
+        "ab1",
+        "ab2g",
+        "ab2d"
+      ],
+      "seeds": [
+        2026071301
+      ],
+      "cell_count": 18,
+      "included_artifacts": [
+        "docs/experiments/results/ce115_gemini_clean_incremental_pilot_01/",
+        "docs/experiments/results/ce115_qwen_clean_incremental_pilot_01/",
+        "docs/experiments/analysis/ce115_qwen_clean_incremental_seven_cell_forensic_ledger.json"
+      ],
+      "primary_outcomes": {
+        "gemini_passed": 9,
+        "qwen_passed": 2,
+        "qwen_natural_failures": 7
+      },
+      "prohibited_aggregations": [
+        "Do not merge with cohort B healer success into a single pilot success rate",
+        "Do not merge with cohort C q09 diagnostic outcomes",
+        "Do not treat task_id *_l1 as failure layer L1"
+      ]
+    },
+    {
+      "cohort_id": "B_healer_qwen_core_failures",
+      "purpose": "Healer adjudication on Qwen core natural failures: one formal L2 repair-to-pass + exploratory L1 (not production) + regression no-op guards.",
+      "tasks": [
+        "ce115_calc_exact_rational_expression_l1",
+        "ce115_calc_polynomial_division_l1",
+        "ce115_calc_radical_simplification_l1"
+      ],
+      "models": [
+        "qwen3.5:4b"
+      ],
+      "conditions": [
+        "ab1",
+        "ab2g",
+        "ab2d",
+        "regression"
+      ],
+      "seeds": [
+        2026071301
+      ],
+      "cell_count": 11,
+      "cell_count_natural_failures": 7,
+      "cell_count_regression_support": 4,
+      "included_artifacts": [
+        "docs/experiments/analysis/ce115_qwen_clean_incremental_seven_cell_forensic_ledger.json",
+        "docs/experiments/analysis/ce115_research_healer_frozen_spec_v1.md",
+        "tests/finals_rebuild/fixtures/ce115_research_healer/regression_manifest.json",
+        "agent_tools/finals_rebuild/ce115_research_healer_rules_l2.py",
+        "agent_tools/finals_rebuild/ce115_research_healer_rules_l1.py"
+      ],
+      "primary_outcomes": {
+        "formal_L2_repair_to_pass": 1,
+        "exploratory_L1_not_production": 1,
+        "production_eligible_natural": 1,
+        "regression_no_ops": 4
+      },
+      "prohibited_aggregations": [
+        "Do not count exploratory L1 as formal repair-to-pass",
+        "Do not generalize single L2 fixture to all SCHEMA_FAILURE",
+        "Do not claim oracle-free L2",
+        "Do not mix with cohort C L5 unrepairable rates"
+      ]
+    },
+    {
+      "cohort_id": "C_q09_diagnostic",
+      "purpose": "q09 formal clean-incremental pilot + sign-pairing diagnostic; Gemini L5 mechanism forensic (equation reconstruction).",
+      "tasks": [
+        "ce115_calc_common_factor_quadratic_root_ordering_l1",
+        "xp7_2xm10",
+        "xm7_2xm10",
+        "xp7_2xp10",
+        "xm7_2xp10"
+      ],
+      "models": [
+        "gemini-3.5-flash",
+        "qwen3.5:4b"
+      ],
+      "conditions": [
+        "ab1",
+        "ab2g",
+        "ab2d"
+      ],
+      "seeds": [
+        2026071301
+      ],
+      "cell_count": 30,
+      "included_artifacts": [
+        "docs/experiments/results/ce115_q09_gemini_clean_incremental_pilot_01/",
+        "docs/experiments/results/ce115_q09_qwen_clean_incremental_pilot_01/",
+        "docs/experiments/results/ce115_q09_sign_pairing_gemini_01/",
+        "docs/experiments/results/ce115_q09_sign_pairing_qwen_01/",
+        "docs/experiments/results/ce115_q09_sign_pairing_combined_01/",
+        "docs/experiments/analysis/ce115_q09_gemini_l5_mechanism_ledger.json",
+        "docs/experiments/analysis/ce115_q09_gemini_l5_mechanism_forensic.md"
+      ],
+      "primary_outcomes": {
+        "formal_q09_cells": 6,
+        "sign_pairing_cells": 24,
+        "gemini_l5_mechanism_forensiced": 15,
+        "dominant_mechanism": "EQUATION_RECONSTRUCTION_WRONG / SPURIOUS_SHARED_BINOMIAL_SQUARE_TEMPLATE"
+      },
+      "prohibited_aggregations": [
+        "Do not mix q09 diagnostic pass/fail with core Healer success rates",
+        "Do not claim L5 equation-reconstruction is Healer-repairable",
+        "Do not treat sign-pairing as production task expansion"
+      ]
+    }
+  ]
+}
