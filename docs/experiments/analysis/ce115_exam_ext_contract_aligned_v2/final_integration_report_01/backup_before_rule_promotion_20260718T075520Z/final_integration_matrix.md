@@ -120,49 +120,44 @@
 | qwen3.5:4b | `{"pass_to_pass": 2, "fail_to_pass": 1, "fail_to_fail": 3, "fail_to_infra_fail": 1, "pass_to_fail": 1}` |
 | qwen3.5:9b | not_executed |
 
-## G. L2 eligibility（v1 audit）與歷史 Ab3（舊 allowlist）
+## G. L2 eligibility（v1 audit）與 Ab3
 
 - L2 census: `{"eligible_existing_rule": 3, "eligible_new_rule_candidate": 5}`
-- Historical Ab3 allowlist（凍結當時）：僅 `L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP`；repair_to_pass=0
-- 該歷史數字保留對照；**不**與本輪轉正後 production 鏈式修復混算
+- Existing rule: `L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP`
+- Ab3: repair_to_pass=0, triggered_any=0, v2_ab3=pending_not_run
+- 允許清單僅 `L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP`；本輪禁止 correct_answer wrap → Gemini 114-02 三格 no_op。
 
-## G2. Qwen4B v2 Ab3（歷史；舊 allowlist）
+## G2. Qwen4B v2 Ab3（本輪更新）
 
-- Allowlist: `L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP`
-- Eligible / noneligible: 0 / 4；Healer executed: 0；Rescue-to-pass: 0
-- Artifact: `qwen4b_v2_ab3_production_eval_01/`
-
-## G3. 規則轉正與 production 鏈式修復（本輪）
-
-- Promotion audit: `rule_promotion_audit_01.json`（兩條皆 promote；guards 未放寬）
-- Production allowlist（轉正後）:
-  1. `L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP`
-  2. `L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM`
-  3. `L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP`
-- Methodology: `healer_chained_repair_methodology.md`（outer-gate-first；one change/pass；`chain_position`）
-- **Production 鏈式案例 113-10 Ab2d**：`runtime_failure` → chain_position=1 kwargs-bag → chain_position=2 dumps-unwrap → **`passed`**
-  - Evidence: `qwen4b_v2_113_10_production_chain_01/`
-  - Production rescue-to-pass count（本輪）: **1**（勿與 experimental 目錄混算）
-- **外邊界**：114-08（shadow API）；114-02（parse 崩壞）— essentially unrepairable
-- **113-11**：diagnostic-only（import 不足；不進 allowlist）
-- Backup of this report: `backup_before_rule_promotion_20260718T075520Z`
-
+- Allowlist: `L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP`（與 v1 Gemini Ab3 同版）
+- Hash integrity all ok: `True`
+- Eligible / noneligible: 0 / 4
+- Healer executed: 0
+- Rescue-to-pass: 0
+- Classification: `{"skipped_noneligible": ["114-02 Ab2d", "114-08 Ab2d", "113-10 Ab2d", "113-11 Ab2d"]}`
+- False-positive: none; on-disk candidates unmodified
+- Backup: `docs/experiments/analysis/ce115_exam_ext_contract_aligned_v2/final_integration_report_01/backup_before_qwen4b_v2_ab3_20260718T052755Z`
+- Artifact dir: `docs/experiments/analysis/ce115_exam_ext_contract_aligned_v2/qwen4b_v2_ab3_production_eval_01/`
 ## H. 研究結論
 
-- Contract-aligned v2：Gemini formal8 = 8/8；Qwen4B formal8 = 3/8 ITT（valid 3/7）。
-- 邊界推進敘事（113-10）：runtime crash（空 kwargs 袋 KeyError）→ 第一層接線 inline → 第二層 `json.dumps` 包裝剝離 → PASS。
-- Production 鏈式在 allowlist 擴張後可救援至少一格；114-08／114-02 仍為 deterministic 外邊界。
-- qwen3.5:9b 與 Gemini v2 全矩陣 Ab3（新 allowlist）仍未執行。
+- Contract-aligned v2 在 formal overlap 消除 Gemini v1 兩類失敗（114-02 coefficients 巢狀；114-04 非法 Fraction 路徑）：Gemini v2 formal8 = 8/8 PASS（ITT=valid-response）。
+- Qwen4B v2 formal8 = 3/8 ITT PASS；排除 114-04 timeout 後 valid-response = 3/7；殘敗經 forensic 歸為 assembly/routing/bloat，剩餘 prompt/API mismatch = 0。
+- Qwen4B v2 Ab3（凍結 L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP，與 v1 Gemini 同版）：4 模型失敗格全數 noneligible；healer_executed=0；rescue-to-pass=0；無 false-positive。
+- 殘敗 mechanism 本質上落在 allowlist 設計範圍外（非規則不夠聰明）；不可宣稱 v2 Healer 可救援 Qwen4B 此批失敗。
+- qwen3.5:9b 與 Gemini v2 Ab3 仍未執行；不做模型規模趨勢推論。
 
 ## I. 研究限制
 
-- v1／v2 矩陣不同；勿混算分母。
-- 鏈式需顯式 `max_passes=len(allowlist)`；預設 1 在殘餘可改規則時 fail-closed。
-- 114-04 timeout = infrastructure。
-- 單一 seed；raw artifacts 未改寫。
+- v1 full18 與 v2 formal8 矩陣不同；僅 overlap8 可做成對 v1→v2 變化。
+- L2 eligibility audit 僅涵蓋 v1；v2 失敗另以 forensic taxonomy 審查，未重跑 L2 audit。
+- Ab3：v1 Gemini 與 v2 Qwen4B（本輪）已完成；Gemini v2 Ab3 仍 pending。
+- Qwen 114-04 v2 timeout 屬 infrastructure；能力比較須用 valid-response 分母。
+- 單一 seed（2026071301）；無多 seed 變異。
+- v2 formal 跑次 Healer 關閉（healer_calls=0）。
 
 ## J. 缺失或待補
 
 - qwen3.5:9b 相同 8-cell v2 執行
-- Gemini v2／Qwen 全矩陣 Healer production eval（新 allowlist + chain budget）
+- Gemini v2 Ab3 / Healer production eval
+- （可選）Qwen v1 Ab3 on existing-L2-eligible cells
 - 多 seed 重複驗證

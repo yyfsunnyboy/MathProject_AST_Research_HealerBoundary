@@ -1,0 +1,831 @@
+{
+  "real_model_calls": 0,
+  "cell_id": "qwen3_5_4b__ce115_ext_113_10_factorization_l1__ab2d__seed_2026071301",
+  "production_allowlist": [
+    "L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP",
+    "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
+    "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP"
+  ],
+  "max_passes": 3,
+  "before_outcome": "runtime_failure",
+  "after_outcome": "passed",
+  "rescue_to_pass": true,
+  "healer": {
+    "input_hash": "83902452cc616115ac671ed0b06375e6f824db935487c353c0da41a79c2291f6",
+    "output_hash": "0dfdb8e77440afd7cf2ecf52ab0cee1874c319ad05509cb14ccbb8d81dc68671",
+    "final_status": "changed",
+    "max_passes": 3,
+    "execution_policy": {
+      "policy_id": "ce115_research_healer_execution_policy_h5_audit",
+      "allowlist_only": true,
+      "fixed_priority": true,
+      "priority_order": "ascending",
+      "one_change_per_pass": true,
+      "stop_pass_after_first_changed": true,
+      "reparse_after_change": true,
+      "revalidate_after_change": true,
+      "reevaluate_after_change_when_task_present": true,
+      "repair_attempt_requires_changed": true,
+      "max_passes_required": true,
+      "default_max_passes": 1,
+      "max_passes_semantics": "transactional_rollback",
+      "fail_closed_on_max_passes_exceeded": true,
+      "rollback_on_max_passes_exceeded": true,
+      "consumer_may_use_output_when_max_passes_exceeded": false,
+      "forbid_legacy_pipelines": true,
+      "production_allowlist_only_approved_rules": true,
+      "chained_repair": {
+        "ordering": "fixed_priority_ascending_aligned_to_outer_gates",
+        "gate_alignment": "G2_wiring_before_G3_G4_shape",
+        "one_change_per_pass": true,
+        "revalidate_after_each_change": true,
+        "recommended_max_passes": "len(production_allowlist)",
+        "chain_position_semantics": "1-based index among passes that changed the source in this run; None when the pass did not apply a changing rule"
+      }
+    },
+    "rolled_back": false,
+    "consumer_may_use_output": true,
+    "rule_outcomes": [
+      {
+        "rule_id": "L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP",
+        "layer": "L2",
+        "priority": 100,
+        "applicable": true,
+        "triggered": false,
+        "changed": false,
+        "guard_results": {
+          "single_frozen_key": false,
+          "parse_ok": true,
+          "return_has_oracle_payload": true,
+          "payload_static_scalar": false,
+          "scalar_equals_frozen_value": false,
+          "correct_answer_present": true,
+          "already_wrapped": false,
+          "frozen_key": null,
+          "frozen_value": null,
+          "resolved_scalar": null,
+          "payload_value_kind": null
+        },
+        "reason": "frozen_not_single_key",
+        "before_hash": "83902452cc616115ac671ed0b06375e6f824db935487c353c0da41a79c2291f6",
+        "after_hash": "83902452cc616115ac671ed0b06375e6f824db935487c353c0da41a79c2291f6",
+        "validation": {
+          "ast_parse_success": true,
+          "parse_error": null,
+          "source_len": 1161,
+          "repair_attempted": false
+        },
+        "stop_reason": "not_triggered"
+      },
+      {
+        "rule_id": "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
+        "layer": "L2",
+        "priority": 110,
+        "applicable": true,
+        "triggered": true,
+        "changed": true,
+        "guard_results": {
+          "parse_ok": true,
+          "single_generate": true,
+          "exactly_one_kwargs_empty_bag_load": true,
+          "bag_name": "frozen_params",
+          "kwargs_key": "frozen",
+          "static_keys_read": [
+            "expression",
+            "required_form"
+          ],
+          "bag_reads_static_only": true,
+          "available_param_bags": [
+            "context.frozen"
+          ],
+          "covering_bags": [
+            "context.frozen"
+          ],
+          "unique_covering_bag": true,
+          "frozen_covers_keys": true,
+          "frozen_values_embeddable": true,
+          "correct_answer_present": true
+        },
+        "reason": "inlined_unique_covering_param_bag",
+        "before_hash": "83902452cc616115ac671ed0b06375e6f824db935487c353c0da41a79c2291f6",
+        "after_hash": "4d05a9ff1a3a418bf05a659d1296d8a89912ceab892b8e2d1f4317b65d496394",
+        "validation": {
+          "ast_parse_success": true,
+          "parse_error": null,
+          "source_len": 1220,
+          "rule_id": "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
+          "production_approved": true,
+          "status": "production_approved",
+          "research_positioning": "frozen-oracle-assisted deterministic structural repair",
+          "oracle_assisted": true,
+          "oracle_free_claimed": false,
+          "reparse_ok": true,
+          "correct_answer_before": {
+            "dump": "Call(func=Attribute(value=Name(id='json', ctx=Load()), attr='dumps', ctx=Load()), args=[Name(id='correct_answer', ctx=Load())], keywords=[])",
+            "segment": "json.dumps(correct_answer)"
+          },
+          "correct_answer_after": {
+            "dump": "Call(func=Attribute(value=Name(id='json', ctx=Load()), attr='dumps', ctx=Load()), args=[Name(id='correct_answer', ctx=Load())], keywords=[])",
+            "segment": "json.dumps(correct_answer)"
+          },
+          "correct_answer_guard": true,
+          "inlined_keys": [
+            "expression",
+            "required_form"
+          ],
+          "kwargs_key_replaced": "frozen",
+          "bag_name": "frozen_params",
+          "frozen_oracle_fields_read": {
+            "keys": [
+              "expression",
+              "required_form"
+            ],
+            "source": "context.frozen"
+          },
+          "repair_attempted": true,
+          "evaluator_rerun": true,
+          "evaluator_outcome": "answer_incorrect",
+          "evaluator_details_keys": [
+            "actual_question_text",
+            "composite_outcomes",
+            "evaluation_gates",
+            "expected_answer",
+            "ledger_stage",
+            "mismatch_reason"
+          ],
+          "reparsed_after_change": true
+        },
+        "stop_reason": "changed_stop_pass"
+      },
+      {
+        "rule_id": "L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP",
+        "layer": "L2",
+        "priority": 100,
+        "applicable": true,
+        "triggered": false,
+        "changed": false,
+        "guard_results": {
+          "single_frozen_key": false,
+          "parse_ok": true,
+          "return_has_oracle_payload": true,
+          "payload_static_scalar": false,
+          "scalar_equals_frozen_value": false,
+          "correct_answer_present": true,
+          "already_wrapped": false,
+          "frozen_key": null,
+          "frozen_value": null,
+          "resolved_scalar": null,
+          "payload_value_kind": null
+        },
+        "reason": "frozen_not_single_key",
+        "before_hash": "4d05a9ff1a3a418bf05a659d1296d8a89912ceab892b8e2d1f4317b65d496394",
+        "after_hash": "4d05a9ff1a3a418bf05a659d1296d8a89912ceab892b8e2d1f4317b65d496394",
+        "validation": {
+          "ast_parse_success": true,
+          "parse_error": null,
+          "source_len": 1220,
+          "repair_attempted": false
+        },
+        "stop_reason": "not_triggered"
+      },
+      {
+        "rule_id": "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
+        "layer": "L2",
+        "priority": 110,
+        "applicable": false,
+        "triggered": false,
+        "changed": false,
+        "guard_results": {
+          "parse_ok": true,
+          "single_generate": true,
+          "exactly_one_kwargs_empty_bag_load": false,
+          "bag_name": null,
+          "kwargs_key": null,
+          "static_keys_read": null,
+          "bag_reads_static_only": false,
+          "available_param_bags": [
+            "context.frozen"
+          ],
+          "covering_bags": [],
+          "unique_covering_bag": false,
+          "frozen_covers_keys": false,
+          "frozen_values_embeddable": false,
+          "correct_answer_present": false
+        },
+        "reason": "not_applicable_structure",
+        "before_hash": "4d05a9ff1a3a418bf05a659d1296d8a89912ceab892b8e2d1f4317b65d496394",
+        "after_hash": "4d05a9ff1a3a418bf05a659d1296d8a89912ceab892b8e2d1f4317b65d496394",
+        "validation": {
+          "ast_parse_success": true,
+          "parse_error": null,
+          "source_len": 1220,
+          "repair_attempted": false
+        },
+        "stop_reason": "not_applicable"
+      },
+      {
+        "rule_id": "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP",
+        "layer": "L2",
+        "priority": 120,
+        "applicable": true,
+        "triggered": true,
+        "changed": true,
+        "guard_results": {
+          "parse_ok": true,
+          "single_generate": true,
+          "return_dict_present": true,
+          "correct_answer_present": true,
+          "correct_answer_is_json_dumps": true,
+          "dumps_single_positional_arg": true,
+          "dumps_kwargs_allowed_only": true,
+          "import_json_present": true,
+          "inner_expr_kind": "Name"
+        },
+        "reason": "unwrapped_json_dumps_correct_answer",
+        "before_hash": "4d05a9ff1a3a418bf05a659d1296d8a89912ceab892b8e2d1f4317b65d496394",
+        "after_hash": "0dfdb8e77440afd7cf2ecf52ab0cee1874c319ad05509cb14ccbb8d81dc68671",
+        "validation": {
+          "ast_parse_success": true,
+          "parse_error": null,
+          "source_len": 1208,
+          "rule_id": "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP",
+          "production_approved": true,
+          "status": "production_approved",
+          "research_positioning": "contract-shape structural repair (unwrap stringified correct_answer)",
+          "oracle_assisted": false,
+          "oracle_free_claimed": true,
+          "reparse_ok": true,
+          "post_unwrap_clean": true,
+          "correct_answer_present_after": true,
+          "inner_expr_kind": "Name",
+          "unwrapped_to": "Name(id='correct_answer', ctx=Load())",
+          "repair_attempted": true,
+          "evaluator_rerun": true,
+          "evaluator_outcome": "passed",
+          "evaluator_details_keys": [
+            "actual_question_text",
+            "composite_outcomes",
+            "evaluation_gates",
+            "ledger_stage"
+          ],
+          "reparsed_after_change": true
+        },
+        "stop_reason": "changed_stop_pass"
+      },
+      {
+        "rule_id": "L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP",
+        "layer": "L2",
+        "priority": 100,
+        "applicable": true,
+        "triggered": false,
+        "changed": false,
+        "guard_results": {
+          "single_frozen_key": false,
+          "parse_ok": true,
+          "return_has_oracle_payload": true,
+          "payload_static_scalar": false,
+          "scalar_equals_frozen_value": false,
+          "correct_answer_present": true,
+          "already_wrapped": false,
+          "frozen_key": null,
+          "frozen_value": null,
+          "resolved_scalar": null,
+          "payload_value_kind": null
+        },
+        "reason": "frozen_not_single_key",
+        "before_hash": "0dfdb8e77440afd7cf2ecf52ab0cee1874c319ad05509cb14ccbb8d81dc68671",
+        "after_hash": "0dfdb8e77440afd7cf2ecf52ab0cee1874c319ad05509cb14ccbb8d81dc68671",
+        "validation": {
+          "ast_parse_success": true,
+          "parse_error": null,
+          "source_len": 1208,
+          "repair_attempted": false
+        },
+        "stop_reason": "not_triggered"
+      },
+      {
+        "rule_id": "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
+        "layer": "L2",
+        "priority": 110,
+        "applicable": false,
+        "triggered": false,
+        "changed": false,
+        "guard_results": {
+          "parse_ok": true,
+          "single_generate": true,
+          "exactly_one_kwargs_empty_bag_load": false,
+          "bag_name": null,
+          "kwargs_key": null,
+          "static_keys_read": null,
+          "bag_reads_static_only": false,
+          "available_param_bags": [
+            "context.frozen"
+          ],
+          "covering_bags": [],
+          "unique_covering_bag": false,
+          "frozen_covers_keys": false,
+          "frozen_values_embeddable": false,
+          "correct_answer_present": false
+        },
+        "reason": "not_applicable_structure",
+        "before_hash": "0dfdb8e77440afd7cf2ecf52ab0cee1874c319ad05509cb14ccbb8d81dc68671",
+        "after_hash": "0dfdb8e77440afd7cf2ecf52ab0cee1874c319ad05509cb14ccbb8d81dc68671",
+        "validation": {
+          "ast_parse_success": true,
+          "parse_error": null,
+          "source_len": 1208,
+          "repair_attempted": false
+        },
+        "stop_reason": "not_applicable"
+      },
+      {
+        "rule_id": "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP",
+        "layer": "L2",
+        "priority": 120,
+        "applicable": false,
+        "triggered": false,
+        "changed": false,
+        "guard_results": {
+          "parse_ok": true,
+          "single_generate": true,
+          "return_dict_present": true,
+          "correct_answer_present": true,
+          "correct_answer_is_json_dumps": false,
+          "dumps_single_positional_arg": false,
+          "dumps_kwargs_allowed_only": false,
+          "import_json_present": true,
+          "inner_expr_kind": null
+        },
+        "reason": "correct_answer_not_json_dumps_call",
+        "before_hash": "0dfdb8e77440afd7cf2ecf52ab0cee1874c319ad05509cb14ccbb8d81dc68671",
+        "after_hash": "0dfdb8e77440afd7cf2ecf52ab0cee1874c319ad05509cb14ccbb8d81dc68671",
+        "validation": {
+          "ast_parse_success": true,
+          "parse_error": null,
+          "source_len": 1208,
+          "repair_attempted": false
+        },
+        "stop_reason": "not_applicable"
+      }
+    ],
+    "provenance": [
+      {
+        "pass_index": 0,
+        "chain_position": 1,
+        "candidate_rules_checked": [
+          "L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP",
+          "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM"
+        ],
+        "selected_rule_id": "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
+        "selection_priority": 110,
+        "applicable": true,
+        "triggered": true,
+        "changed": true,
+        "guard_results": {
+          "parse_ok": true,
+          "single_generate": true,
+          "exactly_one_kwargs_empty_bag_load": true,
+          "bag_name": "frozen_params",
+          "kwargs_key": "frozen",
+          "static_keys_read": [
+            "expression",
+            "required_form"
+          ],
+          "bag_reads_static_only": true,
+          "available_param_bags": [
+            "context.frozen"
+          ],
+          "covering_bags": [
+            "context.frozen"
+          ],
+          "unique_covering_bag": true,
+          "frozen_covers_keys": true,
+          "frozen_values_embeddable": true,
+          "correct_answer_present": true
+        },
+        "before_hash": "83902452cc616115ac671ed0b06375e6f824db935487c353c0da41a79c2291f6",
+        "after_hash": "4d05a9ff1a3a418bf05a659d1296d8a89912ceab892b8e2d1f4317b65d496394",
+        "validation": {
+          "ast_parse_success": true,
+          "parse_error": null,
+          "source_len": 1220,
+          "rule_id": "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
+          "production_approved": true,
+          "status": "production_approved",
+          "research_positioning": "frozen-oracle-assisted deterministic structural repair",
+          "oracle_assisted": true,
+          "oracle_free_claimed": false,
+          "reparse_ok": true,
+          "correct_answer_before": {
+            "dump": "Call(func=Attribute(value=Name(id='json', ctx=Load()), attr='dumps', ctx=Load()), args=[Name(id='correct_answer', ctx=Load())], keywords=[])",
+            "segment": "json.dumps(correct_answer)"
+          },
+          "correct_answer_after": {
+            "dump": "Call(func=Attribute(value=Name(id='json', ctx=Load()), attr='dumps', ctx=Load()), args=[Name(id='correct_answer', ctx=Load())], keywords=[])",
+            "segment": "json.dumps(correct_answer)"
+          },
+          "correct_answer_guard": true,
+          "inlined_keys": [
+            "expression",
+            "required_form"
+          ],
+          "kwargs_key_replaced": "frozen",
+          "bag_name": "frozen_params",
+          "frozen_oracle_fields_read": {
+            "keys": [
+              "expression",
+              "required_form"
+            ],
+            "source": "context.frozen"
+          },
+          "repair_attempted": true,
+          "evaluator_rerun": true,
+          "evaluator_outcome": "answer_incorrect",
+          "evaluator_details_keys": [
+            "actual_question_text",
+            "composite_outcomes",
+            "evaluation_gates",
+            "expected_answer",
+            "ledger_stage",
+            "mismatch_reason"
+          ],
+          "reparsed_after_change": true
+        },
+        "stop_reason": "changed_stop_pass",
+        "stopped_after_change": true,
+        "final_status": "changed"
+      },
+      {
+        "pass_index": 1,
+        "chain_position": 2,
+        "candidate_rules_checked": [
+          "L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP",
+          "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
+          "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP"
+        ],
+        "selected_rule_id": "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP",
+        "selection_priority": 120,
+        "applicable": true,
+        "triggered": true,
+        "changed": true,
+        "guard_results": {
+          "parse_ok": true,
+          "single_generate": true,
+          "return_dict_present": true,
+          "correct_answer_present": true,
+          "correct_answer_is_json_dumps": true,
+          "dumps_single_positional_arg": true,
+          "dumps_kwargs_allowed_only": true,
+          "import_json_present": true,
+          "inner_expr_kind": "Name"
+        },
+        "before_hash": "4d05a9ff1a3a418bf05a659d1296d8a89912ceab892b8e2d1f4317b65d496394",
+        "after_hash": "0dfdb8e77440afd7cf2ecf52ab0cee1874c319ad05509cb14ccbb8d81dc68671",
+        "validation": {
+          "ast_parse_success": true,
+          "parse_error": null,
+          "source_len": 1208,
+          "rule_id": "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP",
+          "production_approved": true,
+          "status": "production_approved",
+          "research_positioning": "contract-shape structural repair (unwrap stringified correct_answer)",
+          "oracle_assisted": false,
+          "oracle_free_claimed": true,
+          "reparse_ok": true,
+          "post_unwrap_clean": true,
+          "correct_answer_present_after": true,
+          "inner_expr_kind": "Name",
+          "unwrapped_to": "Name(id='correct_answer', ctx=Load())",
+          "repair_attempted": true,
+          "evaluator_rerun": true,
+          "evaluator_outcome": "passed",
+          "evaluator_details_keys": [
+            "actual_question_text",
+            "composite_outcomes",
+            "evaluation_gates",
+            "ledger_stage"
+          ],
+          "reparsed_after_change": true
+        },
+        "stop_reason": "changed_stop_pass",
+        "stopped_after_change": true,
+        "final_status": "changed"
+      },
+      {
+        "pass_index": 2,
+        "chain_position": null,
+        "candidate_rules_checked": [
+          "L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP",
+          "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
+          "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP"
+        ],
+        "selected_rule_id": null,
+        "selection_priority": null,
+        "applicable": false,
+        "triggered": false,
+        "changed": false,
+        "guard_results": {},
+        "before_hash": "0dfdb8e77440afd7cf2ecf52ab0cee1874c319ad05509cb14ccbb8d81dc68671",
+        "after_hash": "0dfdb8e77440afd7cf2ecf52ab0cee1874c319ad05509cb14ccbb8d81dc68671",
+        "validation": {
+          "ast_parse_success": true,
+          "parse_error": null,
+          "source_len": 1208
+        },
+        "stop_reason": "no_candidate_selected",
+        "stopped_after_change": false,
+        "final_status": "changed"
+      }
+    ],
+    "real_model_calls": 0,
+    "protected_snapshot": {},
+    "notes": [
+      "max_passes=3",
+      "pass_0_stopped_after_first_changed_rule",
+      "pass_1_stopped_after_first_changed_rule",
+      "pass_2_stable_no_change"
+    ],
+    "source_changed": true
+  },
+  "provenance": [
+    {
+      "pass_index": 0,
+      "chain_position": 1,
+      "candidate_rules_checked": [
+        "L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP",
+        "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM"
+      ],
+      "selected_rule_id": "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
+      "selection_priority": 110,
+      "applicable": true,
+      "triggered": true,
+      "changed": true,
+      "guard_results": {
+        "parse_ok": true,
+        "single_generate": true,
+        "exactly_one_kwargs_empty_bag_load": true,
+        "bag_name": "frozen_params",
+        "kwargs_key": "frozen",
+        "static_keys_read": [
+          "expression",
+          "required_form"
+        ],
+        "bag_reads_static_only": true,
+        "available_param_bags": [
+          "context.frozen"
+        ],
+        "covering_bags": [
+          "context.frozen"
+        ],
+        "unique_covering_bag": true,
+        "frozen_covers_keys": true,
+        "frozen_values_embeddable": true,
+        "correct_answer_present": true
+      },
+      "before_hash": "83902452cc616115ac671ed0b06375e6f824db935487c353c0da41a79c2291f6",
+      "after_hash": "4d05a9ff1a3a418bf05a659d1296d8a89912ceab892b8e2d1f4317b65d496394",
+      "validation": {
+        "ast_parse_success": true,
+        "parse_error": null,
+        "source_len": 1220,
+        "rule_id": "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
+        "production_approved": true,
+        "status": "production_approved",
+        "research_positioning": "frozen-oracle-assisted deterministic structural repair",
+        "oracle_assisted": true,
+        "oracle_free_claimed": false,
+        "reparse_ok": true,
+        "correct_answer_before": {
+          "dump": "Call(func=Attribute(value=Name(id='json', ctx=Load()), attr='dumps', ctx=Load()), args=[Name(id='correct_answer', ctx=Load())], keywords=[])",
+          "segment": "json.dumps(correct_answer)"
+        },
+        "correct_answer_after": {
+          "dump": "Call(func=Attribute(value=Name(id='json', ctx=Load()), attr='dumps', ctx=Load()), args=[Name(id='correct_answer', ctx=Load())], keywords=[])",
+          "segment": "json.dumps(correct_answer)"
+        },
+        "correct_answer_guard": true,
+        "inlined_keys": [
+          "expression",
+          "required_form"
+        ],
+        "kwargs_key_replaced": "frozen",
+        "bag_name": "frozen_params",
+        "frozen_oracle_fields_read": {
+          "keys": [
+            "expression",
+            "required_form"
+          ],
+          "source": "context.frozen"
+        },
+        "repair_attempted": true,
+        "evaluator_rerun": true,
+        "evaluator_outcome": "answer_incorrect",
+        "evaluator_details_keys": [
+          "actual_question_text",
+          "composite_outcomes",
+          "evaluation_gates",
+          "expected_answer",
+          "ledger_stage",
+          "mismatch_reason"
+        ],
+        "reparsed_after_change": true
+      },
+      "stop_reason": "changed_stop_pass",
+      "stopped_after_change": true,
+      "final_status": "changed"
+    },
+    {
+      "pass_index": 1,
+      "chain_position": 2,
+      "candidate_rules_checked": [
+        "L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP",
+        "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
+        "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP"
+      ],
+      "selected_rule_id": "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP",
+      "selection_priority": 120,
+      "applicable": true,
+      "triggered": true,
+      "changed": true,
+      "guard_results": {
+        "parse_ok": true,
+        "single_generate": true,
+        "return_dict_present": true,
+        "correct_answer_present": true,
+        "correct_answer_is_json_dumps": true,
+        "dumps_single_positional_arg": true,
+        "dumps_kwargs_allowed_only": true,
+        "import_json_present": true,
+        "inner_expr_kind": "Name"
+      },
+      "before_hash": "4d05a9ff1a3a418bf05a659d1296d8a89912ceab892b8e2d1f4317b65d496394",
+      "after_hash": "0dfdb8e77440afd7cf2ecf52ab0cee1874c319ad05509cb14ccbb8d81dc68671",
+      "validation": {
+        "ast_parse_success": true,
+        "parse_error": null,
+        "source_len": 1208,
+        "rule_id": "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP",
+        "production_approved": true,
+        "status": "production_approved",
+        "research_positioning": "contract-shape structural repair (unwrap stringified correct_answer)",
+        "oracle_assisted": false,
+        "oracle_free_claimed": true,
+        "reparse_ok": true,
+        "post_unwrap_clean": true,
+        "correct_answer_present_after": true,
+        "inner_expr_kind": "Name",
+        "unwrapped_to": "Name(id='correct_answer', ctx=Load())",
+        "repair_attempted": true,
+        "evaluator_rerun": true,
+        "evaluator_outcome": "passed",
+        "evaluator_details_keys": [
+          "actual_question_text",
+          "composite_outcomes",
+          "evaluation_gates",
+          "ledger_stage"
+        ],
+        "reparsed_after_change": true
+      },
+      "stop_reason": "changed_stop_pass",
+      "stopped_after_change": true,
+      "final_status": "changed"
+    },
+    {
+      "pass_index": 2,
+      "chain_position": null,
+      "candidate_rules_checked": [
+        "L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP",
+        "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
+        "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP"
+      ],
+      "selected_rule_id": null,
+      "selection_priority": null,
+      "applicable": false,
+      "triggered": false,
+      "changed": false,
+      "guard_results": {},
+      "before_hash": "0dfdb8e77440afd7cf2ecf52ab0cee1874c319ad05509cb14ccbb8d81dc68671",
+      "after_hash": "0dfdb8e77440afd7cf2ecf52ab0cee1874c319ad05509cb14ccbb8d81dc68671",
+      "validation": {
+        "ast_parse_success": true,
+        "parse_error": null,
+        "source_len": 1208
+      },
+      "stop_reason": "no_candidate_selected",
+      "stopped_after_change": false,
+      "final_status": "changed"
+    }
+  ],
+  "changed_chain": [
+    {
+      "chain_position": 1,
+      "rule_id": "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
+      "pass_index": 0
+    },
+    {
+      "chain_position": 2,
+      "rule_id": "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP",
+      "pass_index": 1
+    }
+  ],
+  "before_gates": {
+    "g1_evaluability": {
+      "status": "PASS",
+      "reason": "evaluability_passed",
+      "raw_output_present": true,
+      "extraction_succeeded": true,
+      "candidate_nonempty": true,
+      "parse_succeeded": true,
+      "required_entry_point_present": true
+    },
+    "g2_executability": {
+      "status": "FAIL",
+      "reason": "runtime_failure",
+      "load_succeeded": true,
+      "entry_point_called": true,
+      "timeout": false,
+      "exception_type": "KeyError",
+      "exception_message": "'expression'",
+      "return_value_produced": false
+    },
+    "g3_contract_compliance": {
+      "status": "NOT_ASSESSED",
+      "reason": "g2_not_passed"
+    },
+    "g4_semantic_correctness": {
+      "status": "NOT_ASSESSED",
+      "reason": "g2_not_passed"
+    },
+    "g5_problem_presentation": {
+      "status": "NOT_OBSERVED",
+      "reason": "actual_question_text_unavailable",
+      "question_present": false
+    },
+    "g6_math_notation": {
+      "status": "NOT_OBSERVED",
+      "reason": "actual_question_text_unavailable",
+      "uses_latex": false
+    }
+  },
+  "after_gates": {
+    "g1_evaluability": {
+      "status": "PASS",
+      "reason": "evaluability_passed",
+      "raw_output_present": true,
+      "extraction_succeeded": true,
+      "candidate_nonempty": true,
+      "parse_succeeded": true,
+      "required_entry_point_present": true
+    },
+    "g2_executability": {
+      "status": "PASS",
+      "reason": "execution_passed",
+      "load_succeeded": true,
+      "entry_point_called": true,
+      "timeout": false,
+      "exception_type": null,
+      "exception_message": null,
+      "return_value_produced": true
+    },
+    "g3_contract_compliance": {
+      "status": "PASS",
+      "reason": "contract_observed",
+      "schema_valid": true,
+      "missing_keys": [],
+      "unexpected_keys": [],
+      "field_types_valid": true,
+      "frozen_parameters_valid": true,
+      "entry_point_signature_valid": null
+    },
+    "g4_semantic_correctness": {
+      "status": "PASS",
+      "reason": "oracle_match",
+      "oracle_executed": true,
+      "oracle_match": true,
+      "invariant_checks": null,
+      "mismatch_reason": null
+    },
+    "g5_problem_presentation": {
+      "status": "PASS",
+      "reason": "presentation_checks_passed",
+      "question_present": true,
+      "placeholder_leak": false,
+      "prompt_leak": false,
+      "code_leak": false,
+      "answer_leak": false,
+      "truncation_signal": false,
+      "frozen_parameters_available": true
+    },
+    "g6_math_notation": {
+      "status": "PASS",
+      "reason": "notation_checks_passed",
+      "uses_latex": false,
+      "delimiter_balance": true,
+      "brace_balance": true,
+      "malformed_command": false,
+      "unclosed_math_region": false
+    }
+  },
+  "raw_artifact_unmodified": true,
+  "promotion_audit": "docs/experiments/analysis/ce115_exam_ext_contract_aligned_v2/rule_promotion_audit_01.json"
+}
