@@ -16,6 +16,8 @@ from agent_tools.finals_rebuild.ce115_clean_incremental_ablation import (
     domain_section,
     prompt_sha256,
 )
+from agent_tools.finals_rebuild.domain_api_ssot import DOMAIN_API_SSOT, render_api_prompt_line
+from core.prompts.domain_function_library import PolynomialOps
 from agent_tools.finals_rebuild.generator_success import evaluate_math_notation
 from agent_tools.finals_rebuild.math16_oracles import (
     compound_radicals_equal,
@@ -48,6 +50,7 @@ def _component_hashes() -> dict[str, str]:
         "evaluator_math16_oracles": ROOT / "agent_tools/finals_rebuild/math16_oracles.py",
         "healer_protocol": ROOT / "agent_tools/finals_rebuild/ce115_research_healer_protocol.py",
         "clean_incremental_ablation": ROOT / "agent_tools/finals_rebuild/ce115_clean_incremental_ablation.py",
+        "domain_api_ssot": ROOT / "agent_tools/finals_rebuild/domain_api_ssot.py",
         "math_answer_contracts": ROOT / "agent_tools/finals_rebuild/math_answer_contracts.py",
         "math16_pool": ROOT / "agent_tools/finals_rebuild/math16_pool.py",
     }
@@ -236,6 +239,39 @@ def run_math16_preflight(*, write_manifest: bool = True) -> dict[str, Any]:
         12,
     )
     checks["q08_rejects_legacy_12"] = wrong08.get("is_correct") is False
+
+    # Domain API SSOT: registry ↔ prompt text ↔ runtime return shape (factor).
+    ssot_failures: list[str] = []
+    for tid in [t["task_id"] for t in tasks]:
+        for api in TASK_DOMAIN_APIS.get(tid, ()):
+            name = api["name"]
+            if name not in DOMAIN_API_SSOT:
+                ssot_failures.append(f"{tid}:missing_ssot:{name}")
+                continue
+            line = render_api_prompt_line(name)
+            section = domain_section(tid)
+            if line not in section:
+                ssot_failures.append(f"{tid}:prompt_ssot_mismatch:{name}")
+    try:
+        factors = PolynomialOps.factor_quadratic_exact(1, 4, -12)
+        if not (
+            isinstance(factors, list)
+            and len(factors) == 2
+            and all(set(f) == {"x_coefficient", "constant"} for f in factors)
+        ):
+            ssot_failures.append("runtime_factor_quadratic_exact_shape")
+        else:
+            # Contract test: 3-value unpack must fail against real return shape.
+            try:
+                _a, _b, _c = factors  # type: ignore[misc]
+                ssot_failures.append("runtime_factor_quadratic_exact_unexpected_3tuple")
+            except ValueError:
+                pass
+    except Exception as exc:  # noqa: BLE001
+        ssot_failures.append(f"runtime_factor_quadratic_exact:{exc}")
+    checks["domain_api_ssot_aligned"] = not ssot_failures
+    if ssot_failures:
+        blockers.append(f"domain_api_ssot:{ssot_failures[:8]}")
 
     checks["oracle_golden_all_pass"] = not oracle_failures
     checks["latex_g6_all_pass"] = not latex_failures

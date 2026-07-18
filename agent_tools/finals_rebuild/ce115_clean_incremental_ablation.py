@@ -16,6 +16,7 @@ import hashlib
 from pathlib import Path
 from typing import Any, Mapping
 
+from agent_tools.finals_rebuild.domain_api_ssot import render_api_prompt_line, require_ssot
 from agent_tools.finals_rebuild.math_boundary_pilot import build_ab1_prompt
 
 LINEAGE_ID = "ce115_clean_incremental_ablation_v1"
@@ -54,7 +55,7 @@ TASK_DOMAIN_APIS: dict[str, tuple[dict[str, str], ...]] = {
             "name": "RadicalOps.simplify_term",
             "import": LIBRARY,
             "signature": "(coeff, radicand)",
-            "returns": "tuple[exact coefficient, int]  # (outer coefficient, square-free radicand)",
+            "returns": "see DOMAIN_API_SSOT",
             "necessity": "Sole supported primitive for extracting square factors into coefficient/radicand.",
         },
     ),
@@ -86,7 +87,8 @@ TASK_DOMAIN_APIS: dict[str, tuple[dict[str, str], ...]] = {
             "name": "PolynomialOps.factor_quadratic_exact",
             "import": LIBRARY,
             "signature": "(a, b, c)",
-            "returns": "tuple of exact linear factors / roots",
+            # returns text is owned by domain_api_ssot.DOMAIN_API_SSOT
+            "returns": "see DOMAIN_API_SSOT",
             "necessity": "Sole supported primitive for exact quadratic factorization and roots.",
         },
         {
@@ -118,7 +120,7 @@ TASK_DOMAIN_APIS: dict[str, tuple[dict[str, str], ...]] = {
             "name": "PolynomialOps.mul",
             "import": LIBRARY,
             "signature": "(c1, c2)",
-            "returns": "list",
+            "returns": "see DOMAIN_API_SSOT",
             "necessity": "Expand (3x+a)(bx+c) under strict_source_template factor order.",
         },
         {
@@ -141,7 +143,7 @@ TASK_DOMAIN_APIS: dict[str, tuple[dict[str, str], ...]] = {
             "name": "IntegerOps.safe_eval",
             "import": LIBRARY,
             "signature": "(expr)",
-            "returns": "exact numeric value",
+            "returns": "see DOMAIN_API_SSOT",
             "necessity": "Evaluate integer checks without unsafe builtins.",
         },
     ),
@@ -150,7 +152,7 @@ TASK_DOMAIN_APIS: dict[str, tuple[dict[str, str], ...]] = {
             "name": "IntegerOps.safe_eval",
             "import": LIBRARY,
             "signature": "(expr)",
-            "returns": "exact numeric value",
+            "returns": "see DOMAIN_API_SSOT",
             "necessity": "Evaluate (-3)**3 exactly with safe integer arithmetic.",
         },
         {
@@ -173,7 +175,7 @@ TASK_DOMAIN_APIS: dict[str, tuple[dict[str, str], ...]] = {
             "name": "IntegerOps.safe_eval",
             "import": LIBRARY,
             "signature": "(expr)",
-            "returns": "exact numeric value",
+            "returns": "see DOMAIN_API_SSOT",
             "necessity": "Count qualifying integers with exact arithmetic only.",
         },
     ),
@@ -182,7 +184,7 @@ TASK_DOMAIN_APIS: dict[str, tuple[dict[str, str], ...]] = {
             "name": "IntegerOps.safe_eval",
             "import": LIBRARY,
             "signature": "(expr)",
-            "returns": "exact numeric value",
+            "returns": "see DOMAIN_API_SSOT",
             "necessity": "Compute generation count k from 20-hour splits over 15 days.",
         },
         {
@@ -267,7 +269,7 @@ TASK_DOMAIN_APIS: dict[str, tuple[dict[str, str], ...]] = {
             "name": "RadicalOps.simplify_term",
             "import": LIBRARY,
             "signature": "(coeff, radicand)",
-            "returns": "tuple[exact coefficient, int]",
+            "returns": "see DOMAIN_API_SSOT",
             "necessity": "Extract square factors from sqrt(135) into coefficient/radicand.",
         },
         {
@@ -283,7 +285,7 @@ TASK_DOMAIN_APIS: dict[str, tuple[dict[str, str], ...]] = {
             "name": "RadicalOps.simplify_term",
             "import": LIBRARY,
             "signature": "(coeff, radicand)",
-            "returns": "tuple[exact coefficient, int]",
+            "returns": "see DOMAIN_API_SSOT",
             "necessity": "Keep exact ±sqrt(3) coefficients for ordered roots.",
         },
         {
@@ -534,7 +536,11 @@ def generic_section() -> str:
 
 
 def domain_section(task_id: str) -> str:
-    """Task-local DOMAIN block only. Raises DOMAIN_BUDGET_EXCEEDED if too large."""
+    """Task-local DOMAIN block only. Raises DOMAIN_BUDGET_EXCEEDED if too large.
+
+    Model-facing signature/returns text is rendered from domain_api_ssot.DOMAIN_API_SSOT
+    (single source of truth). TASK_DOMAIN_APIS only selects which APIs a task may use.
+    """
     apis = TASK_DOMAIN_APIS.get(task_id)
     if not apis:
         raise KeyError(f"no clean-incremental DOMAIN mapping for task_id={task_id!r}")
@@ -543,10 +549,9 @@ def domain_section(task_id: str) -> str:
         "Task-local domain APIs (use only these):",
     ]
     for api in apis:
-        lines.append(
-            f"- `{api['name']}` | import: `{api['import']}` | signature: `{api['signature']}` "
-            f"| returns: {api['returns']}"
-        )
+        name = api["name"]
+        require_ssot(name)  # fail closed if registry missing
+        lines.append(render_api_prompt_line(name))
     lines.append(ADOPTION_RULE)
     section = "\n".join(lines)
     n = len(section)
