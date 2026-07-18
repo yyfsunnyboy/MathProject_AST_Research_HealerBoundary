@@ -16,7 +16,10 @@ from agent_tools.finals_rebuild.ce115_clean_incremental_ablation import (
     domain_section,
     prompt_sha256,
 )
-from agent_tools.finals_rebuild.domain_api_ssot import DOMAIN_API_SSOT, render_api_prompt_line
+from agent_tools.finals_rebuild.domain_api_ssot import (
+    DOMAIN_API_SSOT, render_api_prompt_line, validate_inventory,
+)
+from agent_tools.finals_rebuild.domain_answer_assembly import TASK_OUTPUT_ASSEMBLY
 from core.prompts.domain_function_library import PolynomialOps
 from agent_tools.finals_rebuild.generator_success import evaluate_math_notation
 from agent_tools.finals_rebuild.math16_oracles import (
@@ -241,7 +244,10 @@ def run_math16_preflight(*, write_manifest: bool = True) -> dict[str, Any]:
     checks["q08_rejects_legacy_12"] = wrong08.get("is_correct") is False
 
     # Domain API SSOT: registry ↔ prompt text ↔ runtime return shape (factor).
-    ssot_failures: list[str] = []
+    ssot_failures: list[str] = list(validate_inventory())
+    task_ids = {t["task_id"] for t in tasks}
+    if set(TASK_OUTPUT_ASSEMBLY) != task_ids:
+        ssot_failures.append("task_output_assembly_coverage")
     for tid in [t["task_id"] for t in tasks]:
         for api in TASK_DOMAIN_APIS.get(tid, ()):
             name = api["name"]

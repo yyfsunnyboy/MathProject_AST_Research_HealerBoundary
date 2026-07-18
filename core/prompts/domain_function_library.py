@@ -203,7 +203,7 @@ class IntegerOps:
         return a % b == 0
     
     @staticmethod
-    def safe_eval(expr):
+    def safe_eval(expr) -> int | float:
         """安全評估算式，支援：abs()、基本四則運算、括號"""
         safe_dict = {
             '__builtins__': {},
@@ -218,7 +218,15 @@ class IntegerOps:
         # 移除方括號並替換為括號（如果需要）
         clean_expr = clean_expr.replace('[', '(').replace(']', ')')
         try:
-            return eval(clean_expr, safe_dict)
+            result = eval(clean_expr, safe_dict)
+            # The public contract is deliberately numeric.  Python's bool is an
+            # int subclass and eval can also produce containers; neither is a
+            # valid arithmetic answer at the JSON/answer-contract boundary.
+            if isinstance(result, bool) or not isinstance(result, (int, float)):
+                raise ValueError(
+                    "expression result must be int or float (bool and containers are unsupported)"
+                )
+            return result
         except Exception as e:
             raise ValueError(f"Invalid expression: {expr} (cleaned: {clean_expr}). Error: {e}")
 

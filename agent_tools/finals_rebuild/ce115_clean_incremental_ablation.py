@@ -273,11 +273,11 @@ TASK_DOMAIN_APIS: dict[str, tuple[dict[str, str], ...]] = {
             "necessity": "Extract square factors from sqrt(135) into coefficient/radicand.",
         },
         {
-            "name": "RadicalOps.to_latex",
+            "name": "RadicalOps.format_term",
             "import": LIBRARY,
-            "signature": "(expr)",
+            "signature": "(coeff, radicand, is_first=True)",
             "returns": "str",
-            "necessity": "Emit canonical_latex for the simplified radical.",
+            "necessity": "Emit complete coefficient/radicand canonical_latex for one radical term.",
         },
     ),
     "ce111_q10_ordered_quadratic_roots_radical": (
@@ -296,11 +296,11 @@ TASK_DOMAIN_APIS: dict[str, tuple[dict[str, str], ...]] = {
             "necessity": "Combine rational parts when forming 2a+b as a compound radical.",
         },
         {
-            "name": "RadicalOps.to_latex",
+            "name": "RadicalOps.format_expression",
             "import": LIBRARY,
-            "signature": "(expr)",
+            "signature": "(terms_dict, denominator=1)",
             "returns": "str",
-            "necessity": "Emit canonical_latex for the compound radical result.",
+            "necessity": "Emit complete signed compound-radical canonical_latex.",
         },
     ),
     "ce113_q11_rationalize_denominator": (
