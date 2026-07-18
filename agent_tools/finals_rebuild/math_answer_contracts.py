@@ -106,7 +106,74 @@ NEUTRAL_TASK_STATEMENTS = {
 - Input Parameters: `expression`, `required_form` ("a + b*sqrt(7)"), `target_expression` ("a + b").
 - Output: ask to rewrite in the required form and report a+b.
 - Calculation: return a, b, radicand, and value=a+b.
-- Data Contract: `oracle_payload` must equal the frozen parameters."""
+- Data Contract: `oracle_payload` must equal the frozen parameters.""",
+
+    "math16_polynomial_division_general": """# Task Specification: Math16 Polynomial Division
+- Input Parameters: `dividend_coefficients`, `divisor_coefficients`.
+- Output: `question_text` must use formal LaTeX delimiters and ask for quotient and remainder.
+- Calculation: return quotient_coefficients, remainder_coefficients, quotient_latex, remainder_latex.
+- Data Contract: `oracle_payload` must equal the frozen parameters.""",
+
+    "math16_polynomial_factor_roots": """# Task Specification: Math16 Quadratic Factor Roots
+- Input Parameters: `quadratic_coefficients`.
+- Output: LaTeX question asking for factorization and ascending roots.
+- Calculation: return roots, factorization_latex, roots_latex.
+- Data Contract: `oracle_payload` must equal the frozen parameters.""",
+
+    "math16_exact_rational_expression": """# Task Specification: Math16 Exact Rational Expression
+- Input Parameters: `products` of exact decimal strings.
+- Output: LaTeX question; exact value with no approximation.
+- Calculation: return value and canonical_latex.
+- Data Contract: `oracle_payload` must equal the frozen parameters.""",
+
+    "math16_radical_simplification": """# Task Specification: Math16 Radical Simplification
+- Input Parameters: `radicand`.
+- Output: LaTeX question asking for simplest radical form.
+- Calculation: return coefficient, radicand, canonical_latex.
+- Data Contract: `oracle_payload` must equal the frozen parameters.""",
+
+    "polynomial_division_remainder_only": """# Task Specification: Polynomial Division Remainder Only
+- Input Parameters: dividend/divisor coefficients.
+- Output: ask only for the remainder polynomial in LaTeX-capable form.
+- Calculation: return remainder and canonical_latex only (quotient is not scored).
+- Data Contract: `oracle_payload` may include quotient for audit only.""",
+
+    "polynomial_factor_parameter_recovery": """# Task Specification: Strict Factor Parameter Recovery
+- Input Parameters: quadratic coefficients and factor_order_policy=strict_source_template.
+- Output: ask for a+2c with first factor fixed as (3x+a).
+- Calculation: return the integer a+2c. Factor order may not be swapped to redefine parameters.
+- Data Contract: `oracle_payload` holds a,b,c and expansion check.""",
+
+    "integer_exact": """# Task Specification: Integer Exact Answer
+- Output: ask for a single integer answer.
+- Calculation: return the exact integer.
+- Data Contract: `oracle_payload` must equal the frozen parameters.""",
+
+    "integer_count": """# Task Specification: Integer Count
+- Output: ask how many positive integers satisfy the stated conditions.
+- Calculation: return {count: int}.
+- Data Contract: `oracle_payload` may list valid_values for audit.""",
+
+    "integer_exact_k": """# Task Specification: Integer Exact k
+- Output: ask for exponent/generation count k.
+- Calculation: return {k: int}.
+- Data Contract: `oracle_payload` must equal the frozen parameters.""",
+
+    "exact_fraction_canonical": """# Task Specification: Exact Fraction Canonical
+- Output: ask for an irreducible fraction in LaTeX-capable form.
+- Calculation: return numerator, denominator, canonical_latex.
+- Data Contract: `oracle_payload` must equal the frozen parameters.""",
+
+    "radical_simplification_canonical": """# Task Specification: Radical Simplification Canonical
+- Output: ask for simplest radical form with canonical_latex.
+- Calculation: return coefficient, radicand, canonical_latex.
+- Data Contract: `oracle_payload` must equal the frozen parameters.""",
+
+    "compound_radical_result": """# Task Specification: Compound Radical Result
+- Output: ask for an exact compound radical value.
+- Calculation: return result={rational, radical_coefficient, radicand, canonical_latex}.
+- Comparison uses structured fields; latex is not the sole judge.
+- Data Contract: `oracle_payload` may nest larger_root/smaller_root compounds."""
 }
 
 POLYNOMIAL_DIVISION_CONTRACT = """Required return schema:
@@ -266,6 +333,118 @@ EXAM_RATIONALIZE_CONTRACT = """Required return schema:
 }
 - Exact dictionary match."""
 
+MATH16_POLY_DIV_CONTRACT = """Required return schema:
+{
+  "question_text": str,
+  "correct_answer": {
+    "quotient_coefficients": list,
+    "remainder_coefficients": list,
+    "quotient_latex": str,
+    "remainder_latex": str
+  },
+  "oracle_payload": dict
+}
+- question_text must use formal LaTeX (\\( \\) / \\[ \\]). Structural fields are scored; latex fields required."""
+
+MATH16_FACTOR_ROOTS_CONTRACT = """Required return schema:
+{
+  "question_text": str,
+  "correct_answer": {
+    "roots": list,
+    "factorization_latex": str,
+    "roots_latex": str
+  },
+  "oracle_payload": dict
+}
+- question_text must use formal LaTeX. roots ordered ascending."""
+
+MATH16_EXACT_RATIONAL_CONTRACT = """Required return schema:
+{
+  "question_text": str,
+  "correct_answer": {"value": str, "canonical_latex": str},
+  "oracle_payload": dict
+}
+- Exact rational value plus canonical_latex. No floats."""
+
+MATH16_RADICAL_CONTRACT = """Required return schema:
+{
+  "question_text": str,
+  "correct_answer": {"coefficient": int, "radicand": int, "canonical_latex": str},
+  "oracle_payload": dict
+}
+- Simplest radical form with canonical_latex."""
+
+POLY_REMAINDER_ONLY_CONTRACT = """Required return schema:
+{
+  "question_text": str,
+  "correct_answer": {"remainder": str, "canonical_latex": str},
+  "oracle_payload": dict
+}
+- Score remainder only; do not require quotient in correct_answer."""
+
+FACTOR_PARAM_RECOVERY_CONTRACT = """Required return schema:
+{
+  "question_text": str,
+  "correct_answer": int,
+  "oracle_payload": dict
+}
+- factor_order_policy=strict_source_template; first factor fixed as (3x+a). Return integer a+2c."""
+
+INTEGER_EXACT_CONTRACT = """Required return schema:
+{
+  "question_text": str,
+  "correct_answer": int,
+  "oracle_payload": dict
+}
+- Exact integer match."""
+
+INTEGER_COUNT_CONTRACT = """Required return schema:
+{
+  "question_text": str,
+  "correct_answer": {"count": int},
+  "oracle_payload": dict
+}
+- Exact count match."""
+
+INTEGER_EXACT_K_CONTRACT = """Required return schema:
+{
+  "question_text": str,
+  "correct_answer": {"k": int},
+  "oracle_payload": dict
+}
+- Exact k match."""
+
+EXACT_FRACTION_CANONICAL_CONTRACT = """Required return schema:
+{
+  "question_text": str,
+  "correct_answer": {"numerator": int, "denominator": int, "canonical_latex": str},
+  "oracle_payload": dict
+}
+- Irreducible fraction; structural Fraction equality plus canonical_latex."""
+
+RADICAL_CANONICAL_CONTRACT = """Required return schema:
+{
+  "question_text": str,
+  "correct_answer": {"coefficient": int, "radicand": int, "canonical_latex": str},
+  "oracle_payload": dict
+}
+- Square-free radicand; structural match plus canonical_latex."""
+
+COMPOUND_RADICAL_CONTRACT = """Required return schema:
+{
+  "question_text": str,
+  "correct_answer": {
+    "result": {
+      "rational": int,
+      "radical_coefficient": int,
+      "radicand": int,
+      "canonical_latex": str
+    }
+  },
+  "oracle_payload": dict
+}
+- Structured comparison on (rational, radical_coefficient, radicand). Accepts +1/-1 coefficients. Not string-only."""
+
 CONTRACTS: Mapping[str, str] = {
     "radical_simplification": RADICAL_SIMPLIFICATION_CONTRACT,
     "exact_rational_expression": EXACT_RATIONAL_EXPRESSION_CONTRACT,
@@ -282,6 +461,18 @@ CONTRACTS: Mapping[str, str] = {
     "exam_radical_product_simplified": EXAM_RADICAL_PRODUCT_CONTRACT,
     "exam_factorization_common_binomial": EXAM_FACTORIZATION_CONTRACT,
     "exam_rationalize_conjugate": EXAM_RATIONALIZE_CONTRACT,
+    "math16_polynomial_division_general": MATH16_POLY_DIV_CONTRACT,
+    "math16_polynomial_factor_roots": MATH16_FACTOR_ROOTS_CONTRACT,
+    "math16_exact_rational_expression": MATH16_EXACT_RATIONAL_CONTRACT,
+    "math16_radical_simplification": MATH16_RADICAL_CONTRACT,
+    "polynomial_division_remainder_only": POLY_REMAINDER_ONLY_CONTRACT,
+    "polynomial_factor_parameter_recovery": FACTOR_PARAM_RECOVERY_CONTRACT,
+    "integer_exact": INTEGER_EXACT_CONTRACT,
+    "integer_count": INTEGER_COUNT_CONTRACT,
+    "integer_exact_k": INTEGER_EXACT_K_CONTRACT,
+    "exact_fraction_canonical": EXACT_FRACTION_CANONICAL_CONTRACT,
+    "radical_simplification_canonical": RADICAL_CANONICAL_CONTRACT,
+    "compound_radical_result": COMPOUND_RADICAL_CONTRACT,
 }
 
 

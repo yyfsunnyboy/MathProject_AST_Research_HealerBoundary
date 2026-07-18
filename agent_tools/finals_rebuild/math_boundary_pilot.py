@@ -145,6 +145,69 @@ def build_ab1_prompt(task: dict[str, Any], frozen: dict[str, Any]) -> str:
             "correct_answer must be a JSON-compatible dict with exactly a, b, radicand, and value=a+b "
             "(all ints). Exact arithmetic; no floats. "
         )
+    elif task["oracle_type"] == "math16_polynomial_division_general":
+        answer_contract = (
+            "question_text must use formal LaTeX delimiters \\( \\) / \\[ \\]. "
+            "correct_answer must include quotient_coefficients, remainder_coefficients, "
+            "quotient_latex, and remainder_latex. Exact arithmetic; no floats. "
+        )
+    elif task["oracle_type"] == "math16_polynomial_factor_roots":
+        answer_contract = (
+            "question_text must use formal LaTeX delimiters. correct_answer must include roots "
+            "(ascending), factorization_latex, and roots_latex. Exact arithmetic; no floats. "
+        )
+    elif task["oracle_type"] == "math16_exact_rational_expression":
+        answer_contract = (
+            "question_text must use formal LaTeX delimiters. correct_answer must include value "
+            "(irreducible p/q string) and canonical_latex. Exact arithmetic; no floats. "
+        )
+    elif task["oracle_type"] == "math16_radical_simplification":
+        answer_contract = (
+            "question_text must use formal LaTeX delimiters. correct_answer must include coefficient, "
+            "radicand, and canonical_latex. Exact integers only; no floats. "
+        )
+    elif task["oracle_type"] == "polynomial_division_remainder_only":
+        answer_contract = (
+            "question_text must use formal LaTeX delimiters. correct_answer must include only "
+            "remainder and canonical_latex (quotient is not scored). "
+        )
+    elif task["oracle_type"] == "polynomial_factor_parameter_recovery":
+        answer_contract = (
+            "question_text must use formal LaTeX delimiters. factor_order_policy is "
+            "strict_source_template: first factor is fixed as (3x+a). correct_answer must be the "
+            "integer a+2c. Do not redefine parameters after swapping factors. "
+        )
+    elif task["oracle_type"] == "integer_exact":
+        answer_contract = (
+            "question_text must use formal LaTeX delimiters where math appears. "
+            "correct_answer must be a single exact integer. "
+        )
+    elif task["oracle_type"] == "integer_count":
+        answer_contract = (
+            "question_text must use formal LaTeX delimiters where math appears. "
+            "correct_answer must be a JSON-compatible dict with exactly count (int). "
+        )
+    elif task["oracle_type"] == "integer_exact_k":
+        answer_contract = (
+            "question_text must use formal LaTeX delimiters where math appears. "
+            "correct_answer must be a JSON-compatible dict with exactly k (int). "
+        )
+    elif task["oracle_type"] == "exact_fraction_canonical":
+        answer_contract = (
+            "question_text must use formal LaTeX delimiters. correct_answer must include "
+            "numerator, denominator, and canonical_latex for an irreducible fraction. "
+        )
+    elif task["oracle_type"] == "radical_simplification_canonical":
+        answer_contract = (
+            "question_text must use formal LaTeX delimiters. correct_answer must include "
+            "coefficient, radicand, and canonical_latex. "
+        )
+    elif task["oracle_type"] == "compound_radical_result":
+        answer_contract = (
+            "question_text must use formal LaTeX delimiters. correct_answer must include result with "
+            "rational, radical_coefficient (may be +1 or -1), radicand, and canonical_latex. "
+            "Structured comparison is required; do not rely on string-only equality. "
+        )
     return (
         "Write only Python source. Implement def generate(level=1, **kwargs).\n"
         f"Task: {task['task_id']} ({task['domain']}, difficulty level {task['difficulty_level']}).\n"
