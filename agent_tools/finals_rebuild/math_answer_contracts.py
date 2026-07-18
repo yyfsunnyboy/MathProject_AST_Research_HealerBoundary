@@ -435,15 +435,16 @@ COMPOUND_RADICAL_CONTRACT = """Required return schema:
   "question_text": str,
   "correct_answer": {
     "result": {
-      "rational": int,
-      "radical_coefficient": int,
-      "radicand": int,
+      "rational": int,  # int or integer-valued Fraction (denominator 1); non-integral Fraction rejected
+      "radical_coefficient": int,  # same integer boundary as rational
+      "radicand": int,  # same integer boundary as rational
       "canonical_latex": str
     }
   },
   "oracle_payload": dict
 }
-- Structured comparison on (rational, radical_coefficient, radicand). Accepts +1/-1 coefficients. Not string-only."""
+- Structured comparison on (rational, radical_coefficient, radicand). Accepts +1/-1 coefficients. Not string-only.
+- Integer-valued Fraction values are normalized to int at the JSON-safe / oracle boundary; non-integral Fraction is rejected."""
 
 CONTRACTS: Mapping[str, str] = {
     "radical_simplification": RADICAL_SIMPLIFICATION_CONTRACT,

@@ -81,6 +81,30 @@ def _integer(value: Any, name: str) -> int:
     return value
 
 
+def coerce_exact_int(value: Any, name: str = "value") -> int:
+    """Accept int or integer-valued Fraction; reject non-integral Fraction."""
+    if isinstance(value, bool):
+        raise ValueError(f"{name} must be an integer")
+    if isinstance(value, int):
+        return value
+    if isinstance(value, Fraction):
+        if value.denominator != 1:
+            raise ValueError(f"{name} must be an integer (got non-integral Fraction {value})")
+        return int(value.numerator)
+    raise ValueError(f"{name} must be an integer")
+
+
+def json_safe_default(obj: Any) -> Any:
+    """JSON boundary: integer-valued Fraction -> int; never coerce non-integral Fraction."""
+    if isinstance(obj, Fraction):
+        if obj.denominator == 1:
+            return int(obj.numerator)
+        raise TypeError(
+            f"Object of type Fraction is not JSON serializable for non-integer value {obj}"
+        )
+    raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
+
+
 def _as_fraction(value: Any) -> Fraction:
     if isinstance(value, bool):
         raise ValueError("boolean is not a number")
@@ -100,9 +124,9 @@ def normalize_compound_radical(value: Any) -> tuple[int, int, int]:
     payload = value.get("result", value)
     if not isinstance(payload, dict):
         raise ValueError("compound radical payload must be a dict")
-    rational = _integer(payload["rational"], "rational")
-    coeff = _integer(payload["radical_coefficient"], "radical_coefficient")
-    radicand = _integer(payload["radicand"], "radicand")
+    rational = coerce_exact_int(payload["rational"], "rational")
+    coeff = coerce_exact_int(payload["radical_coefficient"], "radical_coefficient")
+    radicand = coerce_exact_int(payload["radicand"], "radicand")
     if radicand <= 0:
         raise ValueError("radicand must be positive")
     if coeff == 0:

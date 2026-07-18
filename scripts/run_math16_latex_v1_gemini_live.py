@@ -181,7 +181,18 @@ def verify_freeze_consistency() -> dict[str, Any]:
 def _execute_generate_all_ops(source: str, timeout: float = 3.0) -> tuple[str, Any, str | None]:
     """Execute generate with full domain Ops injected (Math16 Ab2d-safe; runner-local)."""
     wrapper = """import json, sys
+from fractions import Fraction
 source = sys.stdin.read()
+
+def json_safe_default(obj):
+    if isinstance(obj, Fraction):
+        if obj.denominator == 1:
+            return int(obj.numerator)
+        raise TypeError(
+            f"Object of type Fraction is not JSON serializable for non-integer value {obj}"
+        )
+    raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
+
 try:
     from core.prompts.domain_function_library import FractionOps, IntegerOps, PolynomialOps, RadicalOps
     ns = {
@@ -192,11 +203,17 @@ try:
         'RadicalOps': RadicalOps,
     }
     exec(compile(source, 'candidate.py', 'exec'), ns)
-    print(json.dumps({'ok': True, 'value': ns['generate']()}, ensure_ascii=False))
+    print(json.dumps({'ok': True, 'value': ns['generate']()}, ensure_ascii=False, default=json_safe_default))
 except BaseException as exc:
     print(json.dumps({'ok': False, 'type': type(exc).__name__, 'message': str(exc)}))
 """
-    environment = os.environ | {"PYTHONUTF8": "1", "PYTHONIOENCODING": "utf-8"}
+    environment = os.environ | {
+        "PYTHONUTF8": "1",
+        "PYTHONIOENCODING": "utf-8",
+        "PYTHONPATH": os.pathsep.join(
+            [str(ROOT)] + ([os.environ["PYTHONPATH"]] if os.environ.get("PYTHONPATH") else [])
+        ),
+    }
     proc = subprocess.Popen(
         [sys.executable, "-X", "utf8", "-c", wrapper],
         stdin=subprocess.PIPE,
@@ -206,6 +223,7 @@ except BaseException as exc:
         encoding="utf-8",
         errors="replace",
         env=environment,
+        cwd=str(ROOT),
     )
     try:
         stdout, stderr = proc.communicate(source, timeout=timeout)
