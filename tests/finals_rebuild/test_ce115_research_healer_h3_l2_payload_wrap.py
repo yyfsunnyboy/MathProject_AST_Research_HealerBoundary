@@ -73,7 +73,7 @@ def test_rule_id_and_priority():
     assert RULE_ID == RULE
     assert PRIORITY == 100
     assert RULE in RULE_ALLOWLIST
-    assert RULE_ALLOWLIST == (RULE,)
+    assert RULE_ALLOWLIST[0] == RULE
 
 
 def test_radical_ab1_evaluator_before_failure_after_pass():

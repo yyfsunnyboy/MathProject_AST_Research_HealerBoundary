@@ -45,9 +45,34 @@ from agent_tools.finals_rebuild.ce115_research_healer_rules_l2 import (
     is_applicable as _l2_is_applicable,
     is_triggered as _l2_is_triggered,
 )
+from agent_tools.finals_rebuild.ce115_research_healer_rules_l2_kwargs_bag_inline import (
+    LAYER as _L2_KWARGS_LAYER,
+    PRIORITY as _L2_KWARGS_PRIORITY,
+    RULE_ID as L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM,
+    apply as _l2_kwargs_apply,
+    is_applicable as _l2_kwargs_is_applicable,
+    is_triggered as _l2_kwargs_is_triggered,
+)
+from agent_tools.finals_rebuild.ce115_research_healer_rules_l2_json_dumps_unwrap import (
+    LAYER as _L2_DUMPS_LAYER,
+    PRIORITY as _L2_DUMPS_PRIORITY,
+    RULE_ID as L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP,
+    apply as _l2_dumps_apply,
+    is_applicable as _l2_dumps_is_applicable,
+    is_triggered as _l2_dumps_is_triggered,
+)
 
 # Production allowlist — audit-approved L2 only. L1 is paused.
-RULE_ALLOWLIST: tuple[str, ...] = (L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP,)
+# Order in this tuple is registration order; execution sorts by ascending priority.
+# Gate-aligned priorities: payload-wrap(100) → kwargs-bag(110) → dumps-unwrap(120).
+RULE_ALLOWLIST: tuple[str, ...] = (
+    L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP,
+    L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM,
+    L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP,
+)
+
+# Chained multi-rule repair budget (explicit; DEFAULT_MAX_PASSES remains 1 for single-pass Ab3).
+RECOMMENDED_CHAIN_MAX_PASSES: int = len(RULE_ALLOWLIST)
 
 FORBIDDEN_LEGACY_IMPORTS: frozenset[str] = frozenset(
     {
@@ -99,6 +124,22 @@ RULE_REGISTRY: dict[str, _RegisteredRule] = {
         is_applicable=_l2_is_applicable,
         is_triggered=_l2_is_triggered,
         apply=_l2_apply,
+    ),
+    L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM: _RegisteredRule(
+        rule_id=L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM,
+        layer=_L2_KWARGS_LAYER,
+        priority=_L2_KWARGS_PRIORITY,
+        is_applicable=_l2_kwargs_is_applicable,
+        is_triggered=_l2_kwargs_is_triggered,
+        apply=_l2_kwargs_apply,
+    ),
+    L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP: _RegisteredRule(
+        rule_id=L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP,
+        layer=_L2_DUMPS_LAYER,
+        priority=_L2_DUMPS_PRIORITY,
+        is_applicable=_l2_dumps_is_applicable,
+        is_triggered=_l2_dumps_is_triggered,
+        apply=_l2_dumps_apply,
     ),
 }
 
@@ -199,6 +240,7 @@ def _any_rule_would_change(
 def _build_pass_provenance(
     *,
     pass_index: int,
+    chain_position: int | None,
     checked: Sequence[str],
     selected_id: str | None,
     selected_priority: int | None,
@@ -213,6 +255,7 @@ def _build_pass_provenance(
     if selected_outcome is not None:
         return PassProvenance(
             pass_index=pass_index,
+            chain_position=chain_position,
             candidate_rules_checked=tuple(checked),
             selected_rule_id=selected_id,
             selection_priority=selected_priority,
@@ -229,6 +272,7 @@ def _build_pass_provenance(
         )
     return PassProvenance(
         pass_index=pass_index,
+        chain_position=None,
         candidate_rules_checked=tuple(checked),
         selected_rule_id=None,
         selection_priority=None,
@@ -267,6 +311,7 @@ def _finish(
         if last.final_status != final_status:
             provenance[-1] = PassProvenance(
                 pass_index=last.pass_index,
+                chain_position=last.chain_position,
                 candidate_rules_checked=last.candidate_rules_checked,
                 selected_rule_id=last.selected_rule_id,
                 selection_priority=last.selection_priority,
@@ -364,6 +409,7 @@ def run_research_healer(
         provenance.append(
             _build_pass_provenance(
                 pass_index=0,
+                chain_position=None,
                 checked=(),
                 selected_id=None,
                 selected_priority=None,
@@ -390,6 +436,7 @@ def run_research_healer(
         )
 
     changed_any = False
+    chain_change_count = 0
     for pass_index in range(max_passes):
         before = current
         before_hash = sha256_text(before)
@@ -399,6 +446,7 @@ def run_research_healer(
         selected_outcome: RuleOutcome | None = None
         stopped_after_change = False
         pass_changed = False
+        pass_chain_position: int | None = None
         pass_stop_reason: str | None = "no_candidate_selected"
         pass_validation: dict[str, Any] = make_parse_validation(before)
 
@@ -489,6 +537,7 @@ def run_research_healer(
                 provenance.append(
                     _build_pass_provenance(
                         pass_index=pass_index,
+                        chain_position=None,
                         checked=checked,
                         selected_id=selected_id,
                         selected_priority=selected_priority,
@@ -518,6 +567,8 @@ def run_research_healer(
                 current = new_source
                 pass_changed = True
                 changed_any = True
+                chain_change_count += 1
+                pass_chain_position = chain_change_count
                 stopped_after_change = True
                 selected_id = rule.rule_id
                 selected_priority = rule.priority
@@ -574,6 +625,7 @@ def run_research_healer(
         provenance.append(
             _build_pass_provenance(
                 pass_index=pass_index,
+                chain_position=pass_chain_position,
                 checked=checked,
                 selected_id=selected_id,
                 selected_priority=selected_priority,
@@ -741,4 +793,4 @@ def iter_exploratory_cases(manifest: Mapping[str, Any]) -> list[dict[str, Any]]:
 
 def experimental_allowlist() -> tuple[str, ...]:
     """Explicit allowlist for paused experimental rules (tests / probes only)."""
-    return (L1_COMMENT_ONLY_IF_INSERT_PASS, L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP)
+    return (L1_COMMENT_ONLY_IF_INSERT_PASS, *RULE_ALLOWLIST)

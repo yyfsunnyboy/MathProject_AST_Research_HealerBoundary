@@ -1,0 +1,49 @@
+{
+  "audit_id": "ce115_rule_promotion_audit_01",
+  "real_model_calls": 0,
+  "audited_at_note": "Promotion from experimental_candidate after held-out regression",
+  "rules": [
+    {
+      "rule_id": "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
+      "decision": "promote_to_production",
+      "prior_status": "experimental_candidate",
+      "evidence_dir": "docs/experiments/analysis/ce115_exam_ext_contract_aligned_v2/experimental_kwargs_bag_inline_01",
+      "guard_completeness": "pass",
+      "safety_argument": "pass",
+      "heldout_52": {
+        "regression_pass": true,
+        "pass_misfires": 0,
+        "other_fail_misfires": 0,
+        "intended_target_trigger": "v2 qwen4b 113-10 Ab2d only"
+      },
+      "generality_self_check": true,
+      "concerns": [],
+      "positioning": "frozen-oracle-assisted deterministic structural repair (same class as L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP)",
+      "reason": "Guards are structure-only with unique covering-bag fail-closed uniqueness; held-out clean; no task_id/numerics/snippets."
+    },
+    {
+      "rule_id": "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP",
+      "decision": "promote_to_production",
+      "prior_status": "experimental_candidate",
+      "evidence_dir": "docs/experiments/analysis/ce115_exam_ext_contract_aligned_v2/experimental_json_dumps_unwrap_01",
+      "guard_completeness": "pass",
+      "safety_argument": "pass",
+      "heldout_52": {
+        "regression_pass": true,
+        "pass_misfires": 0,
+        "other_fail_misfires": 0,
+        "same_pattern_expected": 1
+      },
+      "generality_self_check": true,
+      "concerns": [],
+      "positioning": "contract-shape structural repair (oracle-free unwrap)",
+      "reason": "json.dumps around correct_answer is always the wrong return type under CE115 contract; transform only removes wrapper; held-out clean."
+    }
+  ],
+  "production_allowlist_after": [
+    "L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP",
+    "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
+    "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP"
+  ],
+  "guards_not_loosened": true
+}

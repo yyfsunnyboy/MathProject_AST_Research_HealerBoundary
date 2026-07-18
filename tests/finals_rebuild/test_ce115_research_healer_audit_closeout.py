@@ -93,12 +93,12 @@ COMPANION_REQUIRED_FIELDS = (
 
 
 def test_production_allowlist_only_approved_l2():
-    assert RULE_ALLOWLIST == (L2_ID,)
-    assert set(RULE_REGISTRY) == {L2_ID}
+    assert L2_ID in RULE_ALLOWLIST
+    assert set(RULE_REGISTRY) == set(RULE_ALLOWLIST)
     assert "L1_COMMENT_ONLY_IF_INSERT_PASS" in EXPERIMENTAL_RULE_REGISTRY
     assert "L1_COMMENT_ONLY_IF_INSERT_PASS" not in RULE_ALLOWLIST
     manifest = load_regression_manifest(MANIFEST_PATH)
-    assert manifest["allowlist_expected"] == [L2_ID]
+    assert manifest["allowlist_expected"] == list(RULE_ALLOWLIST)
     assert "fail_exact_ab2d_l1" not in {
         c["case_id"] for c in iter_manifest_cases(manifest)
     }

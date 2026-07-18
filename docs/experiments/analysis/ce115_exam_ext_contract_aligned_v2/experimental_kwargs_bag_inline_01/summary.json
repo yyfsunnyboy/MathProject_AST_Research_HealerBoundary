@@ -1,0 +1,215 @@
+{
+  "real_model_calls": 0,
+  "rule_id": "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
+  "production_allowlist_modified": false,
+  "experimental_status": "experimental_candidate",
+  "generality_self_check": {
+    "no_task_id_in_guards": true,
+    "no_exam_numerics_in_guards": true,
+    "no_candidate_snippet_in_guards": true,
+    "unique_alternative_definition": "Available parameter bags := {context.frozen}. A bag covers static key-set S iff S ⊆ keys(bag). Trigger requires |covering bags| == 1.",
+    "note": "Guards remain complete if any single-task identifiers are removed; they only mention AST shape + context.frozen coverage uniqueness."
+  },
+  "target_113_10": {
+    "cell_id": "qwen3_5_4b__ce115_ext_113_10_factorization_l1__ab2d__seed_2026071301",
+    "before_status": "RUNTIME_FAILURE",
+    "rule_result": {
+      "rule_id": "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
+      "layer": "L2",
+      "guards": {
+        "parse_ok": true,
+        "single_generate": true,
+        "exactly_one_kwargs_empty_bag_load": true,
+        "bag_name": "frozen_params",
+        "kwargs_key": "frozen",
+        "static_keys_read": [
+          "expression",
+          "required_form"
+        ],
+        "bag_reads_static_only": true,
+        "available_param_bags": [
+          "context.frozen"
+        ],
+        "covering_bags": [
+          "context.frozen"
+        ],
+        "unique_covering_bag": true,
+        "frozen_covers_keys": true,
+        "frozen_values_embeddable": true,
+        "correct_answer_present": true
+      },
+      "transform": "replace_kwargs_get_empty_bag_rhs_with_literal_unique_covering_param_bag",
+      "applicable": true,
+      "triggered": true,
+      "changed": true,
+      "reason": "inlined_unique_covering_param_bag",
+      "before_hash": "83902452cc616115ac671ed0b06375e6f824db935487c353c0da41a79c2291f6",
+      "after_hash": "4d05a9ff1a3a418bf05a659d1296d8a89912ceab892b8e2d1f4317b65d496394",
+      "validation": {
+        "rule_id": "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
+        "production_approved": false,
+        "status": "experimental_candidate_draft",
+        "research_positioning": "frozen-oracle-assisted deterministic structural repair",
+        "oracle_assisted": true,
+        "oracle_free_claimed": false,
+        "reparse_ok": true,
+        "correct_answer_before": {
+          "dump": "Call(func=Attribute(value=Name(id='json', ctx=Load()), attr='dumps', ctx=Load()), args=[Name(id='correct_answer', ctx=Load())], keywords=[])",
+          "segment": "json.dumps(correct_answer)"
+        },
+        "correct_answer_after": {
+          "dump": "Call(func=Attribute(value=Name(id='json', ctx=Load()), attr='dumps', ctx=Load()), args=[Name(id='correct_answer', ctx=Load())], keywords=[])",
+          "segment": "json.dumps(correct_answer)"
+        },
+        "correct_answer_guard": true,
+        "inlined_keys": [
+          "expression",
+          "required_form"
+        ],
+        "kwargs_key_replaced": "frozen",
+        "bag_name": "frozen_params",
+        "frozen_oracle_fields_read": {
+          "keys": [
+            "expression",
+            "required_form"
+          ],
+          "source": "context.frozen"
+        }
+      },
+      "app_reason": "all_transform_guards_ready",
+      "trig_reason": "all_transform_guards_ready"
+    },
+    "before_layers_report_only": {
+      "evaluator_rerun": true,
+      "outcome": "runtime_failure",
+      "g1": "PASS",
+      "g2": "FAIL",
+      "g2_exception": "KeyError",
+      "g2_message": "'expression'",
+      "g3": "NOT_ASSESSED",
+      "g4": "NOT_ASSESSED"
+    },
+    "after_layers_report_only": {
+      "evaluator_rerun": true,
+      "outcome": "answer_incorrect",
+      "g1": "PASS",
+      "g2": "PASS",
+      "g2_exception": null,
+      "g2_message": null,
+      "g3": "PASS",
+      "g4": "FAIL"
+    },
+    "rescue_to_pass": false
+  },
+  "heldout_regression": {
+    "denominator_note": "v1 Gemini18 + v1 Qwen18 + v2 Gemini8 + v2 Qwen8 (=52 artifact cells); empty candidates skipped",
+    "n_cells_seen": 52,
+    "n_pass": 32,
+    "n_fail_with_candidate": 19,
+    "n_skipped_empty": 1,
+    "pass_triggered_or_changed": [],
+    "other_fail_triggered_or_changed": [],
+    "target_row": [
+      {
+        "cell_id": "qwen3_5_4b__ce115_ext_113_10_factorization_l1__ab2d__seed_2026071301",
+        "task_id": "ce115_ext_113_10_factorization_l1",
+        "condition": "ab2d",
+        "model": "qwen3.5:4b",
+        "version": "v1",
+        "evaluator_status": "PASSED",
+        "is_pass": true,
+        "infrastructure_valid": true,
+        "skipped": false,
+        "applicable": false,
+        "triggered": false,
+        "changed": false,
+        "reason": "not_applicable_structure",
+        "trig_reason": "not_applicable_structure",
+        "before_hash": "5df3d0ed75a4fe1ad17306856a2ec04706fe44dff3e98e15c581ccc1053e4d33",
+        "after_hash": "5df3d0ed75a4fe1ad17306856a2ec04706fe44dff3e98e15c581ccc1053e4d33"
+      },
+      {
+        "cell_id": "qwen3_5_4b__ce115_ext_113_10_factorization_l1__ab2d__seed_2026071301",
+        "task_id": "ce115_ext_113_10_factorization_l1",
+        "condition": "ab2d",
+        "model": "qwen3.5:4b",
+        "version": "v2",
+        "evaluator_status": "RUNTIME_FAILURE",
+        "is_pass": false,
+        "infrastructure_valid": true,
+        "skipped": false,
+        "applicable": true,
+        "triggered": true,
+        "changed": true,
+        "reason": "inlined_unique_covering_param_bag",
+        "trig_reason": "all_transform_guards_ready",
+        "before_hash": "83902452cc616115ac671ed0b06375e6f824db935487c353c0da41a79c2291f6",
+        "after_hash": "4d05a9ff1a3a418bf05a659d1296d8a89912ceab892b8e2d1f4317b65d496394"
+      }
+    ],
+    "regression_pass": true,
+    "triggered_count": 1,
+    "changed_count": 1
+  },
+  "diagnostic_113_11": {
+    "status": "diagnostic_only_not_allowlist",
+    "cell_id": "qwen3_5_4b__ce115_ext_113_11_rationalize_l1__ab2d__seed_2026071301",
+    "before_outcome": "runtime_failure",
+    "names_used_without_binding": [
+      "RadicalOps"
+    ],
+    "top_level_imports_dump": [
+      "Import(names=[alias(name='json')])",
+      "ImportFrom(module='fractions', names=[alias(name='Fraction')], level=0)",
+      "ImportFrom(module='decimal', names=[alias(name='Decimal'), alias(name='getcontext')], level=0)"
+    ],
+    "radicalops_imported": false,
+    "radical_calls": [
+      {
+        "attr": "rationalize_linear_denominator",
+        "nargs": 4,
+        "keywords": []
+      }
+    ],
+    "expected_signature": "RadicalOps.rationalize_linear_denominator(numerator, denom_rational, denom_radical_coeff, radicand) -> tuple[Fraction, Fraction, int]",
+    "call_arity_matches": true,
+    "missing_fractionops_to_exact_in_original": true,
+    "after_import_only": {
+      "outcome": "runtime_failure",
+      "note": "import RadicalOps+FractionOps prepended; no other edits"
+    },
+    "after_import_and_to_exact_diagnostic_rewrite": {
+      "outcome": "passed",
+      "note": "DIAGNOSTIC ONLY — uses exam-specific literals; NOT a general rule. Shows whether API call shape + to_exact can satisfy oracle when wiring is complete."
+    },
+    "conclusion": "Original failure is NameError on RadicalOps (missing import). Call arity for rationalize_linear_denominator is structurally correct (4 args). Original also omits required FractionOps.to_exact. Import-only is insufficient for a general safe rule without also handling to_exact and without exam-specific hardcoding; no general import rule proposed this round."
+  },
+  "unrepairable": {
+    "114-08_Ab2d": {
+      "verdict": "essentially_unrepairable_deterministic",
+      "machine_status": "RUNTIME_FAILURE",
+      "reviewed_mechanism": "model_assembly_failure + tool_routing_gap + code_bloat",
+      "reasons": [
+        "Candidate defines a local RadicalOps class that shadows the production API.",
+        "Local simplify_term / normalize_term_list reimplement incorrect algorithms with non-terminating/ambiguous control flow.",
+        "Repair would require understanding and replacing invented domain logic — not a local structural rewrite.",
+        "Beyond deterministic Healer scope (would be semantic/model-intent reconstruction)."
+      ]
+    },
+    "114-02_Ab2d": {
+      "verdict": "essentially_unrepairable_deterministic",
+      "machine_status": "PARSE_MINOR",
+      "reviewed_mechanism": "model_assembly_failure + code_bloat",
+      "reasons": [
+        "Invalid syntax in except-fallback branch (malformed ternary/if).",
+        "Same class as withdrawn L1 comment-only-if precedent: restoring parse does not guarantee missing math/assembly is complete or no-op-safe.",
+        "Fallback path invents sympy/manual coefficient logic; cannot deterministically know intended branch semantics."
+      ]
+    }
+  },
+  "boundary_conclusion": {
+    "advanced": true,
+    "status": "experimental_candidate",
+    "note": "General kwargs-empty-bag inline rule passed held-out no-op regression and changed the target cell. NOT added to production allowlist; awaits human review."
+  }
+}

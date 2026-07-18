@@ -31,6 +31,7 @@ RULE_PROTOCOL_FIELDS: tuple[str, ...] = (
 # H5 frozen provenance — every pass record must expose these keys.
 PROVENANCE_FIELDS: tuple[str, ...] = (
     "pass_index",
+    "chain_position",
     "candidate_rules_checked",
     "selected_rule_id",
     "selection_priority",
@@ -69,6 +70,19 @@ FROZEN_EXECUTION_POLICY: dict[str, Any] = {
     "consumer_may_use_output_when_max_passes_exceeded": False,
     "forbid_legacy_pipelines": True,
     "production_allowlist_only_approved_rules": True,
+    # Chained repair (multi-rule, multi-pass). Default max_passes stays 1;
+    # callers that intend a chain must set max_passes >= len(allowlist).
+    "chained_repair": {
+        "ordering": "fixed_priority_ascending_aligned_to_outer_gates",
+        "gate_alignment": "G2_wiring_before_G3_G4_shape",
+        "one_change_per_pass": True,
+        "revalidate_after_each_change": True,
+        "recommended_max_passes": "len(production_allowlist)",
+        "chain_position_semantics": (
+            "1-based index among passes that changed the source in this run; "
+            "None when the pass did not apply a changing rule"
+        ),
+    },
 }
 
 ALLOWED_LAYERS: frozenset[str] = frozenset(
@@ -135,6 +149,7 @@ class PassProvenance:
     """Complete H5 provenance for one runner pass."""
 
     pass_index: int
+    chain_position: int | None
     candidate_rules_checked: tuple[str, ...]
     selected_rule_id: str | None
     selection_priority: int | None
@@ -192,6 +207,7 @@ def rule_outcome_to_dict(outcome: RuleOutcome) -> dict[str, Any]:
 def provenance_to_dict(prov: PassProvenance) -> dict[str, Any]:
     return {
         "pass_index": prov.pass_index,
+        "chain_position": prov.chain_position,
         "candidate_rules_checked": list(prov.candidate_rules_checked),
         "selected_rule_id": prov.selected_rule_id,
         "selection_priority": prov.selection_priority,
@@ -283,6 +299,14 @@ def validate_provenance(prov: PassProvenance) -> None:
             raise RuleProtocolError(f"missing provenance field: {name}")
     if not isinstance(prov.pass_index, int) or prov.pass_index < 0:
         raise RuleProtocolError("pass_index must be a non-negative int")
+    if prov.chain_position is not None and (
+        not isinstance(prov.chain_position, int) or prov.chain_position < 1
+    ):
+        raise RuleProtocolError("chain_position must be None or an int >= 1")
+    if prov.changed and prov.chain_position is None:
+        raise RuleProtocolError("changed=True requires chain_position >= 1")
+    if (not prov.changed) and prov.chain_position is not None:
+        raise RuleProtocolError("chain_position requires changed=True")
     if not isinstance(prov.candidate_rules_checked, tuple):
         raise RuleProtocolError("candidate_rules_checked must be a tuple")
     for rule_id in prov.candidate_rules_checked:

@@ -81,6 +81,7 @@ def test_frozen_execution_policy_constants():
     assert FROZEN_EXECUTION_POLICY["forbid_legacy_pipelines"] is True
     assert set(PROVENANCE_FIELDS) == {
         "pass_index",
+        "chain_position",
         "candidate_rules_checked",
         "selected_rule_id",
         "selection_priority",
@@ -95,6 +96,7 @@ def test_frozen_execution_policy_constants():
         "stopped_after_change",
         "final_status",
     }
+    assert "chained_repair" in FROZEN_EXECUTION_POLICY
 
 
 def test_single_rule_changed_stops_pass():
@@ -291,7 +293,7 @@ def test_h3_l2_repair_to_pass_not_regressed():
         max_passes=DEFAULT_MAX_PASSES,
     )
     assert L2 in RULE_ALLOWLIST
-    assert RULE_ALLOWLIST == (L2,)
+    assert RULE_ALLOWLIST[0] == L2
     assert result.final_status == "changed"
     assert result.real_model_calls == 0
     after, _, _ = classify_response(

@@ -1,0 +1,242 @@
+{
+  "real_model_calls": 0,
+  "rule_id": "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP",
+  "production_allowlist_modified": false,
+  "experimental_status": "experimental_candidate",
+  "forensic_g4": {
+    "correct_answer_runtime_type": "str",
+    "correct_answer_raw": "{\"factors\": [{\"x_coefficient\": -5, \"constant\": 2}, {\"x_coefficient\": 15, \"constant\": -8}]}",
+    "json_loads_ok": true,
+    "parsed_dict": {
+      "factors": [
+        {
+          "x_coefficient": -5,
+          "constant": 2
+        },
+        {
+          "x_coefficient": 15,
+          "constant": -8
+        }
+      ]
+    },
+    "expected_answer": {
+      "factors": [
+        {
+          "x_coefficient": 5,
+          "constant": -2
+        },
+        {
+          "x_coefficient": -15,
+          "constant": 8
+        }
+      ]
+    },
+    "oracle_on_raw_string_or_value": {
+      "oracle_type": "exam_factorization_common_binomial",
+      "is_correct": false,
+      "expected_answer": {
+        "factors": [
+          {
+            "x_coefficient": 5,
+            "constant": -2
+          },
+          {
+            "x_coefficient": -15,
+            "constant": 8
+          }
+        ]
+      },
+      "submitted_answer": "{\"factors\": [{\"x_coefficient\": -5, \"constant\": 2}, {\"x_coefficient\": 15, \"constant\": -8}]}",
+      "error": null
+    },
+    "oracle_on_parsed_dict": {
+      "oracle_type": "exam_factorization_common_binomial",
+      "is_correct": true,
+      "expected_answer": {
+        "factors": [
+          {
+            "x_coefficient": 5,
+            "constant": -2
+          },
+          {
+            "x_coefficient": -15,
+            "constant": 8
+          }
+        ]
+      },
+      "submitted_answer": {
+        "factors": [
+          {
+            "x_coefficient": -5,
+            "constant": 2
+          },
+          {
+            "x_coefficient": 15,
+            "constant": -8
+          }
+        ]
+      },
+      "error": null
+    },
+    "error_value_path": {
+      "expression_source": "frozen_params['expression'] (inlined by prior experimental rule)",
+      "api_chain": [
+        "PolynomialOps.coeffs_from_py_expression(expression_str, var='x')",
+        "PolynomialOps.factor_quadratic_exact(a, b, c)",
+        "build factor_dict_1/2 from API list",
+        "correct_answer = {'factors': [...]}",
+        "return correct_answer=json.dumps(correct_answer)  # STRING WRAP"
+      ],
+      "api_factors_observed": [
+        {
+          "x_coefficient": -5,
+          "constant": 2
+        },
+        {
+          "x_coefficient": 15,
+          "constant": -8
+        }
+      ],
+      "expected_canonical_factors": [
+        {
+          "x_coefficient": 5,
+          "constant": -2
+        },
+        {
+          "x_coefficient": -15,
+          "constant": 8
+        }
+      ],
+      "algebraic_note": "Predicted factors equal expected under overall sign flip of both linear factors; oracle accepts that equivalence when submitted_answer is a dict."
+    },
+    "failure_class": "a_format_wrapping",
+    "failure_label": "格式/包裝層錯誤：值（經 json.loads + 符號翻轉等價）通過 oracle，但 correct_answer 以 json.dumps 字串回傳導致 oracle 拒收",
+    "layers_before_unwrap": {
+      "evaluator_rerun": true,
+      "outcome": "answer_incorrect",
+      "g1": "PASS",
+      "g2": "PASS",
+      "g3": "PASS",
+      "g4": "FAIL",
+      "g4_reason": "oracle_mismatch",
+      "expected_answer": {
+        "factors": [
+          {
+            "x_coefficient": 5,
+            "constant": -2
+          },
+          {
+            "x_coefficient": -15,
+            "constant": 8
+          }
+        ]
+      },
+      "mismatch_reason": "oracle_mismatch"
+    }
+  },
+  "failure_nature": {
+    "class": "a_format_wrapping",
+    "label": "格式/包裝層錯誤：值（經 json.loads + 符號翻轉等價）通過 oracle，但 correct_answer 以 json.dumps 字串回傳導致 oracle 拒收",
+    "evidence": [
+      "runtime correct_answer type is str via json.dumps",
+      "oracle rejects str",
+      "oracle accepts json.loads(str) dict (sign-flip equivalent)",
+      "G3 PASS / G4 FAIL before unwrap"
+    ]
+  },
+  "target_chain": {
+    "input": "experimental_kwargs_bag_inline_01 repaired candidate",
+    "rule_result": {
+      "rule_id": "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP",
+      "layer": "L2",
+      "guards": {
+        "parse_ok": true,
+        "single_generate": true,
+        "return_dict_present": true,
+        "correct_answer_present": true,
+        "correct_answer_is_json_dumps": true,
+        "dumps_single_positional_arg": true,
+        "dumps_kwargs_allowed_only": true,
+        "import_json_present": true,
+        "inner_expr_kind": "Name"
+      },
+      "transform": "unwrap_json_dumps_around_return_correct_answer",
+      "applicable": true,
+      "triggered": true,
+      "changed": true,
+      "reason": "unwrapped_json_dumps_correct_answer",
+      "before_hash": "4d05a9ff1a3a418bf05a659d1296d8a89912ceab892b8e2d1f4317b65d496394",
+      "after_hash": "0dfdb8e77440afd7cf2ecf52ab0cee1874c319ad05509cb14ccbb8d81dc68671",
+      "validation": {
+        "rule_id": "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP",
+        "production_approved": false,
+        "status": "experimental_candidate_draft",
+        "research_positioning": "contract-shape structural repair (unwrap stringified correct_answer)",
+        "oracle_assisted": false,
+        "oracle_free_claimed": true,
+        "reparse_ok": true,
+        "post_unwrap_clean": true,
+        "correct_answer_present_after": true,
+        "inner_expr_kind": "Name",
+        "unwrapped_to": "Name(id='correct_answer', ctx=Load())"
+      },
+      "app_reason": "all_transform_guards_ready",
+      "trig_reason": "all_transform_guards_ready"
+    },
+    "layers_after_unwrap_report_only": {
+      "evaluator_rerun": true,
+      "outcome": "passed",
+      "g1": "PASS",
+      "g2": "PASS",
+      "g3": "PASS",
+      "g4": "PASS",
+      "g4_reason": "oracle_match",
+      "expected_answer": null,
+      "mismatch_reason": null
+    },
+    "rescue_to_pass": true
+  },
+  "heldout_regression": {
+    "denominator_note": "v1 Gemini18 + v1 Qwen18 + v2 Gemini8 + v2 Qwen8 (=52); empty skipped",
+    "n_cells_seen": 51,
+    "n_pass": 32,
+    "n_fail_with_candidate": 19,
+    "n_skipped_empty": 1,
+    "pass_triggered_or_changed": [],
+    "other_fail_triggered_or_changed": [],
+    "same_pattern_expected_triggers": [
+      {
+        "cell_id": "qwen3_5_4b__ce115_ext_113_10_factorization_l1__ab2d__seed_2026071301",
+        "task_id": "ce115_ext_113_10_factorization_l1",
+        "condition": "ab2d",
+        "model": "qwen3.5:4b",
+        "version": "v2",
+        "evaluator_status": "RUNTIME_FAILURE",
+        "is_pass": false,
+        "skipped": false,
+        "applicable": true,
+        "triggered": true,
+        "changed": true,
+        "reason": "unwrapped_json_dumps_correct_answer",
+        "before_hash": "83902452cc616115ac671ed0b06375e6f824db935487c353c0da41a79c2291f6",
+        "after_hash": "c2f8eaaf3e705aac89cf98af767d6c81cd62376384ca9471b9acb7731e8b882a"
+      }
+    ],
+    "regression_pass": true,
+    "triggered_count": 1,
+    "changed_count": 1
+  },
+  "generality_self_check": {
+    "no_task_id_in_guards": true,
+    "no_exam_numerics_in_guards": true,
+    "no_candidate_snippet_in_guards": true,
+    "unique_alternative_definition": "Trigger iff return correct_answer value AST is json.dumps(<expr>) with one positional arg and only constant dumps kwargs; json imported.",
+    "note": "Guards remain complete without any single-task identifiers."
+  },
+  "boundary_conclusion": {
+    "advanced": true,
+    "status": "experimental_candidate",
+    "final_113_10": "multi_layer_partially_repairable_rescue_to_pass",
+    "note": "Layer1 kwargs-empty-bag inline + Layer2 json.dumps unwrap. NOT added to production allowlist; awaits human review."
+  }
+}

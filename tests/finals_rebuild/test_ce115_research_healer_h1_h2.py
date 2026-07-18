@@ -110,6 +110,7 @@ def test_rule_protocol_required_fields():
 def test_provenance_required_fields():
     assert set(PROVENANCE_FIELDS) == {
         "pass_index",
+        "chain_position",
         "candidate_rules_checked",
         "selected_rule_id",
         "selection_priority",
@@ -209,7 +210,11 @@ def test_applicable_triggered_changed_semantics_distinguishable():
 
 def test_math_healer_runner_exports_allowlist_surface():
     assert mhr.RULE_ALLOWLIST == RULE_ALLOWLIST
-    assert RULE_ALLOWLIST == ("L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP",)
+    assert RULE_ALLOWLIST == (
+        "L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP",
+        "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
+        "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP",
+    )
     assert "L1_COMMENT_ONLY_IF_INSERT_PASS" not in RULE_ALLOWLIST
     assert "L1_COMMENT_ONLY_IF_INSERT_PASS" not in RULE_REGISTRY
     assert "L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP" in RULE_REGISTRY
@@ -341,6 +346,8 @@ def test_manifest_schema_and_required_case_fields():
     assert manifest["manifest_id"] == "ce115_research_healer_regression_v1"
     assert manifest["allowlist_expected"] == [
         "L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP",
+        "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
+        "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP",
     ]
     cases = iter_manifest_cases(manifest)
     assert len(cases) >= 5
@@ -467,6 +474,7 @@ def test_protocol_dict_coverage_helpers():
     assert_provenance_field_coverage(
         {
             "pass_index": 0,
+            "chain_position": None,
             "candidate_rules_checked": [],
             "selected_rule_id": None,
             "selection_priority": None,

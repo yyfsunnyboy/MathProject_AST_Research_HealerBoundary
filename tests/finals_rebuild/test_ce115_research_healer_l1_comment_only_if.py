@@ -75,12 +75,12 @@ def test_l1_paused_not_on_production_allowlist():
     assert L1_PRIORITY < L2_PRIORITY
     assert PRODUCTION_APPROVED is False
     assert L1_STATUS == "paused_experimental_draft"
-    assert RULE_ALLOWLIST == (L2_ID,)
+    assert L2_ID in RULE_ALLOWLIST
     assert L1_ID not in RULE_ALLOWLIST
     assert L1_ID not in RULE_REGISTRY
     assert L1_ID in EXPERIMENTAL_RULE_REGISTRY
     ordered = select_allowlisted_rules(allowlist=experimental_allowlist())
-    assert [r.rule_id for r in ordered] == [L1_ID, L2_ID]
+    assert [r.rule_id for r in ordered] == [L1_ID, *RULE_ALLOWLIST]
 
 
 def test_exact_ab2d_before_parse_failure_after_success_minimal_diff():
@@ -199,7 +199,7 @@ def test_l2_repair_to_pass_not_regressed():
 
 def test_cumulative_manifest_production_only():
     manifest = load_regression_manifest(MANIFEST_PATH)
-    assert manifest["allowlist_expected"] == [L2_ID]
+    assert manifest["allowlist_expected"] == list(RULE_ALLOWLIST)
     for case in iter_manifest_cases(manifest):
         source = (FIX / case["source_artifact"]).read_text(encoding="utf-8")
         frozen = json.loads((FIX / case["frozen_artifact"]).read_text(encoding="utf-8"))
