@@ -115,6 +115,36 @@ def build_ab1_prompt(task: dict[str, Any], frozen: dict[str, Any]) -> str:
             "as int or irreducible p/q strings ordered a>b), a (larger root), b (smaller root), and value "
             "(exact linear combination coeff_a*a + coeff_b*b). Exact arithmetic; no floats. "
         )
+    elif task["oracle_type"] == "exam_power_of_same_base":
+        answer_contract = (
+            "correct_answer must be a JSON-compatible dict with exactly base (int) and exponent "
+            "(int or irreducible p/q string). Exact arithmetic; no floats. "
+        )
+    elif task["oracle_type"] == "exam_polynomial_simplify":
+        answer_contract = (
+            "correct_answer must be a JSON-compatible dict with exactly coefficients mapping degree "
+            "strings '2','1','0' to exact ints or irreducible p/q strings. Exact arithmetic; no floats. "
+        )
+    elif task["oracle_type"] == "exam_linear_system_linear_combination":
+        answer_contract = (
+            "correct_answer must be a JSON-compatible dict with exactly x, y, and value "
+            "(ints or irreducible p/q strings). Exact arithmetic; no floats. "
+        )
+    elif task["oracle_type"] == "exam_radical_product_simplified":
+        answer_contract = (
+            "correct_answer must be a JSON-compatible dict with exactly terms: a list of "
+            "{coefficient, radicand} after simplifying squares, merged, sorted by increasing radicand. "
+        )
+    elif task["oracle_type"] == "exam_factorization_common_binomial":
+        answer_contract = (
+            "correct_answer must be a JSON-compatible dict with exactly factors: two "
+            "{x_coefficient, constant} linear factors (order may vary). Exact arithmetic; no floats. "
+        )
+    elif task["oracle_type"] == "exam_rationalize_conjugate":
+        answer_contract = (
+            "correct_answer must be a JSON-compatible dict with exactly a, b, radicand, and value=a+b "
+            "(all ints). Exact arithmetic; no floats. "
+        )
     return (
         "Write only Python source. Implement def generate(level=1, **kwargs).\n"
         f"Task: {task['task_id']} ({task['domain']}, difficulty level {task['difficulty_level']}).\n"
@@ -161,7 +191,7 @@ def _domain_execution_namespace(skill_id: str) -> dict[str, Any]:
     from core.prompts.domain_function_library import FractionOps, IntegerOps, PolynomialOps, RadicalOps
 
     names = {"IntegerOps": IntegerOps, "FractionOps": FractionOps}
-    if skill_id == "radical_simplification":
+    if skill_id in {"radical_simplification", "exam_radical_product_simplified"}:
         names["RadicalOps"] = RadicalOps
     if skill_id in {"polynomial_division_quotient_remainder", "polynomial_division_general", "polynomial_factor_roots"}:
         names["PolynomialOps"] = PolynomialOps

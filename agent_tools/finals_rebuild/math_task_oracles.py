@@ -287,6 +287,13 @@ _DISPATCH: dict[str, Callable[[dict[str, Any], Any], dict[str, Any]]] = {
     "polynomial_factor_roots": evaluate_polynomial_factor_roots,
 }
 
+# 113/114 exam external-validation oracles (held-out; not Healer success denom).
+from agent_tools.finals_rebuild.ce115_exam_external_validation_oracles import (  # noqa: E402
+    EXAM_ORACLE_DISPATCH,
+)
+
+_DISPATCH.update(EXAM_ORACLE_DISPATCH)
+
 
 def evaluate_math_task_oracle(oracle_type: str, oracle_payload: dict[str, Any], submitted_answer: Any) -> dict[str, Any]:
     """Evaluate an answer from immutable task data without importing generator code."""

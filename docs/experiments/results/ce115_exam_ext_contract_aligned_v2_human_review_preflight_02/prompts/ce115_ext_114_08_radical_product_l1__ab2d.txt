@@ -1,0 +1,16 @@
+Write only Python source. Implement def generate(level=1, **kwargs).
+Task: ce115_ext_114_08_radical_product_l1 (junior_high_exam_external_validation, difficulty level 1).
+Task specification: exam_radical_product_simplified.
+Frozen sampled parameters: {"expression": "(2*sqrt(3) + sqrt(6))*sqrt(2)"}
+generate() must return a dict with exactly question_text, correct_answer, and oracle_payload. correct_answer must be a JSON-compatible dict with exactly terms: a list of {coefficient, radicand} after simplifying squares, merged, sorted by increasing radicand. oracle_payload must exactly equal the frozen sampled parameters. Do not use input, files, network, subprocess, Markdown fences, or explanations.
+
+## Clean-incremental GENERIC
+Output complete Python source only. Do not use Markdown fences or explanatory prose. Preserve frozen parameters exactly. Verify that generate() exists. Verify that the return value has exactly the three required top-level keys. Verify field types match the stated contract and that oracle_payload equals the frozen parameters.
+
+## Clean-incremental DOMAIN
+Task-local domain APIs (use only these; signatures match production):
+- `RadicalOps.simplify_term` | import: `core.prompts.domain_function_library` | signature: `(coeff, radicand)` | returns: tuple[exact coefficient, int]  # (outer coeff, square-free radicand) | adoption: required
+  notes: Pulls square factors from radicand into coeff.
+- `RadicalOps.normalize_term_list` | import: `core.prompts.domain_function_library` | signature: `(terms)` | returns: list[{coefficient, radicand}]  # merged, sorted by radicand asc | adoption: required
+  notes: Accepts (c,r) pairs or dicts; coefficients JSON-exact via to_exact.
+Use the listed domain API for each supported core operation, and ensure the returned value contributes to correct_answer. Do not invent APIs. Do not call unrelated APIs unless listed.

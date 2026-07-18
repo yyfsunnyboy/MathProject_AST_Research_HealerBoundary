@@ -1,0 +1,143 @@
+{
+  "matrix": [
+    {
+      "exam": "114-01",
+      "task_id": "ce115_ext_114_01_power_laws_l1",
+      "required_operations": [
+        "parse same-base powers",
+        "add exponents on multiply",
+        "subtract exponents on divide"
+      ],
+      "production_apis": [
+        "IntegerOps.add",
+        "IntegerOps.sub"
+      ],
+      "coverage": "full",
+      "partial_only": false,
+      "forces_algorithm_rewrite": false,
+      "contract_gap": null,
+      "notes": "v1 wrongly listed FractionOps; IntegerOps adoption is optional."
+    },
+    {
+      "exam": "114-02",
+      "task_id": "ce115_ext_114_02_polynomial_simplify_l1",
+      "required_operations": [
+        "expand/simplify polynomial expression",
+        "emit nested coefficients degree map"
+      ],
+      "production_apis": [
+        "PolynomialOps.coeffs_from_py_expression",
+        "PolynomialOps.to_degree_map"
+      ],
+      "coverage": "full",
+      "partial_only": false,
+      "forces_algorithm_rewrite": false,
+      "contract_gap": "BASE must require top-level key coefficients (fixed in Ab1-v2)",
+      "notes": "v1 DOMAIN only FractionOps — coverage gap closed by new PolynomialOps helpers."
+    },
+    {
+      "exam": "114-04",
+      "task_id": "ce115_ext_114_04_linear_system_l1",
+      "required_operations": [
+        "exact 2x2 solve",
+        "evaluate x+2y",
+        "serialize Fraction to int/'p/q'",
+        "avoid illegal signed-denominator strings"
+      ],
+      "production_apis": [
+        "LinearSystemOps.solve_2x2",
+        "LinearSystemOps.evaluate_linear",
+        "FractionOps.from_parts",
+        "FractionOps.to_exact"
+      ],
+      "coverage": "full",
+      "partial_only": false,
+      "forces_algorithm_rewrite": false,
+      "contract_gap": null,
+      "notes": "FractionOps.create removed from DOMAIN; from_parts+to_exact for exact leaves."
+    },
+    {
+      "exam": "114-08",
+      "task_id": "ce115_ext_114_08_radical_product_l1",
+      "required_operations": [
+        "multiply/distribute radical terms",
+        "simplify_term",
+        "merge and sort by radicand"
+      ],
+      "production_apis": [
+        "RadicalOps.simplify_term",
+        "RadicalOps.normalize_term_list"
+      ],
+      "coverage": "full",
+      "partial_only": false,
+      "forces_algorithm_rewrite": false,
+      "contract_gap": null,
+      "notes": "normalize_term_list encodes merge/sort contract."
+    },
+    {
+      "exam": "113-10",
+      "task_id": "ce115_ext_113_10_factorization_l1",
+      "required_operations": [
+        "expand expression to quadratic",
+        "factor into two linear factors"
+      ],
+      "production_apis": [
+        "PolynomialOps.coeffs_from_py_expression",
+        "PolynomialOps.factor_quadratic_exact"
+      ],
+      "coverage": "full",
+      "partial_only": false,
+      "forces_algorithm_rewrite": false,
+      "contract_gap": null,
+      "notes": "Reusable factorization; does not leak exam common binomial."
+    },
+    {
+      "exam": "113-11",
+      "task_id": "ce115_ext_113_11_rationalize_l1",
+      "required_operations": [
+        "multiply by conjugate",
+        "emit a+b*sqrt(r) and value a+b",
+        "JSON serialize exact leaves"
+      ],
+      "production_apis": [
+        "RadicalOps.rationalize_linear_denominator",
+        "FractionOps.to_exact"
+      ],
+      "coverage": "full",
+      "partial_only": false,
+      "forces_algorithm_rewrite": false,
+      "contract_gap": null,
+      "notes": "Reusable rationalization; serialization via to_exact."
+    }
+  ],
+  "all_covered": true,
+  "gaps": [],
+  "v2_task_domain_apis": {
+    "ce115_ext_114_01_power_laws_l1": [
+      "IntegerOps.add",
+      "IntegerOps.sub"
+    ],
+    "ce115_ext_114_02_polynomial_simplify_l1": [
+      "PolynomialOps.coeffs_from_py_expression",
+      "PolynomialOps.to_degree_map"
+    ],
+    "ce115_ext_114_04_linear_system_l1": [
+      "LinearSystemOps.solve_2x2",
+      "LinearSystemOps.evaluate_linear",
+      "FractionOps.from_parts",
+      "FractionOps.to_exact"
+    ],
+    "ce115_ext_114_08_radical_product_l1": [
+      "RadicalOps.simplify_term",
+      "RadicalOps.normalize_term_list"
+    ],
+    "ce115_ext_113_10_factorization_l1": [
+      "PolynomialOps.coeffs_from_py_expression",
+      "PolynomialOps.factor_quadratic_exact"
+    ],
+    "ce115_ext_113_11_rationalize_l1": [
+      "RadicalOps.rationalize_linear_denominator",
+      "FractionOps.to_exact"
+    ]
+  }
+}

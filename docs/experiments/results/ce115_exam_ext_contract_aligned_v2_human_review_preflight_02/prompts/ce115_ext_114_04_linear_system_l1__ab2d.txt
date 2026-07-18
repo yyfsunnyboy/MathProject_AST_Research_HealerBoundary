@@ -1,0 +1,20 @@
+Write only Python source. Implement def generate(level=1, **kwargs).
+Task: ce115_ext_114_04_linear_system_l1 (junior_high_exam_external_validation, difficulty level 1).
+Task specification: exam_linear_system_linear_combination.
+Frozen sampled parameters: {"equations": ["37*x + 2*y = 81", "23*x - 2*y = 39"], "target_expression": "x + 2*y"}
+generate() must return a dict with exactly question_text, correct_answer, and oracle_payload. correct_answer must be a JSON-compatible dict with exactly x, y, and value (ints or irreducible p/q strings with positive denominators). Never encode rationals as signed-denominator strings such as '-240/-120'. Exact arithmetic; no floats. oracle_payload must exactly equal the frozen sampled parameters. Do not use input, files, network, subprocess, Markdown fences, or explanations.
+
+## Clean-incremental GENERIC
+Output complete Python source only. Do not use Markdown fences or explanatory prose. Preserve frozen parameters exactly. Verify that generate() exists. Verify that the return value has exactly the three required top-level keys. Verify field types match the stated contract and that oracle_payload equals the frozen parameters.
+
+## Clean-incremental DOMAIN
+Task-local domain APIs (use only these; signatures match production):
+- `LinearSystemOps.solve_2x2` | import: `core.prompts.domain_function_library` | signature: `(a1, b1, c1, a2, b2, c2)` | returns: tuple[Fraction, Fraction]  # (x, y) | adoption: required
+  notes: Legal coeffs: int, Fraction, or 'p/q' with positive denominator literal only. Raises on singular systems. Do not invent alternate solvers.
+- `LinearSystemOps.evaluate_linear` | import: `core.prompts.domain_function_library` | signature: `(x, y, cx=1, cy=0)` | returns: Fraction | adoption: required
+  notes: Computes cx*x + cy*y exactly.
+- `FractionOps.from_parts` | import: `core.prompts.domain_function_library` | signature: `(numerator, denominator=1)` | returns: Fraction  # denominator normalized positive | adoption: required
+  notes: Legal: int numerator/denominator. Illegal: str/float/bool. Generic example: from_parts(-4, -2) -> Fraction(2, 1). Prefer this over any signed-denominator string literal.
+- `FractionOps.to_exact` | import: `core.prompts.domain_function_library` | signature: `(value)` | returns: int | 'p/q' | adoption: required
+  notes: JSON-compatible serialization; 'p/q' always has a positive denominator.
+Use the listed domain API for each supported core operation, and ensure the returned value contributes to correct_answer. Do not invent APIs. Do not call unrelated APIs unless listed.

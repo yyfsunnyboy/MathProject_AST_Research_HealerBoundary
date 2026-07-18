@@ -1,0 +1,16 @@
+Write only Python source. Implement def generate(level=1, **kwargs).
+Task: ce115_ext_113_11_rationalize_l1 (junior_high_exam_external_validation, difficulty level 1).
+Task specification: exam_rationalize_conjugate.
+Frozen sampled parameters: {"expression": "9/(4 - sqrt(7))", "required_form": "a + b*sqrt(7)", "target_expression": "a + b"}
+generate() must return a dict with exactly question_text, correct_answer, and oracle_payload. correct_answer must be a JSON-compatible dict with exactly a, b, radicand, and value=a+b (all ints). Exact arithmetic; no floats. oracle_payload must exactly equal the frozen sampled parameters. Do not use input, files, network, subprocess, Markdown fences, or explanations.
+
+## Clean-incremental GENERIC
+Output complete Python source only. Do not use Markdown fences or explanatory prose. Preserve frozen parameters exactly. Verify that generate() exists. Verify that the return value has exactly the three required top-level keys. Verify field types match the stated contract and that oracle_payload equals the frozen parameters.
+
+## Clean-incremental DOMAIN
+Task-local domain APIs (use only these; signatures match production):
+- `RadicalOps.rationalize_linear_denominator` | import: `core.prompts.domain_function_library` | signature: `(numerator, denom_rational, denom_radical_coeff, radicand)` | returns: tuple[Fraction, Fraction, int]  # (a, b, r) for a + b*sqrt(r) | adoption: required
+  notes: Denominator is defined as (denom_rational + denom_radical_coeff * sqrt(radicand)). Generic non-task examples: num/(p+q*sqrt(r)) -> (num, p, q, r); num/(p-q*sqrt(r)) -> (num, p, -q, r).
+- `FractionOps.to_exact` | import: `core.prompts.domain_function_library` | signature: `(value)` | returns: int | 'p/q' | adoption: required
+  notes: Serialize a, b and a+b for JSON contract.
+Use the listed domain API for each supported core operation, and ensure the returned value contributes to correct_answer. Do not invent APIs. Do not call unrelated APIs unless listed.

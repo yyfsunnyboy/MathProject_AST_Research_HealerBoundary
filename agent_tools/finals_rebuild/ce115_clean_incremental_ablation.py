@@ -104,6 +104,110 @@ TASK_DOMAIN_APIS: dict[str, tuple[dict[str, str], ...]] = {
             "necessity": "Accumulate the exact linear combination into correct_answer.value.",
         },
     ),
+    # 113/114 exam external validation (minimal DOMAIN; GENERIC unchanged).
+    "ce115_ext_114_01_power_laws_l1": (
+        {
+            "name": "FractionOps.create",
+            "import": LIBRARY,
+            "signature": "(value)",
+            "returns": "Fraction",
+            "necessity": "Construct exact exponent contributions from each same-base power.",
+        },
+        {
+            "name": "FractionOps.add",
+            "import": LIBRARY,
+            "signature": "(a, b)",
+            "returns": "Fraction",
+            "necessity": "Combine exponents for multiply (+) and divide (−) of same-base powers.",
+        },
+    ),
+    "ce115_ext_114_02_polynomial_simplify_l1": (
+        {
+            "name": "FractionOps.create",
+            "import": LIBRARY,
+            "signature": "(value)",
+            "returns": "Fraction",
+            "necessity": "Exact coefficient arithmetic while expanding/combining like terms.",
+        },
+        {
+            "name": "FractionOps.add",
+            "import": LIBRARY,
+            "signature": "(a, b)",
+            "returns": "Fraction",
+            "necessity": "Accumulate like-term coefficients into the simplified polynomial.",
+        },
+    ),
+    "ce115_ext_114_04_linear_system_l1": (
+        {
+            "name": "FractionOps.create",
+            "import": LIBRARY,
+            "signature": "(value)",
+            "returns": "Fraction",
+            "necessity": "Exact rational coefficients for elimination/substitution.",
+        },
+        {
+            "name": "FractionOps.mul",
+            "import": LIBRARY,
+            "signature": "(a, b)",
+            "returns": "Fraction",
+            "necessity": "Scale equations and evaluate the linear combination.",
+        },
+        {
+            "name": "FractionOps.add",
+            "import": LIBRARY,
+            "signature": "(a, b)",
+            "returns": "Fraction",
+            "necessity": "Combine equation sides and accumulate x+2y.",
+        },
+    ),
+    "ce115_ext_114_08_radical_product_l1": (
+        {
+            "name": "RadicalOps.simplify_term",
+            "import": LIBRARY,
+            "signature": "(coeff, radicand)",
+            "returns": "tuple[exact coefficient, int]  # (outer coefficient, square-free radicand)",
+            "necessity": "Extract square factors after multiplying/distributing radicals.",
+        },
+    ),
+    "ce115_ext_113_10_factorization_l1": (
+        {
+            "name": "FractionOps.create",
+            "import": LIBRARY,
+            "signature": "(value)",
+            "returns": "Fraction",
+            "necessity": "Exact arithmetic for factor coefficients.",
+        },
+        {
+            "name": "FractionOps.mul",
+            "import": LIBRARY,
+            "signature": "(a, b)",
+            "returns": "Fraction",
+            "necessity": "Scale binomial coefficients while completing factorization.",
+        },
+    ),
+    "ce115_ext_113_11_rationalize_l1": (
+        {
+            "name": "FractionOps.create",
+            "import": LIBRARY,
+            "signature": "(value)",
+            "returns": "Fraction",
+            "necessity": "Exact rational arithmetic while rationalizing.",
+        },
+        {
+            "name": "FractionOps.mul",
+            "import": LIBRARY,
+            "signature": "(a, b)",
+            "returns": "Fraction",
+            "necessity": "Multiply by the conjugate numerator/denominator.",
+        },
+        {
+            "name": "FractionOps.add",
+            "import": LIBRARY,
+            "signature": "(a, b)",
+            "returns": "Fraction",
+            "necessity": "Form a+b from the simplified a + b*sqrt(7).",
+        },
+    ),
 }
 
 GENERIC_BUDGET = (250, 400)

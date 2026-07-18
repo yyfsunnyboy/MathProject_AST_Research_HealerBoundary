@@ -169,6 +169,48 @@ def resolve_task_operations(task_id, frozen_payload=None):
             "optional": [],
             "acceptable_canonical_paths": [["FractionOps.create", "FractionOps.mul", "FractionOps.add"]],
         }
+    if task_id == "ce115_ext_114_01_power_laws_l1":
+        return {
+            **common,
+            "required": ["FractionOps.create", "FractionOps.add"],
+            "optional": [],
+            "acceptable_canonical_paths": [["FractionOps.create", "FractionOps.add"]],
+        }
+    if task_id == "ce115_ext_114_02_polynomial_simplify_l1":
+        return {
+            **common,
+            "required": ["FractionOps.create", "FractionOps.add"],
+            "optional": [],
+            "acceptable_canonical_paths": [["FractionOps.create", "FractionOps.add"]],
+        }
+    if task_id == "ce115_ext_114_04_linear_system_l1":
+        return {
+            **common,
+            "required": ["FractionOps.create", "FractionOps.mul", "FractionOps.add"],
+            "optional": [],
+            "acceptable_canonical_paths": [["FractionOps.create", "FractionOps.mul", "FractionOps.add"]],
+        }
+    if task_id == "ce115_ext_114_08_radical_product_l1":
+        return {
+            **common,
+            "required": ["RadicalOps.simplify_term"],
+            "optional": [],
+            "acceptable_canonical_paths": [["RadicalOps.simplify_term"]],
+        }
+    if task_id == "ce115_ext_113_10_factorization_l1":
+        return {
+            **common,
+            "required": ["FractionOps.create", "FractionOps.mul"],
+            "optional": [],
+            "acceptable_canonical_paths": [["FractionOps.create", "FractionOps.mul"]],
+        }
+    if task_id == "ce115_ext_113_11_rationalize_l1":
+        return {
+            **common,
+            "required": ["FractionOps.create", "FractionOps.mul", "FractionOps.add"],
+            "optional": [],
+            "acceptable_canonical_paths": [["FractionOps.create", "FractionOps.mul", "FractionOps.add"]],
+        }
     raise KeyError(task_id)
 
 

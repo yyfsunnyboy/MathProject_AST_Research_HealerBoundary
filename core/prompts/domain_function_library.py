@@ -55,7 +55,25 @@ class FractionOps:
             value_str = str(value)
             return Fraction(value_str).limit_denominator(10000)
         elif isinstance(value, str):
-            return Fraction(value)
+            text = value.strip().replace(" ", "")
+            if "/" in text:
+                num_s, den_s = text.split("/", 1)
+                if den_s.startswith("-") or den_s.startswith("+"):
+                    raise ValueError(
+                        "illegal Fraction string: denominator literal must be a positive "
+                        "integer without sign (e.g. '-3/5' ok; '-240/-120' illegal). "
+                        "Use FractionOps.from_parts(numerator, denominator) instead."
+                    )
+                num_body = num_s[1:] if num_s[:1] in "+-" else num_s
+                if not num_body.isdigit() or not den_s.isdigit():
+                    raise ValueError(
+                        "illegal Fraction string grammar: expected 'p/q' with optional "
+                        "sign on p only and positive integer q"
+                    )
+            try:
+                return Fraction(text)
+            except (ValueError, ZeroDivisionError) as exc:
+                raise ValueError(f"illegal Fraction string: {value!r}") from exc
         elif isinstance(value, Fraction):
             return value
         else:
@@ -99,10 +117,60 @@ class FractionOps:
             raise ValueError("Division by zero")
         return a / b
 
+    @staticmethod
+    def from_parts(numerator, denominator=1):
+        """以整數分子／分母建立正規化 Fraction（分母恆為正）。
+
+        合法：int 分子／分母。禁止 float、bool、字串。
+        例：from_parts(-240, -120) → Fraction(2, 1)；from_parts(7, 2) → Fraction(7, 2)。
+        """
+        if isinstance(numerator, bool) or isinstance(denominator, bool):
+            raise ValueError("numerator/denominator must be int, not bool")
+        if not isinstance(numerator, int) or not isinstance(denominator, int):
+            raise ValueError("numerator/denominator must be int")
+        if denominator == 0:
+            raise ValueError("denominator must not be zero")
+        return Fraction(numerator, denominator)
+
+    @staticmethod
+    def to_exact(value):
+        """將 exact 有理數序列化為 JSON-compatible：int 或最簡 'p/q'（分母為正）。"""
+        if isinstance(value, bool):
+            raise ValueError("bool is not an exact rational leaf")
+        if isinstance(value, int):
+            return value
+        if isinstance(value, Fraction):
+            return int(value) if value.denominator == 1 else f"{value.numerator}/{value.denominator}"
+        if isinstance(value, str):
+            try:
+                frac = Fraction(value)
+            except (ValueError, ZeroDivisionError) as exc:
+                raise ValueError(f"invalid exact rational string: {value!r}") from exc
+            return int(frac) if frac.denominator == 1 else f"{frac.numerator}/{frac.denominator}"
+        raise ValueError("to_exact requires int, Fraction, or 'p/q' string")
+
 
 class IntegerOps:
     """整數運算模組 - 支援格式化、絕對值等"""
     
+    @staticmethod
+    def add(a, b):
+        """整數加法（亦可用於同底冪指數合併）。"""
+        if isinstance(a, bool) or isinstance(b, bool):
+            raise ValueError("add requires int operands, not bool")
+        if not isinstance(a, int) or not isinstance(b, int):
+            raise ValueError("add requires int operands")
+        return a + b
+
+    @staticmethod
+    def sub(a, b):
+        """整數減法（亦可用於同底冪除法的指數差）。"""
+        if isinstance(a, bool) or isinstance(b, bool):
+            raise ValueError("sub requires int operands, not bool")
+        if not isinstance(a, int) or not isinstance(b, int):
+            raise ValueError("sub requires int operands")
+        return a - b
+
     @staticmethod
     def op_to_latex(op_str):
         """將基礎運算符號轉成國中課本 LaTeX 顯示"""
@@ -443,6 +511,62 @@ class RadicalOps:
         """[防護方法] 化簡 √radicand，等同 simplify_term(1, radicand)，返回 (coeff, simplified_radicand)"""
         return RadicalOps.simplify_term(1, int(radicand))
 
+    @staticmethod
+    def normalize_term_list(terms):
+        """合併／化簡根式項列表，依 radicand 升序回傳 JSON-compatible list。
+
+        輸入：iterable of (coeff, radicand) 或 {"coefficient": c, "radicand": r}。
+        輸出：[{"coefficient": int|'p/q', "radicand": int}, ...]（係數 0 省略）。
+        """
+        if not isinstance(terms, (list, tuple)):
+            raise ValueError("terms must be a list/tuple")
+        merged = {}
+        for item in terms:
+            if isinstance(item, dict):
+                coeff, radicand = item["coefficient"], item["radicand"]
+            elif isinstance(item, (list, tuple)) and len(item) == 2:
+                coeff, radicand = item
+            else:
+                raise ValueError("each term must be (coeff, radicand) or dict with coefficient/radicand")
+            if isinstance(radicand, bool) or not isinstance(radicand, int):
+                if isinstance(radicand, Fraction) and radicand.denominator == 1:
+                    radicand = int(radicand)
+                else:
+                    raise ValueError("radicand must be int")
+            new_c, new_r = RadicalOps.simplify_term(coeff, radicand)
+            merged[new_r] = merged.get(new_r, 0) + new_c
+        out = []
+        for rad in sorted(merged):
+            coef = merged[rad]
+            if coef == 0:
+                continue
+            out.append({"coefficient": FractionOps.to_exact(coef if isinstance(coef, (int, Fraction)) else Fraction(coef)), "radicand": int(rad)})
+        return out
+
+    @staticmethod
+    def rationalize_linear_denominator(numerator, denom_rational, denom_radical_coeff, radicand):
+        """有理化 numerator / (a + b√r)，回傳 (a_out, b_out, r) 使得結果 = a_out + b_out√r。
+
+        全部係數為 int／Fraction／合法 'p/q'。r 必須為正整數且非完全平方。
+        JSON 序列化請再對 a_out／b_out 使用 FractionOps.to_exact。
+        """
+        num = numerator if isinstance(numerator, Fraction) else FractionOps.create(numerator)
+        a = denom_rational if isinstance(denom_rational, Fraction) else FractionOps.create(denom_rational)
+        b = denom_radical_coeff if isinstance(denom_radical_coeff, Fraction) else FractionOps.create(denom_radical_coeff)
+        if isinstance(radicand, bool) or not isinstance(radicand, int) or radicand <= 0:
+            raise ValueError("radicand must be a positive int")
+        if RadicalOps.is_perfect_square(radicand):
+            raise ValueError("radicand must not be a perfect square")
+        # Multiply by conjugate a - b√r  (conj_b = -b)
+        conj_a, conj_b = a, -b
+        denom = a * conj_a + (b * conj_b) * radicand  # a^2 - b^2 * r
+        if denom == 0:
+            raise ValueError("denominator conjugate product is zero")
+        # num*(a - b√r) / denom = (num*a)/denom + (num*(-b))/denom * √r
+        a_out = (num * conj_a) / denom
+        b_out = (num * conj_b) / denom
+        return a_out, b_out, int(radicand)
+
 class CalculusOps:
     """微積分運算模組 - 多項式與微分"""
     
@@ -650,10 +774,175 @@ class PolynomialOps:
         remainder = _strip(remainder) if remainder else [Fraction(0)]
         return [_canonical(value) for value in quotient], [_canonical(value) for value in remainder]
 
+    @staticmethod
+    def coeffs_from_py_expression(expression, var="x"):
+        """將受限 Python 多項式字串展開為降冪係數列表（Fraction）。
 
-# ============================================================================
-# [V2.5 新增] FractionOps - 分數標準函數庫
-# ============================================================================
+        允許：整數常數、變數 var、+ - * **（整數指數）、括號。禁止 float、函式呼叫。
+        """
+        import ast as _ast
+
+        if not isinstance(expression, str) or not expression.strip():
+            raise ValueError("expression must be a non-empty str")
+        if not isinstance(var, str) or not var.isidentifier():
+            raise ValueError("var must be an identifier")
+
+        tree = _ast.parse(expression.replace("^", "**"), mode="eval")
+
+        class _PolyVisitor(_ast.NodeVisitor):
+            def visit(self, node):  # type: ignore[override]
+                if isinstance(node, _ast.Expression):
+                    return self.visit(node.body)
+                if isinstance(node, _ast.Constant) and isinstance(node.value, int) and not isinstance(node.value, bool):
+                    return {0: Fraction(node.value)}
+                if isinstance(node, _ast.UnaryOp) and isinstance(node.op, _ast.USub):
+                    return {k: -v for k, v in self.visit(node.operand).items()}
+                if isinstance(node, _ast.UnaryOp) and isinstance(node.op, _ast.UAdd):
+                    return self.visit(node.operand)
+                if isinstance(node, _ast.BinOp):
+                    left, right = self.visit(node.left), self.visit(node.right)
+                    if isinstance(node.op, _ast.Add):
+                        out = dict(left)
+                        for k, v in right.items():
+                            out[k] = out.get(k, Fraction(0)) + v
+                        return out
+                    if isinstance(node.op, _ast.Sub):
+                        out = dict(left)
+                        for k, v in right.items():
+                            out[k] = out.get(k, Fraction(0)) - v
+                        return out
+                    if isinstance(node.op, _ast.Mult):
+                        out = {}
+                        for i, a in left.items():
+                            for j, b in right.items():
+                                out[i + j] = out.get(i + j, Fraction(0)) + a * b
+                        return out
+                    if isinstance(node.op, _ast.Pow):
+                        if not (isinstance(node.right, _ast.Constant) and isinstance(node.right.value, int)):
+                            raise ValueError("power exponent must be a non-negative int constant")
+                        exp = node.right.value
+                        if exp < 0:
+                            raise ValueError("power exponent must be non-negative")
+                        base = left
+                        out = {0: Fraction(1)}
+                        for _ in range(exp):
+                            nxt = {}
+                            for i, a in out.items():
+                                for j, b in base.items():
+                                    nxt[i + j] = nxt.get(i + j, Fraction(0)) + a * b
+                            out = nxt
+                        return out
+                if isinstance(node, _ast.Name) and node.id == var:
+                    return {1: Fraction(1)}
+                raise ValueError(f"unsupported expression node: {type(node).__name__}")
+
+        try:
+            sparse = _PolyVisitor().visit(tree)
+        except SyntaxError as exc:
+            raise ValueError(f"invalid expression syntax: {exc}") from exc
+        if not sparse:
+            return [0]
+        deg = max(sparse)
+        coeffs = [sparse.get(d, Fraction(0)) for d in range(deg, -1, -1)]
+        return PolynomialOps.normalize(coeffs)
+
+    @staticmethod
+    def to_degree_map(coeffs):
+        """降冪係數列表 → degree-string map，值為 int 或最簡 'p/q'。"""
+        if not isinstance(coeffs, (list, tuple)) or len(coeffs) == 0:
+            raise ValueError("coeffs must be a non-empty list")
+        normalized = PolynomialOps.normalize(list(coeffs))
+        degree = len(normalized) - 1
+        out = {}
+        for i, coef in enumerate(normalized):
+            d = degree - i
+            exact = FractionOps.to_exact(coef if isinstance(coef, (int, Fraction, str)) else Fraction(coef))
+            out[str(d)] = exact
+        return out
+
+    @staticmethod
+    def factor_quadratic_exact(a, b, c):
+        """將 ax^2+bx+c 因式分解為兩個一次因式（有理數係數），若可分解。
+
+        回傳 [{"x_coefficient": ..., "constant": ...}, {...}]，值為 int 或 'p/q'。
+        不可分解則 raise ValueError。不假設特定題目結構；不洩漏共同因式提示。
+        """
+        if isinstance(a, bool) or isinstance(b, bool) or isinstance(c, bool):
+            raise ValueError("coefficients must not be bool")
+        A = a if isinstance(a, Fraction) else FractionOps.create(a)
+        B = b if isinstance(b, Fraction) else FractionOps.create(b)
+        C = c if isinstance(c, Fraction) else FractionOps.create(c)
+        if A == 0:
+            raise ValueError("leading coefficient must be non-zero")
+        disc = B * B - 4 * A * C
+        if disc < 0:
+            raise ValueError("quadratic has no rational factorization over the rationals")
+
+        def _is_square_frac(f: Fraction) -> Fraction | None:
+            if f < 0:
+                return None
+            n, d = f.numerator, f.denominator
+            sn, sd = int(math.isqrt(n)), int(math.isqrt(d))
+            if sn * sn == n and sd * sd == d:
+                return Fraction(sn, sd)
+            return None
+
+        root_disc = _is_square_frac(disc)
+        if root_disc is None:
+            raise ValueError("discriminant is not a perfect square in Q")
+        r1 = (-B + root_disc) / (2 * A)
+        r2 = (-B - root_disc) / (2 * A)
+        # A (x - r1)(x - r2) = A/(d1 d2) * (d1 x - n1)(d2 x - n2)
+        n1, d1 = r1.numerator, r1.denominator
+        n2, d2 = r2.numerator, r2.denominator
+        lead = A / (d1 * d2)
+        f1_x, f1_c = lead * d1, -lead * n1
+        f2_x, f2_c = Fraction(d2), -Fraction(n2)
+        return [
+            {"x_coefficient": FractionOps.to_exact(f1_x), "constant": FractionOps.to_exact(f1_c)},
+            {"x_coefficient": FractionOps.to_exact(f2_x), "constant": FractionOps.to_exact(f2_c)},
+        ]
+
+
+class LinearSystemOps:
+    """二元一次聯立方程式精確求解（可重用）。"""
+
+    @staticmethod
+    def solve_2x2(a1, b1, c1, a2, b2, c2):
+        """解 a1*x + b1*y = c1、a2*x + b2*y = c2。
+
+        係數可為 int／Fraction／合法 'p/q'（分母為正）。回傳 (x, y) 為 Fraction。
+        奇異系統 raise ValueError。內部僅用 from_parts／四則，不經非法字串字面值。
+        """
+        def _as_frac(value, name):
+            if isinstance(value, bool):
+                raise ValueError(f"{name} must not be bool")
+            if isinstance(value, int):
+                return FractionOps.from_parts(value, 1)
+            if isinstance(value, Fraction):
+                return value
+            if isinstance(value, str):
+                return FractionOps.create(value)
+            raise ValueError(f"{name} must be int, Fraction, or 'p/q' string")
+
+        A1, B1, C1 = _as_frac(a1, "a1"), _as_frac(b1, "b1"), _as_frac(c1, "c1")
+        A2, B2, C2 = _as_frac(a2, "a2"), _as_frac(b2, "b2"), _as_frac(c2, "c2")
+        det = A1 * B2 - A2 * B1
+        if det == 0:
+            raise ValueError("singular 2x2 system")
+        x = (C1 * B2 - C2 * B1) / det
+        y = (A1 * C2 - A2 * C1) / det
+        return x, y
+
+    @staticmethod
+    def evaluate_linear(x, y, cx=1, cy=0):
+        """計算 cx*x + cy*y，回傳 Fraction。"""
+        X = x if isinstance(x, Fraction) else FractionOps.create(x)
+        Y = y if isinstance(y, Fraction) else FractionOps.create(y)
+        CX = cx if isinstance(cx, Fraction) else FractionOps.create(cx)
+        CY = cy if isinstance(cy, Fraction) else FractionOps.create(cy)
+        return CX * X + CY * Y
+
 
 FRACTIONOPS_HELPERS = r"""
 # ===== FractionOps (分數標準函數庫) =====

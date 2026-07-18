@@ -1,0 +1,259 @@
+{
+  "ce115_ext_114_01_power_laws_l1": {
+    "exam": {
+      "exam_year": "114",
+      "item": "1",
+      "source": "114年國中教育會考數學試題第1題",
+      "stem": "算式 7^10 × 7^2 ÷ 7^4 之值可用 7 的幾次方表示？",
+      "goal": "求 exponent（同底冪）"
+    },
+    "required_operations": [
+      "parse same-base powers",
+      "add exponents on multiply",
+      "subtract exponents on divide"
+    ],
+    "selected_apis": [
+      {
+        "name": "IntegerOps.add",
+        "import": "core.prompts.domain_function_library",
+        "signature": "(a, b)",
+        "returns": "int",
+        "legal_input_grammar_notes": "Legal: int (not bool). Illegal: float/str/Fraction.",
+        "necessity": "Add exponents for same-base multiplication.",
+        "adoption": "required",
+        "json_serialization": "via FractionOps.to_exact / to_degree_map / normalize_term_list when return is Fraction or non-JSON leaf; otherwise JSON-native"
+      },
+      {
+        "name": "IntegerOps.sub",
+        "import": "core.prompts.domain_function_library",
+        "signature": "(a, b)",
+        "returns": "int",
+        "legal_input_grammar_notes": "Legal: int (not bool). Illegal: float/str/Fraction.",
+        "necessity": "Subtract exponents for same-base division.",
+        "adoption": "required",
+        "json_serialization": "via FractionOps.to_exact / to_degree_map / normalize_term_list when return is Fraction or non-JSON leaf; otherwise JSON-native"
+      }
+    ],
+    "coverage": "full",
+    "notes": "v1 wrongly listed FractionOps; integer exponent arithmetic is sufficient."
+  },
+  "ce115_ext_114_02_polynomial_simplify_l1": {
+    "exam": {
+      "exam_year": "114",
+      "item": "2",
+      "source": "114年國中教育會考數學試題第2題",
+      "stem": "計算 (5x^2 - 2x) - (4 - 3x)",
+      "goal": "化簡多項式"
+    },
+    "required_operations": [
+      "expand/simplify polynomial expression",
+      "emit nested coefficients degree map"
+    ],
+    "selected_apis": [
+      {
+        "name": "PolynomialOps.coeffs_from_py_expression",
+        "import": "core.prompts.domain_function_library",
+        "signature": "(expression, var='x')",
+        "returns": "list  # highest-degree-first coeffs (int or Fraction)",
+        "legal_input_grammar_notes": "Legal: restricted Python poly str with int/+-*/**/(). Illegal: float, calls.",
+        "necessity": "Expand/simplify frozen polynomial expression to coefficient list.",
+        "adoption": "required",
+        "json_serialization": "via FractionOps.to_exact / to_degree_map / normalize_term_list when return is Fraction or non-JSON leaf; otherwise JSON-native"
+      },
+      {
+        "name": "PolynomialOps.to_degree_map",
+        "import": "core.prompts.domain_function_library",
+        "signature": "(coeffs)",
+        "returns": "dict[str, int|'p/q']  # degree-string keys",
+        "legal_input_grammar_notes": "Serialize coeffs for the nested coefficients map.",
+        "necessity": "Build the degree map placed under correct_answer['coefficients'].",
+        "adoption": "required",
+        "json_serialization": "via FractionOps.to_exact / to_degree_map / normalize_term_list when return is Fraction or non-JSON leaf; otherwise JSON-native"
+      }
+    ],
+    "coverage": "full",
+    "notes": "v1 DOMAIN only FractionOps — coverage gap closed by new PolynomialOps helpers."
+  },
+  "ce115_ext_114_04_linear_system_l1": {
+    "exam": {
+      "exam_year": "114",
+      "item": "4",
+      "source": "114年國中教育會考數學試題第4題",
+      "stem": "聯立 37x+2y=81, 23x-2y=39；解 x=a,y=b，求 a+2b",
+      "goal": "求 a+2b"
+    },
+    "required_operations": [
+      "exact 2x2 solve",
+      "evaluate x+2y",
+      "serialize Fraction to int/'p/q'",
+      "avoid illegal signed-denominator strings"
+    ],
+    "selected_apis": [
+      {
+        "name": "LinearSystemOps.solve_2x2",
+        "import": "core.prompts.domain_function_library",
+        "signature": "(a1, b1, c1, a2, b2, c2)",
+        "returns": "tuple[Fraction, Fraction]  # (x, y)",
+        "legal_input_grammar_notes": "Legal coeffs: int/Fraction/'p/q' with positive denom literal. Raises on singular.",
+        "necessity": "Exact 2x2 solver (handles negative determinants without illegal strings).",
+        "adoption": "required",
+        "json_serialization": "via FractionOps.to_exact / to_degree_map / normalize_term_list when return is Fraction or non-JSON leaf; otherwise JSON-native"
+      },
+      {
+        "name": "LinearSystemOps.evaluate_linear",
+        "import": "core.prompts.domain_function_library",
+        "signature": "(x, y, cx=1, cy=0)",
+        "returns": "Fraction",
+        "legal_input_grammar_notes": "Computes cx*x + cy*y exactly.",
+        "necessity": "Evaluate target linear combination (e.g. x+2y).",
+        "adoption": "required",
+        "json_serialization": "via FractionOps.to_exact / to_degree_map / normalize_term_list when return is Fraction or non-JSON leaf; otherwise JSON-native"
+      },
+      {
+        "name": "FractionOps.from_parts",
+        "import": "core.prompts.domain_function_library",
+        "signature": "(numerator, denominator=1)",
+        "returns": "Fraction  # denominator normalized positive",
+        "legal_input_grammar_notes": "Legal: int n,d. Illegal: str/float/bool. from_parts(-240,-120)->2.",
+        "necessity": "Safe signed-int construction when a ratio would need a negative denom literal.",
+        "adoption": "required",
+        "json_serialization": "via FractionOps.to_exact / to_degree_map / normalize_term_list when return is Fraction or non-JSON leaf; otherwise JSON-native"
+      },
+      {
+        "name": "FractionOps.to_exact",
+        "import": "core.prompts.domain_function_library",
+        "signature": "(value)",
+        "returns": "int | 'p/q'",
+        "legal_input_grammar_notes": "JSON-compatible serialization; denom always positive in 'p/q'.",
+        "necessity": "Serialize x,y,value into contract leaves.",
+        "adoption": "required",
+        "json_serialization": "via FractionOps.to_exact / to_degree_map / normalize_term_list when return is Fraction or non-JSON leaf; otherwise JSON-native"
+      },
+      {
+        "name": "FractionOps.create",
+        "import": "core.prompts.domain_function_library",
+        "signature": "(value)",
+        "returns": "Fraction",
+        "legal_input_grammar_notes": "Legal str: '-3/5','7/2'. Illegal: '-240/-120' (signed denom) -> ValueError.",
+        "necessity": "Optional for legal positive-denom strings only; never use signed-denom literals.",
+        "adoption": "optional",
+        "json_serialization": "via FractionOps.to_exact / to_degree_map / normalize_term_list when return is Fraction or non-JSON leaf; otherwise JSON-native"
+      }
+    ],
+    "coverage": "full",
+    "notes": "create('-240/-120') illegal; from_parts(-240,-120)->2."
+  },
+  "ce115_ext_114_08_radical_product_l1": {
+    "exam": {
+      "exam_year": "114",
+      "item": "8",
+      "source": "114年國中教育會考數學試題第8題",
+      "stem": "計算 (2√3 + √6) × √2",
+      "goal": "化為最簡根式和"
+    },
+    "required_operations": [
+      "multiply/distribute radical terms",
+      "simplify_term",
+      "merge and sort by radicand"
+    ],
+    "selected_apis": [
+      {
+        "name": "RadicalOps.simplify_term",
+        "import": "core.prompts.domain_function_library",
+        "signature": "(coeff, radicand)",
+        "returns": "tuple[exact coefficient, int]  # (outer coeff, square-free radicand)",
+        "legal_input_grammar_notes": "Pulls square factors from radicand into coeff.",
+        "necessity": "Simplify each product term after distributing.",
+        "adoption": "required",
+        "json_serialization": "via FractionOps.to_exact / to_degree_map / normalize_term_list when return is Fraction or non-JSON leaf; otherwise JSON-native"
+      },
+      {
+        "name": "RadicalOps.normalize_term_list",
+        "import": "core.prompts.domain_function_library",
+        "signature": "(terms)",
+        "returns": "list[{coefficient, radicand}]  # merged, sorted by radicand asc",
+        "legal_input_grammar_notes": "Accepts (c,r) pairs or dicts; coefficients JSON-exact via to_exact.",
+        "necessity": "Merge like radicands and emit contract terms list.",
+        "adoption": "required",
+        "json_serialization": "via FractionOps.to_exact / to_degree_map / normalize_term_list when return is Fraction or non-JSON leaf; otherwise JSON-native"
+      }
+    ],
+    "coverage": "full",
+    "notes": "normalize_term_list encodes merge/sort contract."
+  },
+  "ce115_ext_113_10_factorization_l1": {
+    "exam": {
+      "exam_year": "113",
+      "item": "10",
+      "source": "113年國中教育會考數學試題第10題",
+      "stem": "因式分解 5x(5x-2) - 4(5x-2)^2",
+      "goal": "完全因式分解"
+    },
+    "required_operations": [
+      "expand expression to quadratic",
+      "factor into two linear factors"
+    ],
+    "selected_apis": [
+      {
+        "name": "PolynomialOps.coeffs_from_py_expression",
+        "import": "core.prompts.domain_function_library",
+        "signature": "(expression, var='x')",
+        "returns": "list  # highest-degree-first",
+        "legal_input_grammar_notes": "Expand frozen expression to quadratic coeffs.",
+        "necessity": "Obtain a,b,c for factorization without hardcoding factors.",
+        "adoption": "required",
+        "json_serialization": "via FractionOps.to_exact / to_degree_map / normalize_term_list when return is Fraction or non-JSON leaf; otherwise JSON-native"
+      },
+      {
+        "name": "PolynomialOps.factor_quadratic_exact",
+        "import": "core.prompts.domain_function_library",
+        "signature": "(a, b, c)",
+        "returns": "list[2] of {x_coefficient, constant} as int|'p/q'",
+        "legal_input_grammar_notes": "Raises if not square-disc over Q. Order may vary; overall sign flip ok.",
+        "necessity": "Reusable exact linear-factor factorization.",
+        "adoption": "required",
+        "json_serialization": "via FractionOps.to_exact / to_degree_map / normalize_term_list when return is Fraction or non-JSON leaf; otherwise JSON-native"
+      }
+    ],
+    "coverage": "full",
+    "notes": "Reusable factorization; does not leak exam common binomial."
+  },
+  "ce115_ext_113_11_rationalize_l1": {
+    "exam": {
+      "exam_year": "113",
+      "item": "11",
+      "source": "113年國中教育會考數學試題第11題",
+      "stem": "將 9/(4-√7) 化為 a+b√7，求 a+b",
+      "goal": "有理化並求 a+b"
+    },
+    "required_operations": [
+      "multiply by conjugate",
+      "emit a+b*sqrt(r) and value a+b",
+      "JSON serialize exact leaves"
+    ],
+    "selected_apis": [
+      {
+        "name": "RadicalOps.rationalize_linear_denominator",
+        "import": "core.prompts.domain_function_library",
+        "signature": "(numerator, denom_rational, denom_radical_coeff, radicand)",
+        "returns": "tuple[Fraction, Fraction, int]  # (a, b, r) for a + b*sqrt(r)",
+        "legal_input_grammar_notes": "For num/(a+b*sqrt(r)); use b=-1 when denominator is a-sqrt(r).",
+        "necessity": "Reusable conjugate rationalization.",
+        "adoption": "required",
+        "json_serialization": "via FractionOps.to_exact / to_degree_map / normalize_term_list when return is Fraction or non-JSON leaf; otherwise JSON-native"
+      },
+      {
+        "name": "FractionOps.to_exact",
+        "import": "core.prompts.domain_function_library",
+        "signature": "(value)",
+        "returns": "int | 'p/q'",
+        "legal_input_grammar_notes": "Serialize a,b and a+b for JSON contract.",
+        "necessity": "Exact JSON leaves for a, b, value.",
+        "adoption": "required",
+        "json_serialization": "via FractionOps.to_exact / to_degree_map / normalize_term_list when return is Fraction or non-JSON leaf; otherwise JSON-native"
+      }
+    ],
+    "coverage": "full",
+    "notes": "Reusable rationalization; serialization via to_exact."
+  }
+}

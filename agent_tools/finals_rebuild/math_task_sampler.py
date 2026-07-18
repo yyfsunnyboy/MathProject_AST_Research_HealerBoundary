@@ -86,6 +86,9 @@ def sample_task_parameters(task_spec, seed):
             if scale==0: continue
             payload={"quadratic_coefficients":[scale*p1*p2,scale*(-(p1*q2+p2*q1)),scale*q1*q2]}; break
         else: raise ValueError("unable to sample factor-roots parameters")
+    elif skill.startswith("exam_"):
+        # Identity frozen exam payloads: every field is a single allowed_values entry.
+        payload={key:_pick(rng,spec) for key,spec in r.items()}
     else:
         count=_pick(rng,r["claim_count"]); vals=[6,10,12,15,18,21,22,24,26,30,33,35,39,42,44,45,50,55,60,66,70,78,84,90,105,110,120]; vals=[v for v in vals if r["largest_proper_divisor"]["min"]<=v<=r["largest_proper_divisor"]["max"]]
         declared={}; claims=[]

@@ -12,7 +12,12 @@ import urllib.request
 from typing import Any
 
 MODEL_ID = "qwen3.5:4b"
-EXPECTED_DIGEST_PREFIX = "2a654d98e6fb"
+ALLOWED_MODELS = ("qwen3.5:4b", "qwen3.5:9b")
+EXPECTED_DIGEST_PREFIX = "2a654d98e6fb"  # pinned for 4b only; 9b recorded at probe time
+EXPECTED_DIGEST_BY_MODEL = {
+    "qwen3.5:4b": "2a654d98e6fb",
+    # qwen3.5:9b: digest recorded dynamically from /api/tags (no hard pin until first freeze)
+}
 EXPECTED_OLLAMA_VERSION_PREFIX = "0.32.0"
 DEFAULT_BASE_URL = "http://127.0.0.1:11434"
 API_CHAT = "/api/chat"
@@ -35,8 +40,8 @@ def _http_json(url: str, *, data: bytes | None = None, timeout_s: float) -> Any:
 
 def build_chat_payload(prompt: str, *, seed: int, model: str = MODEL_ID) -> dict[str, Any]:
     """Build /api/chat body. think must be top-level false."""
-    if model != MODEL_ID:
-        raise RuntimeError(f"model must be exactly {MODEL_ID}, got {model}")
+    if model not in ALLOWED_MODELS:
+        raise RuntimeError(f"model must be one of {ALLOWED_MODELS}, got {model}")
     payload = {
         "model": model,
         "messages": [{"role": "user", "content": prompt}],
@@ -56,8 +61,15 @@ def build_chat_payload(prompt: str, *, seed: int, model: str = MODEL_ID) -> dict
     return payload
 
 
-def probe_ollama(*, base_url: str = DEFAULT_BASE_URL, timeout_s: float = 10.0) -> dict[str, Any]:
+def probe_ollama(
+    *,
+    base_url: str = DEFAULT_BASE_URL,
+    timeout_s: float = 10.0,
+    model: str = MODEL_ID,
+) -> dict[str, Any]:
     """Service + model availability only. Zero /api/chat calls."""
+    if model not in ALLOWED_MODELS:
+        raise RuntimeError(f"model must be one of {ALLOWED_MODELS}, got {model}")
     version_data = _http_json(base_url.rstrip("/") + "/api/version", timeout_s=timeout_s)
     version = version_data.get("version") if isinstance(version_data, dict) else None
     if not isinstance(version, str) or not version.strip():
@@ -70,21 +82,27 @@ def probe_ollama(*, base_url: str = DEFAULT_BASE_URL, timeout_s: float = 10.0) -
         for m in (tags.get("models") or [])
         if isinstance(m, dict) and (m.get("name") or m.get("model"))
     }
-    entry = models.get(MODEL_ID)
+    entry = models.get(model)
     if entry is None:
-        raise RuntimeError(f"model {MODEL_ID!r} not found in /api/tags")
+        raise RuntimeError(f"model {model!r} not found in /api/tags")
     digest = str(entry.get("digest") or "")
-    digest_ok = EXPECTED_DIGEST_PREFIX in digest
-    if not digest_ok:
-        raise RuntimeError(
-            f"digest mismatch for {MODEL_ID}: expected prefix {EXPECTED_DIGEST_PREFIX}, got {digest}"
-        )
+    expected_prefix = EXPECTED_DIGEST_BY_MODEL.get(model)
+    if expected_prefix:
+        digest_ok = expected_prefix in digest
+        if not digest_ok:
+            raise RuntimeError(
+                f"digest mismatch for {model}: expected prefix {expected_prefix}, got {digest}"
+            )
+    else:
+        digest_ok = bool(digest)
+        if not digest_ok:
+            raise RuntimeError(f"missing digest for {model}")
     return {
         "base_url": base_url.rstrip("/"),
         "runtime": "ollama",
         "runtime_version": version,
         "version_ok": version_ok,
-        "model": MODEL_ID,
+        "model": model,
         "model_present": True,
         "model_digest": digest,
         "digest_ok": digest_ok,

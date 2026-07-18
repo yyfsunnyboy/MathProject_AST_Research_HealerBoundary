@@ -70,7 +70,43 @@ NEUTRAL_TASK_STATEMENTS = {
 - Input Parameters: `shared_shift`, `leading_factor`, `subtracted_factor`, `root_order`, and `linear_combination`.
 - Output: `question_text` must ask to solve (leading_factor*x - subtracted_factor) * (x + shared_shift) = 0, name the roots according to root_order, and evaluate the requested linear combination.
 - Calculation: factor the shared binomial, solve both linear factors, order the roots as a>b, and return roots, labeled a/b, and the exact linear combination value.
-- Data Contract: `oracle_payload` must return exactly the input parameters."""
+- Data Contract: `oracle_payload` must return exactly the input parameters.""",
+
+    "exam_power_of_same_base": """# Task Specification: Power of the Same Base
+- Input Parameters: `expression` (product/quotient of powers), `required_form` ("power_of_same_base"), `base`.
+- Output: ask to rewrite the expression as a single power of the given base.
+- Calculation: return base and exponent.
+- Data Contract: `oracle_payload` must equal the frozen parameters.""",
+
+    "exam_polynomial_simplify": """# Task Specification: Polynomial Simplification
+- Input Parameters: `expression` (difference of polynomials in x).
+- Output: ask to simplify the expression.
+- Calculation: return simplified coefficients keyed by degree strings "2","1","0".
+- Data Contract: `oracle_payload` must equal the frozen parameters.""",
+
+    "exam_linear_system_linear_combination": """# Task Specification: Linear System Linear Combination
+- Input Parameters: `equations` (two linear equations) and `target_expression`.
+- Output: ask to solve for x and y and evaluate the target expression.
+- Calculation: return x, y, and value of the target expression.
+- Data Contract: `oracle_payload` must equal the frozen parameters.""",
+
+    "exam_radical_product_simplified": """# Task Specification: Radical Product Simplification
+- Input Parameters: `expression` (product involving square roots).
+- Output: ask to rewrite as a simplified sum of radical terms.
+- Calculation: return terms [{coefficient, radicand}, ...] sorted by increasing radicand after simplifying squares.
+- Data Contract: `oracle_payload` must equal the frozen parameters.""",
+
+    "exam_factorization_common_binomial": """# Task Specification: Factorization
+- Input Parameters: `expression` and `required_form` ("fully_factored").
+- Output: ask to factor the expression completely.
+- Calculation: return two linear factors as {x_coefficient, constant} pairs (order may vary; equivalent forms accepted by oracle).
+- Data Contract: `oracle_payload` must equal the frozen parameters.""",
+
+    "exam_rationalize_conjugate": """# Task Specification: Rationalize Denominator
+- Input Parameters: `expression`, `required_form` ("a + b*sqrt(7)"), `target_expression` ("a + b").
+- Output: ask to rewrite in the required form and report a+b.
+- Calculation: return a, b, radicand, and value=a+b.
+- Data Contract: `oracle_payload` must equal the frozen parameters."""
 }
 
 POLYNOMIAL_DIVISION_CONTRACT = """Required return schema:
@@ -182,6 +218,54 @@ POLYNOMIAL_FACTOR_ROOTS_CONTRACT = """Required return schema:
 - Formatting rules: ascending order; exact values only; irreducible "p/q" with positive denominator when fractional; no float values.
 - Equality: Exact dictionary match. No tolerance."""
 
+EXAM_POWER_CONTRACT = """Required return schema:
+{
+  "question_text": str,
+  "correct_answer": {"base": int, "exponent": int | str},
+  "oracle_payload": dict
+}
+- Equality: Exact dictionary match."""
+
+EXAM_POLY_SIMPLIFY_CONTRACT = """Required return schema:
+{
+  "question_text": str,
+  "correct_answer": {"coefficients": {"2": int|str, "1": int|str, "0": int|str}},
+  "oracle_payload": dict
+}
+- Degree keys are strings. Exact arithmetic only. Exact dictionary match."""
+
+EXAM_LINEAR_SYSTEM_CONTRACT = """Required return schema:
+{
+  "question_text": str,
+  "correct_answer": {"x": int|str, "y": int|str, "value": int|str},
+  "oracle_payload": dict
+}
+- Exact rationals as int or irreducible "p/q". Exact dictionary match."""
+
+EXAM_RADICAL_PRODUCT_CONTRACT = """Required return schema:
+{
+  "question_text": str,
+  "correct_answer": {"terms": [{"coefficient": int|str, "radicand": int}, ...]},
+  "oracle_payload": dict
+}
+- Simplify square factors; merge like radicands; sort by increasing radicand. Exact match on normalized terms."""
+
+EXAM_FACTORIZATION_CONTRACT = """Required return schema:
+{
+  "question_text": str,
+  "correct_answer": {"factors": [{"x_coefficient": int|str, "constant": int|str}, {"x_coefficient": int|str, "constant": int|str}]},
+  "oracle_payload": dict
+}
+- Factor order may vary; oracle accepts algebraically equivalent linear-factor pairs (not string-only)."""
+
+EXAM_RATIONALIZE_CONTRACT = """Required return schema:
+{
+  "question_text": str,
+  "correct_answer": {"a": int, "b": int, "radicand": int, "value": int},
+  "oracle_payload": dict
+}
+- Exact dictionary match."""
+
 CONTRACTS: Mapping[str, str] = {
     "radical_simplification": RADICAL_SIMPLIFICATION_CONTRACT,
     "exact_rational_expression": EXACT_RATIONAL_EXPRESSION_CONTRACT,
@@ -192,6 +276,12 @@ CONTRACTS: Mapping[str, str] = {
     "largest_proper_divisor_logic": LARGEST_PROPER_DIVISOR_CONTRACT,
     "alternating_sequence_threshold": ALTERNATING_SEQUENCE_CONTRACT,
     "common_factor_quadratic_root_ordering": COMMON_FACTOR_QUADRATIC_ROOT_ORDERING_CONTRACT,
+    "exam_power_of_same_base": EXAM_POWER_CONTRACT,
+    "exam_polynomial_simplify": EXAM_POLY_SIMPLIFY_CONTRACT,
+    "exam_linear_system_linear_combination": EXAM_LINEAR_SYSTEM_CONTRACT,
+    "exam_radical_product_simplified": EXAM_RADICAL_PRODUCT_CONTRACT,
+    "exam_factorization_common_binomial": EXAM_FACTORIZATION_CONTRACT,
+    "exam_rationalize_conjugate": EXAM_RATIONALIZE_CONTRACT,
 }
 
 

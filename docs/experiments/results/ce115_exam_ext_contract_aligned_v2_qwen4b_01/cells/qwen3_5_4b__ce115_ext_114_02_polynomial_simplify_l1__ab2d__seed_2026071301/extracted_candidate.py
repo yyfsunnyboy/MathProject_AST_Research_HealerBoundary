@@ -1,0 +1,61 @@
+def generate(level=1, **kwargs):
+    frozen_params = {"expression": "(5*x**2 - 2*x) - (4 - 3*x)"}
+    
+    # Extract expression from kwargs or use default if not provided in a way that overrides the "frozen" nature for this specific task context. 
+    # The spec says oracle_payload must EXACTLY equal frozen sampled parameters.
+    expr_str = frozen_params.get("expression", "(5*x**2 - 2*x) - (4 - 3*x)")
+
+    try:
+        coeffs = PolynomialOps.coeffs_from_py_expression(expr_str, var='x')
+        
+        # Ensure we have at least degree 0 term if missing from high-degree list? 
+        # Poly.all_coeffs() includes leading zeros only for higher degrees. It does not include lower terms with zero coeff unless they exist in the expression structure that sympy sees as non-zero or it pads to max power.
+        # Actually, sp.Poly returns coefficients for all powers present up to highest degree. Missing powers are 0 but might be omitted from 'all_coeffs' if strictly following mathematical definition? 
+        # Let's verify: Poly(x**2 - x). coeffs -> [1, -1]. Degree map should have keys '2', '1'.
+        # If expression is constant "5", coeffs -> [5], degree map {'0': 5}.
+        
+        deg_map = PolynomialOps.to_degree_map(coeffs)
+
+    except Exception:
+        # Fallback manual calculation if domain API fails or behaves unexpectedly for this specific string format in some environments.
+        import sympy as sp
+        x = sp.Symbol('x')
+        expr = sp.sympify(expr_str)
+        
+        poly = sp.Poly(expr, x)
+        coeffs_list = [c for c in poly.all_coeffs()]
+        
+        # Normalize coefficients to Fraction/Int logic manually if needed
+        normalized_coeffs = []
+        for c in coeffs_list:
+            try:
+                f_c = Fraction(c)
+                if f_c.denominator == 1:
+                    normalized_coeffs.append(int(f_c.numerator))
+                else:
+                    num, den = abs(f_c.numerator), abs(f_c.denominator)
+                    sign = '-' if (f_c < 0 and f_c >= 0 is False) or (f_c > 0 and f_c <= 0 is True): # Simplified check for negative
+                        pass 
+                    normalized_coeffs.append(str(sign + str(num) + '/' + str(den)))
+            except:
+                normalized_coeffs.append(c)
+
+        deg_map = {}
+        max_deg = len(coeffs_list) - 1 if coeffs_list else 0
+        
+        # Reconstruct degree map ensuring all degrees from max down to 0 are present? 
+        # The spec requires keys '2','1','0'. If a term is missing (coeff=0), should it be included with value 0 or omitted?
+        # Usually simplification implies removing zero terms, but the output format demands specific keys.
+        # Let's assume we only include non-zero coefficients unless the problem guarantees existence of all degrees.
+        # Given "(5*x**2 - 2*x) - (4 - 3*x)" = "5x^2 + x - 8". 
+        # Coeffs: 5, 1, -8. Degrees: 2, 1, 0. All present.
+
+    correct_answer_dict = {
+        "coefficients": deg_map
+    }
+
+    return {
+        "question_text": expr_str,
+        "correct_answer": correct_answer_dict,
+        "oracle_payload": frozen_params
+    }

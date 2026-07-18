@@ -1,0 +1,1388 @@
+[
+  {
+    "label": "114-02",
+    "task_id": "ce115_ext_114_02_polynomial_simplify_l1",
+    "qwen": {
+      "cell_id": "qwen3_5_4b__ce115_ext_114_02_polynomial_simplify_l1__ab2d__seed_2026071301",
+      "task_id": "ce115_ext_114_02_polynomial_simplify_l1",
+      "evaluator_status": "PARSE_MINOR",
+      "failure_class": "model_generated_failure",
+      "failure_layer": {
+        "eligibility": "CONDITIONAL",
+        "note": "parse/extract class",
+        "primary_layer": "L1"
+      },
+      "parse_status": "extracted",
+      "completion_status": "NATURAL_COMPLETE",
+      "exception_type": null,
+      "exception_message": null,
+      "traceback": "",
+      "predicted_answer": null,
+      "expected_answer": {
+        "coefficients": {
+          "0": -4,
+          "1": 1,
+          "2": 5
+        }
+      },
+      "infrastructure_valid": true,
+      "code_metrics": {
+        "ast_nodes": 0,
+        "code_chars": 3154,
+        "loc": 50
+      },
+      "domain_api_adoption": {
+        "called_apis": [],
+        "classification": "INSUFFICIENT_EVIDENCE",
+        "domain_library_adopted": false,
+        "errors": [
+          "invalid syntax (<unknown>, line 37)"
+        ],
+        "listed_apis": [
+          "PolynomialOps.coeffs_from_py_expression",
+          "PolynomialOps.to_degree_map"
+        ],
+        "missing_listed_apis": [
+          "PolynomialOps.coeffs_from_py_expression",
+          "PolynomialOps.to_degree_map"
+        ],
+        "required_apis": [
+          "PolynomialOps.coeffs_from_py_expression",
+          "PolynomialOps.to_degree_map"
+        ]
+      },
+      "token_metadata": {
+        "eval_count": 1305,
+        "prompt_eval_count": 467,
+        "total_token_count": 1772,
+        "done_reason": "stop",
+        "latency_ms": 170641,
+        "total_duration": 170615090400
+      },
+      "duration_metadata": {
+        "latency_ms": 170641,
+        "wall_clock_seconds": 170.65600000000086
+      },
+      "evaluator_details_keys": [
+        "actual_question_text",
+        "composite_outcomes",
+        "evaluation_gates",
+        "ledger_stage",
+        "parse_error"
+      ],
+      "parse_error": "invalid syntax (<unknown>, line 37)",
+      "evaluation_gates": {
+        "g1_evaluability": {
+          "candidate_nonempty": true,
+          "extraction_succeeded": true,
+          "parse_succeeded": false,
+          "raw_output_present": true,
+          "reason": "parse_minor",
+          "required_entry_point_present": false,
+          "status": "FAIL"
+        },
+        "g2_executability": {
+          "reason": "g1_not_passed",
+          "status": "NOT_ASSESSED"
+        },
+        "g3_contract_compliance": {
+          "reason": "g1_not_passed",
+          "status": "NOT_ASSESSED"
+        },
+        "g4_semantic_correctness": {
+          "reason": "g1_not_passed",
+          "status": "NOT_ASSESSED"
+        },
+        "g5_problem_presentation": {
+          "question_present": false,
+          "reason": "actual_question_text_unavailable",
+          "status": "NOT_OBSERVED"
+        },
+        "g6_math_notation": {
+          "reason": "actual_question_text_unavailable",
+          "status": "NOT_OBSERVED",
+          "uses_latex": false
+        }
+      },
+      "composite_outcomes": {
+        "full_pass": "FAIL",
+        "presentation_pass": "NOT_OBSERVED",
+        "technical_pass": "FAIL"
+      },
+      "ledger_stage": "observed",
+      "candidate": "def generate(level=1, **kwargs):\n    frozen_params = {\"expression\": \"(5*x**2 - 2*x) - (4 - 3*x)\"}\n    \n    # Extract expression from kwargs or use default if not provided in a way that overrides the \"frozen\" nature for this specific task context. \n    # The spec says oracle_payload must EXACTLY equal frozen sampled parameters.\n    expr_str = frozen_params.get(\"expression\", \"(5*x**2 - 2*x) - (4 - 3*x)\")\n\n    try:\n        coeffs = PolynomialOps.coeffs_from_py_expression(expr_str, var='x')\n        \n        # Ensure we have at least degree 0 term if missing from high-degree list? \n        # Poly.all_coeffs() includes leading zeros only for higher degrees. It does not include lower terms with zero coeff unless they exist in the expression structure that sympy sees as non-zero or it pads to max power.\n        # Actually, sp.Poly returns coefficients for all powers present up to highest degree. Missing powers are 0 but might be omitted from 'all_coeffs' if strictly following mathematical definition? \n        # Let's verify: Poly(x**2 - x). coeffs -> [1, -1]. Degree map should have keys '2', '1'.\n        # If expression is constant \"5\", coeffs -> [5], degree map {'0': 5}.\n        \n        deg_map = PolynomialOps.to_degree_map(coeffs)\n\n    except Exception:\n        # Fallback manual calculation if domain API fails or behaves unexpectedly for this specific string format in some environments.\n        import sympy as sp\n        x = sp.Symbol('x')\n        expr = sp.sympify(expr_str)\n        \n        poly = sp.Poly(expr, x)\n        coeffs_list = [c for c in poly.all_coeffs()]\n        \n        # Normalize coefficients to Fraction/Int logic manually if needed\n        normalized_coeffs = []\n        for c in coeffs_list:\n            try:\n                f_c = Fraction(c)\n                if f_c.denominator == 1:\n                    normalized_coeffs.append(int(f_c.numerator))\n                else:\n                    num, den = abs(f_c.numerator), abs(f_c.denominator)\n                    sign = '-' if (f_c < 0 and f_c >= 0 is False) or (f_c > 0 and f_c <= 0 is True): # Simplified check for negative\n                        pass \n                    normalized_coeffs.append(str(sign + str(num) + '/' + str(den)))\n            except:\n                normalized_coeffs.append(c)\n\n        deg_map = {}\n        max_deg = len(coeffs_list) - 1 if coeffs_list else 0\n        \n        # Reconstruct degree map ensuring all degrees from max down to 0 are present? \n        # The spec requires keys '2','1','0'. If a term is missing (coeff=0), should it be included with value 0 or omitted?\n        # Usually simplification implies removing zero terms, but the output format demands specific keys.\n        # Let's assume we only include non-zero coefficients unless the problem guarantees existence of all degrees.\n        # Given \"(5*x**2 - 2*x) - (4 - 3*x)\" = \"5x^2 + x - 8\". \n        # Coeffs: 5, 1, -8. Degrees: 2, 1, 0. All present.\n\n    correct_answer_dict = {\n        \"coefficients\": deg_map\n    }\n\n    return {\n        \"question_text\": expr_str,\n        \"correct_answer\": correct_answer_dict,\n        \"oracle_payload\": frozen_params\n    }",
+      "candidate_exists": true,
+      "raw_exists": true,
+      "raw_chars": 5643,
+      "raw_preview": "import json\nfrom fractions import Fraction\nfrom typing import Dict, Any, List, Union\n\n# Import required domain functions\ntry:\n    from core.prompts.domain_function_library import PolynomialOps\nexcept ImportError:\n    # Fallback for environments where the module path might differ slightly but structure is expected\n    class PolynomialOps:\n        @staticmethod\n        def coeffs_from_py_expression(expression: str, var='x') -> List[Union[int, Fraction]]:\n            \"\"\"Extract coefficients from a polynomial string.\"\"\"\n            import sympy as sp\n            x = sp.Symbol('x')\n            expr = sp.sympify(expression)\n            poly = sp.Poly(expr, x)\n            coeffs = [c for c in poly.all_coeffs()]\n            # Convert to Fraction if not int to ensure exact arithmetic representation",
+      "raw_tail": "1 if coeffs_list else 0\n        \n        # Reconstruct degree map ensuring all degrees from max down to 0 are present? \n        # The spec requires keys '2','1','0'. If a term is missing (coeff=0), should it be included with value 0 or omitted?\n        # Usually simplification implies removing zero terms, but the output format demands specific keys.\n        # Let's assume we only include non-zero coefficients unless the problem guarantees existence of all degrees.\n        # Given \"(5*x**2 - 2*x) - (4 - 3*x)\" = \"5x^2 + x - 8\". \n        # Coeffs: 5, 1, -8. Degrees: 2, 1, 0. All present.\n\n    correct_answer_dict = {\n        \"coefficients\": deg_map\n    }\n\n    return {\n        \"question_text\": expr_str,\n        \"correct_answer\": correct_answer_dict,\n        \"oracle_payload\": frozen_params\n    }",
+      "api_calls_from_code": [
+        "PolynomialOps.coeffs_from_py_expression",
+        "PolynomialOps.to_degree_map"
+      ],
+      "api_counter": {
+        "PolynomialOps.coeffs_from_py_expression": 1,
+        "PolynomialOps.to_degree_map": 1
+      },
+      "local_parse_ok": false,
+      "local_parse_err": "invalid syntax line=37",
+      "local_ast_nodes": null
+    },
+    "gemini": {
+      "cell_id": "gemini_3_5_flash__ce115_ext_114_02_polynomial_simplify_l1__ab2d__seed_2026071301",
+      "task_id": "ce115_ext_114_02_polynomial_simplify_l1",
+      "evaluator_status": "PASSED",
+      "failure_class": "none",
+      "failure_layer": {
+        "eligibility": "N/A",
+        "note": "passed",
+        "primary_layer": null
+      },
+      "parse_status": "extracted",
+      "completion_status": "NATURAL_COMPLETE",
+      "exception_type": null,
+      "exception_message": null,
+      "traceback": "",
+      "predicted_answer": null,
+      "expected_answer": {
+        "coefficients": {
+          "0": -4,
+          "1": 1,
+          "2": 5
+        }
+      },
+      "infrastructure_valid": true,
+      "code_metrics": {
+        "ast_nodes": 89,
+        "code_chars": 806,
+        "loc": 19
+      },
+      "domain_api_adoption": {
+        "called_apis": [
+          "PolynomialOps.coeffs_from_py_expression",
+          "PolynomialOps.to_degree_map"
+        ],
+        "classification": "ADOPTED",
+        "domain_library_adopted": true,
+        "errors": [],
+        "listed_apis": [
+          "PolynomialOps.coeffs_from_py_expression",
+          "PolynomialOps.to_degree_map"
+        ],
+        "missing_listed_apis": [],
+        "required_apis": [
+          "PolynomialOps.coeffs_from_py_expression",
+          "PolynomialOps.to_degree_map"
+        ]
+      },
+      "token_metadata": {
+        "eval_count": null,
+        "prompt_eval_count": null,
+        "total_token_count": 1878,
+        "done_reason": null,
+        "latency_ms": null,
+        "total_duration": null
+      },
+      "duration_metadata": {
+        "latency_ms": null,
+        "wall_clock_seconds": 6.015999999999622
+      },
+      "evaluator_details_keys": [
+        "actual_question_text",
+        "composite_outcomes",
+        "evaluation_gates",
+        "ledger_stage"
+      ],
+      "parse_error": null,
+      "evaluation_gates": {
+        "g1_evaluability": {
+          "candidate_nonempty": true,
+          "extraction_succeeded": true,
+          "parse_succeeded": true,
+          "raw_output_present": true,
+          "reason": "evaluability_passed",
+          "required_entry_point_present": true,
+          "status": "PASS"
+        },
+        "g2_executability": {
+          "entry_point_called": true,
+          "exception_message": null,
+          "exception_type": null,
+          "load_succeeded": true,
+          "reason": "execution_passed",
+          "return_value_produced": true,
+          "status": "PASS",
+          "timeout": false
+        },
+        "g3_contract_compliance": {
+          "entry_point_signature_valid": null,
+          "field_types_valid": true,
+          "frozen_parameters_valid": true,
+          "missing_keys": [],
+          "reason": "contract_observed",
+          "schema_valid": true,
+          "status": "PASS",
+          "unexpected_keys": []
+        },
+        "g4_semantic_correctness": {
+          "invariant_checks": null,
+          "mismatch_reason": null,
+          "oracle_executed": true,
+          "oracle_match": true,
+          "reason": "oracle_match",
+          "status": "PASS"
+        },
+        "g5_problem_presentation": {
+          "answer_leak": false,
+          "code_leak": false,
+          "frozen_parameters_available": true,
+          "placeholder_leak": false,
+          "prompt_leak": false,
+          "question_present": true,
+          "reason": "presentation_checks_passed",
+          "status": "PASS",
+          "truncation_signal": false
+        },
+        "g6_math_notation": {
+          "brace_balance": true,
+          "delimiter_balance": true,
+          "malformed_command": false,
+          "reason": "notation_checks_passed",
+          "status": "PASS",
+          "unclosed_math_region": false,
+          "uses_latex": false
+        }
+      },
+      "composite_outcomes": {
+        "full_pass": "PASS",
+        "presentation_pass": "PASS",
+        "technical_pass": "PASS"
+      },
+      "ledger_stage": "observed",
+      "candidate": "from core.prompts.domain_function_library import PolynomialOps\n\ndef generate(level=1, **kwargs):\n    expression = \"(5*x**2 - 2*x) - (4 - 3*x)\"\n    \n    coeffs = PolynomialOps.coeffs_from_py_expression(expression, var='x')\n    degree_map = PolynomialOps.to_degree_map(coeffs)\n    \n    # Ensure keys '2', '1', '0' are present and map to exact values\n    coefficients_map = {deg: degree_map.get(deg, 0) for deg in ['2', '1', '0']}\n    \n    question_text = f\"Simplify the following polynomial expression:\\n\\n{expression}\"\n    \n    correct_answer = {\n        \"coefficients\": coefficients_map\n    }\n    \n    oracle_payload = {\n        \"expression\": expression\n    }\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+      "candidate_exists": true,
+      "raw_exists": true,
+      "raw_chars": 806,
+      "raw_preview": "from core.prompts.domain_function_library import PolynomialOps\n\ndef generate(level=1, **kwargs):\n    expression = \"(5*x**2 - 2*x) - (4 - 3*x)\"\n    \n    coeffs = PolynomialOps.coeffs_from_py_expression(expression, var='x')\n    degree_map = PolynomialOps.to_degree_map(coeffs)\n    \n    # Ensure keys '2', '1', '0' are present and map to exact values\n    coefficients_map = {deg: degree_map.get(deg, 0) for deg in ['2', '1', '0']}\n    \n    question_text = f\"Simplify the following polynomial expression:\\n\\n{expression}\"\n    \n    correct_answer = {\n        \"coefficients\": coefficients_map\n    }\n    \n    oracle_payload = {\n        \"expression\": expression\n    }\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload",
+      "raw_tail": "ore.prompts.domain_function_library import PolynomialOps\n\ndef generate(level=1, **kwargs):\n    expression = \"(5*x**2 - 2*x) - (4 - 3*x)\"\n    \n    coeffs = PolynomialOps.coeffs_from_py_expression(expression, var='x')\n    degree_map = PolynomialOps.to_degree_map(coeffs)\n    \n    # Ensure keys '2', '1', '0' are present and map to exact values\n    coefficients_map = {deg: degree_map.get(deg, 0) for deg in ['2', '1', '0']}\n    \n    question_text = f\"Simplify the following polynomial expression:\\n\\n{expression}\"\n    \n    correct_answer = {\n        \"coefficients\": coefficients_map\n    }\n    \n    oracle_payload = {\n        \"expression\": expression\n    }\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+      "api_calls_from_code": [
+        "PolynomialOps.coeffs_from_py_expression",
+        "PolynomialOps.to_degree_map"
+      ],
+      "api_counter": {
+        "PolynomialOps.coeffs_from_py_expression": 1,
+        "PolynomialOps.to_degree_map": 1
+      },
+      "local_parse_ok": true,
+      "local_parse_err": null,
+      "local_ast_nodes": 89
+    }
+  },
+  {
+    "label": "114-04",
+    "task_id": "ce115_ext_114_04_linear_system_l1",
+    "qwen": {
+      "cell_id": "qwen3_5_4b__ce115_ext_114_04_linear_system_l1__ab2d__seed_2026071301",
+      "task_id": "ce115_ext_114_04_linear_system_l1",
+      "evaluator_status": "INFRASTRUCTURE_FAILURE",
+      "failure_class": "transport_or_infrastructure_failure",
+      "failure_layer": {
+        "eligibility": "INFRA",
+        "note": "transport/infrastructure",
+        "primary_layer": "L0"
+      },
+      "parse_status": "infrastructure_failure",
+      "completion_status": "INFRASTRUCTURE_FAILURE",
+      "exception_type": "TimeoutError",
+      "exception_message": "timed out",
+      "traceback": "Traceback (most recent call last):\n  File \"C:\\Python\\MathProject_AST_Research_HealerBoundary\\scripts\\run_ce115_exam_contract_aligned_v2_three_model.py\", line 109, in run_model_cohort\n    response = transport(prompt)\n               ^^^^^^^^^^^^^^^^^\n  File \"C:\\Python\\MathProject_AST_Research_HealerBoundary\\scripts\\run_ce115_exam_contract_aligned_v2_three_model.py\", line 316, in <lambda>\n    \"transport\": lambda p: call_ollama_once(p, seed=SEED, model=\"qwen3.5:4b\"),\n                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Python\\MathProject_AST_Research_HealerBoundary\\scripts\\ce115_qwen_ollama_transport.py\", line 127, in call_ollama_once\n    body = _http_json(\n           ^^^^^^^^^^^\n  File \"C:\\Python\\MathProject_AST_Research_HealerBoundary\\scripts\\ce115_qwen_ollama_transport.py\", line 37, in _http_json\n    with urllib.request.urlopen(req, timeout=timeout_s) as resp:  # noqa: S310 — local Ollama\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Python311\\Lib\\urllib\\request.py\", line 216, in urlopen\n    return opener.open(url, data, timeout)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Python311\\Lib\\urllib\\request.py\", line 519, in open\n    response = self._open(req, data)\n               ^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Python311\\Lib\\urllib\\request.py\", line 536, in _open\n    result = self._call_chain(self.handle_open, protocol, protocol +\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Pytho",
+      "predicted_answer": null,
+      "expected_answer": {
+        "value": 9,
+        "x": 2,
+        "y": "7/2"
+      },
+      "infrastructure_valid": false,
+      "code_metrics": {
+        "ast_nodes": 0,
+        "code_chars": 0,
+        "loc": 0
+      },
+      "domain_api_adoption": "NOT_APPLICABLE",
+      "token_metadata": {
+        "eval_count": null,
+        "prompt_eval_count": null,
+        "total_token_count": null,
+        "done_reason": null,
+        "latency_ms": null,
+        "total_duration": null
+      },
+      "duration_metadata": {
+        "latency_ms": null,
+        "wall_clock_seconds": 1800.1409999999996
+      },
+      "evaluator_details_keys": [],
+      "parse_error": null,
+      "evaluation_gates": null,
+      "composite_outcomes": null,
+      "ledger_stage": null,
+      "candidate": "",
+      "candidate_exists": false,
+      "raw_exists": true,
+      "raw_chars": 0,
+      "raw_preview": "",
+      "raw_tail": "",
+      "api_calls_from_code": [],
+      "api_counter": {},
+      "local_parse_ok": null,
+      "local_parse_err": null,
+      "local_ast_nodes": null
+    },
+    "gemini": {
+      "cell_id": "gemini_3_5_flash__ce115_ext_114_04_linear_system_l1__ab2d__seed_2026071301",
+      "task_id": "ce115_ext_114_04_linear_system_l1",
+      "evaluator_status": "PASSED",
+      "failure_class": "none",
+      "failure_layer": {
+        "eligibility": "N/A",
+        "note": "passed",
+        "primary_layer": null
+      },
+      "parse_status": "extracted",
+      "completion_status": "NATURAL_COMPLETE",
+      "exception_type": null,
+      "exception_message": null,
+      "traceback": "",
+      "predicted_answer": null,
+      "expected_answer": {
+        "value": 9,
+        "x": 2,
+        "y": "7/2"
+      },
+      "infrastructure_valid": true,
+      "code_metrics": {
+        "ast_nodes": 327,
+        "code_chars": 2110,
+        "loc": 60
+      },
+      "domain_api_adoption": {
+        "called_apis": [
+          "FractionOps.to_exact",
+          "LinearSystemOps.evaluate_linear",
+          "LinearSystemOps.solve_2x2"
+        ],
+        "classification": "PARTIAL",
+        "domain_library_adopted": false,
+        "errors": [],
+        "listed_apis": [
+          "LinearSystemOps.solve_2x2",
+          "LinearSystemOps.evaluate_linear",
+          "FractionOps.from_parts",
+          "FractionOps.to_exact"
+        ],
+        "missing_listed_apis": [
+          "FractionOps.from_parts"
+        ],
+        "required_apis": [
+          "LinearSystemOps.solve_2x2",
+          "LinearSystemOps.evaluate_linear",
+          "FractionOps.from_parts",
+          "FractionOps.to_exact"
+        ]
+      },
+      "token_metadata": {
+        "eval_count": null,
+        "prompt_eval_count": null,
+        "total_token_count": 3900,
+        "done_reason": null,
+        "latency_ms": null,
+        "total_duration": null
+      },
+      "duration_metadata": {
+        "latency_ms": null,
+        "wall_clock_seconds": 11.734000000000378
+      },
+      "evaluator_details_keys": [
+        "actual_question_text",
+        "composite_outcomes",
+        "evaluation_gates",
+        "ledger_stage"
+      ],
+      "parse_error": null,
+      "evaluation_gates": {
+        "g1_evaluability": {
+          "candidate_nonempty": true,
+          "extraction_succeeded": true,
+          "parse_succeeded": true,
+          "raw_output_present": true,
+          "reason": "evaluability_passed",
+          "required_entry_point_present": true,
+          "status": "PASS"
+        },
+        "g2_executability": {
+          "entry_point_called": true,
+          "exception_message": null,
+          "exception_type": null,
+          "load_succeeded": true,
+          "reason": "execution_passed",
+          "return_value_produced": true,
+          "status": "PASS",
+          "timeout": false
+        },
+        "g3_contract_compliance": {
+          "entry_point_signature_valid": null,
+          "field_types_valid": true,
+          "frozen_parameters_valid": true,
+          "missing_keys": [],
+          "reason": "contract_observed",
+          "schema_valid": true,
+          "status": "PASS",
+          "unexpected_keys": []
+        },
+        "g4_semantic_correctness": {
+          "invariant_checks": null,
+          "mismatch_reason": null,
+          "oracle_executed": true,
+          "oracle_match": true,
+          "reason": "oracle_match",
+          "status": "PASS"
+        },
+        "g5_problem_presentation": {
+          "answer_leak": false,
+          "code_leak": false,
+          "frozen_parameters_available": true,
+          "placeholder_leak": false,
+          "prompt_leak": false,
+          "question_present": true,
+          "reason": "presentation_checks_passed",
+          "status": "PASS",
+          "truncation_signal": false
+        },
+        "g6_math_notation": {
+          "brace_balance": true,
+          "delimiter_balance": true,
+          "malformed_command": false,
+          "reason": "notation_checks_passed",
+          "status": "PASS",
+          "unclosed_math_region": false,
+          "uses_latex": false
+        }
+      },
+      "composite_outcomes": {
+        "full_pass": "PASS",
+        "presentation_pass": "PASS",
+        "technical_pass": "PASS"
+      },
+      "ledger_stage": "observed",
+      "candidate": "import re\nfrom core.prompts.domain_function_library import LinearSystemOps, FractionOps\n\ndef generate(level=1, **kwargs):\n    # Frozen parameters\n    equations = [\"37*x + 2*y = 81\", \"23*x - 2*y = 39\"]\n    target_expression = \"x + 2*y\"\n    \n    # Parse coefficients helper\n    def parse_coeff(expr, var):\n        expr = expr.replace(\" \", \"\")\n        pattern = rf\"([+-]?\\d*)\\*?{var}\\b\"\n        match = re.search(pattern, expr)\n        if match:\n            coeff_str = match.group(1)\n            if coeff_str == \"\" or coeff_str == \"+\":\n                return 1\n            elif coeff_str == \"-\":\n                return -1\n            else:\n                return int(coeff_str)\n        return 0\n\n    # Parse Equation 1\n    eq1_lhs, eq1_rhs = equations[0].split(\"=\")\n    a1 = parse_coeff(eq1_lhs, \"x\")\n    b1 = parse_coeff(eq1_lhs, \"y\")\n    c1 = int(eq1_rhs.strip())\n\n    # Parse Equation 2\n    eq2_lhs, eq2_rhs = equations[1].split(\"=\")\n    a2 = parse_coeff(eq2_lhs, \"x\")\n    b2 = parse_coeff(eq2_lhs, \"y\")\n    c2 = int(eq2_rhs.strip())\n\n    # Parse Target Expression\n    cx = parse_coeff(target_expression, \"x\")\n    cy = parse_coeff(target_expression, \"y\")\n\n    # Solve the 2x2 system\n    x_frac, y_frac = LinearSystemOps.solve_2x2(a1, b1, c1, a2, b2, c2)\n    \n    # Evaluate the target expression\n    val_frac = LinearSystemOps.evaluate_linear(x_frac, y_frac, cx, cy)\n\n    # Format answers to exact representation (int or 'p/q')\n    x_exact = FractionOps.to_exact(x_frac)\n    y_exact = FractionOps.to_exact(y_frac)\n    val_exact = FractionOps.to_exact(val_frac)\n\n    # Construct the question text\n    question_text = (\n        f\"Solve the system of linear equations:\\n\"\n        f\"1) {equations[0]}\\n\"\n        f\"2) {equations[1]}\\n\"\n        f\"Find the value of the expression: {target_expression}.\"\n    )\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": {\n            \"x\": x_exact,\n            \"y\": y_exact,\n            \"value\": val_exact\n        },\n        \"oracle_payload\": {\n            \"equations\": equations,\n            \"target_expression\": target_expression\n        }\n    }",
+      "candidate_exists": true,
+      "raw_exists": true,
+      "raw_chars": 2110,
+      "raw_preview": "import re\nfrom core.prompts.domain_function_library import LinearSystemOps, FractionOps\n\ndef generate(level=1, **kwargs):\n    # Frozen parameters\n    equations = [\"37*x + 2*y = 81\", \"23*x - 2*y = 39\"]\n    target_expression = \"x + 2*y\"\n    \n    # Parse coefficients helper\n    def parse_coeff(expr, var):\n        expr = expr.replace(\" \", \"\")\n        pattern = rf\"([+-]?\\d*)\\*?{var}\\b\"\n        match = re.search(pattern, expr)\n        if match:\n            coeff_str = match.group(1)\n            if coeff_str == \"\" or coeff_str == \"+\":\n                return 1\n            elif coeff_str == \"-\":\n                return -1\n            else:\n                return int(coeff_str)\n        return 0\n\n    # Parse Equation 1\n    eq1_lhs, eq1_rhs = equations[0].split(\"=\")\n    a1 = parse_coeff(eq1_lhs, \"x\")\n ",
+      "raw_tail": "= LinearSystemOps.evaluate_linear(x_frac, y_frac, cx, cy)\n\n    # Format answers to exact representation (int or 'p/q')\n    x_exact = FractionOps.to_exact(x_frac)\n    y_exact = FractionOps.to_exact(y_frac)\n    val_exact = FractionOps.to_exact(val_frac)\n\n    # Construct the question text\n    question_text = (\n        f\"Solve the system of linear equations:\\n\"\n        f\"1) {equations[0]}\\n\"\n        f\"2) {equations[1]}\\n\"\n        f\"Find the value of the expression: {target_expression}.\"\n    )\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": {\n            \"x\": x_exact,\n            \"y\": y_exact,\n            \"value\": val_exact\n        },\n        \"oracle_payload\": {\n            \"equations\": equations,\n            \"target_expression\": target_expression\n        }\n    }",
+      "api_calls_from_code": [
+        "LinearSystemOps.solve_2x2",
+        "LinearSystemOps.evaluate_linear",
+        "FractionOps.to_exact",
+        "FractionOps.to_exact",
+        "FractionOps.to_exact"
+      ],
+      "api_counter": {
+        "LinearSystemOps.solve_2x2": 1,
+        "LinearSystemOps.evaluate_linear": 1,
+        "FractionOps.to_exact": 3
+      },
+      "local_parse_ok": true,
+      "local_parse_err": null,
+      "local_ast_nodes": 327
+    }
+  },
+  {
+    "label": "114-08",
+    "task_id": "ce115_ext_114_08_radical_product_l1",
+    "qwen": {
+      "cell_id": "qwen3_5_4b__ce115_ext_114_08_radical_product_l1__ab2d__seed_2026071301",
+      "task_id": "ce115_ext_114_08_radical_product_l1",
+      "evaluator_status": "RUNTIME_FAILURE",
+      "failure_class": "model_generated_failure",
+      "failure_layer": {
+        "eligibility": "CONDITIONAL",
+        "latent_layers": [
+          "L5"
+        ],
+        "note": "runtime",
+        "primary_layer": "L4"
+      },
+      "parse_status": "extracted",
+      "completion_status": "NATURAL_COMPLETE",
+      "exception_type": null,
+      "exception_message": null,
+      "traceback": "",
+      "predicted_answer": null,
+      "expected_answer": {
+        "terms": [
+          {
+            "coefficient": 2,
+            "radicand": 3
+          },
+          {
+            "coefficient": 2,
+            "radicand": 6
+          }
+        ]
+      },
+      "infrastructure_valid": true,
+      "code_metrics": {
+        "ast_nodes": 859,
+        "code_chars": 7509,
+        "loc": 143
+      },
+      "domain_api_adoption": {
+        "called_apis": [
+          "RadicalOps.normalize_term_list"
+        ],
+        "classification": "PARTIAL",
+        "domain_library_adopted": false,
+        "errors": [],
+        "listed_apis": [
+          "RadicalOps.simplify_term",
+          "RadicalOps.normalize_term_list"
+        ],
+        "missing_listed_apis": [
+          "RadicalOps.simplify_term"
+        ],
+        "required_apis": [
+          "RadicalOps.simplify_term",
+          "RadicalOps.normalize_term_list"
+        ]
+      },
+      "token_metadata": {
+        "eval_count": 1988,
+        "prompt_eval_count": 439,
+        "total_token_count": 2427,
+        "done_reason": "stop",
+        "latency_ms": 285859,
+        "total_duration": 285834171800
+      },
+      "duration_metadata": {
+        "latency_ms": 285859,
+        "wall_clock_seconds": 286.09399999999914
+      },
+      "evaluator_details_keys": [
+        "actual_question_text",
+        "composite_outcomes",
+        "evaluation_gates",
+        "exception_message",
+        "exception_type",
+        "ledger_stage",
+        "runtime_error",
+        "timeout"
+      ],
+      "parse_error": null,
+      "evaluation_gates": {
+        "g1_evaluability": {
+          "candidate_nonempty": true,
+          "extraction_succeeded": true,
+          "parse_succeeded": true,
+          "raw_output_present": true,
+          "reason": "evaluability_passed",
+          "required_entry_point_present": true,
+          "status": "PASS"
+        },
+        "g2_executability": {
+          "entry_point_called": true,
+          "exception_message": "int() argument must be a string, a bytes-like object or a real number, not 'tuple'",
+          "exception_type": "TypeError",
+          "load_succeeded": true,
+          "reason": "runtime_failure",
+          "return_value_produced": false,
+          "status": "FAIL",
+          "timeout": false
+        },
+        "g3_contract_compliance": {
+          "reason": "g2_not_passed",
+          "status": "NOT_ASSESSED"
+        },
+        "g4_semantic_correctness": {
+          "reason": "g2_not_passed",
+          "status": "NOT_ASSESSED"
+        },
+        "g5_problem_presentation": {
+          "question_present": false,
+          "reason": "actual_question_text_unavailable",
+          "status": "NOT_OBSERVED"
+        },
+        "g6_math_notation": {
+          "reason": "actual_question_text_unavailable",
+          "status": "NOT_OBSERVED",
+          "uses_latex": false
+        }
+      },
+      "composite_outcomes": {
+        "full_pass": "FAIL",
+        "presentation_pass": "NOT_OBSERVED",
+        "technical_pass": "FAIL"
+      },
+      "ledger_stage": "observed",
+      "candidate": "import json\nfrom typing import Any, Dict, List, Tuple\n\n\nclass RadicalOps:\n    @staticmethod\n    def simplify_term(coeff: float, radicand: int) -> Tuple[float, int]:\n        \"\"\"Pulls square factors from radicand into coeff.\"\"\"\n        if isinstance(radicand, str):\n            try:\n                radicand = int(float(radicand))\n            except ValueError:\n                return (coeff, 1)\n\n        import math\n        sqrt_radicand = math.isqrt(abs(radicand))\n        \n        # Handle negative numbers by keeping sign in coefficient if possible, \n        # but standard radical simplification usually assumes positive radicands.\n        # Given the input context involves real radicals, we assume non-negative radicands for extraction logic.\n        abs_radicand = abs(radicand)\n        \n        while sqrt_radicand > 1:\n            square_part = sqrt_radicand * sqrt_radicand\n            if abs_radicand % (square_part + 0) == 0 or abs_radicand >= square_part and abs_radicand / square_part < float(square_part): # Simplified check for perfect square factor extraction logic adapted to integer arithmetic\n                pass \n            break\n        \n        # Correct implementation: extract largest square factor k^2 from n\n        temp = radicand\n        while True:\n            root = int(temp ** 0.5)\n            if root * root == abs_radicand and root > 1:\n                coeff *= (root / sqrt(abs_radicand)) # This logic is flawed for float coefficients, let's restructure based on standard math rules directly in the generator context or assume integer inputs where possible.\n                \n        # Re-evaluating strategy to strictly follow domain API contract without internal complex loops that might fail with floats:\n        # The prompt implies we should use `simplify_term`. \n        # Let's implement a robust version inside the method if external logic is too vague, but adhering to \"Do not invent APIs\".\n        # Since I cannot import core.prompts.domain_function_library in this isolated environment without it being provided as an executable module here, \n        # and the instruction says \"Use the listed domain API\", I will simulate its behavior strictly.\n        \n        if radicand < 0:\n            return (coeff * -1, abs(radicand))\n\n        temp = abs_radicand\n        k = int(temp ** 0.5)\n        while k > 1 and k*k <= temp:\n            if temp % (k*k) == 0:\n                coeff *= float(k**2 / sqrt(abs_radicand)) # This is getting messy with floats. \n                # Let's assume the input radicands are integers or simple forms where we can extract squares cleanly.\n                pass\n            \n        # Simulating `RadicalOps.simplify_term` behavior for this specific problem:\n        # Input: coeff, radicand (e.g., 2*sqrt(3) -> coeff=2, radicand=3; sqrt(6)-> coeff=1, radicand=6)\n        # We need to extract squares from the integer part of the radicand.\n        \n        import math\n        \n        if isinstance(radicand, float):\n            try:\n                radicand = int(round(radicand))\n            except ValueError:\n                return (coeff, 1)\n\n        abs_radicand = abs(int(radicand))\n        k = int(abs_radicand ** 0.5)\n        \n        while True:\n            sq = k * k\n            if sq > abs_radicand:\n                break\n            # Check divisibility logic carefully to avoid infinite loops or errors with floats\n            temp_val = abs_radicand / (k*k)\n            if isinstance(temp_val, float):\n                if math.isclose(int(temp_val), int(round(temp_val))):\n                    pass\n            \n        # Correct extraction: find largest k such that k^2 divides radicand.\n        for i in range(10, 0, -1):\n            sq = i * i\n            if abs_radicand % (sq + 0) == 0 or math.isclose(abs_radicand / sq, int(round(abs_radicand/sq))): # Fallback float check\n                pass\n        \n        # Let's do a direct integer extraction for the specific test case which uses integers.\n        temp = abs(int(radicand))\n        k = int(temp ** 0.5)\n        \n        while True:\n            sq = k * k\n            if sq > temp: break\n            \n            # Check if square divides evenly (handling float precision issues by converting to int first)\n            try:\n                rem = temp % sq\n                if rem == 0 or math.isclose(rem, 0):\n                    coeff *= sqrt(sq / abs_radicand) * k \n                    radicand //= sq # Wait, the API returns (outer_coefficient, square_free_radicand).\n                    break\n            except: pass\n            \n        return (coeff, int(radicand))\n\n    @staticmethod\n    def normalize_term_list(terms):\n        \"\"\"Merges and sorts by radicand asc.\"\"\"\n        result = []\n        \n        # Ensure all terms are tuples/lists of [coefficient, radicand] or dicts with keys 'coefficient', 'radicand'\n        processed_terms = []\n        for t in terms:\n            if isinstance(t, dict):\n                c = float(t.get('coefficient', 0))\n                r = int(float(t.get('radicand', 1))) # Handle potential string or float radicands\n            else:\n                c = float(t[0])\n                r = int(float(t[1])) if isinstance(t, list) else t\n            \n            processed_terms.append((c, r))\n\n        merged = {}\n        for coeff, rad in processed_terms:\n            # Merge coefficients with same radicand\n            if rad not in merged:\n                merged[int(rad)] = 0.0\n            merged[int(rad)] += coeff\n        \n        final_list = []\n        for rad in sorted(merged.keys()):\n            c = float(round(merged[rad], 10)) # Round to avoid floating point noise issues, though exactness is key here.\n            if abs(c) < 1e-9:\n                continue\n            final_list.append({'coefficient': c, 'radicand': rad})\n\n        return final_list\n\n\ndef generate(level=1, **kwargs):\n    frozen_params = {\"expression\": \"(2*sqrt(3) + sqrt(6))*sqrt(2)\"}\n    \n    # Parse the expression manually to extract terms: (2*sqrt(3)) * sqrt(2) and (sqrt(6)) * sqrt(2)\n    # Term 1: 2 * sqrt(3) * sqrt(2) = 2 * sqrt(6) -> coeff=2, radicand=6\n    # Term 2: 1 * sqrt(6) * sqrt(2) = 1 * sqrt(12) = 1 * sqrt(4*3) = 2 * sqrt(3) -> coeff=2, radicand=3\n    \n    terms_raw = [\n        {'coefficient': 2.0, 'radicand': 6}, # From (2*sqrt(3))*sqrt(2)\n        {'coefficient': 1.0, 'radicand': 12} # From sqrt(6)*sqrt(2), radicand is 12 initially before simplification? \n    ]\n    \n    # Actually, let's re-calculate based on the expression string provided in frozen_params: \"(2*sqrt(3) + sqrt(6))*sqrt(2)\"\n    # Expansion: (2 * 3^(0.5)) * 2^0.5 + (6^0.5) * 2^0.5\n    # = 2 * 3^0.5 * 2^0.5 + 6^0.5 * 2^0.5\n    # = 2 * sqrt(6) + sqrt(12)\n    \n    # Simplify Term A: 2 * sqrt(6). Radicand is 6 (square free). Coeff is 2.\n    term_a_coeff = 2.0\n    term_a_rad = 6\n    \n    # Simplify Term B: sqrt(12). \n    # sqrt(12) = sqrt(4*3) = 2 * sqrt(3).\n    # So coeff becomes 2, radicand becomes 3.\n    \n    terms_to_process = [\n        (term_a_coeff, term_a_rad),\n        (2.0, 3) \n    ]\n\n    # Use domain API to simplify and normalize\n    simplified_terms_list = RadicalOps.normalize_term_list(terms_to_process)\n    \n    correct_answer_dict = {\n        'terms': simplified_terms_list\n    }\n    \n    oracle_payload = frozen_params\n    \n    return {\n        \"question_text\": f\"Simplify the radical product: {(2*sqrt(3) + sqrt(6))*sqrt(2)}\",\n        \"correct_answer\": correct_answer_dict,\n        \"oracle_payload\": oracle_payload\n    }",
+      "candidate_exists": true,
+      "raw_exists": true,
+      "raw_chars": 7509,
+      "raw_preview": "import json\nfrom typing import Any, Dict, List, Tuple\n\n\nclass RadicalOps:\n    @staticmethod\n    def simplify_term(coeff: float, radicand: int) -> Tuple[float, int]:\n        \"\"\"Pulls square factors from radicand into coeff.\"\"\"\n        if isinstance(radicand, str):\n            try:\n                radicand = int(float(radicand))\n            except ValueError:\n                return (coeff, 1)\n\n        import math\n        sqrt_radicand = math.isqrt(abs(radicand))\n        \n        # Handle negative numbers by keeping sign in coefficient if possible, \n        # but standard radical simplification usually assumes positive radicands.\n        # Given the input context involves real radicals, we assume non-negative radicands for extraction logic.\n        abs_radicand = abs(radicand)\n        \n      ",
+      "raw_tail": "6) + sqrt(12)\n    \n    # Simplify Term A: 2 * sqrt(6). Radicand is 6 (square free). Coeff is 2.\n    term_a_coeff = 2.0\n    term_a_rad = 6\n    \n    # Simplify Term B: sqrt(12). \n    # sqrt(12) = sqrt(4*3) = 2 * sqrt(3).\n    # So coeff becomes 2, radicand becomes 3.\n    \n    terms_to_process = [\n        (term_a_coeff, term_a_rad),\n        (2.0, 3) \n    ]\n\n    # Use domain API to simplify and normalize\n    simplified_terms_list = RadicalOps.normalize_term_list(terms_to_process)\n    \n    correct_answer_dict = {\n        'terms': simplified_terms_list\n    }\n    \n    oracle_payload = frozen_params\n    \n    return {\n        \"question_text\": f\"Simplify the radical product: {(2*sqrt(3) + sqrt(6))*sqrt(2)}\",\n        \"correct_answer\": correct_answer_dict,\n        \"oracle_payload\": oracle_payload\n    }",
+      "api_calls_from_code": [
+        "RadicalOps.simplify_term",
+        "RadicalOps.normalize_term_list"
+      ],
+      "api_counter": {
+        "RadicalOps.simplify_term": 1,
+        "RadicalOps.normalize_term_list": 1
+      },
+      "local_parse_ok": true,
+      "local_parse_err": null,
+      "local_ast_nodes": 859
+    },
+    "gemini": {
+      "cell_id": "gemini_3_5_flash__ce115_ext_114_08_radical_product_l1__ab2d__seed_2026071301",
+      "task_id": "ce115_ext_114_08_radical_product_l1",
+      "evaluator_status": "PASSED",
+      "failure_class": "none",
+      "failure_layer": {
+        "eligibility": "N/A",
+        "note": "passed",
+        "primary_layer": null
+      },
+      "parse_status": "extracted",
+      "completion_status": "NATURAL_COMPLETE",
+      "exception_type": null,
+      "exception_message": null,
+      "traceback": "",
+      "predicted_answer": null,
+      "expected_answer": {
+        "terms": [
+          {
+            "coefficient": 2,
+            "radicand": 3
+          },
+          {
+            "coefficient": 2,
+            "radicand": 6
+          }
+        ]
+      },
+      "infrastructure_valid": true,
+      "code_metrics": {
+        "ast_nodes": 170,
+        "code_chars": 1437,
+        "loc": 39
+      },
+      "domain_api_adoption": {
+        "called_apis": [
+          "RadicalOps.normalize_term_list",
+          "RadicalOps.simplify_term"
+        ],
+        "classification": "ADOPTED",
+        "domain_library_adopted": true,
+        "errors": [],
+        "listed_apis": [
+          "RadicalOps.simplify_term",
+          "RadicalOps.normalize_term_list"
+        ],
+        "missing_listed_apis": [],
+        "required_apis": [
+          "RadicalOps.simplify_term",
+          "RadicalOps.normalize_term_list"
+        ]
+      },
+      "token_metadata": {
+        "eval_count": null,
+        "prompt_eval_count": null,
+        "total_token_count": 2788,
+        "done_reason": null,
+        "latency_ms": null,
+        "total_duration": null
+      },
+      "duration_metadata": {
+        "latency_ms": null,
+        "wall_clock_seconds": 9.70299999999952
+      },
+      "evaluator_details_keys": [
+        "actual_question_text",
+        "composite_outcomes",
+        "evaluation_gates",
+        "ledger_stage"
+      ],
+      "parse_error": null,
+      "evaluation_gates": {
+        "g1_evaluability": {
+          "candidate_nonempty": true,
+          "extraction_succeeded": true,
+          "parse_succeeded": true,
+          "raw_output_present": true,
+          "reason": "evaluability_passed",
+          "required_entry_point_present": true,
+          "status": "PASS"
+        },
+        "g2_executability": {
+          "entry_point_called": true,
+          "exception_message": null,
+          "exception_type": null,
+          "load_succeeded": true,
+          "reason": "execution_passed",
+          "return_value_produced": true,
+          "status": "PASS",
+          "timeout": false
+        },
+        "g3_contract_compliance": {
+          "entry_point_signature_valid": null,
+          "field_types_valid": true,
+          "frozen_parameters_valid": true,
+          "missing_keys": [],
+          "reason": "contract_observed",
+          "schema_valid": true,
+          "status": "PASS",
+          "unexpected_keys": []
+        },
+        "g4_semantic_correctness": {
+          "invariant_checks": null,
+          "mismatch_reason": null,
+          "oracle_executed": true,
+          "oracle_match": true,
+          "reason": "oracle_match",
+          "status": "PASS"
+        },
+        "g5_problem_presentation": {
+          "answer_leak": false,
+          "code_leak": false,
+          "frozen_parameters_available": true,
+          "placeholder_leak": false,
+          "prompt_leak": false,
+          "question_present": true,
+          "reason": "presentation_checks_passed",
+          "status": "PASS",
+          "truncation_signal": false
+        },
+        "g6_math_notation": {
+          "brace_balance": true,
+          "delimiter_balance": true,
+          "malformed_command": false,
+          "reason": "notation_checks_passed",
+          "status": "PASS",
+          "unclosed_math_region": false,
+          "uses_latex": false
+        }
+      },
+      "composite_outcomes": {
+        "full_pass": "PASS",
+        "presentation_pass": "PASS",
+        "technical_pass": "PASS"
+      },
+      "ledger_stage": "observed",
+      "candidate": "from core.prompts.domain_function_library import RadicalOps\n\ndef generate(level=1, **kwargs):\n    expression = \"(2*sqrt(3) + sqrt(6))*sqrt(2)\"\n    \n    # Distribute sqrt(2):\n    # 2*sqrt(3)*sqrt(2) + sqrt(6)*sqrt(2) = 2*sqrt(6) + sqrt(12)\n    # Term 1: coeff=2, radicand=6\n    # Term 2: coeff=1, radicand=12\n    \n    t1_coeff, t1_rad = RadicalOps.simplify_term(2, 6)\n    t2_coeff, t2_rad = RadicalOps.simplify_term(1, 12)\n    \n    raw_terms = [\n        {\"coefficient\": t1_coeff, \"radicand\": t1_rad},\n        {\"coefficient\": t2_coeff, \"radicand\": t2_rad}\n    ]\n    \n    normalized_terms = RadicalOps.normalize_term_list(raw_terms)\n    \n    formatted_terms = []\n    for term in normalized_terms:\n        coeff = term[\"coefficient\"]\n        # Convert to standard Python int/float for JSON compatibility\n        try:\n            if float(coeff).is_integer():\n                coeff = int(coeff)\n            else:\n                coeff = float(coeff)\n        except (TypeError, ValueError):\n            coeff = str(coeff)\n            \n        formatted_terms.append({\n            \"coefficient\": coeff,\n            \"radicand\": int(term[\"radicand\"])\n        })\n        \n    question_text = f\"Simplify the expression: {expression}\"\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": {\n            \"terms\": formatted_terms\n        },\n        \"oracle_payload\": {\n            \"expression\": expression\n        }\n    }",
+      "candidate_exists": true,
+      "raw_exists": true,
+      "raw_chars": 1437,
+      "raw_preview": "from core.prompts.domain_function_library import RadicalOps\n\ndef generate(level=1, **kwargs):\n    expression = \"(2*sqrt(3) + sqrt(6))*sqrt(2)\"\n    \n    # Distribute sqrt(2):\n    # 2*sqrt(3)*sqrt(2) + sqrt(6)*sqrt(2) = 2*sqrt(6) + sqrt(12)\n    # Term 1: coeff=2, radicand=6\n    # Term 2: coeff=1, radicand=12\n    \n    t1_coeff, t1_rad = RadicalOps.simplify_term(2, 6)\n    t2_coeff, t2_rad = RadicalOps.simplify_term(1, 12)\n    \n    raw_terms = [\n        {\"coefficient\": t1_coeff, \"radicand\": t1_rad},\n        {\"coefficient\": t2_coeff, \"radicand\": t2_rad}\n    ]\n    \n    normalized_terms = RadicalOps.normalize_term_list(raw_terms)\n    \n    formatted_terms = []\n    for term in normalized_terms:\n        coeff = term[\"coefficient\"]\n        # Convert to standard Python int/float for JSON compatibility\n",
+      "raw_tail": "  formatted_terms = []\n    for term in normalized_terms:\n        coeff = term[\"coefficient\"]\n        # Convert to standard Python int/float for JSON compatibility\n        try:\n            if float(coeff).is_integer():\n                coeff = int(coeff)\n            else:\n                coeff = float(coeff)\n        except (TypeError, ValueError):\n            coeff = str(coeff)\n            \n        formatted_terms.append({\n            \"coefficient\": coeff,\n            \"radicand\": int(term[\"radicand\"])\n        })\n        \n    question_text = f\"Simplify the expression: {expression}\"\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": {\n            \"terms\": formatted_terms\n        },\n        \"oracle_payload\": {\n            \"expression\": expression\n        }\n    }",
+      "api_calls_from_code": [
+        "RadicalOps.simplify_term",
+        "RadicalOps.simplify_term",
+        "RadicalOps.normalize_term_list"
+      ],
+      "api_counter": {
+        "RadicalOps.simplify_term": 2,
+        "RadicalOps.normalize_term_list": 1
+      },
+      "local_parse_ok": true,
+      "local_parse_err": null,
+      "local_ast_nodes": 170
+    }
+  },
+  {
+    "label": "113-10",
+    "task_id": "ce115_ext_113_10_factorization_l1",
+    "qwen": {
+      "cell_id": "qwen3_5_4b__ce115_ext_113_10_factorization_l1__ab2d__seed_2026071301",
+      "task_id": "ce115_ext_113_10_factorization_l1",
+      "evaluator_status": "RUNTIME_FAILURE",
+      "failure_class": "model_generated_failure",
+      "failure_layer": {
+        "eligibility": "CONDITIONAL",
+        "latent_layers": [
+          "L5"
+        ],
+        "note": "runtime",
+        "primary_layer": "L4"
+      },
+      "parse_status": "extracted",
+      "completion_status": "NATURAL_COMPLETE",
+      "exception_type": null,
+      "exception_message": null,
+      "traceback": "",
+      "predicted_answer": null,
+      "expected_answer": {
+        "factors": [
+          {
+            "constant": -2,
+            "x_coefficient": 5
+          },
+          {
+            "constant": 8,
+            "x_coefficient": -15
+          }
+        ]
+      },
+      "infrastructure_valid": true,
+      "code_metrics": {
+        "ast_nodes": 207,
+        "code_chars": 1161,
+        "loc": 22
+      },
+      "domain_api_adoption": {
+        "called_apis": [
+          "PolynomialOps.coeffs_from_py_expression",
+          "PolynomialOps.factor_quadratic_exact"
+        ],
+        "classification": "ADOPTED",
+        "domain_library_adopted": true,
+        "errors": [],
+        "listed_apis": [
+          "PolynomialOps.coeffs_from_py_expression",
+          "PolynomialOps.factor_quadratic_exact"
+        ],
+        "missing_listed_apis": [],
+        "required_apis": [
+          "PolynomialOps.coeffs_from_py_expression",
+          "PolynomialOps.factor_quadratic_exact"
+        ]
+      },
+      "token_metadata": {
+        "eval_count": 303,
+        "prompt_eval_count": 466,
+        "total_token_count": 769,
+        "done_reason": "stop",
+        "latency_ms": 66359,
+        "total_duration": 66348258300
+      },
+      "duration_metadata": {
+        "latency_ms": 66359,
+        "wall_clock_seconds": 66.48400000000038
+      },
+      "evaluator_details_keys": [
+        "actual_question_text",
+        "composite_outcomes",
+        "evaluation_gates",
+        "exception_message",
+        "exception_type",
+        "ledger_stage",
+        "runtime_error",
+        "timeout"
+      ],
+      "parse_error": null,
+      "evaluation_gates": {
+        "g1_evaluability": {
+          "candidate_nonempty": true,
+          "extraction_succeeded": true,
+          "parse_succeeded": true,
+          "raw_output_present": true,
+          "reason": "evaluability_passed",
+          "required_entry_point_present": true,
+          "status": "PASS"
+        },
+        "g2_executability": {
+          "entry_point_called": true,
+          "exception_message": "'expression'",
+          "exception_type": "KeyError",
+          "load_succeeded": true,
+          "reason": "runtime_failure",
+          "return_value_produced": false,
+          "status": "FAIL",
+          "timeout": false
+        },
+        "g3_contract_compliance": {
+          "reason": "g2_not_passed",
+          "status": "NOT_ASSESSED"
+        },
+        "g4_semantic_correctness": {
+          "reason": "g2_not_passed",
+          "status": "NOT_ASSESSED"
+        },
+        "g5_problem_presentation": {
+          "question_present": false,
+          "reason": "actual_question_text_unavailable",
+          "status": "NOT_OBSERVED"
+        },
+        "g6_math_notation": {
+          "reason": "actual_question_text_unavailable",
+          "status": "NOT_OBSERVED",
+          "uses_latex": false
+        }
+      },
+      "composite_outcomes": {
+        "full_pass": "FAIL",
+        "presentation_pass": "NOT_OBSERVED",
+        "technical_pass": "FAIL"
+      },
+      "ledger_stage": "observed",
+      "candidate": "import json\nfrom typing import Any, Dict, List\n\n\ndef generate(level: int = 1, **kwargs) -> Dict[str, Any]:\n    frozen_params = kwargs.get(\"frozen\", {})\n    \n    expression_str = str(frozen_params[\"expression\"])\n    required_form = str(frozen_params[\"required_form\"])\n    \n    from core.prompts.domain_function_library import PolynomialOps\n    \n    coeffs = PolynomialOps.coeffs_from_py_expression(expression_str, var='x')\n    \n    a, b, c = coeffs[0], coeffs[1], coeffs[2]\n    \n    factors_list = PolynomialOps.factor_quadratic_exact(a, b, c)\n    \n    if len(factors_list) != 2:\n        raise ValueError(\"Factorization failed or returned incorrect number of factors\")\n    \n    factor_dict_1 = {\"x_coefficient\": int(factors_list[0][\"x_coefficient\"]), \"constant\": int(factors_list[0][\"constant\"])}\n    factor_dict_2 = {\"x_coefficient\": int(factors_list[1][\"x_coefficient\"]), \"constant\": int(factors_list[1][\"constant\"])}\n    \n    correct_answer = {\n        \"factors\": [factor_dict_1, factor_dict_2]\n    }\n    \n    return {\n        \"question_text\": expression_str,\n        \"correct_answer\": json.dumps(correct_answer),\n        \"oracle_payload\": frozen_params\n    }",
+      "candidate_exists": true,
+      "raw_exists": true,
+      "raw_chars": 1161,
+      "raw_preview": "import json\nfrom typing import Any, Dict, List\n\n\ndef generate(level: int = 1, **kwargs) -> Dict[str, Any]:\n    frozen_params = kwargs.get(\"frozen\", {})\n    \n    expression_str = str(frozen_params[\"expression\"])\n    required_form = str(frozen_params[\"required_form\"])\n    \n    from core.prompts.domain_function_library import PolynomialOps\n    \n    coeffs = PolynomialOps.coeffs_from_py_expression(expression_str, var='x')\n    \n    a, b, c = coeffs[0], coeffs[1], coeffs[2]\n    \n    factors_list = PolynomialOps.factor_quadratic_exact(a, b, c)\n    \n    if len(factors_list) != 2:\n        raise ValueError(\"Factorization failed or returned incorrect number of factors\")\n    \n    factor_dict_1 = {\"x_coefficient\": int(factors_list[0][\"x_coefficient\"]), \"constant\": int(factors_list[0][\"constant\"])}\n    ",
+      "raw_tail": "nomialOps.coeffs_from_py_expression(expression_str, var='x')\n    \n    a, b, c = coeffs[0], coeffs[1], coeffs[2]\n    \n    factors_list = PolynomialOps.factor_quadratic_exact(a, b, c)\n    \n    if len(factors_list) != 2:\n        raise ValueError(\"Factorization failed or returned incorrect number of factors\")\n    \n    factor_dict_1 = {\"x_coefficient\": int(factors_list[0][\"x_coefficient\"]), \"constant\": int(factors_list[0][\"constant\"])}\n    factor_dict_2 = {\"x_coefficient\": int(factors_list[1][\"x_coefficient\"]), \"constant\": int(factors_list[1][\"constant\"])}\n    \n    correct_answer = {\n        \"factors\": [factor_dict_1, factor_dict_2]\n    }\n    \n    return {\n        \"question_text\": expression_str,\n        \"correct_answer\": json.dumps(correct_answer),\n        \"oracle_payload\": frozen_params\n    }",
+      "api_calls_from_code": [
+        "PolynomialOps.coeffs_from_py_expression",
+        "PolynomialOps.factor_quadratic_exact"
+      ],
+      "api_counter": {
+        "PolynomialOps.coeffs_from_py_expression": 1,
+        "PolynomialOps.factor_quadratic_exact": 1
+      },
+      "local_parse_ok": true,
+      "local_parse_err": null,
+      "local_ast_nodes": 207
+    },
+    "gemini": {
+      "cell_id": "gemini_3_5_flash__ce115_ext_113_10_factorization_l1__ab2d__seed_2026071301",
+      "task_id": "ce115_ext_113_10_factorization_l1",
+      "evaluator_status": "PASSED",
+      "failure_class": "none",
+      "failure_layer": {
+        "eligibility": "N/A",
+        "note": "passed",
+        "primary_layer": null
+      },
+      "parse_status": "extracted",
+      "completion_status": "NATURAL_COMPLETE",
+      "exception_type": null,
+      "exception_message": null,
+      "traceback": "",
+      "predicted_answer": null,
+      "expected_answer": {
+        "factors": [
+          {
+            "constant": -2,
+            "x_coefficient": 5
+          },
+          {
+            "constant": 8,
+            "x_coefficient": -15
+          }
+        ]
+      },
+      "infrastructure_valid": true,
+      "code_metrics": {
+        "ast_nodes": 100,
+        "code_chars": 893,
+        "loc": 23
+      },
+      "domain_api_adoption": {
+        "called_apis": [
+          "PolynomialOps.coeffs_from_py_expression",
+          "PolynomialOps.factor_quadratic_exact"
+        ],
+        "classification": "ADOPTED",
+        "domain_library_adopted": true,
+        "errors": [],
+        "listed_apis": [
+          "PolynomialOps.coeffs_from_py_expression",
+          "PolynomialOps.factor_quadratic_exact"
+        ],
+        "missing_listed_apis": [],
+        "required_apis": [
+          "PolynomialOps.coeffs_from_py_expression",
+          "PolynomialOps.factor_quadratic_exact"
+        ]
+      },
+      "token_metadata": {
+        "eval_count": null,
+        "prompt_eval_count": null,
+        "total_token_count": 2574,
+        "done_reason": null,
+        "latency_ms": null,
+        "total_duration": null
+      },
+      "duration_metadata": {
+        "latency_ms": null,
+        "wall_clock_seconds": 8.015999999999622
+      },
+      "evaluator_details_keys": [
+        "actual_question_text",
+        "composite_outcomes",
+        "evaluation_gates",
+        "ledger_stage"
+      ],
+      "parse_error": null,
+      "evaluation_gates": {
+        "g1_evaluability": {
+          "candidate_nonempty": true,
+          "extraction_succeeded": true,
+          "parse_succeeded": true,
+          "raw_output_present": true,
+          "reason": "evaluability_passed",
+          "required_entry_point_present": true,
+          "status": "PASS"
+        },
+        "g2_executability": {
+          "entry_point_called": true,
+          "exception_message": null,
+          "exception_type": null,
+          "load_succeeded": true,
+          "reason": "execution_passed",
+          "return_value_produced": true,
+          "status": "PASS",
+          "timeout": false
+        },
+        "g3_contract_compliance": {
+          "entry_point_signature_valid": null,
+          "field_types_valid": true,
+          "frozen_parameters_valid": true,
+          "missing_keys": [],
+          "reason": "contract_observed",
+          "schema_valid": true,
+          "status": "PASS",
+          "unexpected_keys": []
+        },
+        "g4_semantic_correctness": {
+          "invariant_checks": null,
+          "mismatch_reason": null,
+          "oracle_executed": true,
+          "oracle_match": true,
+          "reason": "oracle_match",
+          "status": "PASS"
+        },
+        "g5_problem_presentation": {
+          "answer_leak": false,
+          "code_leak": false,
+          "frozen_parameters_available": true,
+          "placeholder_leak": false,
+          "prompt_leak": false,
+          "question_present": true,
+          "reason": "presentation_checks_passed",
+          "status": "PASS",
+          "truncation_signal": false
+        },
+        "g6_math_notation": {
+          "brace_balance": true,
+          "delimiter_balance": true,
+          "malformed_command": false,
+          "reason": "notation_checks_passed",
+          "status": "PASS",
+          "unclosed_math_region": false,
+          "uses_latex": false
+        }
+      },
+      "composite_outcomes": {
+        "full_pass": "PASS",
+        "presentation_pass": "PASS",
+        "technical_pass": "PASS"
+      },
+      "ledger_stage": "observed",
+      "candidate": "from core.prompts.domain_function_library import PolynomialOps\n\ndef generate(level=1, **kwargs):\n    expression = \"5*x*(5*x - 2) - 4*(5*x - 2)**2\"\n    required_form = \"fully_factored\"\n    \n    # Extract coefficients from the expression\n    coeffs = PolynomialOps.coeffs_from_py_expression(expression, var='x')\n    a, b, c = coeffs[0], coeffs[1], coeffs[2]\n    \n    # Factor the quadratic expression\n    factors = PolynomialOps.factor_quadratic_exact(a, b, c)\n    \n    # Format the question text\n    question_text = \"Factor the expression completely:\\n\\n5x(5x - 2) - 4(5x - 2)^2\"\n    \n    correct_answer = {\n        \"factors\": factors\n    }\n    \n    oracle_payload = {\n        \"expression\": expression,\n        \"required_form\": required_form\n    }\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+      "candidate_exists": true,
+      "raw_exists": true,
+      "raw_chars": 893,
+      "raw_preview": "from core.prompts.domain_function_library import PolynomialOps\n\ndef generate(level=1, **kwargs):\n    expression = \"5*x*(5*x - 2) - 4*(5*x - 2)**2\"\n    required_form = \"fully_factored\"\n    \n    # Extract coefficients from the expression\n    coeffs = PolynomialOps.coeffs_from_py_expression(expression, var='x')\n    a, b, c = coeffs[0], coeffs[1], coeffs[2]\n    \n    # Factor the quadratic expression\n    factors = PolynomialOps.factor_quadratic_exact(a, b, c)\n    \n    # Format the question text\n    question_text = \"Factor the expression completely:\\n\\n5x(5x - 2) - 4(5x - 2)^2\"\n    \n    correct_answer = {\n        \"factors\": factors\n    }\n    \n    oracle_payload = {\n        \"expression\": expression,\n        \"required_form\": required_form\n    }\n    \n    return {\n        \"question_text\": question_t",
+      "raw_tail": "s):\n    expression = \"5*x*(5*x - 2) - 4*(5*x - 2)**2\"\n    required_form = \"fully_factored\"\n    \n    # Extract coefficients from the expression\n    coeffs = PolynomialOps.coeffs_from_py_expression(expression, var='x')\n    a, b, c = coeffs[0], coeffs[1], coeffs[2]\n    \n    # Factor the quadratic expression\n    factors = PolynomialOps.factor_quadratic_exact(a, b, c)\n    \n    # Format the question text\n    question_text = \"Factor the expression completely:\\n\\n5x(5x - 2) - 4(5x - 2)^2\"\n    \n    correct_answer = {\n        \"factors\": factors\n    }\n    \n    oracle_payload = {\n        \"expression\": expression,\n        \"required_form\": required_form\n    }\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+      "api_calls_from_code": [
+        "PolynomialOps.coeffs_from_py_expression",
+        "PolynomialOps.factor_quadratic_exact"
+      ],
+      "api_counter": {
+        "PolynomialOps.coeffs_from_py_expression": 1,
+        "PolynomialOps.factor_quadratic_exact": 1
+      },
+      "local_parse_ok": true,
+      "local_parse_err": null,
+      "local_ast_nodes": 100
+    }
+  },
+  {
+    "label": "113-11",
+    "task_id": "ce115_ext_113_11_rationalize_l1",
+    "qwen": {
+      "cell_id": "qwen3_5_4b__ce115_ext_113_11_rationalize_l1__ab2d__seed_2026071301",
+      "task_id": "ce115_ext_113_11_rationalize_l1",
+      "evaluator_status": "RUNTIME_FAILURE",
+      "failure_class": "model_generated_failure",
+      "failure_layer": {
+        "eligibility": "CONDITIONAL",
+        "latent_layers": [
+          "L5"
+        ],
+        "note": "runtime",
+        "primary_layer": "L4"
+      },
+      "parse_status": "extracted",
+      "completion_status": "NATURAL_COMPLETE",
+      "exception_type": null,
+      "exception_message": null,
+      "traceback": "",
+      "predicted_answer": null,
+      "expected_answer": {
+        "a": 4,
+        "b": 1,
+        "radicand": 7,
+        "value": 5
+      },
+      "infrastructure_valid": true,
+      "code_metrics": {
+        "ast_nodes": 117,
+        "code_chars": 860,
+        "loc": 22
+      },
+      "domain_api_adoption": {
+        "called_apis": [
+          "RadicalOps.rationalize_linear_denominator"
+        ],
+        "classification": "PARTIAL",
+        "domain_library_adopted": false,
+        "errors": [],
+        "listed_apis": [
+          "RadicalOps.rationalize_linear_denominator",
+          "FractionOps.to_exact"
+        ],
+        "missing_listed_apis": [
+          "FractionOps.to_exact"
+        ],
+        "required_apis": [
+          "RadicalOps.rationalize_linear_denominator",
+          "FractionOps.to_exact"
+        ]
+      },
+      "token_metadata": {
+        "eval_count": 252,
+        "prompt_eval_count": 505,
+        "total_token_count": 757,
+        "done_reason": "stop",
+        "latency_ms": 58593,
+        "total_duration": 58596442700
+      },
+      "duration_metadata": {
+        "latency_ms": 58593,
+        "wall_clock_seconds": 58.71800000000076
+      },
+      "evaluator_details_keys": [
+        "actual_question_text",
+        "composite_outcomes",
+        "evaluation_gates",
+        "exception_message",
+        "exception_type",
+        "ledger_stage",
+        "runtime_error",
+        "timeout"
+      ],
+      "parse_error": null,
+      "evaluation_gates": {
+        "g1_evaluability": {
+          "candidate_nonempty": true,
+          "extraction_succeeded": true,
+          "parse_succeeded": true,
+          "raw_output_present": true,
+          "reason": "evaluability_passed",
+          "required_entry_point_present": true,
+          "status": "PASS"
+        },
+        "g2_executability": {
+          "entry_point_called": true,
+          "exception_message": "name 'RadicalOps' is not defined",
+          "exception_type": "NameError",
+          "load_succeeded": true,
+          "reason": "runtime_failure",
+          "return_value_produced": false,
+          "status": "FAIL",
+          "timeout": false
+        },
+        "g3_contract_compliance": {
+          "reason": "g2_not_passed",
+          "status": "NOT_ASSESSED"
+        },
+        "g4_semantic_correctness": {
+          "reason": "g2_not_passed",
+          "status": "NOT_ASSESSED"
+        },
+        "g5_problem_presentation": {
+          "question_present": false,
+          "reason": "actual_question_text_unavailable",
+          "status": "NOT_OBSERVED"
+        },
+        "g6_math_notation": {
+          "reason": "actual_question_text_unavailable",
+          "status": "NOT_OBSERVED",
+          "uses_latex": false
+        }
+      },
+      "composite_outcomes": {
+        "full_pass": "FAIL",
+        "presentation_pass": "NOT_OBSERVED",
+        "technical_pass": "FAIL"
+      },
+      "ledger_stage": "observed",
+      "candidate": "import json\nfrom fractions import Fraction\nfrom decimal import Decimal, getcontext\ngetcontext().prec = 100\n\ndef generate(level=1, **kwargs):\n    frozen_params = {\"expression\": \"9/(4 - sqrt(7))\", \"required_form\": \"a + b*sqrt(7)\", \"target_expression\": \"a + b\"}\n    \n    numerator = Fraction(9)\n    denom_rational = 4\n    denom_radical_coeff = -1\n    radicand = 7\n    \n    a, b, r = RadicalOps.rationalize_linear_denominator(numerator, denom_rational, denom_radical_coeff, radicand)\n    \n    correct_answer_dict = {\n        \"a\": int(a),\n        \"b\": int(b),\n        \"radicand\": int(r),\n        \"value\": a + b\n    }\n    \n    return {\n        \"question_text\": f\"Simplify the expression: 9/(4 - sqrt(7)) into the form a + b*sqrt({r}). Provide integers a, b and their sum.\",\n        \"correct_answer\": correct_answer_dict,\n        \"oracle_payload\": frozen_params\n    }",
+      "candidate_exists": true,
+      "raw_exists": true,
+      "raw_chars": 860,
+      "raw_preview": "import json\nfrom fractions import Fraction\nfrom decimal import Decimal, getcontext\ngetcontext().prec = 100\n\ndef generate(level=1, **kwargs):\n    frozen_params = {\"expression\": \"9/(4 - sqrt(7))\", \"required_form\": \"a + b*sqrt(7)\", \"target_expression\": \"a + b\"}\n    \n    numerator = Fraction(9)\n    denom_rational = 4\n    denom_radical_coeff = -1\n    radicand = 7\n    \n    a, b, r = RadicalOps.rationalize_linear_denominator(numerator, denom_rational, denom_radical_coeff, radicand)\n    \n    correct_answer_dict = {\n        \"a\": int(a),\n        \"b\": int(b),\n        \"radicand\": int(r),\n        \"value\": a + b\n    }\n    \n    return {\n        \"question_text\": f\"Simplify the expression: 9/(4 - sqrt(7)) into the form a + b*sqrt({r}). Provide integers a, b and their sum.\",\n        \"correct_answer\": correc",
+      "raw_tail": "rt Decimal, getcontext\ngetcontext().prec = 100\n\ndef generate(level=1, **kwargs):\n    frozen_params = {\"expression\": \"9/(4 - sqrt(7))\", \"required_form\": \"a + b*sqrt(7)\", \"target_expression\": \"a + b\"}\n    \n    numerator = Fraction(9)\n    denom_rational = 4\n    denom_radical_coeff = -1\n    radicand = 7\n    \n    a, b, r = RadicalOps.rationalize_linear_denominator(numerator, denom_rational, denom_radical_coeff, radicand)\n    \n    correct_answer_dict = {\n        \"a\": int(a),\n        \"b\": int(b),\n        \"radicand\": int(r),\n        \"value\": a + b\n    }\n    \n    return {\n        \"question_text\": f\"Simplify the expression: 9/(4 - sqrt(7)) into the form a + b*sqrt({r}). Provide integers a, b and their sum.\",\n        \"correct_answer\": correct_answer_dict,\n        \"oracle_payload\": frozen_params\n    }",
+      "api_calls_from_code": [
+        "RadicalOps.rationalize_linear_denominator"
+      ],
+      "api_counter": {
+        "RadicalOps.rationalize_linear_denominator": 1
+      },
+      "local_parse_ok": true,
+      "local_parse_err": null,
+      "local_ast_nodes": 117
+    },
+    "gemini": {
+      "cell_id": "gemini_3_5_flash__ce115_ext_113_11_rationalize_l1__ab2d__seed_2026071301",
+      "task_id": "ce115_ext_113_11_rationalize_l1",
+      "evaluator_status": "PASSED",
+      "failure_class": "none",
+      "failure_layer": {
+        "eligibility": "N/A",
+        "note": "passed",
+        "primary_layer": null
+      },
+      "parse_status": "extracted",
+      "completion_status": "NATURAL_COMPLETE",
+      "exception_type": null,
+      "exception_message": null,
+      "traceback": "",
+      "predicted_answer": null,
+      "expected_answer": {
+        "a": 4,
+        "b": 1,
+        "radicand": 7,
+        "value": 5
+      },
+      "infrastructure_valid": true,
+      "code_metrics": {
+        "ast_nodes": 148,
+        "code_chars": 1454,
+        "loc": 40
+      },
+      "domain_api_adoption": {
+        "called_apis": [
+          "FractionOps.to_exact",
+          "RadicalOps.rationalize_linear_denominator"
+        ],
+        "classification": "ADOPTED",
+        "domain_library_adopted": true,
+        "errors": [],
+        "listed_apis": [
+          "RadicalOps.rationalize_linear_denominator",
+          "FractionOps.to_exact"
+        ],
+        "missing_listed_apis": [],
+        "required_apis": [
+          "RadicalOps.rationalize_linear_denominator",
+          "FractionOps.to_exact"
+        ]
+      },
+      "token_metadata": {
+        "eval_count": null,
+        "prompt_eval_count": null,
+        "total_token_count": 2951,
+        "done_reason": null,
+        "latency_ms": null,
+        "total_duration": null
+      },
+      "duration_metadata": {
+        "latency_ms": null,
+        "wall_clock_seconds": 9.421999999998661
+      },
+      "evaluator_details_keys": [
+        "actual_question_text",
+        "composite_outcomes",
+        "evaluation_gates",
+        "ledger_stage"
+      ],
+      "parse_error": null,
+      "evaluation_gates": {
+        "g1_evaluability": {
+          "candidate_nonempty": true,
+          "extraction_succeeded": true,
+          "parse_succeeded": true,
+          "raw_output_present": true,
+          "reason": "evaluability_passed",
+          "required_entry_point_present": true,
+          "status": "PASS"
+        },
+        "g2_executability": {
+          "entry_point_called": true,
+          "exception_message": null,
+          "exception_type": null,
+          "load_succeeded": true,
+          "reason": "execution_passed",
+          "return_value_produced": true,
+          "status": "PASS",
+          "timeout": false
+        },
+        "g3_contract_compliance": {
+          "entry_point_signature_valid": null,
+          "field_types_valid": true,
+          "frozen_parameters_valid": true,
+          "missing_keys": [],
+          "reason": "contract_observed",
+          "schema_valid": true,
+          "status": "PASS",
+          "unexpected_keys": []
+        },
+        "g4_semantic_correctness": {
+          "invariant_checks": null,
+          "mismatch_reason": null,
+          "oracle_executed": true,
+          "oracle_match": true,
+          "reason": "oracle_match",
+          "status": "PASS"
+        },
+        "g5_problem_presentation": {
+          "answer_leak": false,
+          "code_leak": false,
+          "frozen_parameters_available": true,
+          "placeholder_leak": false,
+          "prompt_leak": false,
+          "question_present": true,
+          "reason": "presentation_checks_passed",
+          "status": "PASS",
+          "truncation_signal": false
+        },
+        "g6_math_notation": {
+          "brace_balance": true,
+          "delimiter_balance": true,
+          "malformed_command": false,
+          "reason": "notation_checks_passed",
+          "status": "PASS",
+          "unclosed_math_region": false,
+          "uses_latex": true
+        }
+      },
+      "composite_outcomes": {
+        "full_pass": "PASS",
+        "presentation_pass": "PASS",
+        "technical_pass": "PASS"
+      },
+      "ledger_stage": "observed",
+      "candidate": "from core.prompts.domain_function_library import RadicalOps, FractionOps\n\ndef generate(level=1, **kwargs):\n    # Frozen sampled parameters\n    expression = \"9/(4 - sqrt(7))\"\n    required_form = \"a + b*sqrt(7)\"\n    target_expression = \"a + b\"\n    \n    oracle_payload = {\n        \"expression\": expression,\n        \"required_form\": required_form,\n        \"target_expression\": target_expression\n    }\n    \n    # Parameters for the expression 9 / (4 - 1*sqrt(7))\n    numerator = 9\n    denom_rational = 4\n    denom_radical_coeff = -1\n    radicand = 7\n    \n    # Rationalize the denominator using the domain API\n    a_frac, b_frac, rad = RadicalOps.rationalize_linear_denominator(\n        numerator, denom_rational, denom_radical_coeff, radicand\n    )\n    \n    # Convert Fraction results to exact representation (ints)\n    a = FractionOps.to_exact(a_frac)\n    b = FractionOps.to_exact(b_frac)\n    value = FractionOps.to_exact(a_frac + b_frac)\n    \n    # Construct the question text\n    question_text = (\n        f\"Rationalize the denominator of the expression: \\\\frac{{9}}{{4 - \\\\sqrt{{7}}}}. \"\n        f\"Write the result in the form {required_form}, and find the value of {target_expression}.\"\n    )\n    \n    correct_answer = {\n        \"a\": a,\n        \"b\": b,\n        \"radicand\": rad,\n        \"value\": value\n    }\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+      "candidate_exists": true,
+      "raw_exists": true,
+      "raw_chars": 1454,
+      "raw_preview": "from core.prompts.domain_function_library import RadicalOps, FractionOps\n\ndef generate(level=1, **kwargs):\n    # Frozen sampled parameters\n    expression = \"9/(4 - sqrt(7))\"\n    required_form = \"a + b*sqrt(7)\"\n    target_expression = \"a + b\"\n    \n    oracle_payload = {\n        \"expression\": expression,\n        \"required_form\": required_form,\n        \"target_expression\": target_expression\n    }\n    \n    # Parameters for the expression 9 / (4 - 1*sqrt(7))\n    numerator = 9\n    denom_rational = 4\n    denom_radical_coeff = -1\n    radicand = 7\n    \n    # Rationalize the denominator using the domain API\n    a_frac, b_frac, rad = RadicalOps.rationalize_linear_denominator(\n        numerator, denom_rational, denom_radical_coeff, radicand\n    )\n    \n    # Convert Fraction results to exact representa",
+      "raw_tail": "linear_denominator(\n        numerator, denom_rational, denom_radical_coeff, radicand\n    )\n    \n    # Convert Fraction results to exact representation (ints)\n    a = FractionOps.to_exact(a_frac)\n    b = FractionOps.to_exact(b_frac)\n    value = FractionOps.to_exact(a_frac + b_frac)\n    \n    # Construct the question text\n    question_text = (\n        f\"Rationalize the denominator of the expression: \\\\frac{{9}}{{4 - \\\\sqrt{{7}}}}. \"\n        f\"Write the result in the form {required_form}, and find the value of {target_expression}.\"\n    )\n    \n    correct_answer = {\n        \"a\": a,\n        \"b\": b,\n        \"radicand\": rad,\n        \"value\": value\n    }\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+      "api_calls_from_code": [
+        "RadicalOps.rationalize_linear_denominator",
+        "FractionOps.to_exact",
+        "FractionOps.to_exact",
+        "FractionOps.to_exact"
+      ],
+      "api_counter": {
+        "RadicalOps.rationalize_linear_denominator": 1,
+        "FractionOps.to_exact": 3
+      },
+      "local_parse_ok": true,
+      "local_parse_err": null,
+      "local_ast_nodes": 148
+    }
+  }
+]
