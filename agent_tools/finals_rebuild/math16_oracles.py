@@ -1,6 +1,7 @@
 """Math16-LaTeX-v1 oracles: structural comparison, not string-only equality."""
 from __future__ import annotations
 
+import re
 from fractions import Fraction
 from math import isqrt
 from typing import Any, Callable
@@ -12,6 +13,9 @@ from agent_tools.finals_rebuild.math_task_oracles import (
     evaluate_radical_simplification,
 )
 
+# Display-latex revision: structural fields judge math correctness; latex is presentation.
+EVALUATOR_LATEX_SEMANTIC_REVISION = "math16_latex_semantic_v2"
+
 
 def _result(oracle_type: str, expected: Any, submitted: Any, error: str | None = None) -> dict[str, Any]:
     return {
@@ -21,6 +25,54 @@ def _result(oracle_type: str, expected: Any, submitted: Any, error: str | None =
         "submitted_answer": submitted,
         "error": error,
     }
+
+
+def normalize_math16_display_latex(text: Any) -> str | None:
+    """Normalize non-semantic LaTeX display differences for presentation checks."""
+    if not isinstance(text, str):
+        return None
+    s = text.strip()
+    wrappers = (
+        (r"\(", r"\)"),
+        (r"\[", r"\]"),
+        ("$$", "$$"),
+        ("$", "$"),
+    )
+    for left, right in wrappers:
+        if s.startswith(left) and s.endswith(right) and len(s) >= len(left) + len(right):
+            s = s[len(left) : len(s) - len(right)].strip()
+            break
+    for token in (r"\,", r"\;", r"\:", r"\!", r"\ ", r"~"):
+        s = s.replace(token, "")
+    s = re.sub(r"\s+", "", s)
+    return s
+
+
+def display_latex_equivalent(left: Any, right: Any) -> bool:
+    a = normalize_math16_display_latex(left)
+    b = normalize_math16_display_latex(right)
+    return a is not None and b is not None and a == b
+
+
+def _factorization_latex_equivalent(submitted: Any, expected: str) -> bool:
+    a = normalize_math16_display_latex(submitted)
+    b = normalize_math16_display_latex(expected)
+    if a is None or b is None:
+        return False
+    a = re.sub(r"=0$", "", a)
+    b = re.sub(r"=0$", "", b)
+    return a == b
+
+
+def _roots_latex_equivalent(submitted: Any, roots: list[int]) -> bool:
+    """Accept common roots display forms that encode the same ordered integer roots."""
+    if not isinstance(submitted, str):
+        return False
+    normalized = normalize_math16_display_latex(submitted)
+    if normalized is None:
+        return False
+    nums = [int(match) for match in re.findall(r"-?\d+", normalized)]
+    return nums == list(roots)
 
 
 def _integer(value: Any, name: str) -> int:
@@ -91,18 +143,22 @@ def evaluate_math16_polynomial_division_general(
         "remainder_coefficients": submitted_answer.get("remainder_coefficients"),
     }
     structural_ok = submitted_structural == structural
-    latex_ok = (
-        submitted_answer.get("quotient_latex") == expected["quotient_latex"]
-        and submitted_answer.get("remainder_latex") == expected["remainder_latex"]
+    latex_ok = display_latex_equivalent(
+        submitted_answer.get("quotient_latex"), expected["quotient_latex"]
+    ) and display_latex_equivalent(
+        submitted_answer.get("remainder_latex"), expected["remainder_latex"]
     )
+    # Structural coefficients are the semantic judge; latex is presentation-only.
     return {
         "oracle_type": oracle_type,
-        "is_correct": structural_ok and latex_ok,
+        "is_correct": structural_ok,
         "expected_answer": expected,
         "submitted_answer": submitted_answer,
-        "error": None if structural_ok and latex_ok else "structural_or_latex_mismatch",
+        "error": None if structural_ok else "structural_mismatch",
         "structural_ok": structural_ok,
         "latex_ok": latex_ok,
+        "latex_presentation_ok": latex_ok,
+        "evaluator_revision": EVALUATOR_LATEX_SEMANTIC_REVISION,
     }
 
 
@@ -124,18 +180,22 @@ def evaluate_math16_polynomial_factor_roots(
     if not isinstance(submitted_answer, dict):
         return _result(oracle_type, expected, submitted_answer)
     structural_ok = submitted_answer.get("roots") == structural["roots"]
-    latex_ok = (
-        submitted_answer.get("factorization_latex") == expected["factorization_latex"]
-        and submitted_answer.get("roots_latex") == expected["roots_latex"]
+    latex_ok = _factorization_latex_equivalent(
+        submitted_answer.get("factorization_latex"), expected["factorization_latex"]
+    ) and _roots_latex_equivalent(
+        submitted_answer.get("roots_latex"), list(structural["roots"])
     )
+    # Roots list is the semantic judge; latex fields are presentation-only.
     return {
         "oracle_type": oracle_type,
-        "is_correct": structural_ok and latex_ok,
+        "is_correct": structural_ok,
         "expected_answer": expected,
         "submitted_answer": submitted_answer,
-        "error": None if structural_ok and latex_ok else "structural_or_latex_mismatch",
+        "error": None if structural_ok else "structural_mismatch",
         "structural_ok": structural_ok,
         "latex_ok": latex_ok,
+        "latex_presentation_ok": latex_ok,
+        "evaluator_revision": EVALUATOR_LATEX_SEMANTIC_REVISION,
     }
 
 
