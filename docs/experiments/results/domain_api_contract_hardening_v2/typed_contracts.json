@@ -1,0 +1,498 @@
+{
+  "IntegerOps.add": {
+    "import": "core.prompts.domain_function_library",
+    "signature": "(a, b)",
+    "returns_model_facing": "int",
+    "input_constraints": "a,b: int; bool forbidden",
+    "return_contract": {
+      "type": "int",
+      "json_safe": true
+    },
+    "normalization_responsibility": "none",
+    "usage_example": "IntegerOps.add(2, 3)  # 5",
+    "name": "IntegerOps.add",
+    "classification": "SUPPORTED_PUBLIC"
+  },
+  "IntegerOps.sub": {
+    "import": "core.prompts.domain_function_library",
+    "signature": "(a, b)",
+    "returns_model_facing": "int",
+    "input_constraints": "a,b: int; bool forbidden",
+    "return_contract": {
+      "type": "int",
+      "json_safe": true
+    },
+    "normalization_responsibility": "none",
+    "usage_example": "IntegerOps.sub(2, 3)  # -1",
+    "name": "IntegerOps.sub",
+    "classification": "SUPPORTED_PUBLIC"
+  },
+  "IntegerOps.fmt_num": {
+    "import": "core.prompts.domain_function_library",
+    "signature": "(n)",
+    "returns_model_facing": "str",
+    "input_constraints": "ordered numeric n",
+    "return_contract": {
+      "type": "str",
+      "json_safe": true
+    },
+    "normalization_responsibility": "presentation only",
+    "usage_example": "IntegerOps.fmt_num(-3)  # \"(-3)\"",
+    "name": "IntegerOps.fmt_num",
+    "classification": "SUPPORTED_PUBLIC"
+  },
+  "IntegerOps.is_divisible": {
+    "import": "core.prompts.domain_function_library",
+    "signature": "(a, b)",
+    "returns_model_facing": "bool",
+    "input_constraints": "integer-like a,b; b=0 returns False",
+    "return_contract": {
+      "type": "bool",
+      "json_safe": true
+    },
+    "normalization_responsibility": "not an answer integer",
+    "usage_example": "IntegerOps.is_divisible(156, 13)  # True",
+    "name": "IntegerOps.is_divisible",
+    "classification": "SUPPORTED_PUBLIC"
+  },
+  "IntegerOps.safe_eval": {
+    "import": "core.prompts.domain_function_library",
+    "signature": "(expr)",
+    "returns_model_facing": "int | float  # bool and container results raise ValueError",
+    "input_constraints": "arithmetic expression string using literals,+,-,*,/,//,%,**,abs,sum,min,max; trusted generated input only",
+    "return_contract": {
+      "type": "union",
+      "types": [
+        "int",
+        "float"
+      ],
+      "json_safe": true,
+      "forbidden_types": [
+        "bool",
+        "tuple",
+        "list",
+        "dict"
+      ]
+    },
+    "normalization_responsibility": "exact-int contracts must require type(value) is int; floats are never coerced to int",
+    "usage_example": "IntegerOps.safe_eval(\"(-3)**3\")  # -27",
+    "name": "IntegerOps.safe_eval",
+    "classification": "SUPPORTED_PUBLIC"
+  },
+  "FractionOps.create": {
+    "import": "core.prompts.domain_function_library",
+    "signature": "(value)",
+    "returns_model_facing": "Fraction  # not JSON serializable; use the to_exact adapter",
+    "input_constraints": "int, finite float, legal numeric str, or Fraction; bool forbidden",
+    "return_contract": {
+      "type": "Fraction",
+      "json_safe": false
+    },
+    "normalization_responsibility": "FractionOps.to_exact before correct_answer",
+    "usage_example": "FractionOps.create(\"3/5\")  # Fraction(3, 5)",
+    "name": "FractionOps.create",
+    "classification": "SUPPORTED_PUBLIC"
+  },
+  "FractionOps.to_latex": {
+    "import": "core.prompts.domain_function_library",
+    "signature": "(val, mixed=False)",
+    "returns_model_facing": "str",
+    "input_constraints": "exact value; mixed: bool",
+    "return_contract": {
+      "type": "str",
+      "json_safe": true
+    },
+    "normalization_responsibility": "presentation only; not semantic serialization",
+    "usage_example": "FractionOps.to_latex(Fraction(3,5))  # '\\frac{3}{5}'",
+    "name": "FractionOps.to_latex",
+    "classification": "SUPPORTED_PUBLIC"
+  },
+  "FractionOps.add": {
+    "import": "core.prompts.domain_function_library",
+    "signature": "(a, b)",
+    "returns_model_facing": "Fraction",
+    "input_constraints": "a,b: Fraction",
+    "return_contract": {
+      "type": "Fraction",
+      "json_safe": false
+    },
+    "normalization_responsibility": "to_exact before correct_answer",
+    "usage_example": "FractionOps.add(Fraction(1,2), Fraction(1,3))",
+    "name": "FractionOps.add",
+    "classification": "SUPPORTED_PUBLIC"
+  },
+  "FractionOps.sub": {
+    "import": "core.prompts.domain_function_library",
+    "signature": "(a, b)",
+    "returns_model_facing": "Fraction",
+    "input_constraints": "a,b: Fraction",
+    "return_contract": {
+      "type": "Fraction",
+      "json_safe": false
+    },
+    "normalization_responsibility": "to_exact before correct_answer",
+    "usage_example": "FractionOps.sub(Fraction(3,7), Fraction(-1,4))",
+    "name": "FractionOps.sub",
+    "classification": "SUPPORTED_PUBLIC"
+  },
+  "FractionOps.mul": {
+    "import": "core.prompts.domain_function_library",
+    "signature": "(a, b)",
+    "returns_model_facing": "Fraction",
+    "input_constraints": "a,b: Fraction",
+    "return_contract": {
+      "type": "Fraction",
+      "json_safe": false
+    },
+    "normalization_responsibility": "to_exact before correct_answer",
+    "usage_example": "FractionOps.mul(Fraction(1,2), Fraction(1,3))",
+    "name": "FractionOps.mul",
+    "classification": "SUPPORTED_PUBLIC"
+  },
+  "FractionOps.div": {
+    "import": "core.prompts.domain_function_library",
+    "signature": "(a, b)",
+    "returns_model_facing": "Fraction",
+    "input_constraints": "a,b: Fraction; b != 0",
+    "return_contract": {
+      "type": "Fraction",
+      "json_safe": false
+    },
+    "normalization_responsibility": "to_exact before correct_answer",
+    "usage_example": "FractionOps.div(Fraction(1,2), Fraction(1,3))",
+    "name": "FractionOps.div",
+    "classification": "SUPPORTED_PUBLIC"
+  },
+  "FractionOps.from_parts": {
+    "import": "core.prompts.domain_function_library",
+    "signature": "(numerator, denominator=1)",
+    "returns_model_facing": "Fraction",
+    "input_constraints": "numerator,denominator: int; bool forbidden; denominator != 0",
+    "return_contract": {
+      "type": "Fraction",
+      "json_safe": false
+    },
+    "normalization_responsibility": "to_exact before correct_answer",
+    "usage_example": "FractionOps.from_parts(6,3)  # Fraction(2,1)",
+    "name": "FractionOps.from_parts",
+    "classification": "SUPPORTED_PUBLIC"
+  },
+  "FractionOps.to_exact": {
+    "import": "core.prompts.domain_function_library",
+    "signature": "(value)",
+    "returns_model_facing": "int | str  # integer or irreducible 'p/q'",
+    "input_constraints": "int, Fraction, or legal exact string; bool/float forbidden",
+    "return_contract": {
+      "type": "union",
+      "types": [
+        "int",
+        "str"
+      ],
+      "string_schema": "^-?[0-9]+/[1-9][0-9]*$",
+      "json_safe": true
+    },
+    "normalization_responsibility": "official Fraction-to-JSON adapter",
+    "usage_example": "FractionOps.to_exact(Fraction(3,2))  # '3/2'",
+    "name": "FractionOps.to_exact",
+    "classification": "SUPPORTED_PUBLIC"
+  },
+  "RadicalOps.simplify_term": {
+    "import": "core.prompts.domain_function_library",
+    "signature": "(coeff, radicand)",
+    "returns_model_facing": "tuple[int | Fraction, int]  # semantic (coefficient, square-free radicand)",
+    "input_constraints": "exact coeff; non-negative int or Fraction radicand",
+    "return_contract": {
+      "type": "tuple",
+      "length": 2,
+      "elements": [
+        {
+          "types": [
+            "int",
+            "Fraction"
+          ]
+        },
+        {
+          "type": "int"
+        }
+      ],
+      "json_safe": "partial"
+    },
+    "normalization_responsibility": "normalize_term_list or to_exact before JSON",
+    "usage_example": "RadicalOps.simplify_term(1,12)  # (2,3)",
+    "name": "RadicalOps.simplify_term",
+    "classification": "SUPPORTED_PUBLIC"
+  },
+  "RadicalOps.format_term": {
+    "import": "core.prompts.domain_function_library",
+    "signature": "(coeff, radicand, is_first=True)",
+    "returns_model_facing": "str  # complete single-term LaTeX including coefficient/sign",
+    "input_constraints": "semantic coefficient and radicand",
+    "return_contract": {
+      "type": "str",
+      "json_safe": true
+    },
+    "normalization_responsibility": "presentation only",
+    "usage_example": "RadicalOps.format_term(3,15)  # '3\\sqrt{15}'",
+    "name": "RadicalOps.format_term",
+    "classification": "SUPPORTED_PUBLIC"
+  },
+  "RadicalOps.format_expression": {
+    "import": "core.prompts.domain_function_library",
+    "signature": "(terms_dict, denominator=1)",
+    "returns_model_facing": "str  # complete compound-radical LaTeX",
+    "input_constraints": "mapping radicand->coefficient; exact denominator",
+    "return_contract": {
+      "type": "str",
+      "json_safe": true
+    },
+    "normalization_responsibility": "presentation only",
+    "usage_example": "RadicalOps.format_expression({1:6,3:-1})  # '6 - \\sqrt{3}'",
+    "name": "RadicalOps.format_expression",
+    "classification": "SUPPORTED_PUBLIC"
+  },
+  "RadicalOps.normalize_term_list": {
+    "import": "core.prompts.domain_function_library",
+    "signature": "(terms)",
+    "returns_model_facing": "list[dict]  # sorted; keys coefficient,radicand",
+    "input_constraints": "list/tuple of pairs or coefficient/radicand dicts",
+    "return_contract": {
+      "type": "list",
+      "length": "variable",
+      "element": {
+        "type": "dict",
+        "required_keys": [
+          "coefficient",
+          "radicand"
+        ],
+        "value_types": {
+          "coefficient": [
+            "int",
+            "str"
+          ],
+          "radicand": [
+            "int"
+          ]
+        }
+      },
+      "ordering": "ascending radicand",
+      "json_safe": true
+    },
+    "normalization_responsibility": "official radical semantic JSON adapter",
+    "usage_example": "RadicalOps.normalize_term_list([(1,12)])",
+    "name": "RadicalOps.normalize_term_list",
+    "classification": "SUPPORTED_PUBLIC"
+  },
+  "RadicalOps.rationalize_linear_denominator": {
+    "import": "core.prompts.domain_function_library",
+    "signature": "(numerator, denom_rational, denom_radical_coeff, radicand)",
+    "returns_model_facing": "tuple[int | Fraction, int | Fraction, int]",
+    "input_constraints": "exact rational coefficients; positive nonsquare radicand; nonzero conjugate denominator",
+    "return_contract": {
+      "type": "tuple",
+      "length": 3,
+      "elements": [
+        {
+          "types": [
+            "int",
+            "Fraction"
+          ]
+        },
+        {
+          "types": [
+            "int",
+            "Fraction"
+          ]
+        },
+        {
+          "type": "int"
+        }
+      ],
+      "json_safe": "partial"
+    },
+    "normalization_responsibility": "to_exact on first two leaves before JSON",
+    "usage_example": "RadicalOps.rationalize_linear_denominator(1,2,1,3)",
+    "name": "RadicalOps.rationalize_linear_denominator",
+    "classification": "SUPPORTED_PUBLIC"
+  },
+  "PolynomialOps.normalize": {
+    "import": "core.prompts.domain_function_library",
+    "signature": "(coeffs)",
+    "returns_model_facing": "list[number]  # highest degree first; leading zeros removed",
+    "input_constraints": "non-empty coefficient sequence",
+    "return_contract": {
+      "type": "list",
+      "length": "variable",
+      "ordering": "highest degree first",
+      "json_safe": "operand-dependent"
+    },
+    "normalization_responsibility": "preserves coefficient types",
+    "usage_example": "PolynomialOps.normalize([0,2,1])  # [2,1]",
+    "name": "PolynomialOps.normalize",
+    "classification": "SUPPORTED_PUBLIC"
+  },
+  "PolynomialOps.format_latex": {
+    "import": "core.prompts.domain_function_library",
+    "signature": "(coeffs, var='x')",
+    "returns_model_facing": "str",
+    "input_constraints": "highest-degree-first numeric coefficients",
+    "return_contract": {
+      "type": "str",
+      "json_safe": true
+    },
+    "normalization_responsibility": "presentation only",
+    "usage_example": "PolynomialOps.format_latex([4,0])  # '4x'",
+    "name": "PolynomialOps.format_latex",
+    "classification": "SUPPORTED_PUBLIC"
+  },
+  "PolynomialOps.add": {
+    "import": "core.prompts.domain_function_library",
+    "signature": "(c1, c2)",
+    "returns_model_facing": "list[number]  # operand-dependent coefficient type; highest degree first",
+    "input_constraints": "coefficient lists with mutually arithmetic-compatible values",
+    "return_contract": {
+      "type": "list",
+      "length": "max operand length after normalization",
+      "ordering": "highest degree first",
+      "json_safe": "operand-dependent"
+    },
+    "normalization_responsibility": "use to_exact per Fraction coefficient before JSON",
+    "usage_example": "PolynomialOps.add([1,2],[3,4])  # [4,6]",
+    "name": "PolynomialOps.add",
+    "classification": "SUPPORTED_PUBLIC"
+  },
+  "PolynomialOps.sub": {
+    "import": "core.prompts.domain_function_library",
+    "signature": "(c1, c2)",
+    "returns_model_facing": "list[number]  # operand-dependent coefficient type; highest degree first",
+    "input_constraints": "coefficient lists with mutually arithmetic-compatible values",
+    "return_contract": {
+      "type": "list",
+      "length": "max operand length after normalization",
+      "ordering": "highest degree first",
+      "json_safe": "operand-dependent"
+    },
+    "normalization_responsibility": "use to_exact per Fraction coefficient before JSON",
+    "usage_example": "PolynomialOps.sub([1,2],[3,4])  # [-2,-2]",
+    "name": "PolynomialOps.sub",
+    "classification": "SUPPORTED_PUBLIC"
+  },
+  "PolynomialOps.mul": {
+    "import": "core.prompts.domain_function_library",
+    "signature": "(c1, c2)",
+    "returns_model_facing": "list[int | float | Fraction]  # operand-dependent; highest degree first",
+    "input_constraints": "non-empty coefficient lists containing arithmetic-compatible int,float,Fraction; bool unsupported",
+    "return_contract": {
+      "type": "list",
+      "length": "len(c1)+len(c2)-1 before leading-zero normalization",
+      "element_types": [
+        "int",
+        "float",
+        "Fraction"
+      ],
+      "ordering": "highest degree first",
+      "json_safe": "operand-dependent"
+    },
+    "normalization_responsibility": "Fraction coefficients require to_exact; exact tasks must not use float",
+    "usage_example": "PolynomialOps.mul([3,2],[13,-7])  # [39,5,-14]",
+    "name": "PolynomialOps.mul",
+    "classification": "SUPPORTED_PUBLIC"
+  },
+  "PolynomialOps.div_qr": {
+    "import": "core.prompts.domain_function_library",
+    "signature": "(dividend_coefficients, divisor_coefficients)",
+    "returns_model_facing": "tuple[list[int | str], list[int | str]]  # quotient,remainder",
+    "input_constraints": "non-empty exact coefficient lists: int,Fraction,or p/q; no bool/float; nonzero divisor",
+    "return_contract": {
+      "type": "tuple",
+      "length": 2,
+      "elements": [
+        {
+          "type": "list",
+          "element_types": [
+            "int",
+            "str"
+          ]
+        },
+        {
+          "type": "list",
+          "element_types": [
+            "int",
+            "str"
+          ]
+        }
+      ],
+      "ordering": "highest degree first",
+      "json_safe": true
+    },
+    "normalization_responsibility": "already exact JSON leaves",
+    "usage_example": "PolynomialOps.div_qr([6,0,6],[1,-4])  # ([6,24],[102])",
+    "name": "PolynomialOps.div_qr",
+    "classification": "SUPPORTED_PUBLIC"
+  },
+  "PolynomialOps.coeffs_from_py_expression": {
+    "import": "core.prompts.domain_function_library",
+    "signature": "(expression, var='x')",
+    "returns_model_facing": "list[Fraction]  # highest degree first",
+    "input_constraints": "restricted polynomial expression using integer constants,+,-,*,nonnegative integer **",
+    "return_contract": {
+      "type": "list",
+      "length": "degree+1",
+      "element_types": [
+        "Fraction"
+      ],
+      "ordering": "highest degree first",
+      "json_safe": false
+    },
+    "normalization_responsibility": "to_degree_map or to_exact per coefficient",
+    "usage_example": "PolynomialOps.coeffs_from_py_expression('(x+1)*(x-1)')",
+    "name": "PolynomialOps.coeffs_from_py_expression",
+    "classification": "SUPPORTED_PUBLIC"
+  },
+  "PolynomialOps.to_degree_map": {
+    "import": "core.prompts.domain_function_library",
+    "signature": "(coeffs)",
+    "returns_model_facing": "dict[str, int | str]  # descending degree insertion order",
+    "input_constraints": "non-empty exact coefficient list",
+    "return_contract": {
+      "type": "dict",
+      "keys": "decimal degree strings",
+      "values": [
+        "int",
+        "str"
+      ],
+      "ordering": "descending numeric degree insertion order",
+      "json_safe": true
+    },
+    "normalization_responsibility": "official polynomial JSON adapter",
+    "usage_example": "PolynomialOps.to_degree_map([1,0,-1])",
+    "name": "PolynomialOps.to_degree_map",
+    "classification": "SUPPORTED_PUBLIC"
+  },
+  "PolynomialOps.factor_quadratic_exact": {
+    "import": "core.prompts.domain_function_library",
+    "signature": "(a, b, c)",
+    "returns_model_facing": "list[dict, dict]  # fixed length 2; keys x_coefficient,constant; int or 'p/q'; NOT a 3-tuple",
+    "input_constraints": "exact rational a,b,c; a nonzero; rational roots required",
+    "return_contract": {
+      "type": "list",
+      "length": 2,
+      "element": {
+        "type": "dict",
+        "required_keys": [
+          "x_coefficient",
+          "constant"
+        ],
+        "value_types": [
+          "int",
+          "str"
+        ]
+      },
+      "ordering": "deterministic implementation order; consumers must not infer sorted roots",
+      "json_safe": true
+    },
+    "normalization_responsibility": "already JSON safe",
+    "usage_example": "PolynomialOps.factor_quadratic_exact(1,4,-12)",
+    "name": "PolynomialOps.factor_quadratic_exact",
+    "classification": "SUPPORTED_PUBLIC"
+  }
+}
