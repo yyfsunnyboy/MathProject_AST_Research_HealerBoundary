@@ -503,24 +503,64 @@ def evaluate_compound_radical_result(
     except (KeyError, ValueError, TypeError) as exc:
         return _result(oracle_type, expected, submitted_answer, str(exc))
     structural_ok = got == expected_tuple
-    # latex display is not the sole judge; accept missing latex if structure matches,
-    # but if present it must match canonical.
     latex = None
     if "result" in submitted_answer and isinstance(submitted_answer["result"], dict):
         latex = submitted_answer["result"].get("canonical_latex")
     else:
         latex = submitted_answer.get("canonical_latex")
-    latex_ok = latex is None or latex == expected["result"]["canonical_latex"]
+    # Structure is the semantic judge; non-semantic whitespace must not veto.
+    latex_ok = latex is None or display_latex_equivalent(
+        latex, expected["result"]["canonical_latex"]
+    )
     return {
         "oracle_type": oracle_type,
-        "is_correct": structural_ok and latex_ok,
+        "is_correct": structural_ok,
         "expected_answer": expected,
         "submitted_answer": submitted_answer,
-        "error": None if structural_ok and latex_ok else "compound_radical_mismatch",
+        "error": None if structural_ok else "structural_mismatch",
         "structural_ok": structural_ok,
         "latex_ok": latex_ok,
+        "latex_presentation_ok": latex_ok,
         "normalized": {"expected": expected_tuple, "submitted": got},
+        "evaluator_revision": EVALUATOR_LATEX_SEMANTIC_REVISION,
     }
+
+
+def classify_math16_oracle_failure(verdict: dict[str, Any]) -> str:
+    """Map oracle verdict to failure taxonomy (not INTRINSIC_SAFETY for math mismatches)."""
+    if verdict.get("is_correct"):
+        return "passed"
+    structural_ok = verdict.get("structural_ok")
+    latex_ok = verdict.get("latex_ok")
+    error = str(verdict.get("error") or "")
+    # True safety / policy denials only (not ordinary oracle mismatches).
+    safety_markers = (
+        "safety",
+        "policy_denied",
+        "intrinsic_safety",
+        "blocked_by_safety",
+    )
+    if any(marker in error.lower() for marker in safety_markers):
+        return "intrinsic_safety"
+    if structural_ok is True and latex_ok is False:
+        return "latex_mismatch"
+    if structural_ok is False:
+        return "structural_mismatch"
+    if error in {
+        "structural_or_latex_mismatch",
+        "compound_radical_mismatch",
+        "radical_mismatch",
+        "fraction_mismatch",
+        "remainder_mismatch",
+        "answer_mismatch",
+    }:
+        # Prefer finer labels when structural/latex flags exist; else math incorrect.
+        if "latex" in error and structural_ok is not False:
+            return "latex_mismatch"
+        if "structural" in error:
+            return "structural_mismatch"
+        return "answer_incorrect"
+    return "answer_incorrect"
 
 
 MATH16_ORACLE_DISPATCH: dict[str, Callable[[dict[str, Any], Any], dict[str, Any]]] = {

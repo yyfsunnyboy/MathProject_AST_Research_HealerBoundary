@@ -45,6 +45,7 @@ from agent_tools.finals_rebuild.math_boundary_pilot import (
     _looks_truncated,
     _success_details,
 )
+from agent_tools.finals_rebuild.math16_oracles import classify_math16_oracle_failure
 from agent_tools.finals_rebuild.math_task_oracles import evaluate_math_task_oracle
 from scripts.ce115_v4_gemini_transport import MODEL_ID, call_gemini_once
 
@@ -325,33 +326,32 @@ def classify_math16_response(
     verdict = evaluate_math_task_oracle(
         task["oracle_type"], audit_oracle_payload, value["correct_answer"]
     )
-    if verdict.get("error"):
-        return "intrinsic_safety", source, _success_details(
-            outcome="intrinsic_safety",
-            raw=raw,
-            source=source,
-            returned_value=value,
-            frozen=frozen_view,
-            detail={"oracle_error": verdict["error"]},
-        )
-    if not verdict["is_correct"]:
-        return "answer_incorrect", source, _success_details(
-            outcome="answer_incorrect",
+    outcome = classify_math16_oracle_failure(verdict)
+    if outcome == "passed":
+        return "passed", source, _success_details(
+            outcome="passed",
             raw=raw,
             source=source,
             returned_value=value,
             frozen=frozen_view,
             detail={
-                "expected_answer": verdict["expected_answer"],
-                "mismatch_reason": "oracle_mismatch",
+                "structural_ok": verdict.get("structural_ok"),
+                "latex_ok": verdict.get("latex_ok"),
             },
         )
-    return "passed", source, _success_details(
-        outcome="passed",
+    return outcome, source, _success_details(
+        outcome=outcome,
         raw=raw,
         source=source,
         returned_value=value,
         frozen=frozen_view,
+        detail={
+            "oracle_error": verdict.get("error"),
+            "expected_answer": verdict.get("expected_answer"),
+            "mismatch_reason": outcome,
+            "structural_ok": verdict.get("structural_ok"),
+            "latex_ok": verdict.get("latex_ok"),
+        },
     )
 
 
@@ -575,10 +575,16 @@ def run_live(output_dir: Path, *, transport: Callable[[str], dict[str, Any]] = c
                 failure_category = "none"
             elif evaluator == "ANSWER_INCORRECT":
                 failure_category = "answer_incorrect"
+            elif evaluator == "LATEX_MISMATCH":
+                failure_category = "latex_mismatch"
+            elif evaluator == "STRUCTURAL_MISMATCH":
+                failure_category = "structural_mismatch"
             elif evaluator == "SCHEMA_FAILURE":
                 failure_category = "schema_failure"
             elif evaluator == "EXECUTION_FAILURE":
                 failure_category = "execution_failure"
+            elif evaluator == "INTRINSIC_SAFETY":
+                failure_category = "intrinsic_safety"
             else:
                 failure_category = "model_generated_failure"
         except RuntimeError as exc:
