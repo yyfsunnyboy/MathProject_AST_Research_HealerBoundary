@@ -1,8 +1,8 @@
 # CE115 Exam Ext — Contract-Aligned Ablation v2 研究里程碑報告
 
-**日期**：2026-07-18  
-**狀態**：正式封存（本文件不重跑模型、不改 raw artifacts）  
-**Seed**：2026071301  
+**日期**：2026-07-18
+**狀態**：正式封存（本文件不重跑模型、不改 raw artifacts）
+**Seed**：2026071301
 **Production Healer allowlist（凍結）**：僅 `L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP`
 
 ---
@@ -17,7 +17,7 @@
 4. **qwen3.5:9b 標未執行**；不做模型規模趨勢推論。
 5. Healer 邊界數字（本里程碑 Qwen4B v2 Ab3）：**rescue-to-pass = 0**，**false-positive = 0**。
 
-機器可讀總表：  
+機器可讀總表：
 `docs/experiments/analysis/ce115_exam_ext_contract_aligned_v2/final_integration_report_01/final_integration_matrix.json`
 
 ---
@@ -77,7 +77,7 @@
 | **v2 Qwen4B formal8** | **3/8** | **0.375** | **1** | **3/7** | **0.4286** |
 | v2 Qwen9B formal8 | NOT_EXECUTED | — | — | — | — |
 
-> 詳細逐格矩陣見  
+> 詳細逐格矩陣見
 > `docs/experiments/analysis/ce115_exam_ext_contract_aligned_v2/final_integration_report_01/final_integration_matrix.md`
 
 ### 2.2 v1 → v2（僅 formal overlap8）
@@ -119,7 +119,7 @@
 | eligible_existing_rule | 3 |
 | eligible_new_rule_candidate | 5 |
 
-Existing rule：`L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP`  
+Existing rule：`L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP`
 （new-rule candidates **本里程碑未實作**；correct_answer wrap 禁止）
 
 ### 3.2 Ab3 — v1 Gemini（已完成）
@@ -189,8 +189,9 @@ Non-eligible 對應 production guard（非「規則不夠聰明」）：
 
 ## 6. 封存備註
 
-- 整合報告備份目錄（可回溯、未覆寫）：  
-  `docs/experiments/analysis/ce115_exam_ext_contract_aligned_v2/final_integration_report_01/backup_before_qwen4b_v2_ab3_*`
-- 本里程碑清理：僅移除一次性 `scripts/_tmp_*.py`；**不刪除** `docs/experiments/results/**` 與 `docs/experiments/analysis/**`。
-- 結論摘要副本：  
+- 整合報告備份目錄（可回溯、未覆寫）位於
+  `docs/experiments/analysis/ce115_exam_ext_contract_aligned_v2/final_integration_report_01/`
+  底下以 `backup_before_qwen4b_v2_ab3_` 為前綴的子目錄。
+- 本里程碑清理：僅移除一次性 scripts 目錄下 `_tmp_` 前綴腳本；**不刪除** results 與 analysis 實驗下任何實驗產物。
+- 結論摘要副本：
   `docs/experiments/analysis/ce115_exam_ext_contract_aligned_v2/final_integration_report_01/research_conclusions_and_limitations.md`
