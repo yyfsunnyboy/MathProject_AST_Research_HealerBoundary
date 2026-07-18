@@ -52,7 +52,7 @@
       "note": "different evaluator/runtime conditions"
     },
     "wall_seconds": {
-      "spec_total": 1759.97,
+      "spec_total": 1759.9700000000003,
       "assembly_total": 1870.554455280304,
       "spec_median": 8.975000000000001,
       "assembly_median": 9.718105673789978,

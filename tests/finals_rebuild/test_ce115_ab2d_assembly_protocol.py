@@ -5,7 +5,12 @@ GOOD = "def generate(level=1, **kwargs):\n q,r=PolynomialOps.div_qr([1,0,-1],[1,
 
 def test_stubs_are_contracts_not_implementations():
     stub = stub_for_task(TASK)
-    assert "MUST_CALL" in stub and "DO_NOT_REIMPLEMENT_DOMAIN_LOGIC" in stub
+    assert "Available Domain APIs" in stub
+    assert "Select only APIs relevant to the current task" in stub
+    assert "Do not call irrelevant APIs merely for compliance" in stub
+    assert "Do not manually reimplement a supported core algorithm" in stub
+    assert "MUST_CALL" not in stub
+    assert "DO_NOT_REIMPLEMENT_DOMAIN_LOGIC" not in stub
     assert "class PolynomialOps" not in stub
 
 def test_scanner_rejects_missing_and_redefined_helpers_and_accepts_wrapper():

@@ -5,7 +5,7 @@
   "verdict": "FORMAL_RERUN_PREFLIGHT_READY",
   "blocking_reasons": [],
   "freeze_status": "FROZEN",
-  "protocol_hash": "6c9ca1ab66ee151dd9da2f4e514ba9c31870708e68fbffb73dca5ead1ae748b4",
+  "protocol_hash": "80cfbb53457b535a2477830474f2c94010ec1a43e9ac88e69a15d724f2216d6a",
   "planned_cells": 18,
   "roots_exclusions": 6,
   "model_healer_repair_replay_retry_calls": 0
