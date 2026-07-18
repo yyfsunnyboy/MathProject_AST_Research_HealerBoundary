@@ -118,7 +118,8 @@ def main() -> int:
 
     ensure_api_key_via_dialog()
     OUT_DIR.mkdir(parents=True)
-    cell_id = f"gemini_3_5_flash__{TASK_ID}__{CONDITION}__seed_{SEED}__{REVISION_ID}"
+    # Short cell_id: Windows MAX_PATH cannot store the full task+revision suffix.
+    cell_id = f"gemini_3_5_flash__ce111_q10_ab2d__seed_{SEED}__fix_r1"
     cell_dir = OUT_DIR / "cells" / cell_id
     cell_dir.mkdir(parents=True)
     _atomic_write_text(cell_dir / "prompt.txt", prompt)
