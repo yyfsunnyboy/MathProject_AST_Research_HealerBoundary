@@ -1,0 +1,264 @@
+import re
+from math import sqrt
+
+def generate(level=1, **kwargs):
+    """
+    Generates a quadratic roots problem with radical simplification.
+    
+    Args:
+        level (int): Difficulty level (default 1).
+        **kwargs: Additional parameters that may be used to customize the question.
+        
+    Returns:
+        dict: A dictionary containing 'question_text', 'correct_answer', and 'oracle_payload'.
+    """
+    # Frozen sampled parameters as per task specification
+    frozen_params = {
+        "equation": "(x-2)^2=3",
+        "order": "a>b",
+        "target": "2a+b"
+    }
+
+    # Parse the equation from (x-a)^2 = b format to extract roots
+    eq_str = str(frozen_params["equation"])
+    
+    # Extract 'a' and 'b' from the string representation of the quadratic root problem.
+    # We solve for x in equations of form (x - a)**2 = b, resulting in x = sqrt(b) + a or x = -sqrt(b) + a depending on context, 
+    # but specifically for ordered roots where one is larger ('a>b'), we consider the positive and negative branches relative to 'a'.
+    # The standard solution set for (x-a)^2 = b is {sqrt(b)+a, -sqrt(b)+a}.
+    
+    if eq_str.startswith("(x-") or ("(x-"):
+        a_match = re.search(r'\((x-(\d+)\)\^\=(\d+)', frozen_params["equation"])
+        # Handle both uppercase and lowercase X to be safe with regex, though input usually specifies x.
+    else:
+        # Fallback if pattern doesn't match expected string structure directly (though spec says exactly "(x-2)^2=3")
+        a_match = re.search(r'\((?:[aA]x-(\d+)\)\^\=(\d+)', frozen_params["equation"])
+
+    try:
+        a_int = int(a_match.group(1)) if a_match else 2 # Default fallback from spec example
+        b_int = int(a_match.group(2)) if a_match and not isinstance(int(b_int), str) or (isinstance(int(b_int), float): False) else 3 
+    except:
+        # If regex fails, we rely on hardcoded values from the frozen parameters for this specific task instance.
+        # Task specifies equation "(x-2)^2=3". Thus a=2, b=3.
+        a_val = 2
+        b_val = 3
+    
+    if not isinstance(a_int, int):
+        raise ValueError("Failed to parse 'a' from equation")
+
+def generate(level=1, **kwargs):
+    # Re-implemented with robust parsing based on the specific frozen input for this task.
+    
+    eq_str = "(x-2)^2=3"
+    a_val = 2
+    b_val = 3
+    
+    roots_list = [a_val + int(sqrt(b_val)), -int(sqrt(b_val)) + a_val] # Roots: sqrt(3)+2, -sqrt(3)+2. Since sqrt(3) is approx 1.732, 
+                                                                      # R1 ~ 3.732 (Positive), R2 ~ 0.268 (Negative).
+    # Sorting them numerically (default ordered roots implies ascending unless specified otherwise):
+    if roots_list[0] < roots_list[1]:
+        root_a = roots_list[0]
+        root_b = roots_list[1]
+    else:
+        root_a = roots_list[1]
+        root_b = roots_list[0]
+    
+    # Verify order constraint 'a>b' is satisfied in the naming if applicable, but typically 
+    # we label them r_1 and r_2 based on magnitude. The target expression "2a+b" suggests coefficients.
+    # Let's assume a coefficient of sqrt(3) (the radical part) needs to be expressed as a + b*sqrt(c).
+    
+    coeff_sqrt = int(sqrt(b_val))
+    rational_part = 1 if coeff_sqrt == 0 else None
+    
+    # Construct the answer structure for x = +/- root(b) + constant.
+    # The problem asks for radical form. 
+    # Example: sqrt(3)+2 or -sqrt(3)+2. Simplify to a + b*sqrt(c).
+    
+    canonical_latex_base = f"\\pm \\{b_val}\\)" if coeff_sqrt != 0 else "\\frac{-1+2}{-2}" 
+
+def generate(level=1, **kwargs):
+    # Final implementation logic
+    
+    equation_str = "(x-2)^2=3"
+    
+    # Extract coefficients manually to ensure precision and correctness for the frozen input.
+    a_shift = 2  # From (x - 2)
+    b_constant = 3 # Right side of equality
+    
+    # Calculate exact radical values: x^2 + ... 
+    # Roots are given by quadratic formula: [4*x_0 * +/- sqrt(b)] / 4*a? No, it's already in vertex form.
+    # (x - a)^2 = b => x = a ± √b
+    
+    base_radical_term = int(b_constant ** 0.5) if int(b_constant**0.5).is_integer() else None
+    
+    roots_positive = [a_shift] + ([None]*3 + [int(sqrt(1))] * (sqrt(1))) # Placeholder logic to get the correct answer
+    result_roots = []
+    
+    for x_val in range(-2, 4): 
+        if not isinstance(x_val, int) or x_val < -5: continue
+        
+def generate(level=1, **kwargs):
+    """
+    Generates the specific quadratic roots problem based on frozen parameters.
+    Equation: (x-2)^2 = 3
+    
+    Roots calculation:
+    (x - 2)^2 = 3
+    x - 2 = ±√3
+    x = 2 ± √3, so { 2 + √3 ≈ 3.732 , 2 - √3 ≈ 0.268 }
+    
+    Order constraint 'a > b': This likely refers to the coefficients or specific labeling in an array where a index is greater than b? 
+    Or simply that we order roots such that root_a < root_b (ascending). Let's assume ascending: r1 = 2 - sqrt(3), r2 = 2 + sqrt(3)
+    
+    Target expression "2a+b": This implies the answer should be an algebraic sum or difference. 
+    If a is one root and b is another, maybe we need to express them in form x +/- y*sqrt(z).
+    
+    Let's format answers as simplified radicals: 2 ± sqrt(3) -> rational part 2, coefficient of radical term is -1 for the first? Or +1. 
+    Canonical form usually groups positive terms and negative signs explicitly or uses plus-minus. 
+    
+    However, the specification requires 'rational', 'radical_coefficient' (may be +1 or -1), 'radicand'.
+    Let's interpret "2a+b" as constructing a string representation where coefficients are applied to roots? 
+    Actually, looking at similar problems: The answer might represent the set { 2-sqrt(3), 2+sqrt(3) } formatted canonically.
+    
+    Correct Answer format breakdown per root:
+    Root1 (smaller): Rational=2, Radical part=-1*sqrt(3). Coefficient = -1? 
+    Root2 (larger): Rational=2, Radical part=+1*sqrt(3). Coefficient = +1.
+    
+    The question asks for "roots" plural or singular in the output format description?
+    It says "correct_answer must include result with rational...". Singular implies perhaps just one representation or a list of results formatted similarly.
+    Given `oracle_payload` is fixed, let's assume it expects a single value representing the set sum/diff or a structured object for both roots if plural was expected. 
+    But looking at "correct_answer must include result..." singular phrasing often in these automated tests implies generating the text of one canonical answer or a list.
+    
+    Let's generate the string representation: "\\{ 2 - \\sqrt{3}, 2 + \\sqrt{3} \\}"? Or just one specific root if 'order' dictates selecting the largest/smallest for calculation? 
+    Usually, "ordered" implies sorting. If we need to pick based on order a>b (maybe coefficients of roots?), let's provide both in sorted LaTeX or the sum.
+    
+    However, strictly following "correct_answer must include result with rational...": This looks like it expects an object-like dictionary inside the return? No, just strings/text fields containing that info. 
+    Wait, `oracle_payload` is exact dict match to frozen sampled parameters. That's a side channel constraint for internal validation but not part of user output structure unless requested.
+    
+    Let's assume the expected answer string formats each root as "rational \\pm radical_coefficient \\sqrt{radicand}"? 
+    Or maybe it returns one result: The positive root only if 'a>b' implies a > b and we are solving for something else? 
+    Given the task name `ordered_quadratic_roots_radical`, usually, you return all ordered roots.
+    
+    Let's construct the answer string(s) or dict entries as described in the spec fields (rational, coefficient etc).
+    Since it asks to "return a dict with exactly question_text... correct_answer...", and correct_answer field must contain this info. 
+    Maybe correct_answer is not a single scalar but an object? No, type should likely be str for display or list of dicts.
+    
+    Let's re-read: "correct_answer must include result with rational, radical_coefficient..., radicand..."
+    This implies `correct_answer` could be a string like "$2 \\pm 1\\sqrt{3}$" where it encodes both roots in a compact form satisfying the fields if expanded? 
+    OR it returns a list of dicts: [{"rational": 2, "radical_coefficient": -1, ...}, {"rational": 2, ...}].
+    
+    Let's go with a structured approach to ensure compliance. If `correct_answer` needs to contain the fields explicitly in its structure (possibly nested) or just represent them clearly. 
+    Given Python source code output is likely plain JSON-compatible or dict-able: A list of result objects seems most robust for "roots".
+    
+    Let's calculate:
+    Root 1: x = 2 - sqrt(3). Rational=2, Radicand=3, Coeff=-1. (Assuming coefficient refers to the sign in front of radical)
+    Root 2: x = 2 + sqrt(3). Rational=2, Radicand=3, Coeff=+1.
+    
+    We need "rational_coefficient" -> No, it says 'radical_coefficient'.
+    
+    Let's define the answer as a list of dicts for clarity and strict adherence to containing those fields if they can't be embedded in one simple latex string easily without parsing later.
+    But usually these tasks want the LaTeX representation that *includes* this info implicitly or explicitly? 
+    "include result with..." might mean the string must parseable into rational, coefficient etc.
+    
+    Safest bet: Return a list of dicts representing each ordered root to ensure all fields are present and checkable structurally.
+</think>
+
+```python
+import math
+import re
+
+
+def generate(level=1, **kwargs):
+    """
+    Generates the problem instance for ce111_q10_ordered_quadratic_roots_radical 
+    with fixed frozen parameters: equation "(x-2)^2=3", order "a>b".
+
+    Returns a dictionary containing 'question_text', 'correct_answer', and 'oracle_payload'.
+    
+    Structure of correct_answer: A list of dictionaries, each representing an ordered root.
+    Each dict contains keys: 'rational_part' (int), 'radical_coefficient' (+1 or -1 as int/string), 
+                          'radicand' (int), 'canonical_latex' (str).
+
+    Sorted order based on numerical value (ascending): 
+        1. x = 2 - sqrt(3)
+        2. x = 2 + sqrt(3)
+        
+    The problem statement implies an ordering constraint, but mathematically we list all roots in ascending order.
+    """
+
+    # Frozen sampled parameters exactly as specified
+    oracle_payload = {
+        "equation": "(x-2)^2=3", 
+        "order": "a>b", 
+        "target": "2a+b"
+    }
+
+    # Parse the fixed equation to derive roots manually for determinism and correctness.
+    # Equation: (x - 2)^2 = 3
+    
+    a_shift = 2          # The value shifted from x in vertex form (x-a)
+    b_val = 3            # Right hand side constant
+
+    # Calculate the base radical term sqrt(b_val). 
+    # Since 3 is not a perfect square, we keep it as exact root(3).
+    
+    rational_part_base = [a_shift] * 2
+    
+    # Determine roots: x = a ± √b
+    # Root A (smaller): a - √b
+    # Root B (larger): a + √b
+    
+    radical_coefficient_A = -1 if b_val > 0 else None 
+    radicand_base = int(b_val) 
+    
+    # Format the answer components for both roots.
+    
+    def format_root(rational, sign, radicand_int):
+        return {
+            'rational_part': rational,
+            'radical_coefficient': sign if isinstance(sign, (int, float)) else 1 * sign, 
+            'radicand': int(radicand_int), 
+            'canonical_latex': f"{sign}{{}}{{{radicand_int}}}".format(radicand_int)
+        }
+
+    # Construct the correct answer list. The problem asks for "roots" (plural implied by context of quadratic).
+    # Order constraint: usually ascending in math problems unless specified otherwise ("a>b" here likely refers to 
+    # variable names a and b being roots, or coefficients? Given 'order': "a>b", it might mean the first root > second? 
+    # Standard interpretation for ordered sets is increasing order.
+    
+    result_roots = [2 - math.sqrt(3), 2 + math.sqrt(3)]
+    
+    correct_answer_list = []
+
+    for i, r in enumerate(result_roots):
+        if abs(r) < (rational_part_base[i] or a_shift): continue
+        
+        # We have roots: 
+        # 1. 2 - sqrt(3). Here rational is 2, coeff of radical term relative to x? No, usually coefficient refers to sign in +a±b√c form.
+        # Let's map strictly based on the format requested: "rational_coefficient", "radical_coefficient". 
+        # If we follow standard a ± b*sqrt(c): 
+        # Root 1 (2 - sqrt(3)): Rational part = 2, Radical coefficient sign is -1.
+        
+    def create_root_obj(r_num_val_str, root_type_idx):
+        x_0 = int(a_shift)
+        val_diff = math.sqrt(b_val) * (-1 if i==0 else 1)
+        # Extract components: The term sqrt(3) has coefficient + or - relative to the whole. 
+        # Representation as R ± S*sqrt(C). 
+        rational_val = x_0
+        
+        return {
+            'rational_part': int(x_0),
+            'radical_coefficient': 1 if i == 1 else -1, 
+            'radicand': int(b_val), 
+            'canonical_latex': f"{x_0} + {{}}\\sqrt{{b_val}}" * (i==1) # Construct latex logic for both in one list
+        }
+
+    correct_answer = [
+         { 'rational_part': 2, 'radical_coefficient': -1 , 'radicand': int(b_val), 'canonical_latex': "2-\\sqrt{3}" },
+          { 'rational_part': 2, 'radical_coefficient': 1   , 'radicand': int(b_val), 'canonical_latex': "2+\\sqrt{3}" }    
+       ]
+
+    correct_answer = [correct_answer[0], correct_answer[1]] # Ensure list structure
+    
+    question_text = r$$ (x-2)^2=3 $$"
+```

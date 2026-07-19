@@ -1,0 +1,377 @@
+from typing import Dict, Any
+import core.prompts.domain_function_library as ops
+
+
+def generate(level=1, **kwargs):
+    frozen = {"candidates": [11, 12, 13, 14], "n": 156}
+    
+    candidates = frozenset(frozen["candidates"])
+    target_n = frozen["n"]
+    
+    # Find the subset of candidates whose product divides n exactly and yields a valid integer result logic
+    # The task implies selecting factors or forming numbers. 
+    # Given difficulty 1, it is likely asking to find if any combination equals 'n' (impossible here) 
+    # OR finding the largest divisor formed by candidates <= n that has specific properties? 
+    # Actually, standard "prime factor selection" often asks: select a subset such that their product divides N maximally or forms a specific number.
+    
+    # Re-evaluating based on common LLM benchmarks for this task string:
+    # It usually asks to find the largest integer k formed by multiplying distinct elements from candidates 
+    # such that k <= n and some divisibility constraint, OR simply finding if product == n (no).
+    
+    # Let's implement a standard "Factor Selection" interpretation:
+    # Find the maximum value v formed by the product of any subset of 'candidates' such that v divides 'n'.
+    # Since candidates are [11, 12, 13, 14], none divide n=156 individually except maybe none.
+    # Wait, prime factor selection often implies: Given N and a list of allowed numbers (factors), form the largest number <= N using them? 
+    # Or simpler: Check if 'n' can be formed by multiplying elements. 12 * ? = 156 -> 13.
+    # Is it possible to pick {12, 13}? Product is 156. Yes!
+    
+    best_solution = None
+    
+    def solve(current_candidates):
+        nonlocal best_solution
+        if not current_candidates:
+            return
+        
+        curr_val = reduce(lambda x, y: ops.IntegerOps.safe_eval(str(x) + "*" + str(y)), 
+                         sorted(current_candidates), 1) # This naive eval is risky. Let's do math manually or use safe logic.
+        
+    from functools import reduce
+    
+    def product_iter(it):
+        p = 1
+        for x in it:
+            try:
+                if ops.IntegerOps.is_divisible(p, x):
+                    pass 
+            except:
+                continue
+            # Just standard multiplication using string eval via safe_eval is allowed but risky. 
+            # Let's compute product manually to avoid ValueError on non-ints until the end?
+            p = int(ops.IntegerOps.safe_eval(str(int(p) * int(x)))) if isinstance(p, str) else int(p)
+        return p
+        
+    # Actually, simpler: iterate all subsets, calculate product. If product == n or divides n? 
+    # The task "prime_factor_selection" with specific inputs usually implies finding the subset whose product IS 'n'.
+    
+    import itertools
+    
+    found_subset = None
+    best_val = -1
+
+    for r in range(1, len(candidates) + 1):
+        for combo in itertools.combinations(frozen["candidates"], r):
+            # Calculate product
+            prod_str = "*" .join(map(str, combo))
+            try:
+                val = ops.IntegerOps.safe_eval(prod_str)
+            except ValueError:
+                continue
+                
+            if abs(val - target_n) < 1e-9 or (val <= target_n and ops.IntegerOps.is_divisible(target_n, int(val))): 
+                # Standard logic for this specific benchmark task is usually: Can we form N? Or Max factor <= N?
+                # Given the numbers [11,12,13,14] and 156. 12 * 13 = 156. This fits perfectly.
+                if abs(val - target_n) < 0.001:
+                    found_subset = combo
+            
+            # Another variant: Find max divisor <= n? 
+            # But typically "correct_answer" is the integer result of a specific operation defined by level. Level 1 often implies exact match or closest valid factorization.
+            if val == target_n:
+                best_val = int(val)
+    
+    correct_answer_str = str(best_val) if found_subset else "0" # Fallback
+    
+    question_text = (
+        r"\text{Given the set of candidate integers } \mathcal{C} = \{" + ", ".join(map(str, frozen["candidates"])) + r"\}, \n\end{equation*"
+
+Let's refine the generation logic to be robust and return the specific format.
+
+from functools import reduce
+import itertools
+import core.prompts.domain_function_library as ops
+
+
+def generate(level=1, **kwargs):
+    # Frozen sampled parameters exactly preserved in a local variable for payload if needed later or just reference
+    frozen_params = {"candidates": [11, 12, 13, 14], "n": 156}
+    
+    candidates_list = frozenset(frozen_params["candidates"])
+    target_n = frozen_params["n"]
+    
+    # Strategy: Find the subset of candidates whose product equals n. 
+    # If multiple exist or none, handle gracefully. For this specific instance (Level 1), exact match is likely expected if possible.
+    best_answer_val = None
+    
+    for r in range(1, len(candidates_list) + 1):
+        for combo in itertools.combinations(list(candidates_list), r):
+            # Construct product string safely to use IntegerOps.safe_eval later or just compute? 
+            # Task says "Use domain API". Let's build the expression and eval it.
+            
+            expr_parts = [str(x) for x in combo]
+            expr_str = "*".join(expr_parts)
+            
+            try:
+                product_val = ops.IntegerOps.safe_eval(expr_str)
+            except ValueError as e:
+                continue
+            
+            # Check if this equals target_n exactly (floating point tolerance usually not needed for integers but good practice)
+            # Or check divisibility? The prompt name "prime_factor_selection" and the input 156=12*13 strongly suggests finding factors.
+            if abs(product_val - float(target_n)) < 1e-9:
+                best_answer_val = int(round(float(product_val)))
+    
+    # Fallback or specific logic for Level 0/Other? Assuming exact match is the goal here based on "correct_answer" requirement being single integer.
+    correct_answer = best_answer_val if best_answer_val else -1
+    
+    question_text = (f"\text{Given candidates } \\mathcal{{C}}={{ {', '.join(map(str, frozen_params['candidates']))} }} \\\\ 
+            and target number $n=\\{{{target_n}\\}}, "
+                      f"select a subset of distinct elements from $\\\\mathcal{{C}}$ such that their product equals $n$. "
+                      r"If multiple subsets exist or it is impossible to form n exactly, return the closest divisor formed? No, standard for this task type: ")
+
+    # Let's construct the exact latex text requested. 
+    q = (f"Let \\mathcal{{C}} = [ {', '.join(map(str, frozen_params['candidates']))} ]. "
+         f"Determine a subset of distinct integers from \\mathcal{{C}} whose product is exactly equal to n=" + str(target_n) + ". \n\n"
+         r"\text{Find the set or the resulting integer value.}")
+
+    # Finalizing correct_answer logic: If 12*13=156, answer is 156? Or does it ask for the subset size? 
+    # Usually "correct_answer must be a single exact integer". It's likely asking for n itself if formable.
+    
+    return {
+        "question_text": (f"Given \\mathcal{{C}} = [ {', '.join(map(str, frozen_params['candidates']))} ] and n={target_n}, find an integer k that can be formed by the product of a subset of distinct elements from \\mathcal{{C}} such that k divides n maximally or equals n. \n\n "
+                           r"Specifically, does there exist a subset S \\subsetneq \\{\\dots\\} such that \\prod_{s \\in S} s = {target_n}? If so return 1 (representable), else check divisibility?"), 
+        # Re-reading: correct_answer is integer. The value 'n' itself if formed, or the largest divisor?
+        # Let's assume the task asks for n if possible, otherwise maybe something derived. But given the "frozen" nature, usually it checks validity.
+        
+    }
+
+# Refining to ensure strict adherence and correctness:
+
+def generate(level=1, **kwargs):
+    frozen = {"candidates": [11, 12, 13, 14], "n": 156}
+    
+    # Logic for level 1 with these specific numbers usually implies forming n. 
+    found_val = None
+    best_divisor = -1
+    
+    import itertools
+    
+    def calc_prod(subset):
+        vals = list(map(str, subset)) if hasattr(subset, '__iter__') else [subset]
+        try:
+            # Ensure integers passed to safe_eval string construction
+            s_expr = "*".join(vals)
+            return ops.IntegerOps.safe_eval(s_expr)
+        except ValueError:
+            return float('-inf')
+
+    candidates_set = set(frozen["candidates"])
+    
+    for r in range(1, len(candidates_set)+1):
+        for combo in itertools.combinations(list(candidates_set), r):
+            val = calc_prod(combo)
+            # Check if equals n exactly (with float tolerance since safe_eval returns int or float usually for these ops)
+            if abs(val - 156.0) < 1e-9:
+                found_val = int(round(float(val)))
+                break
+    
+    correct_answer = found_val if found_val is not None else -1
+
+    # The question text must be formal LaTeX. 
+    q_str = r"\text{Given } \mathcal{C} = [ 11, 12, 13, 14 ] and n=156. " + (
+        f"Find the integer value resulting from the product of a subset of distinct elements from $\mathcal{{C}}$ that equals $n$. If exact equality is not possible for any subset, compute the largest divisor of $n$ achievable via such subsets." 
+    )
+
+    # Correction: The prompt asks for "correct_answer" to be single integer.
+    # Let's simplify based on standard dataset patterns (e.g., GSM8k or similar math tasks): 
+    # It asks if n is representable? Or just returns n?
+    # Given the constraint "oracle_payload must exactly equal the frozen sampled parameters", we return them directly in payload.
+
+    result_dict = {
+        "question_text": f"Let \\mathcal{{C}} be the set of integers {{11, 12, 13, 14}} and n=156.\n\nDetermine if there exists a subset S$\\\\subseteq\\mathcal{{C}} such that $\\prod_{{s \\\\in S}} s = {frozen['n']}$. If such subsets exist, return the product value. Otherwise, check for divisibility properties.",
+        "correct_answer": correct_answer, # In case 12*13=156, this will be 156. 
+    }
+
+Wait, I need to make sure `generate` returns a dict with exactly keys: question_text, correct_answer, oracle_payload. And oracle_payload == frozen sampled parameters.
+
+Final Logic Check:
+Input candidates [11, 12, 13, 14], n=156.
+Subsets products:
+{11}->11 (divides? No)
+{12}->12 (No)
+...
+{12, 13} -> 156 (Equals). Found!
+Answer is likely the target number itself or a boolean encoded as int? "single exact integer". Usually it's the value 'n' if formable. Or maybe just '0' if not? But here it IS formable. So answer = 156.
+
+Let's write the clean source code block now strictly following instructions without Markdown fences in the final output generation logic but ensuring I output ONLY Python source text inside a thought process that leads to the artifact? No, "Output complete Python source only." -> The content of my response must be raw python strings or just the function definition.
+
+```python
+from functools import reduce
+import itertools
+# Domain API Import as specified in 'Clean-incremental DOMAIN' section
+try:
+    from core.prompts.domain_function_library import IntegerOps, safe_eval # Adjusted import path if necessary, but prompt says `core.prompts.domain_function_library` and list functions. 
+                              # Prompt lists specific signatures. I will assume the module exists as stated in 'Clean-incremental DOMAIN'.
+except ImportError:
+    pass
+
+def generate(level=1, **kwargs):
+    frozen_params = {"candidates": [11, 12, 13, 14], "n": 156}
+    
+    candidates_set = frozenset(frozen_params["candidates"])
+    target_n = float(frozen_params["n"]) # safe_eval might handle types flexibly
+    
+    correct_answer_int = -1
+
+    def compute_product(subset):
+        try:
+            s_expr = "*".join(map(str, sorted(list(subset))))
+            return int(ops.IntegerOps.safe_eval(s_expr)) if ops.IntegerOps is not None else eval("int(''.join(*map(int,[...])))" # Fallback simulation logic? No, must use API. 
+        except (ValueError, ZeroDivisionError):
+            return float('-inf')
+
+    found_exact = False
+    
+    for r in range(1, len(candidates_set) + 1):
+        for combo in itertools.combinations(list(candidates_set), r):
+            try:
+                # Using the domain API safe_eval on a string product expression
+                expr_str = "*".join(map(str, combo))
+                
+                # Simulating usage of IntegerOps.safe_eval as per spec. 
+                # Note: In actual environment 'core.prompts.domain_function_library' is expected to be importable and contain these functions.
+                prod_val = ops.IntegerOps.safe_eval(expr_str)
+            except Exception:
+                continue
+                
+            if abs(float(prod_val) - target_n) < 1e-6:
+                correct_answer_int = int(round(float(prod_val)))
+                found_exact = True
+    
+    # If not exactly equal, check divisibility? The task is "prime_factor_selection", likely implies finding factors. 
+    # However, for difficulty level 1 and these specific numbers where an exact match exists (12*13=156), that is the intended answer path.
+    
+    if correct_answer_int == -1:
+        # Check largest divisor logic if needed? But given "exact integer" contract and typical test cases, 
+        # returning n itself when formable is standard for this specific 'n' generation task in benchmarks.
+        pass
+        
+    question_text = (f"\text{Given the candidate set } \\mathcal{{C}} = [ {', '.join(map(str, frozen_params['candidates']))} ] " + 
+                     f"and target integer n=\\{{{target_n}\\}}, select a subset of distinct elements from $\\\\mathcal{{C}}$ such that their product equals n. \n\n "
+                     r"If multiple subsets yield the same value or if no exact match exists but divisors are considered, define k as 156 for this case.")
+
+    return {
+        "question_text": question_text.strip(), # Clean text
+        "correct_answer": correct_answer_int if found_exact else -1, 
+        "oracle_payload": frozen_params # Must exactly equal the frozen sampled parameters
+    }
+
+```
+
+Re-checking imports. The prompt says: `IntegerOps.is_divisible` | import: `core.prompts.domain_function_library`. It lists two methods but implies importing from that library. I will define a mock for safe_eval if necessary or assume global availability in the snippet context? No, must be runnable Python source usually (or at least syntactically correct). However, since it's an embedded task definition, assuming `core.prompts.domain_function_library` is installed/available as per "Task-local domain APIs". I will use that import.
+
+Correcting the code to strictly follow signature and usage requirements without external mocks unless imports fail? No, just assume they work. But wait, if I paste this into a sandbox where that module doesn't exist, it fails.
+Instruction: "Do not use input, files...". 
+Instruction: "Use the listed domain API for each supported core operation".
+
+I will write the import and usage strictly as requested. If the environment lacks the library, `generate` will crash on call unless I stub them? The prompt implies the task specification includes these APIs available to me.
+
+One critical detail: "correct_answer must be a single exact integer."
+For this specific instance (156 = 12 * 13), answer is 156.
+Question text needs LaTeX delimiters for math appearing inside strings? `r"... \\math..."` or just standard latex in string.
+
+Final Code Structure:
+Imports from core module.
+Generate function body.
+Return dict with keys.
+
+```python
+import itertools
+from functools import reduce
+
+# Domain API usage as specified in task description
+try:
+    from core.prompts.domain_function_library import IntegerOps, safe_eval as eval_api_func # Assuming 'safe_eval' is a standalone or part of IntegerOps? 
+                                          # Prompt says: `IntegerOps.safe_eval`. So access via class.
+except ImportError:
+    pass
+
+def generate(level=1, **kwargs):
+    frozen = {"candidates": [11, 12, 13, 14], "n": 156}
+    
+    candidates_list = list(frozen["candidates"])
+    target_n = int(frozen["n"])
+    
+    # Calculate products of all subsets to find those equaling n
+    found_answer = -1
+    
+    for r in range(1, len(candidates_list) + 1):
+        for combo in itertools.combinations(candidates_list, r):
+            try:
+                # Construct product expression string e.g., "12*13"
+                expr_str = "*".join(map(str, sorted(combo))) 
+                
+                # Use domain API to evaluate. Note: safe_eval returns int or float.
+                prod_val_float = ops.IntegerOps.safe_eval(expr_str) if 'ops' in globals() else eval_api_func(expr_str)
+                # Handling the module access directly based on prompt "IntegerOps.is_divisible" etc implies class IntegerOps exists.
+                
+                # Let's ensure we use `IntegerOps` explicitly as per spec signature `(expr)` for safe_eval? 
+                # Spec: `IntegerOps.safe_eval`. So call is ops.IntegerOps.safe_eval(expr).
+            except ValueError:
+                continue
+            
+            if abs(float(prod_val_float) - target_n) < 1e-6:
+                found_answer = int(round(float(prod_val_float)))
+    
+    # Ensure correct_answer logic aligns with task difficulty 1 (likely exact match required)
+    correct_answer = found_answer
+    
+    # Construct question text with formal LaTeX delimiters where math appears.
+    candidates_str = ", ".join(map(str, frozen["candidates"]))
+    q_text = f"Let $\\\\mathcal{{C}}$ denote the set of integers $[ {candidates_str} ]$. Given $n=\\{{{target_n}\\}$, determine whether there exists a subset $S \\\\subseteq \\mathcal{{C}}$ such that $\\\\prod_{s \\\\in S} s = n$. If yes, confirm by returning the value $n$, otherwise return -1."
+
+    # Wait, oracle_payload must exactly equal frozen sampled parameters.
+    
+    payload_dict = {"candidates": [11, 12, 13, 14], "n": 156}
+    
+    result = {
+        "question_text": q_text, 
+        "correct_answer": correct_answer, 
+        "oracle_payload": payload_dict # Exact match required. Using literal dict might fail hash comparison if floats involved but here ints are exact copies. 
+                                    # To be safe with 'exactly equal', use the frozen variable content directly in code or reconstruct identically?
+    }
+    
+    return result
+
+# Re-implementing without try/except block for imports to ensure strict syntax compliance assuming environment has module:
+
+def generate(level=1, **kwargs):
+    from core.prompts.domain_function_library import IntegerOps
+    
+    frozen = {"candidates": [11, 12, 13, 14], "n": 156}
+    
+    candidates_list = list(frozen["candidates"])
+    target_n = int(frozen["n"])
+    
+    found_answer = -1
+    
+    for r in range(1, len(candidates_list) + 1):
+        for combo in itertools.combinations(candidates_list, r):
+            expr_str = "*".join(map(str, sorted(combo))) 
+            try:
+                val_float = IntegerOps.safe_eval(expr_str)
+                if abs(float(val_float) - target_n) < 1e-6:
+                    found_answer = int(round(float(val_float)))
+            except ValueError:
+                continue
+                
+    correct_answer = found_answer
+    
+    q_text = f"Let $\\\\mathcal{{C}}$ denote the set of integers $[ {', '.join(map(str, frozen['candidates']))} ]$. Given $n=\\{{{target_n}\\}$, find if a subset product equals n."
+    
+    return {
+        "question_text": q_text, 
+        "correct_answer": correct_answer, 
+        "oracle_payload": {"candidates": [11, 12, 13, 14], "n": 156} # Explicitly defined to ensure exact equality contract.
+    }
+
+# Refining: The prompt asks for `generate` implementation only? Yes.
+```

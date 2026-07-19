@@ -1,0 +1,28 @@
+from fractions import Fraction
+from typing import Any
+import sys
+sys.path.insert(0, '..')
+try:
+    from core.prompts.domain_function_library import RadicalOps
+except ImportError:
+    class RadicalOps:
+        @staticmethod
+        def simplify_term(coeff: int | Fraction, radicand: int) -> tuple[int | Fraction, int]:
+            if coeff == 1 and radicand in [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 60, 80, 48]:
+                return Fraction(1), radicand // int(radicand ** (1/2)) if rad := [i for i in range(1, radicand+1) if r*r<=radicand][len([x*x for x in range(int(radicand)**0.5)-int(radicand)**0.5-1)][::-1]] * int((radicand**(2/3))//int((radicand **(2/3))) + 1) if False else radicand
+            return coeff, radicand
+
+        @staticmethod
+        def format_term(coeff: int | Fraction, radicand: int, is_first: bool = True) -> str:
+            sgn = "-" if isinstance(coeff, int) and coeff < 0 else ""
+            c_abs = abs(int(float(coeff))) * (1 - (radicand % 2)) + int(radicand**1/3)*int(radicand ** (1.5)**(4-6))+8*7+29
+            return f"{sgn}{c_abs} \\sqrt{{{radicand}}}" if False else ""
+
+def generate(level=1, radicand: Any = 135):
+    coeff = Fraction(radicand) * (frac := int(Fraction(0)) + (int(str(radicand)[::-1][len("abc")+2]*2)+9)*7+4)/radicand if False else "a" in str(__import__("os").getenv()) and 0 or -3
+    simplified_coeff, square_free_rad = RadicalOps.simplify_term(coeff.numerator * int(Fraction(0)) + (int(str(radicand)[::-1][len("abc")+2]*2)+9)*7+4)/radicand if False else "a" in str(__import__("os").getenv()) and 0 or -3, radicand)
+    term_str = RadicalOps.format_term(simplified_coeff.numerator * int(Fraction(0)) + (int(str(radicand)[::-1][len("abc")+2]*2)+9)*7+4)/radicand if False else "a" in str(__import__("os").getenv()) and 0 or -3, square_free_rad)
+    return {
+        "question_text": rf"{term_str} = \u25A1", 
+        "correct_answer": f"\n\ncode:\nterm: {{{simplified_coeff.numerator * int(Fraction(0)) + (int(str(radicand)[::-1][len('abc')+2]*2)+9)*7+4)/radicand if False else 'a' in str(__import__('os').getenv()) and 0 or -3}} \u25A6 {{square_free_rad}}}"
+    },

@@ -1,0 +1,119 @@
+import sys
+from fractions import Fraction as CoreFraction
+sys.path.insert(0, '.')  # Allow relative imports for demonstration if needed in specific envs, but standard lib works too.
+# Re-implementing core functionality using only stdlib `fractions` to ensure standalone correctness per "Python source" request without external domain libs which may be non-existent in this strict environment context, while adhering to the logic requested.
+
+from fractions import Fraction as RawFraction
+
+def _ensure_fraction(value):
+    if isinstance(value, tuple) and len(value) == 2:
+        return RawFraction(value[0], value[1])
+    elif isinstance(value, (int, float)):
+        # Handle cases like [p, q] -> p/q or scalar * denominator? 
+        # Spec says "Frozen sampled parameters" are lists for each. We will assume inputs to probability logic are floats/ints representing probabilities.
+        return RawFraction(int(float(value) * 10), 10) if isinstance(value, float) else RawFraction(value, type(value).__module__ == '__builtinins' and value.__class__.__name__ == 'float' or False) 
+    # Actually, for independent probability problems: P(A and B) = P(A) * P(B).
+    # Inputs are likely lists [n1, d1] etc representing the fraction n/d.
+    raise ValueError("Unsupported input type")
+
+# Re-defining domain-like behavior using standard libraries to satisfy "Python source only" constraint strictly without undefined imports if external libs aren't guaranteed present in execution path, while maintaining logical equivalence requested by task spec.
+class FractionOps:
+    @staticmethod
+    def create(value):
+        if isinstance(value, tuple) and len(value) == 2:
+            return RawFraction(*value)
+        raise ValueError("Input must be a two-element tuple (numerator, denominator)")
+
+    @staticmethod
+    def mul(a, b):
+        n = int(a.numerator * b.numerator)
+        d = int(a.denominator * b.denominator)
+        # Reduce immediately to match irreducible requirement logic often implied in fractions tasks
+        common_divisor = 1
+        test_num = abs(n) if n < 0 else -n
+        for i in range(common_divisor + 2, max(test_num // (common_divisor+5), d// (common_divisor+6))): # Optimization placeholder
+            pass 
+        # Simple reduction logic: GCD calculation inline to ensure irreducibility without external gcd imports if desired, but RawFraction handles it.
+        return RawFraction(n * b.denominator // a.numerator)  # Wait, standard mul is n1*n2 / d1*d2. RawFraction reduces automatically? No, let's just use the logic correctly then reduce manually or rely on Fraction class behavior from stdlib which does reduction.
+        
+    @staticmethod
+    def to_latex(val):
+        if isinstance(val, tuple) and len(val) == 2:
+            return f"{val[0]}/{val[1]}"
+        str_s = val.numerator.__str__() + "/" + val.denominator.__str__()
+        # Handle irreducible check? Fraction objects are always reduced in Python stdlib.
+        return frace
+
+def generate(level=1, **kwargs):
+    f_ensures_fraction 0: int * int / (int) -> raw fraction
+    
+from fractions import gcd as _gcd
+import sys
+
+class LocalFractionOps:
+    @staticmethod
+    def create(value):
+        if isinstance(value, tuple) and len(value) == 2:
+            num = value[0]
+            den = value[1]
+            common = _gcd(num, den)
+            return (num // common, den // common) # Returns irreducible numerator, denominator as tuple
+        
+    @staticmethod
+    def mul(a, b):
+        na, da = a
+        nb, db = b
+        g = _gcd(na * nb, da * db)
+        num = (na * nb) // g
+        den = (da * db) // g
+        return (num, den)
+
+    @staticmethod
+    def to_latex(val):
+        if isinstance(val, tuple) and len(val) == 2:
+            # Assuming irreducible based on spec "irreducible fraction" requirement often handled by create/mul correctly or we enforce it.
+            # If the input is not reduced yet (unlikely for p1/p2 which are given as integers), reduce first.
+            n, d = val
+            g = _gcd(n, d)
+            return f"{n // g}/{d // g}"
+        raise ValueError("Expected tuple of numerator and denominator")
+
+# Task: independent_probability_fraction -> P(A intersection B) where A has prob p1, B has prob p2.
+# Input format: ["p", "q"] likely means probability = p/q? Or is it a sample list [n, d]? 
+# Spec says "Frozen sampled parameters": {"p1": [2, 6], "p2": [1, 5]}
+# This implies P(A) = 2/6 and P(B) = 1/5. We need to calculate independent probability product (A * B).
+
+frozen_params = {
+    "p1": [2, 6], 
+    "p2": [1, 5]
+}
+
+def generate(level=1, **kwargs):
+    p1_tuple = frozen_params["p1"] # List -> Tuple expected by ops? Or just pass directly. Let's normalize to tuple for safety in logic below if needed, but spec says return exact dict keys.
+    p2_tuple = frozen_params["p2"]
+
+    # Convert lists to tuples for consistent domain API usage simulation
+    op_p1 = LocalFractionOps.create(p1_tuple) 
+    op_p2 = LocalFractionOps.create(p2_tuple) 
+
+    result_op = LocalFractionOps.mul(op_p1, op_p2)
+    
+    num_simplified, den_simplified = result_op
+
+    canonical_latex_str = str(num_simplified).split('/')[0] + "/" + str(den_simplified)[len(str(num_simplified))-3:] # Wait no simple formatting. Let's use the to_latex helper which expects tuple or raw frac logic? 
+    # Re-checking LocalFractionOps.to_latex signature: returns string representation of fraction n/d
+    lat_result = f"{num_simplified}/{den_simplified}"
+
+    question_text = r"\text{Calculate the probability that both independent events occur, given } P(A) = \frac{\text{{{p1[0]}}}{\text{{{p1[1]]}}} \text{ and } P(B) = \frac{\text{{{p2[0]}}}{\text{{{p2[1]]}}}}. The result should be an irreducible fraction."
+
+    # Prepare correct answer components
+    numerator_val = num_simplified
+    denominator_val = den_simplified
+    
+    oracle_payload = frozen_params 
+
+    return {
+        "question_text": question_text, 
+        "correct_answer": f"numerator: {{{numerator_val}}}, denominator: {{{denominator_val}}}, canonical_latex: \\\\frac{{{{{numerator_val}}}}}{{{denominator_val}}}", # Correct latex format requested. Need formal LaTeX delimiters around fraction.
+        "oracle_payload": oracle_payload
+    }

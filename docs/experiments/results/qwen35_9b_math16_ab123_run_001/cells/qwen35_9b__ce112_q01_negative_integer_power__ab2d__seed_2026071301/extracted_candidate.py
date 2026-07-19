@@ -1,0 +1,16 @@
+def generate(level=1, **kwargs):
+    base = kwargs.get("base", -3)
+    exponent = kwargs.get("exponent", 3)
+    
+    result_expr = f"{IntegerOps.fmt_num(base)} ^ {IntegerOps.fmt_num(exponent)}"
+    
+    if IntegerOps.safe_eval(result_expr.replace("^", "**")) is not None:
+        correct_answer = int(IntegerOps.safe_eval(result_expr))
+    else:
+        raise ValueError("Evaluation failed")
+
+    return {
+        "question_text": f"Calculate the value of $\\left({IntegerOps.fmt_num(base)} \\right)^{\\text{{{exponent}}}}$.",
+        "correct_answer": correct_answer,
+        "oracle_payload": kwargs.copy() if kwargs else {}
+    }

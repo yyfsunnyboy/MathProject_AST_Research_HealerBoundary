@@ -1,0 +1,29 @@
+def generate(level=1, **kwargs):
+    frozen = {"dividend_coefficients": [6, 0, 6], "divisor_coefficients": [1, -4]}
+    
+    quotient_coeffs, remainder_coeffs = div_qr(frozen["dividend_coefficients"], frozen["divisor_coefficients"])
+
+    dividend_poly_str = "+".join([str(c) for c in frozen["dividend_coefficients"]]) if len(frozen["dividend_coefficients"]) > 0 else "0"
+    divisor_poly_str = "+".join([str(c) for c in frozen["divisor_coefficients"]]) if len(frozen["divisor_coefficients"]) > 0 else "0"
+
+    quotient_latex = r"\(" + "+".join([str(c) for c in quotient_coeffs]) + "\)"
+    remainder_latex = r"\(" + "+".join([str(c) for c in remainder_coeffs]) + "\)"
+
+    
+    question_text = (f"Simplify the polynomial division: \\[ {dividend_poly_str} \\div {divisor_poly_str} \\\\ "
+                     f"= {{quotient_latex}} R_{{{remainder_latex}}} \\]" )
+
+
+    return_dict = {
+        "question_text": question_text, 
+        "correct_answer": {
+            "quotient_coefficients": quotient_coeffs,
+            "remainder_coefficients": remainder_coeffs,
+            "quotient_latex": quotient_latex,
+            "remainder_latex": remainder_latex
+        }, 
+        "oracle_payload": frozen
+    }
+
+    
+    return return_dict

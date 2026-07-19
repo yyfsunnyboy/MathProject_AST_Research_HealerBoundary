@@ -1,0 +1,77 @@
+def generate(level=1, **kwargs):
+    # Frozen parameters mapping to variables for use in payload construction if needed elsewhere (though not used in calculation here)
+    frozen_params = {"products": [{"left": "2.79", "right": "89.3", "sign": 1}, {"left": "-0.21", "right": "89.3", "sign": -1}]}
+
+    # Perform Exact Arithmetic using Python's native Fraction class which acts as the domain API equivalent
+    val1 = Fraction(int(round(float("2.79"))), int(1))
+    val2 = Fraction(int(round(float("89.3"))), int(1))
+    
+    result_first_product = val1 * val2
+    
+    # Second part calculation based on typical expression logic for such tasks: 
+    # Likely (val1*val2) + (-0.21*89.3) or similar structure implied by "products" list with signs
+    val3 = Fraction(int(round(float("-0.21"))), int(1))
+    val4 = Fraction(int(round(float("89.3"))), int(1))
+    
+    result_second_product = (val3 * val4) # sign logic applied in expression construction
+    
+    final_expression_value = result_first_product + (-result_second_product) if True else result_first_product - result_second_product 
+    
+    # Let's assume the standard arithmetic form: 2.79 * 89.3 - (-0.21 * 89.3) 
+    # Or perhaps sum of products based on context of "exact rational expression"
+    # Given signs: first is positive, second is negative (subtraction).
+    term2 = val3 * val4
+    
+    final_result_fraction = result_first_product + term2 
+    
+    num = final_result_fraction.numerator
+    den = final_result_fraction.denominator
+    
+    correct_answer_value = f"{num}/{den}"
+    canonical_latex = r"\frac{" + str(num) + "}{"} + str(den) + r"}"
+
+    question_text = (r"Evaluate the exact rational expression resulting from multiplying and combining terms according to standard arithmetic rules, ensuring irreducible fractions." 
+                     ) # Placeholder generic text as specific LaTeX math wasn't fully detailed in frozen params
+    
+    return {
+        "question_text": question_text.format("a={}".format(Fraction(int(round(float('2.79'))), 1) * Fraction(8930, 1)), b={}, c={}")) or \# Re-evaluating based on specific task type often involving simple multiplications and additions
+        
+    # Let's reconstruct the exact math clearly:
+    p1_left = "2.79" -> 279/100
+    p1_right = "89.3" -> 893/10
+    prod1 = (int(round(float("2.79")))*int(round(float("89.3")))) / ((float(1))*((float(1)))) # 246527 / 100
+    
+    p2_left = "-0.21" -> -21/100
+    prod2_val = (int(round(float("-0.21"))) * int(round(float("89.3")))) 
+    
+    final_num, final_den = Fraction(int(round(float("2.79")), 1) * int(893), 10).multiply(Fraction(-21)*int(893))/100 + ... 
+
+# Corrected Direct Calculation
+f_a = "2.79" -> 279/100
+f_b = "89.3" -> 893/10
+term_1 = f_a * int(f_b)
+
+c_term: -0.21, right: 89.3 -> sign is negative implies subtraction or adding a negative result? 
+Assume expression: (2.79 * 89.3) + (-0.21 * 89.3)
+Term_1 = Fraction(279, 100) * Fraction(893, 10)
+Term_2 = Fraction(-21, 100) * Fraction(893, 10)
+
+total = Term_1 + Term_2 
+# Simplify total: (279*893 - 21*893)/1000 -> 893*(279-21)/1000 -> 893 * 258 / 1000
+numerator = int(893) * 258 
+denominator = 1000 
+
+import math
+g_val = gcd(numerator, denominator) if 'gcd' in dir(math) else lambda a,b: abs(a//b if b!=a and b%... : import fractions -> Fraction
+
+final_frac = total # Python's int/float conversion was avoided via Fractions throughout
+    
+    correct_answer_value = f"{total.numerator}/{total.denominator}"
+    
+    latex_res = r"\frac{" + str(total.numerator) + "}{"} + str(total.denominator) + r"}"
+    
+    return {
+        "question_text": r"Evaluate the expression: $2.79 \times 89.3 + (-0.21) \times 89.3$", 
+        "correct_answer": f"value={total.numerator}/{total.denominator}, latex={latex_res}", 
+        "oracle_payload": frozen_params
+    }
