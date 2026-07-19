@@ -8,10 +8,16 @@ Call convention matches Gemini Math16 runners:
         "api_attempts": list,   # per-attempt records for the same cell
     }
 
+Sampling is frozen from `ollama show qwen3.5:4b` Parameters (same for 4B/9B):
+temperature=1.0, top_p=0.95, top_k=20, presence_penalty=1.5.
+(Note: user expectation ~0.7 applies to some HF instruct presets; this Ollama
+model card ships temperature=1 / top_p=0.95.)
+
 Does not build Math16 prompts, evaluate answers, or write formal run artifacts.
 """
 from __future__ import annotations
 
+import json
 import time
 import urllib.error
 from typing import Any, Callable
@@ -22,14 +28,11 @@ from scripts.ce115_qwen_ollama_transport import (
     MODEL_ID,
     NUM_CTX,
     NUM_PREDICT,
-    TEMPERATURE,
-    build_chat_payload,
-    call_ollama_once,
+    _http_json,
     probe_ollama,
 )
 
 # Gemini Math16 (ce115_v4_gemini_transport) freezes max_output_tokens=24576.
-# Keep num_predict aligned; do not silently drop to 4096.
 GEMINI_ALIGNED_NUM_PREDICT = NUM_PREDICT  # 24576
 assert GEMINI_ALIGNED_NUM_PREDICT == 24576
 
@@ -38,6 +41,17 @@ DEFAULT_SEED = 2026071301
 REQUEST_TIMEOUT_SECONDS = 1800
 MAX_ATTEMPTS = 3
 BACKOFF_SECONDS = (5, 20, 60)
+
+# Vendor sampling from `ollama show qwen3.5:4b` / `:9b` Parameters block.
+TEMPERATURE = 1.0
+TOP_P = 0.95
+TOP_K = 20
+PRESENCE_PENALTY = 1.5
+VENDOR_SAMPLING_SOURCE = (
+    "ollama show qwen3.5:4b Parameters "
+    "(temperature=1, top_p=0.95, top_k=20, presence_penalty=1.5); "
+    "identical Parameters on qwen3.5:9b"
+)
 
 FROZEN_INFERENCE_CONFIG: dict[str, Any] = {
     "provider": "ollama",
@@ -48,6 +62,10 @@ FROZEN_INFERENCE_CONFIG: dict[str, Any] = {
     "stream": False,
     "think": False,
     "temperature": TEMPERATURE,
+    "top_p": TOP_P,
+    "top_k": TOP_K,
+    "presence_penalty": PRESENCE_PENALTY,
+    "vendor_sampling_source": VENDOR_SAMPLING_SOURCE,
     "num_predict": GEMINI_ALIGNED_NUM_PREDICT,
     "num_predict_alignment": (
         "Aligned to Gemini Math16 MAX_OUTPUT_TOKENS=24576 "
@@ -64,15 +82,11 @@ FROZEN_INFERENCE_CONFIG: dict[str, Any] = {
         "exhausted_validity": "INVALID_INFRASTRUCTURE",
         "same_cell": True,
     },
-    # Explicitly unset in /api/chat options → Ollama server defaults apply.
     "unset_options_use_ollama_defaults": {
-        "top_k": "ollama_default",
-        "top_p": "ollama_default",
         "min_p": "ollama_default",
         "typical_p": "ollama_default",
         "repeat_last_n": "ollama_default",
         "repeat_penalty": "ollama_default",
-        "presence_penalty": "ollama_default",
         "frequency_penalty": "ollama_default",
         "mirostat": "ollama_default",
         "mirostat_tau": "ollama_default",
@@ -149,6 +163,102 @@ class EmptyResponseError(RuntimeError):
 TransportFn = Callable[..., dict[str, Any]]
 
 
+def build_math16_chat_payload(
+    prompt: str,
+    *,
+    seed: int = DEFAULT_SEED,
+    model: str = MODEL_ID,
+) -> dict[str, Any]:
+    """Build /api/chat body with vendor-recommended sampling (think=false)."""
+    if model not in ALLOWED_MODELS:
+        raise RuntimeError(f"model must be one of {ALLOWED_MODELS}, got {model}")
+    payload = {
+        "model": model,
+        "messages": [{"role": "user", "content": prompt}],
+        "stream": False,
+        "think": False,
+        "options": {
+            "temperature": TEMPERATURE,
+            "top_p": TOP_P,
+            "top_k": TOP_K,
+            "presence_penalty": PRESENCE_PENALTY,
+            "seed": int(seed),
+            "num_ctx": NUM_CTX,
+            "num_predict": GEMINI_ALIGNED_NUM_PREDICT,
+        },
+    }
+    if payload.get("think") is not False:
+        raise RuntimeError("think must be false at /api/chat top-level")
+    if "think" in (payload.get("options") or {}):
+        raise RuntimeError("think must not be nested under options")
+    return payload
+
+
+def call_ollama_once_math16(
+    prompt: str,
+    *,
+    seed: int = DEFAULT_SEED,
+    model: str = MODEL_ID,
+    base_url: str = DEFAULT_BASE_URL,
+    timeout_s: float = REQUEST_TIMEOUT_SECONDS,
+) -> dict[str, Any]:
+    """Exactly one Ollama /api/chat call with Math16 vendor sampling. No retry."""
+    payload = build_math16_chat_payload(prompt, seed=seed, model=model)
+    started = time.monotonic()
+    try:
+        body = _http_json(
+            base_url.rstrip("/") + API_CHAT,
+            data=json.dumps(payload).encode("utf-8"),
+            timeout_s=timeout_s,
+        )
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="replace")
+        raise RuntimeError(f"Ollama HTTP {exc.code}: {detail}") from exc
+    except urllib.error.URLError as exc:
+        raise ConnectionError(f"Ollama unreachable: {exc}") from exc
+    wall = time.monotonic() - started
+
+    raw = (body.get("message") or {}).get("content")
+    if not isinstance(raw, str):
+        raise RuntimeError("model response missing message.content string")
+
+    prompt_eval = body.get("prompt_eval_count")
+    eval_count = body.get("eval_count")
+    total_tokens = None
+    if isinstance(prompt_eval, int) and isinstance(eval_count, int):
+        total_tokens = prompt_eval + eval_count
+    elif isinstance(eval_count, int):
+        total_tokens = eval_count
+
+    meta = {
+        "model": model,
+        "requested_model": model,
+        "runtime": "ollama",
+        "api_endpoint": API_CHAT,
+        "think": False,
+        "seed": int(seed),
+        "prompt_eval_count": prompt_eval,
+        "eval_count": eval_count,
+        "total_token_count": total_tokens,
+        "total_duration": body.get("total_duration"),
+        "load_duration": body.get("load_duration"),
+        "prompt_eval_duration": body.get("prompt_eval_duration"),
+        "eval_duration": body.get("eval_duration"),
+        "done": body.get("done"),
+        "done_reason": body.get("done_reason"),
+        "latency_ms": int(wall * 1000),
+        "first_attempt_only": True,
+        "retry": 0,
+        "request_payload": {
+            "model": payload["model"],
+            "stream": payload["stream"],
+            "think": payload["think"],
+            "options": payload["options"],
+        },
+    }
+    return {"raw_text": raw, "metadata": meta}
+
+
 def call_qwen_once(
     prompt: str,
     *,
@@ -159,7 +269,7 @@ def call_qwen_once(
     transport: TransportFn | None = None,
 ) -> dict[str, Any]:
     """Exactly one Ollama /api/chat call. No retry. Matches Gemini once-call shape."""
-    caller = transport or call_ollama_once
+    caller = transport or call_ollama_once_math16
     response = caller(
         prompt,
         seed=int(seed),
@@ -177,12 +287,16 @@ def call_qwen_once(
     meta.setdefault("base_url", base_url.rstrip("/"))
     meta["inference_config"] = {
         "temperature": TEMPERATURE,
+        "top_p": TOP_P,
+        "top_k": TOP_K,
+        "presence_penalty": PRESENCE_PENALTY,
         "num_predict": GEMINI_ALIGNED_NUM_PREDICT,
         "num_ctx": NUM_CTX,
         "think": False,
         "stream": False,
         "seed": int(seed),
         "request_timeout_seconds": timeout_s,
+        "vendor_sampling_source": VENDOR_SAMPLING_SOURCE,
     }
     meta["retry"] = 0
     meta["first_attempt_only"] = True
@@ -316,7 +430,9 @@ def build_cell_generation_record(response: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-# Re-export helpers used by smoke / future runners.
+# Compatibility alias used by older smoke imports / tests.
+build_chat_payload = build_math16_chat_payload
+
 __all__ = [
     "BACKOFF_SECONDS",
     "DEFAULT_BASE_URL",
@@ -326,9 +442,16 @@ __all__ = [
     "InvalidInfrastructureError",
     "MAX_ATTEMPTS",
     "MODEL_ID",
+    "PRESENCE_PENALTY",
     "REQUEST_TIMEOUT_SECONDS",
+    "TEMPERATURE",
+    "TOP_K",
+    "TOP_P",
+    "VENDOR_SAMPLING_SOURCE",
     "build_cell_generation_record",
     "build_chat_payload",
+    "build_math16_chat_payload",
+    "call_ollama_once_math16",
     "call_qwen_once",
     "call_qwen_with_retries",
     "frozen_inference_config",

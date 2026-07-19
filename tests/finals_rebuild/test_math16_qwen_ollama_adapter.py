@@ -25,7 +25,11 @@ def _ok_response(text: str = "print('hello')") -> dict:
 
 def test_frozen_inference_config_aligns_with_gemini_max_tokens() -> None:
     cfg = adapter.frozen_inference_config()
-    assert cfg["temperature"] == 0.0
+    # Vendor sampling from `ollama show qwen3.5:4b` Parameters (not greedy 0.0).
+    assert cfg["temperature"] == 1.0
+    assert cfg["top_p"] == 0.95
+    assert cfg["top_k"] == 20
+    assert cfg["presence_penalty"] == 1.5
     assert cfg["num_predict"] == 24576
     assert cfg["model"] == "qwen3.5:4b"
     assert cfg["base_url"] == "http://localhost:11434"
@@ -33,8 +37,19 @@ def test_frozen_inference_config_aligns_with_gemini_max_tokens() -> None:
     assert cfg["retry"]["backoff_seconds"] == [5, 20, 60]
     assert cfg["retry"]["exhausted_validity"] == "INVALID_INFRASTRUCTURE"
     assert cfg["retry"]["exhausted_layer"] == "L0"
-    assert "top_k" in cfg["unset_options_use_ollama_defaults"]
     assert "24576" in cfg["num_predict_alignment"]
+    assert "ollama show" in cfg["vendor_sampling_source"]
+
+
+def test_math16_chat_payload_uses_vendor_sampling() -> None:
+    payload = adapter.build_math16_chat_payload("print hello", seed=2026071301)
+    assert payload["think"] is False
+    assert payload["options"]["temperature"] == 1.0
+    assert payload["options"]["top_p"] == 0.95
+    assert payload["options"]["top_k"] == 20
+    assert payload["options"]["presence_penalty"] == 1.5
+    assert payload["options"]["num_predict"] == 24576
+    assert payload["options"]["seed"] == 2026071301
 
 
 def test_call_qwen_once_returns_raw_text_and_metadata() -> None:
@@ -44,7 +59,8 @@ def test_call_qwen_once_returns_raw_text_and_metadata() -> None:
 
     out = adapter.call_qwen_once("print hello", transport=fake)
     assert out["raw_text"] == "ok-body"
-    assert out["metadata"]["inference_config"]["temperature"] == 0.0
+    assert out["metadata"]["inference_config"]["temperature"] == 1.0
+    assert out["metadata"]["inference_config"]["top_p"] == 0.95
     assert out["metadata"]["inference_config"]["num_predict"] == 24576
     assert out["metadata"]["eval_count"] == 5
 
