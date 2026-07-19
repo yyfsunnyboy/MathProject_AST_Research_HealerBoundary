@@ -1,7 +1,6 @@
 """Build deterministic no-model Domain API Contract Hardening v2 artifacts."""
 from __future__ import annotations
 
-import hashlib
 import json
 import sys
 from pathlib import Path
@@ -17,6 +16,7 @@ from agent_tools.finals_rebuild.domain_api_ssot import (  # noqa: E402
     API_CLASSIFICATION, DOMAIN_API_SSOT, render_supported_api_reference,
     runtime_public_inventory, validate_inventory,
 )
+from agent_tools.finals_rebuild.git_blob_hash import sha256_git_blob_lf  # noqa: E402
 from agent_tools.finals_rebuild.math16_pool import frozen_for_prompt, load_pool_manifest  # noqa: E402
 
 OUT = ROOT / "docs/experiments/results/domain_api_contract_hardening_v2"
@@ -26,7 +26,8 @@ SKILL_DOC = ROOT / "agent_skills/domain_api_contract_v2/SKILL.md"
 
 
 def sha(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    """SHA-256 of git blob content (LF). Never hash raw CRLF working-tree bytes."""
+    return sha256_git_blob_lf(path, repo_root=ROOT)
 
 
 def main() -> int:
@@ -80,8 +81,30 @@ def main() -> int:
         "answer_contract": sha(ROOT / "agent_tools/finals_rebuild/math_answer_contracts.py"),
         "evaluator": sha(ROOT / "agent_tools/finals_rebuild/math16_oracles.py"),
     }
-    summary = {"version":"Ab2d-v2-candidate","no_model":True,"inventory":inventory["classification_counts"],"supported_count":len(DOMAIN_API_SSOT),"prompt_diff":{"changed":len(changed),"unchanged":len(unchanged)},"component_sha256":components,"preflight_requirements":["runtime inventory == classification","all routed APIs SUPPORTED_PUBLIC","runtime probes == typed SSOT","prompt and generated SKILL lines from SSOT","task assembly covers 16/16","JSON round-trip","Math16 preflight"],"stop":bool(unexpected)}
-    (OUT / "preflight_summary.json").write_text(json.dumps(summary, indent=2, ensure_ascii=False)+"\n", encoding="utf-8")
+    summary = {
+        "version": "Ab2d-v2-candidate",
+        "no_model": True,
+        "hash_basis": "git_blob_lf",
+        "inventory": inventory["classification_counts"],
+        "supported_count": len(DOMAIN_API_SSOT),
+        "prompt_diff": {"changed": len(changed), "unchanged": len(unchanged)},
+        "component_sha256": components,
+        "preflight_requirements": [
+            "runtime inventory == classification",
+            "all routed APIs SUPPORTED_PUBLIC",
+            "runtime probes == typed SSOT",
+            "prompt and generated SKILL lines from SSOT",
+            "task assembly covers 16/16",
+            "JSON round-trip",
+            "Math16 preflight",
+        ],
+        "stop": bool(unexpected),
+    }
+    (OUT / "preflight_summary.json").write_text(
+        json.dumps(summary, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
     print(json.dumps(summary, ensure_ascii=False, indent=2))
     return int(summary["stop"])
 

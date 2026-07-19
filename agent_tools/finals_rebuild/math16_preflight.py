@@ -1,7 +1,6 @@
 """No-model preflight for Math16-LaTeX-v1 (oracle/contract/prompt/G6; no Gemini calls)."""
 from __future__ import annotations
 
-import hashlib
 import json
 from pathlib import Path
 from typing import Any
@@ -20,6 +19,11 @@ from agent_tools.finals_rebuild.domain_api_ssot import (
     DOMAIN_API_SSOT, render_api_prompt_line, validate_inventory,
 )
 from agent_tools.finals_rebuild.domain_answer_assembly import TASK_OUTPUT_ASSEMBLY
+from agent_tools.finals_rebuild.git_blob_hash import (
+    normalize_to_lf,
+    sha256_bytes,
+    sha256_git_blob_lf,
+)
 from core.prompts.domain_function_library import PolynomialOps
 from agent_tools.finals_rebuild.generator_success import evaluate_math_notation
 from agent_tools.finals_rebuild.math16_oracles import (
@@ -43,7 +47,7 @@ CONDITIONS = ("ab1", "ab2g", "ab2d")
 
 
 def _file_sha(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    return sha256_git_blob_lf(path, repo_root=ROOT)
 
 
 def _component_hashes() -> dict[str, str]:
@@ -59,9 +63,9 @@ def _component_hashes() -> dict[str, str]:
     }
     skills_dir = ROOT / "agent_skills"
     skill_files = sorted(skills_dir.rglob("skill.json")) if skills_dir.exists() else []
-    skill_blob = b"".join(path.read_bytes() for path in skill_files)
+    skill_blob = b"".join(normalize_to_lf(path.read_bytes()) for path in skill_files)
     out = {name: _file_sha(path) for name, path in paths.items()}
-    out["skills_snapshot"] = hashlib.sha256(skill_blob).hexdigest() if skill_files else "NO_SKILLS"
+    out["skills_snapshot"] = sha256_bytes(skill_blob) if skill_files else "NO_SKILLS"
     return out
 
 

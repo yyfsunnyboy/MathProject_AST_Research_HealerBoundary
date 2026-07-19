@@ -1,7 +1,6 @@
 """Build deterministic Ab2d-v2 freeze reports and no-model rerun plan."""
 from __future__ import annotations
 
-import hashlib
 import json
 import subprocess
 import sys
@@ -9,6 +8,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+
+from agent_tools.finals_rebuild.git_blob_hash import sha256_git_blob_lf  # noqa: E402
+
 OUT = ROOT / "docs/experiments/results/domain_api_contract_hardening_v2"
 
 BASELINE_FAILURES = [
@@ -37,7 +39,8 @@ BASELINE_FAILURES = [
 
 
 def sha(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    """SHA-256 of git blob content (LF). Never hash raw CRLF working-tree bytes."""
+    return sha256_git_blob_lf(path, repo_root=ROOT)
 
 
 def git(*args: str) -> str:
@@ -79,6 +82,7 @@ def main() -> int:
         "api_inventory": OUT / "api_inventory.json",
         "typed_contracts": OUT / "typed_contracts.json",
         "task_assembly_artifact": OUT / "task_output_assembly.json",
+        "math16_pool_manifest": ROOT / "docs/experiments/manifests/math16_latex_v1_pool_manifest.json",
     }
     hashes = {name: sha(path) for name, path in component_paths.items()}
     gates = {
@@ -88,17 +92,34 @@ def main() -> int:
         "task_assembly_coverage": "16/16", "domain_api_ssot_aligned": True,
         "prompt_hashes": {"ab1_unchanged": "16/16", "ab2g_unchanged": "16/16", "ab2d_changed": "16/16", "unexpected": 0},
         "tests": {"targeted": "75 passed", "no_model_preflight": "PASS", "json_roundtrip": "PASS", "git_diff_check": "PASS"},
+        "hash_basis": "git_blob_lf",
         "component_sha256": hashes, "passed": True,
     }
-    (OUT / "freeze_gate_report.json").write_text(json.dumps(gates, indent=2, ensure_ascii=False)+"\n", encoding="utf-8")
+    (OUT / "freeze_gate_report.json").write_text(json.dumps(gates, indent=2, ensure_ascii=False)+"\n", encoding="utf-8", newline="\n")
 
     cells = [{"cell_id": f"{r['task_id']}__ab2d", "task_id": r["task_id"], "condition": "ab2d", "old_prompt_hash": r["old_prompt_hash"], "frozen_prompt_hash": r["new_prompt_hash"], "status": "PLANNED_NOT_RUN"} for r in prompt_diff["changed_cells"]]
     rerun = {"plan_id":"math16_ab2d_v2_contract_aligned_validation","ab2d_v2_scope":"api_contract_only","task_contract_changes_deferred_to_v3":True,"model_calls":0,"cell_count":len(cells),"cells":cells,"run_authorization":"REQUIRES_SEPARATE_HUMAN_CONFIRMATION"}
-    (OUT / "ab2d_v2_rerun_manifest.json").write_text(json.dumps(rerun, indent=2, ensure_ascii=False)+"\n", encoding="utf-8")
+    (OUT / "ab2d_v2_rerun_manifest.json").write_text(json.dumps(rerun, indent=2, ensure_ascii=False)+"\n", encoding="utf-8", newline="\n")
 
-    freeze = {"freeze_id":"Ab2d-v2","status":"FROZEN_CONTRACT_VALIDATION_PLAN","baseline_head":"aa33a6e1e24f423c62526c4c02d7019d6b778fb1","source_head_before_commit":git("rev-parse","HEAD"),"ab2d_v2_scope":"api_contract_only","task_contract_changes_deferred_to_v3":True,"model_calls":0,"component_sha256":hashes,"prompt_diff_sha256":sha(OUT / "prompt_hash_diff_48.json"),"baseline_failure_attribution_sha256":sha(OUT / "baseline_failure_attribution.json"),"freeze_gate_report_sha256":sha(OUT / "freeze_gate_report.json"),"rerun_manifest_sha256":sha(OUT / "ab2d_v2_rerun_manifest.json"),"changed_cells":16,"unexpected_prompt_hash_changes":0}
-    (OUT / "ab2d_v2_freeze_manifest.json").write_text(json.dumps(freeze, indent=2, ensure_ascii=False)+"\n", encoding="utf-8")
-    print(json.dumps({"passed":True,"cells":len(cells),"hashes":hashes}, indent=2))
+    freeze = {
+        "freeze_id": "Ab2d-v2",
+        "status": "FROZEN_CONTRACT_VALIDATION_PLAN",
+        "hash_basis": "git_blob_lf",
+        "baseline_head": "aa33a6e1e24f423c62526c4c02d7019d6b778fb1",
+        "source_head_before_commit": git("rev-parse", "HEAD"),
+        "ab2d_v2_scope": "api_contract_only",
+        "task_contract_changes_deferred_to_v3": True,
+        "model_calls": 0,
+        "component_sha256": hashes,
+        "prompt_diff_sha256": sha(OUT / "prompt_hash_diff_48.json"),
+        "baseline_failure_attribution_sha256": sha(OUT / "baseline_failure_attribution.json"),
+        "freeze_gate_report_sha256": sha(OUT / "freeze_gate_report.json"),
+        "rerun_manifest_sha256": sha(OUT / "ab2d_v2_rerun_manifest.json"),
+        "changed_cells": 16,
+        "unexpected_prompt_hash_changes": 0,
+    }
+    (OUT / "ab2d_v2_freeze_manifest.json").write_text(json.dumps(freeze, indent=2, ensure_ascii=False)+"\n", encoding="utf-8", newline="\n")
+    print(json.dumps({"passed": True, "cells": len(cells), "hash_basis": "git_blob_lf", "hashes": hashes}, indent=2))
     return 0
 
 

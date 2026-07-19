@@ -5,7 +5,6 @@ task contracts, oracles, evaluators, or evaluation_revision_003.
 """
 from __future__ import annotations
 
-import hashlib
 import json
 import os
 import sys
@@ -25,6 +24,7 @@ from agent_tools.finals_rebuild.ce115_clean_incremental_ablation import (
     prompt_sha256,
 )
 from agent_tools.finals_rebuild.generator_success import evaluate_math_notation
+from agent_tools.finals_rebuild.git_blob_hash import sha256_git_blob_lf
 from agent_tools.finals_rebuild.math16_pool import frozen_for_prompt, tasks_by_id
 from scripts.ce115_v4_gemini_transport import MODEL_ID
 from scripts.run_math16_latex_v1_gemini_live import (
@@ -49,7 +49,8 @@ EXPECTED_CELLS = 16
 
 
 def _sha256_file(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    """SHA-256 of git blob content (LF) for freeze-manifest comparisons."""
+    return sha256_git_blob_lf(path, repo_root=ROOT)
 
 
 def _atomic_write_text(path: Path, text: str) -> None:
