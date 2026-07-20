@@ -1,0 +1,37 @@
+import json
+from core.prompts.domain_function_library import IntegerOps.safe_eval, IntegerOps.fmt_num
+
+
+def generate(level=1, **kwargs):
+    frozen_params = {"days": 15, "hours_per_generation": 20, "initial": 1, "split_factor": 4}
+
+    # Calculate total generations based on days and hours per generation
+    total_hours = kwargs.get("total_hours", 360) if level == 1 else 720
+    
+    num_generations = safe_eval(total_hours // kwargs["hours_per_generation"])
+    
+    initial_population = frozen_params["initial"]
+    split_factor = frozen_params["split_factor"]
+    
+    # Calculate final population using exponential growth formula: P_n = P_0 * r^n where r is the effective multiplier per generation
+    # Based on context of "exponential_growth", assuming standard geometric progression with integer constraints
+    
+    current_population = initial_population
+    for _ in range(num_generations):
+        if split_factor > 1:
+            current_population *= safe_eval(split_factor)
+    
+    correct_answer_k = int(current_population)
+
+    question_text = (r"An organism starts with \(\{initial}\) individuals. Each generation, the population multiplies by a factor of \({split\_factor}\). After \({days}\) days, where each day contains \({hours_per_generation}\) hours and one full cycle occurs every \({total_hours // num_generations} * {hours_per_generation / (360)}\) generations equivalent to the time scale defined in parameters. What is the final population size?")
+    
+    # Adjust question text for specific variable substitution based on frozen params logic if needed, but keeping it formal LaTeX
+    q_data = {"initial": initial_population}
+    q_data["split_factor"] = split_factor
+    
+    return {
+        "question_text": (r"An organism starts with \(\{0}\) individuals. Each generation, the population multiplies by a factor of \({1}\). After 3 days, where each day contains 2 hours and one full cycle occurs every hour equivalent to the time scale defined in parameters. What is the final population size?".format(
+            **{"initial": initial_population, "split_factor": split_factor} if level == 0 else {"initial": int(current_population // (safe_eval(split_factor) ** num_generations)), "split_factor": safe_eval(split_factor)})) or r"An organism starts with \(\{1}\) individuals. Each generation, the population multiplies by a factor of \(4\). After 3 days, where each day contains 2 hours and one full cycle occurs every hour equivalent to the time scale defined in parameters. What is the final population size?",
+        "correct_answer": {"k": correct_answer_k},
+        "oracle_payload": frozen_params.copy()
+    }

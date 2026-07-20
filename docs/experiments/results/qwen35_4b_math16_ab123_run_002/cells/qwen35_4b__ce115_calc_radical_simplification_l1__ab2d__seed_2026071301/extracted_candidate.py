@@ -1,0 +1,20 @@
+def generate(level=1, **kwargs):
+    frozen_params = {"radicand": 27}
+    
+    radicand = kwargs.get("radicand", frozen_params["radicand"])
+    coeff = 1
+    
+    # Simplify the radical term using domain API
+    simplified_coeff, square_free_radicand = RadicalOps.simplify_term(coeff, radicand)
+    
+    correct_answer_dict = {
+        "coefficient": int(simplified_coeff),
+        "radicand": int(square_free_radicand),
+        "canonical_latex": f"{int(simplified_coeff)}\\sqrt{{{square_free_radicand}}}"
+    }
+    
+    return {
+        "question_text": r"\text{Simplify the radical: } \sqrt{\text{" + str(radicand) + "}"} ,
+        "correct_answer": correct_answer_dict,
+        "oracle_payload": frozen_params
+    }
