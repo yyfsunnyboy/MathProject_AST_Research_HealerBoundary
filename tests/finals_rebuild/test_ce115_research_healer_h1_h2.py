@@ -211,6 +211,9 @@ def test_applicable_triggered_changed_semantics_distinguishable():
 def test_math_healer_runner_exports_allowlist_surface():
     assert mhr.RULE_ALLOWLIST == RULE_ALLOWLIST
     assert RULE_ALLOWLIST == (
+        "L1_CLOSE_UNBALANCED_PARENTHESIS",
+        "L1_CLOSE_UNBALANCED_DELIMITER_EXTENDED",
+        "L1_PROSE_RESIDUE_NARROW",
         "L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP",
         "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
         "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP",
@@ -295,7 +298,7 @@ def test_runner_one_change_per_pass_and_priority_with_test_doubles():
 
         return _RegisteredRule(
             rule_id=rule_id,
-            layer="L1",
+            layer="L2",
             priority=priority,
             is_applicable=is_applicable,
             is_triggered=is_triggered,
@@ -345,6 +348,9 @@ def test_manifest_schema_and_required_case_fields():
     manifest = _load_manifest()
     assert manifest["manifest_id"] == "ce115_research_healer_regression_v1"
     assert manifest["allowlist_expected"] == [
+        "L1_CLOSE_UNBALANCED_PARENTHESIS",
+        "L1_CLOSE_UNBALANCED_DELIMITER_EXTENDED",
+        "L1_PROSE_RESIDUE_NARROW",
         "L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP",
         "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
         "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP",

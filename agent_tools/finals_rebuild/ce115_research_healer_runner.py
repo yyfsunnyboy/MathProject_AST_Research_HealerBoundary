@@ -726,6 +726,16 @@ def run_research_healer(
         if pass_changed:
             notes.append(f"pass_{pass_index}_stopped_after_first_changed_rule")
             if pass_index + 1 >= max_passes:
+                if _any_rule_would_change(current, rules, ctx):
+                    return _fail_closed_max_passes(
+                        source=source,
+                        input_hash=input_hash,
+                        outcomes=outcomes,
+                        provenance=provenance,
+                        notes=notes,
+                        protected=protected,
+                        max_passes=max_passes,
+                    )
                 return _finish(
                     source=source,
                     current=current,

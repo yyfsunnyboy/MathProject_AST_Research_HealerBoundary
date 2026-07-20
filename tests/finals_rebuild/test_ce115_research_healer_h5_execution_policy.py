@@ -293,7 +293,7 @@ def test_h3_l2_repair_to_pass_not_regressed():
         max_passes=DEFAULT_MAX_PASSES,
     )
     assert L2 in RULE_ALLOWLIST
-    assert RULE_ALLOWLIST[0] == L2
+    assert RULE_ALLOWLIST[3] == L2
     assert result.final_status == "changed"
     assert result.real_model_calls == 0
     after, _, _ = classify_response(

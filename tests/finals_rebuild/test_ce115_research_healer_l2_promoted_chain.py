@@ -46,7 +46,7 @@ def test_promoted_rules_on_production_allowlist():
     assert DUMPS_APPROVED is True
     assert KWARGS_ID in RULE_ALLOWLIST
     assert DUMPS_ID in RULE_ALLOWLIST
-    assert RECOMMENDED_CHAIN_MAX_PASSES == len(RULE_ALLOWLIST) == 3
+    assert RECOMMENDED_CHAIN_MAX_PASSES == len(RULE_ALLOWLIST) == 6
 
 
 def test_113_10_production_chain_rescue_to_pass():
