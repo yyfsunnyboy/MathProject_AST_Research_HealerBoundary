@@ -247,11 +247,9 @@ def execute_ab3() -> dict[str, Any]:
                             {"oracle_payload": dict(artifact.get("frozen_parameters") or {})},
                             dict(context_for(artifact)["task"]),
                         )
-                        reevaluation = "PASSED" if outcome == "passed" else outcome.upper()
-                        if outcome == "passed":
+                        if str(outcome).lower() == "passed":
                             reevaluation = "PASSED"
                         else:
-                            # normalize
                             reevaluation = "FAIL"
                     except Exception as exc:  # noqa: BLE001
                         eval_failed = True
@@ -336,25 +334,28 @@ def execute_ab3() -> dict[str, Any]:
     if unknown:
         raise RuntimeError(f"unknown outcomes: {unknown[:3]}")
 
-    # trigger = changed or triggered_rule present among FAIL path (not identity_reuse)
-    triggers = [
+    # Trigger = Healer selected/applied a rule (changed), or guarded abstain after trigger.
+    trigger_rows = [
         r
         for r in results
-        if r["actual"] in {"layer_exposure", "rescue_to_pass", "guarded_abstain", "regression"}
-        and r.get("changed")
-        or (r.get("triggered_rule") and r["actual"] != "identity_reuse" and r["actual"] != "no_trigger")
+        if r["actual"]
+        in {
+            "layer_exposure",
+            "rescue_to_pass",
+            "regression",
+            "guarded_abstain",
+        }
+        or (r.get("changed") and r["actual"] != "identity_reuse")
     ]
-    # cleaner trigger definition: healer changed source OR selected a triggered rule that abstained
-    trigger_rows = []
-    for r in results:
-        if r["actual"] == "identity_reuse":
+    # Deduplicate while preserving order
+    seen: set[str] = set()
+    deduped: list[dict[str, Any]] = []
+    for r in trigger_rows:
+        if r["cell_id"] in seen:
             continue
-        if r["actual"] in {"layer_exposure", "rescue_to_pass"}:
-            trigger_rows.append(r)
-        elif r["actual"] == "guarded_abstain" and r.get("triggered_rule"):
-            trigger_rows.append(r)
-        elif r.get("changed"):
-            trigger_rows.append(r)
+        seen.add(r["cell_id"])
+        deduped.append(r)
+    trigger_rows = deduped
 
     summary = {
         "cells": 384,

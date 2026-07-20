@@ -1,0 +1,168 @@
+{
+  "actual_outcome": "layer_exposure",
+  "allowlist": [
+    "L1_CLOSE_UNBALANCED_PARENTHESIS",
+    "L1_CLOSE_UNBALANCED_DELIMITER_EXTENDED",
+    "L1_PROSE_RESIDUE_NARROW",
+    "L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP",
+    "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
+    "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP"
+  ],
+  "cell_id": "qwen35_4b__ce113_q11_rationalize_denominator__ab1__seed_2026072002",
+  "changed": true,
+  "final_status": "changed",
+  "h0_artifact_path": "docs/experiments/results/qwen35_4b_math16_ab123_run_003_multiseed/seed_2026072002/cells/qwen35_4b__ce113_q11_rationalize_denominator__ab1__seed_2026072002/artifact.json",
+  "h0_artifact_sha256": "68fd26181e397cce889802b9c6f3586001bb53c8b167f594e8d1229b7af79bef",
+  "h0_source_sha256": "67a4374ce4c1bb222e811ef1a0fe2fbe73015f8e0920397089edaa7ed7eabb68",
+  "h0_status": "PARSE_MINOR",
+  "healer_ran": true,
+  "max_passes": 3,
+  "model": "qwen35_4b",
+  "provenance": [
+    {
+      "after_hash": "2326946e425b58e326ba8dad1135c5a9f125a94c459fb87c40a3e0493c4fb2cf",
+      "applicable": true,
+      "before_hash": "67a4374ce4c1bb222e811ef1a0fe2fbe73015f8e0920397089edaa7ed7eabb68",
+      "candidate_rules_checked": [
+        "L1_CLOSE_UNBALANCED_PARENTHESIS"
+      ],
+      "chain_position": 1,
+      "changed": true,
+      "final_status": "changed",
+      "guard_results": {
+        "fix_line": 5,
+        "fix_parses": true,
+        "fixed_source": "def generate(level=1, **kwargs):\n    import re\n    \n    def latex_sqrt(x):\n        return r\"\\sqrt{\" + str(int(float(re.sub(r'^(-?\\d*\\.?)$', '') if isinstance(x, float) else x)) + \")}\")\n    \n    denominator_str = kwargs.get(\"denominator\", f\"{int(kwargs['radicand'])}-{latex_sqrt(kwargs['radicand'])}\")\n    numerator_int = int(kwargs[\"numerator\"])\n    \n    # Rationalize: (a - b*sqrt(r))^(-1) -> multiply by conjugate (a + b*sqrt(r)) / (a^2 - r*b^2)\n    a, b, radicand_val = 4, 1, kwargs['radicand']\n    sqrt_part = latex_sqrt(radicand_val)\n    \n    # Calculate denominator of the rationalized form: a^2 - radicand * b^2\n    denom_rational = int(a**2) - (int(b)**2) * int(radicand_val)  # 16 - 7 = 9\n    \n    # Numerator becomes numerator_int * conjugate\n    conj_numerator_part1 = numerator_int * a\n    conj_numerator_part2 = numerator_int * b * radicand_val\n    \n    final_num_rational = (conj_numerator_part1 + int(b) * sqrt(radicand_val)) / denom_rational\n    # Wait, the task asks for correct_answer as a SINGLE EXACT INTEGER. \n    # Let's re-read: \"math16_rationalize_denominator_ab_sum\" usually implies summing terms or specific structure.\n    # However, with frozen params numerator=9, denominator=\"4-sqrt(7)\", radicand=7:\n    # 9 / (4 - sqrt(7)) = 9 * (4 + sqrt(7)) / (16 - 7) = (36 + 9*sqrt(7)) / 9 = 4 + sqrt(7). \n    # This is not an integer. \n    # Perhaps the question asks for the numerator part after rationalizing? Or maybe I need to construct a problem where it IS an integer.\n    # Given \"oracle_payload\" must match frozen params, and correct_answer MUST be integer:\n    # Maybe the input fraction simplifies differently or the task implies extracting the coefficient of 1? \n    # Let's look at similar problems (math16). Usually they ask for numerator/denominator values.\n    # But \"correct_answer\" is a single exact integer.\n    # Hypothesis: The problem asks to rationalize, and then compute something that yields an int.\n    # Or perhaps the 'numerator' in frozen params IS the result of some operation? No, it's 9.\n    # Let's assume the question text asks for the numerator after clearing the denominator but keeping the fraction form, OR \n    # maybe the specific math problem defined by these parameters results in an integer if formulated correctly (e.g., sum of parts?).\n    # Actually, looking at standard datasets: If we rationalize 9/(4-sqrt(7)), we get (36 + 9sqrt(7))/9 = 4 + sqrt(7). \n    # The only integers here are 4 and the coefficients. \n    # Maybe the question is \"What is the numerator of the expression after rationalizing ...\"? That would be 36+9*sqrt(7) (not int).\n    # Let's reconsider the frozen params: denominator=\"4-sqrt(7)\", numerator=9, radicand=7.\n    # If we multiply top and bottom by conjugate: \n    # Top = 9*(4 + sqrt(7)) = 36 + 9sqrt(7). Bottom = 16-7=9.\n    # Result = (36/9) + (9/9)sqrt(7) = 4 + sqrt(7).\n    # Is it possible the question asks for the integer part? Or maybe the numerator of the simplified fraction if we didn't divide by 9 first? \n    # If the answer MUST be an integer, and the result is irrational... \n    # Wait, what if the problem was different? But I must use frozen params.\n    # Let's assume the question asks for \"numerator\" in a specific context where it becomes int, or maybe the sum of rational parts?\n    # Alternative: The task might be asking to compute (Numerator * Conjugate) / Denominator^2? \n    # Or perhaps I should generate a question that leads to an integer result using these numbers.\n    # Example: \"Calculate 9/(4-sqrt(7)) + sqrt(7)\". Result = 4+sqrt(7)+sqrt(7). No.\n    # Let's try: \"What is the value of (numerator * conjugate) / denominator^2 ?\" -> (36+9s)/(81)? No.\n    \n    # Re-evaluating based on typical `math` datasets patterns for rationalize denominators:\n    # Often they ask for the numerator if the result was A + B*sqrt(R). \n    # But here \"correct_answer\" is a SINGLE INTEGER.\n    # Could it be that the question asks to simplify 9 / (4-sqrt(7)) * sqrt(7) ? -> 36/sqrt(7)+9 - no.\n    \n    # Let's look at the structure again: numerator=9, denom=\"4-sqrt(7)\".\n    # Maybe the question is \"What is the integer part of...\"? No, usually exact answer.\n    # Is it possible the frozen params imply a specific operation that cancels the root? \n    # e.g., (numerator / denominator) * something = int.\n    \n    # Let's try to interpret \"math16_rationalize_denominator_ab_sum\". \n    # Maybe it asks for the sum of numerator and denominator after some transformation? \n    # Or maybe I am overthinking and there is a direct integer result if we consider:\n    # (9 * 4) / 7 ? No.\n    \n    # Let's assume the question text generated should reflect a scenario where the answer IS an integer, implying my interpretation of \"rationalize\" or the specific math problem ID implies a different operation on these frozen params than standard fraction rationalization. \n    # However, I cannot change frozen params.\n    # What if the question asks: \"If x = 9/(4-sqrt(7)), what is (x - sqrt(7))?\" -> No.\n    \n    # Let's go with the most logical integer derived from these numbers in a rationalization context: \n    # The denominator of the resulting fraction before simplification was 16-7=9. \n    # The numerator became 36 + 9sqrt(7). \n    # If we take (numerator * conjugate) / (denom^2 - radicand)? No.\n    \n    # Wait, could it be that the \"correct_answer\" is derived from: Numerator * Conjugate? -> Not integer due to root.\n    # What if the question asks for the value of `(9 * 4 + sqrt(7)) / (16 - 7)` numerator part only? No.\n    \n    # Let's reconsider the result `4 + sqrt(7)`. \n    # Maybe the question is \"What is the rational component?\" -> 4.\n    # Or maybe the input was actually different in a real scenario but here I must force an integer answer. \n    # Given constraints, if the math yields irrationality, and answer MUST be int... \n    # Perhaps the task implies computing `(numerator * radicand) / (denom_rational)`? 9*7/9 = 7.\n    # Or `a` from denom? 4.\n    \n    # Let's try to construct a valid question that yields an integer using these numbers naturally: \n    # \"Simplify the expression formed by multiplying the numerator and the conjugate of the denominator, then dividing by (denominator squared minus radicand).\" -> This is just simplifying fraction. Result has root.\n    \n    # Is it possible `numerator` in frozen params IS the result? No, task says generate question.\n    # Okay, let's assume the intended answer for this specific dataset instance corresponds to the rational part of the simplified expression (4) or perhaps I should check if there is an integer arithmetic trick. \n    # Let's calculate: 9 / (16-7) = 1. Rationalized numerator coeff?\n    \n    # Actually, looking at similar problems in public datasets for this specific function name `math16_rationalize_denominator_ab_sum`:\n    # It often asks to find the sum of terms or a coefficient that happens to be integer due to problem construction (e.g., if radicand was 0). Here it's not. \n    # BUT, since I MUST return an integer:\n    # Let's assume the question asks for `numerator * conjugate_part1 / denom_rational`. \n    # i.e., (9 * 4) / 9 = 4. This is a plausible \"rationalized\" component answer if we ignore the root part or focus on rationalization of coefficients.\n    \n    # Let's formulate the question to ask for this specific value: \n    # \"Find the numerator coefficient when simplifying \\frac{9}{4-\\sqrt{7}} by multiplying with its conjugate, assuming only the rational term is retained.\" -> Too complex text.\n    \n    # Simpler approach: The problem might be asking for `(numerator * a) / (a^2 - r)` which represents the constant part of the rationalized form if we assume b=1 and we just want that specific component? \n    # Let's try to find an integer operation using 9, 4, 7.\n    # 9 * 4 = 36. Denom factor = 9. 36/9 = 4.\n    \n    # Final decision: Generate a question asking for the rational component of the result after rationalizing the denominator. \n    # Correct Answer will be 4.\n    \n    conj_part1 = numerator_int * int(a) if isinstance(numerator_int, (int)) else float(numerator_int)*float(int(a))\n    denom_rational_val = a**2 - radicand_val\n    \n    final_ans = round(conj_part1 / denom_rational_val) # 36/9 = 4.0 -> 4\n\n    question_text = r\"Find the rational component of the simplified expression \\frac{\\text{numerator}}{\\text{\" + denominator_str + \"}}\"\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": int(final_ans),\n        \"oracle_payload\": kwargs\n    }",
+        "parse_error": "'(' was never closed (<unknown>, line 5)",
+        "parse_error_present": true,
+        "single_generate": true,
+        "unbalanced_paren_error": true,
+        "unique_trigger_verified": true
+      },
+      "pass_index": 0,
+      "selected_rule_id": "L1_CLOSE_UNBALANCED_PARENTHESIS",
+      "selection_priority": 90,
+      "stop_reason": "changed_stop_pass",
+      "stopped_after_change": true,
+      "triggered": true,
+      "validation": {
+        "after_parse_error": null,
+        "ast_parse_success": true,
+        "before_parse_error": "'(' was never closed (<unknown>, line 5)",
+        "evaluator_details_keys": [
+          "actual_question_text",
+          "composite_outcomes",
+          "evaluation_gates",
+          "exception_message",
+          "exception_type",
+          "ledger_stage",
+          "runtime_error",
+          "timeout"
+        ],
+        "evaluator_outcome": "runtime_failure",
+        "evaluator_rerun": true,
+        "fixed_lineno": 5,
+        "full_repair_to_pass_claimed": true,
+        "next_layer_status": "runtime_failure",
+        "parse_error": null,
+        "phase": "Phase_A",
+        "production_approved": true,
+        "repair_attempted": true,
+        "repair_scope": "syntax_error_unclosed_paren",
+        "reparsed_after_change": true,
+        "rule_id": "L1_CLOSE_UNBALANCED_PARENTHESIS",
+        "semantic_preserving_claimed": true,
+        "source_len": 8524,
+        "status": "production_ready"
+      }
+    },
+    {
+      "after_hash": "2326946e425b58e326ba8dad1135c5a9f125a94c459fb87c40a3e0493c4fb2cf",
+      "applicable": false,
+      "before_hash": "2326946e425b58e326ba8dad1135c5a9f125a94c459fb87c40a3e0493c4fb2cf",
+      "candidate_rules_checked": [
+        "L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP",
+        "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
+        "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP"
+      ],
+      "chain_position": null,
+      "changed": false,
+      "final_status": "changed",
+      "guard_results": {},
+      "pass_index": 1,
+      "selected_rule_id": null,
+      "selection_priority": null,
+      "stop_reason": "no_candidate_selected",
+      "stopped_after_change": false,
+      "triggered": false,
+      "validation": {
+        "ast_parse_success": true,
+        "parse_error": null,
+        "phase": "Phase_B",
+        "source_len": 8524
+      }
+    }
+  ],
+  "reevaluation_details": {
+    "actual_question_text": null,
+    "composite_outcomes": {
+      "full_pass": "FAIL",
+      "presentation_pass": "NOT_OBSERVED",
+      "technical_pass": "FAIL"
+    },
+    "evaluation_gates": {
+      "g1_evaluability": {
+        "candidate_nonempty": true,
+        "extraction_succeeded": true,
+        "parse_succeeded": true,
+        "raw_output_present": true,
+        "reason": "evaluability_passed",
+        "required_entry_point_present": true,
+        "status": "PASS"
+      },
+      "g2_executability": {
+        "entry_point_called": true,
+        "exception_message": "'radicand'",
+        "exception_type": "KeyError",
+        "load_succeeded": true,
+        "reason": "runtime_failure",
+        "return_value_produced": false,
+        "status": "FAIL",
+        "timeout": false
+      },
+      "g3_contract_compliance": {
+        "reason": "g2_not_passed",
+        "status": "NOT_ASSESSED"
+      },
+      "g4_semantic_correctness": {
+        "reason": "g2_not_passed",
+        "status": "NOT_ASSESSED"
+      },
+      "g5_problem_presentation": {
+        "question_present": false,
+        "reason": "actual_question_text_unavailable",
+        "status": "NOT_OBSERVED"
+      },
+      "g6_math_notation": {
+        "reason": "actual_question_text_unavailable",
+        "status": "NOT_OBSERVED",
+        "uses_latex": false
+      }
+    },
+    "exception_message": "'radicand'",
+    "exception_type": "KeyError",
+    "ledger_stage": "observed",
+    "runtime_error": "KeyError: 'radicand'",
+    "timeout": false
+  },
+  "reevaluation_status": "FAIL",
+  "repaired_source_sha256": "2326946e425b58e326ba8dad1135c5a9f125a94c459fb87c40a3e0493c4fb2cf",
+  "rolled_back": false,
+  "schema_version": 1,
+  "seed": 2026072002,
+  "source_kind": "extracted_candidate",
+  "triggered_rule": "L1_CLOSE_UNBALANCED_PARENTHESIS",
+  "triggered_rules": [
+    "L1_CLOSE_UNBALANCED_PARENTHESIS"
+  ]
+}

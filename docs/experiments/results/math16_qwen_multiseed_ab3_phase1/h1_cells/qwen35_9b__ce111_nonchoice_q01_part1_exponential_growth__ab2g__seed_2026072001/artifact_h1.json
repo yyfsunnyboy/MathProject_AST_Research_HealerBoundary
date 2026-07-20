@@ -1,0 +1,188 @@
+{
+  "actual_outcome": "layer_exposure",
+  "allowlist": [
+    "L1_CLOSE_UNBALANCED_PARENTHESIS",
+    "L1_CLOSE_UNBALANCED_DELIMITER_EXTENDED",
+    "L1_PROSE_RESIDUE_NARROW",
+    "L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP",
+    "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
+    "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP"
+  ],
+  "cell_id": "qwen35_9b__ce111_nonchoice_q01_part1_exponential_growth__ab2g__seed_2026072001",
+  "changed": true,
+  "final_status": "changed",
+  "h0_artifact_path": "docs/experiments/results/qwen35_9b_math16_ab123_run_003_multiseed/seed_2026072001/cells/qwen35_9b__ce111_nonchoice_q01_part1_exponential_growth__ab2g__seed_2026072001/artifact.json",
+  "h0_artifact_sha256": "43fe7c21d24ac17629f5999809f16dd465b9cb5404e00248acf966d39a489e6e",
+  "h0_source_sha256": "4012e518425a844c83781fae4101b2477b77bf6ace7e1bd53cb10bb0daea185e",
+  "h0_status": "PARSE_MINOR",
+  "healer_ran": true,
+  "max_passes": 3,
+  "model": "qwen35_9b",
+  "provenance": [
+    {
+      "after_hash": "ce0f93f2cefddf5e1184040ac28782a2410d3f0e8290b1cfbbb555c7573eff8e",
+      "applicable": true,
+      "before_hash": "4012e518425a844c83781fae4101b2477b77bf6ace7e1bd53cb10bb0daea185e",
+      "candidate_rules_checked": [
+        "L1_CLOSE_UNBALANCED_PARENTHESIS",
+        "L1_CLOSE_UNBALANCED_DELIMITER_EXTENDED",
+        "L1_PROSE_RESIDUE_NARROW"
+      ],
+      "chain_position": 1,
+      "changed": true,
+      "final_status": "changed",
+      "guard_results": {
+        "frozen": {
+          "days": 15,
+          "hours_per_generation": 20,
+          "initial": 1,
+          "split_factor": 4
+        },
+        "l1_prose_analysis": {
+          "applicable": true,
+          "guards": {
+            "fix_line": 35,
+            "fixed_source": "def generate(level=1, **kwargs):\n    import json\n    \n    # Frozen sampled parameters from task specification\n    frozen_params = {\"days\": 15, \"hours_per_generation\": 20, \"initial\": 1, \"split_factor\": 4}\n    \n    # Calculate the number of generations based on hours and days\n    total_hours = frozen_params[\"days\"] * 24\n    num_generations = int(total_hours / frozen_params[\"hours_per_generation\"])\n    \n    # Initial population is given as 'initial' parameter (1)\n    initial_population = frozen_params[\"initial\"]\n    \n    # Split factor represents the growth multiplier per generation\n    split_factor = frozen_params[\"split_factor\"]\n    \n    # Calculate final count: P_n = P_0 * r^n\n    if num_generations >= 0:\n        correct_answer_k = int(initial_population * (split_factor ** num_generations))\n    else:\n        # If hours_per_generation > total_hours, no full generation completes\n        correct_answer_k = initial_population\n    \n    question_text = (\n        r\"The population starts with an initial count of $P_0$ and grows by a split factor \"\n        r\"$r$ every $h$ hours. Given that the process runs for $D$ days, calculate the final \"\n        r\"population count after $\\lfloor \\frac{24 \\cdot D}{h} \\rfloor$ full generations.\\n\\n\"\n        r\"Frozen parameters: Days=$\\text{{days}}$, Hours per generation=$\\text{{hours\\_per\\_generation}}$, \"\n        r\"Initial=$\\text{{initial}}$, Split factor=$\\text{{split_factor}}$. Compute the final population.\"\n    ).replace(\"{\", \"{{\").replace(\"}\", \"}}\")\n    \n    # Format question text with actual values substituted for LaTeX placeholders if needed, \n    # but keeping it generic as per instruction style usually implies using variables in text or fixed template.\n    # Re-writing to insert specific frozen param names into the math context properly without eval logic errors:\n    # q_text = (\n        # f\"The population starts with an initial count of $P_0$ and grows by a split factor \"\n        # f\"$r$ every $h$ hours. Given that the process runs for $D$ days, calculate the final \"\n        # f\"population count after $\\lfloor \\frac{24 \\\\cdot D}{h} \\\\rfloor$ full generations.\\n\\n\"\n        # f\"Frozen parameters: Days=$\\\\text{{days}}$, Hours per generation=$\\\\text{{hours\\_per\\_generation}}$, \"\n        # f\"Initial=$\\\\text{{initial}}$, Split factor=$\\\\text{{split_factor}}$. Compute the final population.\"\n    # )\n\n    return {\n        \"question_text\": q_text,\n        \"correct_answer\": {\"k\": correct_answer_k},\n        \"oracle_payload\": frozen_params\n    }",
+            "parse_error": "unexpected character after line continuation character (<unknown>, line 38)",
+            "repair_type": "comment_block_35_to_41",
+            "subclass": "A"
+          },
+          "reason": "all_transform_guards_ready",
+          "triggered": true
+        },
+        "task": {
+          "generation_count": 18,
+          "oracle_type": "math16_exponential_growth_generation_count",
+          "skill_id": "ce111_nonchoice_q01_part1_exponential_growth",
+          "total_hours": 360
+        }
+      },
+      "pass_index": 0,
+      "selected_rule_id": "L1_PROSE_RESIDUE_NARROW",
+      "selection_priority": 98,
+      "stop_reason": "changed_stop_pass",
+      "stopped_after_change": true,
+      "triggered": true,
+      "validation": {
+        "after_parse_error": null,
+        "ast_parse_success": true,
+        "before_parse_error": "unexpected character after line continuation character (<unknown>, line 38)",
+        "evaluator_details_keys": [
+          "actual_question_text",
+          "composite_outcomes",
+          "evaluation_gates",
+          "exception_message",
+          "exception_type",
+          "ledger_stage",
+          "runtime_error",
+          "timeout"
+        ],
+        "evaluator_outcome": "runtime_failure",
+        "evaluator_rerun": true,
+        "fixed_lineno": 35,
+        "full_repair_to_pass_claimed": true,
+        "next_layer_status": "runtime_failure",
+        "parse_error": null,
+        "phase": "Phase_A",
+        "production_approved": false,
+        "repair_attempted": true,
+        "repair_scope": "syntax_error_prose_residue",
+        "repair_type": "comment_block_35_to_41",
+        "reparsed_after_change": true,
+        "rule_id": "L1_PROSE_RESIDUE_NARROW",
+        "semantic_preserving_claimed": true,
+        "source_len": 2513,
+        "status": "experimental",
+        "subclass": "A"
+      }
+    },
+    {
+      "after_hash": "ce0f93f2cefddf5e1184040ac28782a2410d3f0e8290b1cfbbb555c7573eff8e",
+      "applicable": false,
+      "before_hash": "ce0f93f2cefddf5e1184040ac28782a2410d3f0e8290b1cfbbb555c7573eff8e",
+      "candidate_rules_checked": [
+        "L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP",
+        "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
+        "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP"
+      ],
+      "chain_position": null,
+      "changed": false,
+      "final_status": "changed",
+      "guard_results": {},
+      "pass_index": 1,
+      "selected_rule_id": null,
+      "selection_priority": null,
+      "stop_reason": "no_candidate_selected",
+      "stopped_after_change": false,
+      "triggered": false,
+      "validation": {
+        "ast_parse_success": true,
+        "parse_error": null,
+        "phase": "Phase_B",
+        "source_len": 2513
+      }
+    }
+  ],
+  "reevaluation_details": {
+    "actual_question_text": null,
+    "composite_outcomes": {
+      "full_pass": "FAIL",
+      "presentation_pass": "NOT_OBSERVED",
+      "technical_pass": "FAIL"
+    },
+    "evaluation_gates": {
+      "g1_evaluability": {
+        "candidate_nonempty": true,
+        "extraction_succeeded": true,
+        "parse_succeeded": true,
+        "raw_output_present": true,
+        "reason": "evaluability_passed",
+        "required_entry_point_present": true,
+        "status": "PASS"
+      },
+      "g2_executability": {
+        "entry_point_called": true,
+        "exception_message": "name 'q_text' is not defined",
+        "exception_type": "NameError",
+        "load_succeeded": true,
+        "reason": "runtime_failure",
+        "return_value_produced": false,
+        "status": "FAIL",
+        "timeout": false
+      },
+      "g3_contract_compliance": {
+        "reason": "g2_not_passed",
+        "status": "NOT_ASSESSED"
+      },
+      "g4_semantic_correctness": {
+        "reason": "g2_not_passed",
+        "status": "NOT_ASSESSED"
+      },
+      "g5_problem_presentation": {
+        "question_present": false,
+        "reason": "actual_question_text_unavailable",
+        "status": "NOT_OBSERVED"
+      },
+      "g6_math_notation": {
+        "reason": "actual_question_text_unavailable",
+        "status": "NOT_OBSERVED",
+        "uses_latex": false
+      }
+    },
+    "exception_message": "name 'q_text' is not defined",
+    "exception_type": "NameError",
+    "ledger_stage": "observed",
+    "runtime_error": "NameError: name 'q_text' is not defined",
+    "timeout": false
+  },
+  "reevaluation_status": "FAIL",
+  "repaired_source_sha256": "ce0f93f2cefddf5e1184040ac28782a2410d3f0e8290b1cfbbb555c7573eff8e",
+  "rolled_back": false,
+  "schema_version": 1,
+  "seed": 2026072001,
+  "source_kind": "extracted_candidate",
+  "triggered_rule": "L1_PROSE_RESIDUE_NARROW",
+  "triggered_rules": [
+    "L1_PROSE_RESIDUE_NARROW"
+  ]
+}
