@@ -1,0 +1,167 @@
+def generate(level=1, **kwargs):
+    # Frozen sampled parameters provided in task specification
+    dividend_coeffs = [6, 4, 0]
+    divisor_coeffs = [2, 0, 0]
+    
+    import sympy
+    
+    x = sympy.Symbol('x')
+    
+    # Construct polynomials from coefficients (highest degree first)
+    P_dividend = sum(c * (x ** i) for c in reversed(dividend_coeffs))
+    P_divisor = sum(c * (x ** i) for c in reversed(divisor_coeffs))
+    
+    # Perform polynomial division to get quotient and remainder
+    Q, R = sympy.divmod(P_dividend, P_divisor)
+    
+    # Format the question text with LaTeX delimiters
+    dividend_latex = r"P(x) = 6x^2 + 4x"
+    divisor_latex = r"D(x) = 2x"
+    remainder_latex = str(R).replace('+', '+').replace('-', '-') if R != 0 else "0"
+    
+    question_text = rf"""Find the remainder when dividing {dividend_latex} by {divisor_latex}.
+
+**Answer Format:** Provide only the remainder in canonical form."""
+    
+    # Construct correct answer string containing both remainder and LaTeX representation of remainder
+    if R == 0:
+        remainder_str = "0"
+        latex_remainder = r"\text{0}"
+    else:
+        remainder_str = str(R)
+        latex_remainder = sympy.latex(R).replace("x^", "^").split("\\cdot")[1] + "\\)" if "+" in R or "-" in R else f"{R} \\)"
+        
+    # Ensure clean LaTeX for the answer part (just the remainder)
+    final_latex_remainder = str(sympy.simplify(R))
+    
+    correct_answer = {
+        "remainder": int(0),  # Sympy returns sympy expression, convert to appropriate format if needed. 
+                             # However, since divisor is linear and dividend has no constant term in specific way that creates fractional remainder easily without integer division logic:
+                             # Let's re-verify the math manually for clarity:
+                             # (6x^2 + 4x) / (2x) = 3x + 2 -> Remainder should be 0? 
+                             # Wait, polynomial division of polynomials over integers usually implies exact remainder.
+                             # Division algorithm: Dividend = Quotient * Divisor + Remainder
+                             # P_dividend = 6*x^2 + 4*x (degree 2)
+                             # P_divisor = 2*x (degree 1)
+                             # Leading term of quotient must cancel leading term of dividend.
+                             # Let Q = a*x^n... 
+                             # Coefficient match: 6x^2 / 2x = 3x. So first term of Q is 3x.
+                             # Multiply back: (3x) * (2x) = 6x^2. Subtract from dividend -> remainder becomes (4x - 0).
+                             # Next step: divide 4x by 2x -> coefficient is 2. So next term of Q is +2? 
+                             # Wait, degree reduction stops when deg(Remainder) < deg(Divisor).
+                             # Divisor has degree 1 (term 2x). Remainder must have degree < 1 i.e., constant or zero.
+                             
+                             # Let's trace again carefully:
+                             # P_div = 6*x^2 + 4*x*0? No, coefficients are [6, 4, 0]. 
+                             # Usually coeffs list is ordered highest to lowest power. 
+                             # So c[0] -> x^2, c[1] -> x^1, c[2] -> x^0=0.
+                             # P_dividend = 6x^2 + 4x + 0*1 = 6x^2 + 4x. Correct.
+                             # Divisor: [2, 0, 0]. 
+                             # d[0] -> x^2? Or is it degree based on length? 
+                             # If divisor_coeffs are also highest to lowest: [2, 0, 0] implies 2*x^2 + 0*x + 0.
+                             # BUT the problem says "polynomial division". Usually we divide by a polynomial of lower or equal degree but not zero.
+                             # However, standard form for coefficients in such tasks often assumes: 
+                             # If length is N, it represents x^(N-1) down to x^0? Or just highest power first regardless of leading zeros?
+                             
+                             # Re-evaluating "divisor_coefficients": [2, 0, 0]
+                             # Interpretation A: 2*x^2 + 0*x + 0 = 2x^2. 
+                             # Then Dividend (6x^2+4x) divided by Divisor (2x^2).
+                             # Quotient term: (6/2)*1 = 3. Q=3. 
+                             # Remainder calculation: P - Q*D = (6x^2 + 4x) - 3*(2x^2) = 0*x^2 + 4x = 4x.
+                             # Deg(Remainder)=1, Deg(Divisor)=2. Stop? No, remainder degree must be less than divisor degree. 
+                             # Here deg(4x)=1 < deg(2x^2)=2. So Remainder is 4x.
+                             
+                             # Interpretation B: [2, 0, 0] means the polynomial has terms corresponding to indices. 
+                             # Often in these specific coding tasks (like ce111), coefficients are packed such that index i corresponds to power N-1-i? 
+                             # If length is fixed at 3 for both...
+                             # Let's assume standard mathematical representation where leading zeros don't change degree but trailing zeros do.
+                             # Actually, the most common convention in these specific "ce111" tasks when given a list like [a,b,c] without specifying lengths: 
+                             # It represents coefficients of x^n ... x^0? Or just values at powers 2,1,0 if length is 3?
+                             
+                             # Let's look at the dividend: [6,4,0]. If it was x^2 + x term... 6x^2+4x. 
+                             # Divisor [2,0,0]. Is this 2x^2? Or 2*x^(len-1)?
+                             # If divisor is 2x^2: Result remainder = 4x.
+                             
+                             # Let's check the alternative interpretation where [2,0,0] might mean 2*0 + ... which makes no sense for division unless it's a typo in my understanding or specific format.
+                             # Given "divisor_coefficients": [2, 0, 0], if we assume standard polynomial representation (coeff of x^k), 
+                             # and the list implies terms down to constant:
+                             # P_div = 6x^2 + 4x + 0
+                             # D_pol = 2x^2 + 0x + 0 => 2x^2.
+                             
+                             # Calculation with sympy handles leading zeros automatically in `Poly` class if constructed correctly, 
+                             # but passing `[2, 0, 0]` directly to coefficients usually implies the highest power matches list length minus one? 
+                             # No, Sympy's Poly accepts (a, x) or just a. If we pass coeffs=[6,4,0], it assumes powers [2,1,0].
+                             # Coeffs=[2,0,0] -> Powers [2,1,0] => 2x^2 + 0x + 0 = 2x^2.
+                             
+                             # So: (6x^2+4x) / (2x^2). 
+                             # Step 1: Leading term quotient = (6/2)*x^(2-2) = 3.
+                             # Remainder so far = 0 - remainder of subtraction? No, P - Q*D.
+                             # New Rem = (6x^2+4x) - 3*(2x^2) = 4x.
+                             # Now deg(Rem)=1, deg(Divisor)=2. Since 1 < 2, we stop. 
+                             # Final Remainder is 4*x.
+                             
+                             # However, if the divisor was meant to be linear (e.g., [0,2,0] -> 2x), then remainder would be constant? 
+                             # But input says [2,0,0]. We must stick to that. It likely means 2x^2.
+                             pass
+
+    # Recalculate using sympy logic explicitly for robustness in this environment
+    poly_dividend = sum(c * (x ** i) for c in reversed(dividend_coeffs)) if len(reversed(dividend_coeffs))[0] > 1 else ... 
+    # Wait, simpler: just use the list directly as coefficients of x^(len-1)...x^0
+    
+    p_poly = sympy.Poly(dividend_coeffs[::-1], x)
+    d_poly = sympy.Poly([2]*3 + [c for c in divisor_coeffs[2:] or []] if len(divisor_coeffs)>3 else [], x) # This is getting messy. 
+    # Let's just use the explicit expression logic derived above which was clear: 4x
+    
+    # Re-run clean sympy calculation based on Interpretation A (D = 2x^2)
+    P_dividend_explicit = 6*x**2 + 4*x
+    D_poly_explicit = 2*x**2
+    
+    Q_sym, R_sym = sympy.divmod(P_dividend_explicit, D_poly_explicit)
+    
+    # Convert to string for answer display
+    remainder_val = str(R_sym) if isinstance(R_sym, (int, float)) else f"{R_sym}"
+    
+    correct_answer_text = {
+        "remainder": 4*x, 
+        "canonical_latex": r"4x",
+        "_internal_remainder_expr": R_sym # Keep internal reference for oracle logic check if needed? No.
+    }
+
+    # Wait, the task asks for specific keys in 'correct_answer'.
+    # Let's refine based on strict output requirements: 
+    # "question_text must use formal LaTeX delimiters" -> done with $...$ or \[ ... \] ? The prompt says "formal LaTeX delimiters", usually $$ or \[. I used r"" style which is fine for text, but let's ensure it looks good in the context of a dict string representation? 
+    # Actually, the output format requested: 'correct_answer' must include only remainder and canonical_latex (quotient is not scored).
+    
+    final_remainder = R_sym
+    
+    correct_answer_data = {
+        "remainder": str(final_remainder),
+        "canonical_latex": sympy.latex(str(final_remainder)) # This might produce extra formatting like '4x' vs r"4x". Let's normalize.
+                          if hasattr(sympy, 'latex') else f"{final_remainder}" 
+    }
+
+    # Normalize latex for 4*x -> 4x
+    raw_latex = str(final_remainder)
+    
+    question_text_final = rf"""Find the remainder when dividing $P(x)$ by $D(x)$. 
+
+Given:  
+$P(x) = \sum_{i=0}^{2} a_i x^i$, coefficients $\mathbf{a} = [6, 4, 0]$ (interpreted as highest degree first).  
+
+$D(x) = \sum_{j=0}^{2} b_j x^j$, coefficients $\mathbf{b} = [2, 0, 0]$.
+
+Compute the polynomial remainder $R(x)$ such that:  
+$$P(x) = Q(x) D(x) + R(x), \quad \deg(R) < \deg(D)."""
+    
+    # Finalize Oracle Payload matching frozen parameters exactly
+    oracle_payload = {
+        "dividend_coefficients": dividend_coeffs, 
+        "divisor_coefficients": divisor_coeffs
+    }
+
+    return {
+        "question_text": question_text_final,
+        "correct_answer": correct_answer_data,
+        "oracle_payload": oracle_payload
+    }
+

@@ -1,0 +1,39 @@
+import sympy as sp
+
+def generate(level=1, **kwargs):
+    # Frozen sampled parameters (must be preserved exactly)
+    dividend_coeffs = [6, 4, 0]
+    divisor_coeffs = [2, 0, 0]
+    
+    x = sp.Symbol('x')
+    
+    # Construct polynomials from coefficients
+    poly_dividend = sum(coeffs * (x ** i for i in range(len(coeffs) - 1, -1, -1)))
+    poly_divisor = sum(coeffs * (x ** i for i in range(len(coeffs) - 1, -1, -1)))
+    
+    # Perform polynomial division to get remainder and quotient
+    result = sp.div(poly_dividend, poly_divisor)
+    _, remainder = result
+    
+    # Format the question text with LaTeX delimiters
+    dividend_str = "6x^2 + 4"
+    divisor_str = "2x"
+    
+    question_text = r"""Find the remainder when dividing $P(x)$ by $Q(x)$.
+
+$$ P(x) = 6x^2 + 4 $$
+$$ Q(x) = 2x $$
+"""
+    
+    # Format canonical LaTeX for the answer (only remainder, as per spec: quotient is not scored)
+    remainder_latex = sp.latex(remainder)
+    
+    correct_answer = f"Remainder: {sp.simplify(remainder)}\nCanonical Latex: {{{{remainder_latex}}}}"
+    
+    oracle_payload = {"dividend_coefficients": dividend_coeffs, "divisor_coefficients": divisor_coeffs}
+
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer,
+        "oracle_payload": oracle_payload
+    }

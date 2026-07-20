@@ -1,0 +1,41 @@
+def generate(level=1, **kwargs):
+    question_text = r"An organism starts with an initial population of 1 individual. Each generation, every individual splits into a fixed number of offspring (split factor), and all parents are replaced by these offspring. If each generation takes $20$ hours to complete over the course of $15$ days, how many individuals will exist at the end? Express your answer as an integer."
+    
+    frozen_params = {"days": 15, "hours_per_generation": 20, "initial": 1, "split_factor": 4}
+    
+    # Calculate total generations: (total hours) / (hours per generation)
+    # Total time in days * hours/day is not needed if we assume continuous or direct mapping. 
+    # However, standard interpretation for such problems usually implies a rate over the given duration.
+    # Given "days": 15 and "hours_per_generation": 20, let's calculate total generations based on implied daily generation count?
+    # Actually, looking at typical math problem structures: 
+    # If it says "over the course of 15 days" and a process takes X hours per gen.
+    # We need to know how many gens happen in that time. But we don't have an explicit 'generations_per_day'.
+    # Re-reading context often implies a rate like 2 generations per day? Or perhaps the problem assumes 1 generation per unit of time defined by days/hours?
+    # Let's look at standard exponential growth problems with these specific frozen params. 
+    # Often, if 'days' and 'hours_per_generation' are provided without a conversion factor (like hours in a day), it might be an implicit trick or missing info.
+    # HOWEVER, looking at the pattern of such generated tasks: usually there is a hidden assumption that 1 generation happens per hour? No.
+    # Let's assume the standard interpretation where we calculate total generations based on time elapsed. 
+    # Wait, maybe the problem implies "per day" vs specific hours? 
+    # Let's reconsider the math logic often used in these datasets (ce111). 
+    # If no conversion rate is given, perhaps it assumes 24/7 operation or a specific frequency derived from days/hours ratio being irrelevant to count and just flavor text for 'days'?
+    # No, that would make 'hours_per_generation' useless.
+    # Alternative: Maybe the problem implies there are exactly (15 * something) generations? 
+    # Let's try calculating total hours available in 15 days = 360 hours.
+    # Generations = Total Hours / Hours per Generation = 360 / 20 = 18 generations.
+    # This seems the most logical mathematical deduction using all numbers provided.
+    
+    total_hours_in_days = frozen_params["days"] * 24
+    
+    num_generations = int(total_hours_in_days // frozen_params["hours_per_generation"])
+    
+    initial_count = frozen_params["initial"]
+    split_factor = frozen_params["split_factor"]
+    
+    # Exponential growth formula: final = initial * (split_factor ** generations)
+    k = initial_count * (split_factor ** num_generations)
+
+    return {
+        "question_text": question_text,
+        "correct_answer": {"k": int(k)},
+        "oracle_payload": frozen_params
+    }

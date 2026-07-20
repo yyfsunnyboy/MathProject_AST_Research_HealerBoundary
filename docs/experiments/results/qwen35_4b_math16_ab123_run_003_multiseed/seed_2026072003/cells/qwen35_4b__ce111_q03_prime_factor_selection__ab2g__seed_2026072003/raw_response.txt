@@ -1,0 +1,39 @@
+```python
+def generate(level=1, **kwargs):
+    frozen_params = {"candidates": [11, 12, 13, 14], "n": 156}
+    
+    def is_prime(num):
+        if num < 2:
+            return False
+        for i in range(2, int(num**0.5) + 1):
+            if num % i == 0:
+                return False
+        return True
+
+    # Find prime factors of n = 156
+    temp_n = 156
+    primes_found = []
+    
+    d = 2
+    while d * d <= temp_n:
+        while temp_n % d == 0:
+            primes_found.append(d)
+            temp_n //= d
+        d += 1
+    
+    if temp_n > 1:
+        primes_found.append(temp_n)
+        
+    # Filter candidates that are prime factors of n
+    valid_factors = [c for c in frozen_params["candidates"] if is_prime(c)]
+
+    question_text = r"Find the sum of all distinct prime numbers from the given list $[11, 12, 13, 14]$ that divide the integer $n=156$."
+    
+    correct_answer = sum(valid_factors) if valid_factors else 0
+    
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer,
+        "oracle_payload": frozen_params
+    }
+```

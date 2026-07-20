@@ -1,0 +1,50 @@
+def generate(level=1, **kwargs):
+    frozen_params = {
+        "equation": "(x-2)^2=3", 
+        "order": "a>b", 
+        "target": "2a+b"
+    }
+    
+    # Parse the equation (x-a)^2 = b => x^2 - 2ax + a^2 = b => x^2 - 2ax + (a^2-b) = 0
+    # Here, we have (x-2)^2=3. So vertex is at x=2, and constant term adjustment is due to the RHS being positive.
+    # The roots are given by x = a ± sqrt(b). 
+    # In our case: a = 2, b = 3. But wait, standard form (x-h)^2=k gives h±sqrt(k).
+    # So here h=2, k=3. Roots are 2+sqrt(3) and 2-sqrt(3).
+    
+    # The task specifies "order a>b" which implies we might be looking at coefficients in expanded form or specific variable naming from the frozen target "2a+b". 
+    # If we map our solution x = 2 + sqrt(3) to variables: let's say the vertex is 'a' and the radical part coefficient/radicand involves b?
+    # Actually, the prompt says oracle_payload must EXACTLY equal the frozen sampled parameters.
+    # The question text should reflect (x-2)^2=3 using LaTeX.
+    
+    equation_str = r"(x - 2)^{2} = 3"
+    
+    # Identify components for canonical latex and answer structure
+    h_val = 2
+    k_val = 3
+    
+    # Roots are h ± sqrt(k) => 2 ± sqrt(3)
+    # The prompt asks for "rational, radical_coefficient (may be +1 or -1), radicand"
+    # Root: 2 + 1*sqrt(3). 
+    # Rational part = 2. Radical coefficient = 1. Radicand = 3.
+    
+    rational_part = h_val
+    rad_coef = 1 if True else -1 # For the positive root, it's usually just written as is unless specified otherwise. The prompt says "may be +1 or -1". 
+                                  # Since there are two roots (2+sqrt(3) and 2-sqrt(3)), we can pick one based on order a>b?
+                                  # If we interpret the frozen target "2a+b" as an algebraic form where 'a' is rational part, 'b' is radical term... 
+                                  # Let's assume positive root for canonical representation unless specified.
+    
+    radicand = k_val
+    
+    correct_latex = f"{rational_part} + {rad_coef}*\\sqrt{{{radicand}}}"
+    
+    return {
+        "question_text": r"\text{Solve the quadratic equation: } $" + equation_str + "$",
+        "correct_answer": {
+            "result_description": "The solutions are x = 2 \\pm \\sqrt{3}. Taking the positive root as per standard convention when multiple roots exist without further constraints, or based on a>b ordering if applicable in context.",
+            "rational_part": rational_part,
+            "radical_coefficient": rad_coef,
+            "radicand": radicand,
+            "canonical_latex": correct_latex
+        },
+        "oracle_payload": frozen_params
+    }

@@ -1,0 +1,43 @@
+import math
+from fractions import Fraction as PyFraction
+
+def generate(level=1, **kwargs):
+    frozen_params = {"expression": "3/7 - (-1/4)"}
+    
+    # Parse and compute the expression using domain API logic simulation for negative fraction subtraction
+    a_num, a_den = 3, 7
+    b_num, b_den = -1, 4
+    
+    # Calculate common denominator: lcm(7, 4) = 28
+    common_denominator = (a_den * b_den // math.gcd(a_den, b_den))
+    
+    # Adjust numerators to the common denominator
+    a_adj_num = int((float(a_num / float(a_den)) - float(b_num / float(b_den))) * common_denominator) 
+    # Direct fraction arithmetic: 3/7 + (-(-1/4)) -> 3/7 + 1/4
+    # Numerator calculation manually to avoid float issues for precision in final check logic if needed, but Fraction is safer.
+    
+    from fractions import Fraction as F
+    
+    term_a = F(a_num, a_den)
+    term_b = F(b_num, b_den)
+    
+    result_fraction = term_a - term_b # This handles 3/7 - (-1/4) -> 3/7 + 1/4
+    
+    numerator = result_fraction.numerator
+    denominator = result_fraction.denominator
+    
+    canonical_latex = f"{numerator}/{denominator}"
+
+    question_text = r"\text{Compute: } $\frac{3}{7} - \left(-\frac{1}{4}\right)$"
+
+    correct_answer_dict = {
+        "numerator": numerator,
+        "denominator": denominator,
+        "canonical_latex": canonical_latex
+    }
+
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer_dict,
+        "oracle_payload": frozen_params
+    }

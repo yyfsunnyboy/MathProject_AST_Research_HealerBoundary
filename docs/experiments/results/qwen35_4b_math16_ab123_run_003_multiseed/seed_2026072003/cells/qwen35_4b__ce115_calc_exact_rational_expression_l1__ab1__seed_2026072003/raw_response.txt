@@ -1,0 +1,51 @@
+```python
+def generate(level=1, **kwargs):
+    from fractions import Fraction
+    
+    # Frozen sampled parameters as per specification
+    oracle_payload = {"products": [{"left": "2.79", "right": "89.3", "sign": 1}, {"left": "-0.21", "right": "89.3", "sign": -1}]}
+
+    # Parse the frozen parameters to create a math problem
+    products = oracle_payload["products"]
+    
+    terms = []
+    for p in products:
+        left_val = float(p['left'])
+        right_val = float(p['right'])
+        sign = int(p['sign'])
+        
+        term_value = Fraction(sign * (int(str(left_val) + str(right_val)))) # This is just a placeholder logic to ensure irreducible fraction representation for the example
+        
+    # Constructing an exact rational expression based on frozen data: 
+    # Problem involves sum of products where one product is positive and another negative.
+    
+    term1 = Fraction(279, 100) * Fraction(893, 10)      # 2.79 * 89.3
+    term2 = -Fraction(21, 100) * Fraction(893, 10)       # -0.21 * 89.3
+    
+    numerator = (term1.numerator + term2.numerator) 
+    denominator = (term1.denominator * term2.denominator)
+    
+    final_fraction = Fraction(numerator, denominator).limit_denominator(1)
+    
+    p = final_fraction.numerator
+    q = final_fraction.denominator
+    
+    # Ensure irreducible form is handled correctly by Fraction.limit_denominator logic in context of exact rational arithmetic if needed directly. 
+    # Re-calculating strictly from inputs to avoid limit_denominator side effects on small integers:
+    total_sum = term1 + term2
+    p, q = int(total_sum.numerator), int(total_sum.denominator)
+    
+    question_text = r"\text{Evaluate the exact rational expression given by the sum of two products.} \\ \left( (2.79)(89.3) + (-0.21)(89.3) \right)"
+
+    correct_answer_value = f"{p}/{q}"
+    
+    import latexstring
+    
+    canonical_latex = r"\frac{" + str(p) + "}{"} + str(q) + r"}"
+
+    return {
+        "question_text": question_text, 
+        "correct_answer": {"value": correct_answer_value, "canonical_latex": canonical_latex}, 
+        "oracle_payload": oracle_payload
+    }
+```

@@ -1,0 +1,27 @@
+```python
+def generate(level=1, **kwargs):
+    from math import log
+    
+    # Extract fixed parameters based on task specification
+    days = 15
+    hours_per_generation = 20
+    initial = 1
+    split_factor = 4
+    
+    # Calculate total generations: (days * 24) / hours_per_generation
+    total_generations = int((days * 24) // hours_per_generation)
+    
+    # Exponential growth formula: final_amount = initial * (split_factor ** number_of_generations)
+    correct_answer_value = initial * ((split_factor ** total_generations))
+    
+    return {
+        "question_text": r"An organism starts with $1$ individual. Each generation, the population splits into 4 equal parts and then one part is chosen to continue as a new lineage (quadrupling per generation). If this process continues for $\frac{days \times 24}{hours\_per\_generation}$ generations, what will be the final count of individuals in that single continuing line? Express your answer as an integer.",
+        "correct_answer": {"k": correct_answer_value},
+        "oracle_payload": {
+            "days": days, 
+            "hours_per_generation": hours_per_generation, 
+            "initial": initial, 
+            "split_factor": split_factor
+        }
+    }
+```
