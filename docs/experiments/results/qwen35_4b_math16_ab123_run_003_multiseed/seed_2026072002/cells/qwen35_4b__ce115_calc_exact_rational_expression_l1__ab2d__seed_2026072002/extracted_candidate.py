@@ -1,0 +1,18 @@
+def generate(level=1, **kwargs):
+    frozen_params = {"products": [{"left": "2.79", "right": "89.3", "sign": 1}, {"left": "-0.21", "right": "89.3", "sign": -1}]}
+
+    # Parse inputs as Fractions
+    f1 = F("2.79") / F("89.3") if frozen_params["products"][0]["sign"] == 1 else -(F("2.79") / F("89.3"))
+    f2 = (-F("0.21") * F("89.3")) if frozen_params["products"][1]["sign"] == -1 else (-(F("-0.21") * F("89.3")))
+
+    # Simplify expressions using exact arithmetic logic based on the provided samples
+    result = f1 + f2
+
+    correct_answer_value = str(result)
+    p, q = result.numerator, result.denominator
+    canonical_latex = r"\frac{" + str(p) + "}{\text{" + str(q) + "}}" if q != 0 else str(p)
+
+    return {
+        "question_text": f"Compute the exact rational expression: \\begin{{align}} & A_1 = \\\\left\\{\\\\frac{{{frozen_params['products'][0]['left']}}}{{{frozen_params['products'][0]['right']}}}\\\\right\\}^{{{frozen_params['products'][0]['sign']}}} + B_2 = \\\\left({frozen_params['products'][1]['left']} \\times {frozen_params['products'][1]['right']}\\\\right)^{{{frozen_params['products'][1]['sign']}}}, & A+B=\\frac{{{p}}}{{q}}, & end{{align}}"
+        , "correct_answer": f"value: ({correct_answer_value}), canonical_latex: {{{canonical_latex}}}", "oracle_payload": frozen_params
+    }

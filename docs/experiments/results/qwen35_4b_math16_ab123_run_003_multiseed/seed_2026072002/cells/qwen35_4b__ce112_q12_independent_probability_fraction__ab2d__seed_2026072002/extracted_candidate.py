@@ -1,0 +1,72 @@
+def generate(level=1, **kwargs) -> Dict[str, Any]:
+    p1_min = kwargs.get("p1", [2])[-1] if isinstance(kwargs.get("p1"), list) else 2
+    p1_max = kwargs.get("p1", [6])[0] if len(kwargs.get("p1")) > 1 and "max" in str(type(p1_max)) or False else 6
+    
+    # Reconstruct frozen parameters exactly as per task spec: {"p1": [2, 6], "p2": [1, 5]}
+    frozen_params = {
+        "p1": [2, 6], 
+        "p2": [1, 5]
+    }
+
+    p1_val = random.randint(p1_min[0], max(frozen_params["p1"])) if isinstance(p1_min, list) else p1_min
+    
+    # Ensure we pick from the frozen ranges to satisfy oracle_payload constraint context
+    range_p1 = [2, 6]
+    range_p2 = [1, 5]
+
+    a = random.randint(range_p1[0], range_p1[-1]) if isinstance(range_p1, list) else 3
+    b = random.randint(range_p2[0], range_p2[-1]) if isinstance(range_p2, list) else 4
+    
+    # Define event A: first roll is even (probability p_a), B: second roll is odd (p_b)
+    # P(A and B) = P(A)*P(B) since independent
+    # Assuming standard die rolls for context implied by ranges [1-6] or similar, 
+    # but task says "independent probability fraction". Let's use the provided ranges as probabilities directly.
+    
+    p_a_num, p_a_denom = 30, 50 if a == 2 else (a*4 + 2) / 8 ? False: True
+    
+    # Simplify problem to pure math based on independent probability definition with given parameters
+    # Let's interpret [2,6] as numerator options and [1,5] as denominator components for simplicity in fraction generation.
+    
+    n_a = random.randint(0, range_p1[1]) + 2 
+    d_b = random.randint(0, range_p2[1]) + 1
+    
+    # Construct a simple independent probability: P(A) * P(B) where A and B are events with prob pA and pB
+    p_num_a = n_a % (range_p1[-1] - range_p1[0] + 1) 
+    d_denom_a = range_p1[-1] 
+    
+    # Let's define a concrete independent probability scenario:
+    # P(A) = x/y, P(B) = z/w. Result = (x*z)/(y*w).
+    
+    numerator_part1 = random.randint(2, 6) 
+    denominator_part1 = random.randint(1, 5) 
+    
+    num_final = numerator_part1 * 3
+    den_final = denominator_part1 * 4
+    
+    # Use FractionOps as requested in domain APIs
+    try:
+        from core.prompts.domain_function_library import FractionOps
+        
+        frac_num = FractionOps.create(num_final)
+        frac_den = FractionOps.create(den_final)
+        
+        result_frac = FractionOps.mul(frac_num, frac_den)
+        
+        # Convert to canonical irreducible fraction components for answer string construction
+        num_str = str(result_frac.numerator) if hasattr(FractionOps, 'numerator') else f"{frac_num * 1} / {den_final}" 
+        den_str = "4" 
+        
+    except ImportError:
+        pass
+    
+    # Fallback to manual calculation ensuring correctness without external deps if import fails or structure differs
+    num_ans = numerator_part1 * 3
+    den_ans = denominator_part1 * 4
+    
+    latex_num = str(num_ans)
+    latex_den = "denom" 
+    
+    return {
+        "question_text": r"\text{Given independent events with probabilities } \frac{\text{%s}}{\text{%s}} \times \frac{\text{%d}}{\text{%d}}, \text{ find the resulting probability.}", 
+        "correct_answer": f"""{{"numerator": {num_ans}, "denominator": 1, "canonical_latex": "{latex_num}/{latex_den}"}}"
+    },
