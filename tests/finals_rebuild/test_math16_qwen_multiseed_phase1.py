@@ -119,6 +119,55 @@ def test_interim_report_assertions():
     for k, v in data["assertions"].items():
         assert v is True, k
     assert data["title"] == "Qwen Phase 1 interim report"
+    assert data["sd_definition"] == "sample_standard_deviation_n_minus_1"
+    ab = data["ab3_new_seeds"]
+    assert ab["H0_PASS"] == 51
+    assert ab["H0_FAIL"] == 333
+    assert ab["trigger"] == 8
+    assert ab["layer_exposure"] == 8
+    assert ab["rescue_to_pass"] == 0
+    assert ab["regression"] == 0
+    assert ab["outcome_sum"] == 384
+    for model in MODELS:
+        st = data["models"][model]["task_condition_stability"]
+        assert len(st["groups"]) == 48
+        assert st["stable_pass"] + st["stable_fail"] + st["unstable"] == 48
+        for seed, row in data["models"][model]["per_seed"].items():
+            assert row["row_sum"] == 48
+            assert row["PASS"] + row["FAIL"] == 48
+
+
+def test_report_markdown_contains_required_sections():
+    text = (ROOT / "docs/experiments/reports/math16_qwen_five_seed_interim_report.md").read_text(
+        encoding="utf-8"
+    )
+    required = [
+        "# Qwen Phase 1 interim report",
+        "### A. Per seed",
+        "### B. Five-seed pooled and seed-level statistics",
+        "### C. Task–condition stability",
+        "### D. Prompt-condition comparison",
+        "## E. Frozen Healer seed-generalization",
+        "frozen-rule generalization across unseen generation seeds on the same fixed task set",
+        "## F. Prediction vs actual",
+        "## G. Protocol and limits",
+        "Gemini Phase 2 is not completed",
+        "Workflow-order deviation",
+        "byte-level immutable",
+        "pass_frequency",
+        "outcome_consistency",
+        "layer_diversity",
+        "failure_layer_consistency",
+        "exposure / trigger",
+        "rescue / H0 FAIL",
+        "sample SD",
+    ]
+    for needle in required:
+        assert needle in text, needle
+    # full group tables: 48 groups × 2 models = 96 data rows minimum in section C tables
+    assert text.count("| stable_pass |") + text.count("| stable_fail |") + text.count(
+        "| unstable |"
+    ) >= 96
 
 
 def test_allowlist_still_frozen():
