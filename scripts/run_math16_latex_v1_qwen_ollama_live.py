@@ -672,11 +672,17 @@ def run_live(output_dir: Path, *, model: str) -> dict[str, Any]:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", required=True, choices=sorted(MODEL_SLUG))
+    parser.add_argument(
+        "--run-id",
+        default=None,
+        help="Run directory name under docs/experiments/results "
+        "(default: {slug}_math16_ab123_run_001).",
+    )
     parser.add_argument("--output-dir", type=Path, default=None)
     parser.add_argument("--preflight-only", action="store_true")
     args = parser.parse_args()
     model = args.model
-    run_id = f"{MODEL_SLUG[model]}_math16_ab123_run_001"
+    run_id = args.run_id or f"{MODEL_SLUG[model]}_math16_ab123_run_001"
     output_dir = args.output_dir or (ROOT / "docs/experiments/results" / run_id)
 
     prompt_check = verify_prompt_hashes_unchanged()

@@ -25,12 +25,18 @@ def _ok_response(text: str = "print('hello')") -> dict:
 
 def test_frozen_inference_config_aligns_with_gemini_max_tokens() -> None:
     cfg = adapter.frozen_inference_config()
-    # Vendor sampling from `ollama show qwen3.5:4b` Parameters (not greedy 0.0).
-    assert cfg["temperature"] == 1.0
-    assert cfg["top_p"] == 0.95
+    # Non-thinking instruct sampling (not ollama show thinking-mode defaults).
+    assert cfg["temperature"] == 0.7
+    assert cfg["top_p"] == 0.8
     assert cfg["top_k"] == 20
-    assert cfg["presence_penalty"] == 1.5
+    assert cfg["think"] is False
+    assert cfg["runtime_mode"] == "non_thinking"
+    assert "presence_penalty" not in cfg
+    assert cfg["unset_options_use_ollama_defaults"]["presence_penalty"] == "ollama_default"
     assert cfg["num_predict"] == 24576
+    assert cfg["num_ctx"] == 65536
+    assert cfg["seed_default"] == 2026071301
+    assert cfg["request_timeout_seconds"] == 1800
     assert cfg["model"] == "qwen3.5:4b"
     assert cfg["base_url"] == "http://localhost:11434"
     assert cfg["retry"]["max_attempts"] == 3
@@ -38,17 +44,20 @@ def test_frozen_inference_config_aligns_with_gemini_max_tokens() -> None:
     assert cfg["retry"]["exhausted_validity"] == "INVALID_INFRASTRUCTURE"
     assert cfg["retry"]["exhausted_layer"] == "L0"
     assert "24576" in cfg["num_predict_alignment"]
-    assert "ollama show" in cfg["vendor_sampling_source"]
+    assert "non-thinking" in cfg["vendor_sampling_source"]
+    assert "0.7" in cfg["vendor_sampling_source"]
 
 
-def test_math16_chat_payload_uses_vendor_sampling() -> None:
+def test_math16_chat_payload_uses_non_thinking_sampling() -> None:
     payload = adapter.build_math16_chat_payload("print hello", seed=2026071301)
     assert payload["think"] is False
-    assert payload["options"]["temperature"] == 1.0
-    assert payload["options"]["top_p"] == 0.95
+    assert "think" not in payload["options"]
+    assert payload["options"]["temperature"] == 0.7
+    assert payload["options"]["top_p"] == 0.8
     assert payload["options"]["top_k"] == 20
-    assert payload["options"]["presence_penalty"] == 1.5
+    assert "presence_penalty" not in payload["options"]
     assert payload["options"]["num_predict"] == 24576
+    assert payload["options"]["num_ctx"] == 65536
     assert payload["options"]["seed"] == 2026071301
 
 
@@ -59,9 +68,11 @@ def test_call_qwen_once_returns_raw_text_and_metadata() -> None:
 
     out = adapter.call_qwen_once("print hello", transport=fake)
     assert out["raw_text"] == "ok-body"
-    assert out["metadata"]["inference_config"]["temperature"] == 1.0
-    assert out["metadata"]["inference_config"]["top_p"] == 0.95
+    assert out["metadata"]["inference_config"]["temperature"] == 0.7
+    assert out["metadata"]["inference_config"]["top_p"] == 0.8
+    assert out["metadata"]["inference_config"]["top_k"] == 20
     assert out["metadata"]["inference_config"]["num_predict"] == 24576
+    assert out["metadata"]["inference_config"]["presence_penalty"] == "ollama_default_unset"
     assert out["metadata"]["eval_count"] == 5
 
 

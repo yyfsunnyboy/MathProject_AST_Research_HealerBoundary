@@ -8,10 +8,11 @@ Call convention matches Gemini Math16 runners:
         "api_attempts": list,   # per-attempt records for the same cell
     }
 
-Sampling is frozen from `ollama show qwen3.5:4b` Parameters (same for 4B/9B):
-temperature=1.0, top_p=0.95, top_k=20, presence_penalty=1.5.
-(Note: user expectation ~0.7 applies to some HF instruct presets; this Ollama
-model card ships temperature=1 / top_p=0.95.)
+Runtime mode: non-thinking (`think: false` at /api/chat top-level).
+Sampling frozen for both 4B/9B from Qwen official instruct/non-thinking
+recommendations: temperature=0.7, top_p=0.8, top_k=20. presence_penalty is
+omitted (Ollama default). `ollama show` Parameters still list thinking-mode
+defaults (1.0 / 0.95 / presence_penalty=1.5) and are intentionally not used.
 
 Does not build Math16 prompts, evaluate answers, or write formal run artifacts.
 """
@@ -42,15 +43,17 @@ REQUEST_TIMEOUT_SECONDS = 1800
 MAX_ATTEMPTS = 3
 BACKOFF_SECONDS = (5, 20, 60)
 
-# Vendor sampling from `ollama show qwen3.5:4b` / `:9b` Parameters block.
-TEMPERATURE = 1.0
-TOP_P = 0.95
+# Non-thinking instruct sampling (same freeze for qwen3.5:4b and :9b).
+TEMPERATURE = 0.7
+TOP_P = 0.8
 TOP_K = 20
-PRESENCE_PENALTY = 1.5
 VENDOR_SAMPLING_SOURCE = (
-    "ollama show qwen3.5:4b Parameters "
-    "(temperature=1, top_p=0.95, top_k=20, presence_penalty=1.5); "
-    "identical Parameters on qwen3.5:9b"
+    "Qwen official instruct/non-thinking recommendations "
+    "(temperature=0.7, top_p=0.8, top_k=20); "
+    "presence_penalty omitted (Ollama default); "
+    "ollama show Parameters remain thinking-mode defaults "
+    "(temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; "
+    "identical freeze for qwen3.5:4b and qwen3.5:9b"
 )
 
 FROZEN_INFERENCE_CONFIG: dict[str, Any] = {
@@ -61,10 +64,10 @@ FROZEN_INFERENCE_CONFIG: dict[str, Any] = {
     "api": API_CHAT,
     "stream": False,
     "think": False,
+    "runtime_mode": "non_thinking",
     "temperature": TEMPERATURE,
     "top_p": TOP_P,
     "top_k": TOP_K,
-    "presence_penalty": PRESENCE_PENALTY,
     "vendor_sampling_source": VENDOR_SAMPLING_SOURCE,
     "num_predict": GEMINI_ALIGNED_NUM_PREDICT,
     "num_predict_alignment": (
@@ -83,6 +86,7 @@ FROZEN_INFERENCE_CONFIG: dict[str, Any] = {
         "same_cell": True,
     },
     "unset_options_use_ollama_defaults": {
+        "presence_penalty": "ollama_default",
         "min_p": "ollama_default",
         "typical_p": "ollama_default",
         "repeat_last_n": "ollama_default",
@@ -176,12 +180,12 @@ def build_math16_chat_payload(
         "model": model,
         "messages": [{"role": "user", "content": prompt}],
         "stream": False,
+        # Native Ollama /api/chat top-level think flag (not under options).
         "think": False,
         "options": {
             "temperature": TEMPERATURE,
             "top_p": TOP_P,
             "top_k": TOP_K,
-            "presence_penalty": PRESENCE_PENALTY,
             "seed": int(seed),
             "num_ctx": NUM_CTX,
             "num_predict": GEMINI_ALIGNED_NUM_PREDICT,
@@ -191,6 +195,8 @@ def build_math16_chat_payload(
         raise RuntimeError("think must be false at /api/chat top-level")
     if "think" in (payload.get("options") or {}):
         raise RuntimeError("think must not be nested under options")
+    if "presence_penalty" in (payload.get("options") or {}):
+        raise RuntimeError("presence_penalty must be omitted (Ollama default)")
     return payload
 
 
@@ -289,14 +295,15 @@ def call_qwen_once(
         "temperature": TEMPERATURE,
         "top_p": TOP_P,
         "top_k": TOP_K,
-        "presence_penalty": PRESENCE_PENALTY,
         "num_predict": GEMINI_ALIGNED_NUM_PREDICT,
         "num_ctx": NUM_CTX,
         "think": False,
+        "runtime_mode": "non_thinking",
         "stream": False,
         "seed": int(seed),
         "request_timeout_seconds": timeout_s,
         "vendor_sampling_source": VENDOR_SAMPLING_SOURCE,
+        "presence_penalty": "ollama_default_unset",
     }
     meta["retry"] = 0
     meta["first_attempt_only"] = True
@@ -442,7 +449,6 @@ __all__ = [
     "InvalidInfrastructureError",
     "MAX_ATTEMPTS",
     "MODEL_ID",
-    "PRESENCE_PENALTY",
     "REQUEST_TIMEOUT_SECONDS",
     "TEMPERATURE",
     "TOP_K",
