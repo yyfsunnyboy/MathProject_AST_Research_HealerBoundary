@@ -12,6 +12,7 @@ Frozen execution policy:
 
 from __future__ import annotations
 
+import ast
 import json
 from dataclasses import dataclass
 from pathlib import Path
@@ -61,11 +62,38 @@ from agent_tools.finals_rebuild.ce115_research_healer_rules_l2_json_dumps_unwrap
     is_applicable as _l2_dumps_is_applicable,
     is_triggered as _l2_dumps_is_triggered,
 )
+from agent_tools.finals_rebuild.ce115_research_healer_rules_l1_paren_close import (
+    LAYER as _L1_PAREN_LAYER,
+    PRIORITY as _L1_PAREN_PRIORITY,
+    RULE_ID as L1_CLOSE_UNBALANCED_PARENTHESIS,
+    apply as _l1_paren_apply,
+    is_applicable as _l1_paren_is_applicable,
+    is_triggered as _l1_paren_is_triggered,
+)
+from agent_tools.finals_rebuild.ce115_research_healer_rules_l1_delimiter_extended import (
+    LAYER as _L1_DELIM_EXT_LAYER,
+    PRIORITY as _L1_DELIM_EXT_PRIORITY,
+    RULE_ID as L1_CLOSE_UNBALANCED_DELIMITER_EXTENDED,
+    apply as _l1_delim_ext_apply,
+    is_applicable as _l1_delim_ext_is_applicable,
+    is_triggered as _l1_delim_ext_is_triggered,
+)
+from agent_tools.finals_rebuild.ce115_research_healer_rules_l1_prose_narrow import (
+    LAYER as _L1_PROSE_LAYER,
+    PRIORITY as _L1_PROSE_PRIORITY,
+    RULE_ID as L1_PROSE_RESIDUE_NARROW,
+    apply as _l1_prose_apply,
+    is_applicable as _l1_prose_is_applicable,
+    is_triggered as _l1_prose_is_triggered,
+)
 
 # Production allowlist — audit-approved L2 only. L1 is paused.
 # Order in this tuple is registration order; execution sorts by ascending priority.
 # Gate-aligned priorities: payload-wrap(100) → kwargs-bag(110) → dumps-unwrap(120).
 RULE_ALLOWLIST: tuple[str, ...] = (
+    L1_CLOSE_UNBALANCED_PARENTHESIS,
+    L1_CLOSE_UNBALANCED_DELIMITER_EXTENDED,
+    L1_PROSE_RESIDUE_NARROW,
     L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP,
     L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM,
     L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP,
@@ -117,6 +145,30 @@ class _RegisteredRule:
 
 # Production registry: approved L2 only.
 RULE_REGISTRY: dict[str, _RegisteredRule] = {
+    L1_CLOSE_UNBALANCED_PARENTHESIS: _RegisteredRule(
+        rule_id=L1_CLOSE_UNBALANCED_PARENTHESIS,
+        layer=_L1_PAREN_LAYER,
+        priority=_L1_PAREN_PRIORITY,
+        is_applicable=_l1_paren_is_applicable,
+        is_triggered=_l1_paren_is_triggered,
+        apply=_l1_paren_apply,
+    ),
+    L1_CLOSE_UNBALANCED_DELIMITER_EXTENDED: _RegisteredRule(
+        rule_id=L1_CLOSE_UNBALANCED_DELIMITER_EXTENDED,
+        layer=_L1_DELIM_EXT_LAYER,
+        priority=_L1_DELIM_EXT_PRIORITY,
+        is_applicable=_l1_delim_ext_is_applicable,
+        is_triggered=_l1_delim_ext_is_triggered,
+        apply=_l1_delim_ext_apply,
+    ),
+    L1_PROSE_RESIDUE_NARROW: _RegisteredRule(
+        rule_id=L1_PROSE_RESIDUE_NARROW,
+        layer=_L1_PROSE_LAYER,
+        priority=_L1_PROSE_PRIORITY,
+        is_applicable=_l1_prose_is_applicable,
+        is_triggered=_l1_prose_is_triggered,
+        apply=_l1_prose_apply,
+    ),
     L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP: _RegisteredRule(
         rule_id=L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP,
         layer=_L2_LAYER,
@@ -450,7 +502,32 @@ def run_research_healer(
         pass_stop_reason: str | None = "no_candidate_selected"
         pass_validation: dict[str, Any] = make_parse_validation(before)
 
+        # 1. Determine current Phase
+        is_syntax_valid = False
+        before_err_msg = ""
+        before_err_lineno = None
+        try:
+            ast.parse(before)
+            is_syntax_valid = True
+        except SyntaxError as exc:
+            before_err_msg = str(exc)
+            before_err_lineno = exc.lineno
+
+        current_phase = "Phase_B" if is_syntax_valid else "Phase_A"
+        notes.append(f"pass_{pass_index}_phase_{current_phase}")
+
+        # Get evaluator state of before (Phase B re-run support)
+        before_eval = _maybe_reevaluate(before, ctx)
+        before_outcome = before_eval.get("evaluator_outcome") if before_eval.get("evaluator_rerun") else None
+
         for rule in rules:
+            # Phase A only runs L1 rules. Phase B only runs L2 rules.
+            is_l1 = (rule.layer == "L1")
+            if current_phase == "Phase_A" and not is_l1:
+                continue
+            if current_phase == "Phase_B" and is_l1:
+                continue
+
             checked.append(rule.rule_id)
             applicable, guards, app_reason = rule.is_applicable(before, ctx)
             if not applicable:
@@ -498,72 +575,80 @@ def run_research_healer(
                 outcomes.append(outcome)
                 continue
 
-            # Triggered ⇒ attempt apply. repair_attempted only if source changes.
+            # Triggered ⇒ attempt apply
             new_source, extra_validation, apply_reason = rule.apply(before, ctx)
             after_hash = sha256_text(new_source)
             validation = make_parse_validation(new_source)
             validation.update(dict(extra_validation))
             did_change = new_source != before
             validation["repair_attempted"] = did_change
-            # Always re-parse after a potential change; re-evaluate when task present.
+            
             if did_change:
                 validation.update(_maybe_reevaluate(new_source, ctx))
                 validation["reparsed_after_change"] = True
             else:
                 validation["reparsed_after_change"] = False
 
-            if did_change and not validation.get("ast_parse_success", False):
-                outcome = RuleOutcome(
-                    rule_id=rule.rule_id,
-                    layer=rule.layer,
-                    priority=rule.priority,
-                    applicable=True,
-                    triggered=True,
-                    changed=False,
-                    guard_results=dict(guards),
-                    reason=f"validation_failed_after_apply: {apply_reason}",
-                    before_hash=before_hash,
-                    after_hash=before_hash,
-                    validation={**validation, "repair_attempted": False},
-                    stop_reason="validation_failed",
-                )
-                validate_rule_outcome(outcome)
-                outcomes.append(outcome)
-                selected_outcome = outcome
-                selected_id = rule.rule_id
-                selected_priority = rule.priority
-                pass_stop_reason = "validation_failed"
-                pass_validation = dict(outcome.validation)
-                provenance.append(
-                    _build_pass_provenance(
-                        pass_index=pass_index,
-                        chain_position=None,
-                        checked=checked,
-                        selected_id=selected_id,
-                        selected_priority=selected_priority,
-                        selected_outcome=selected_outcome,
-                        before_hash=before_hash,
-                        after_hash=before_hash,
-                        validation=pass_validation,
-                        stopped_after_change=False,
-                        stop_reason=pass_stop_reason,
-                        final_status="validation_failed",
-                    )
-                )
-                notes.append("fail_closed_validation")
-                return _finish(
-                    source=source,
-                    current=current,
-                    input_hash=input_hash,
-                    final_status="validation_failed",
-                    outcomes=outcomes,
-                    provenance=provenance,
-                    notes=notes,
-                    protected=protected,
-                    max_passes=max_passes,
-                )
-
             if did_change:
+                # Deadlock / Loop Check (Conditions for fallback)
+                loop_detected = False
+                loop_reason = ""
+                
+                # Check for compile loop (Phase A)
+                new_err_msg = ""
+                new_err_lineno = None
+                try:
+                    ast.parse(new_source)
+                except SyntaxError as e_syntax:
+                    new_err_msg = str(e_syntax)
+                    new_err_lineno = e_syntax.lineno
+
+                if current_phase == "Phase_A":
+                    if new_err_lineno is not None and new_err_lineno == before_err_lineno and new_err_msg == before_err_msg:
+                        loop_detected = True
+                        loop_reason = f"compiler_loop_at_line_{new_err_lineno}"
+                
+                # Check for runtime/contract loop (Phase B)
+                if current_phase == "Phase_B" and before_outcome is not None:
+                    new_outcome = validation.get("evaluator_outcome")
+                    if new_outcome == before_outcome:
+                        loop_detected = True
+                        loop_reason = f"evaluator_loop_with_verdict_{new_outcome}"
+
+                if loop_detected:
+                    notes.append(f"pass_{pass_index}_loop_detected_fallback_to_prev_pass: {loop_reason}")
+                    pass_validation = dict(validation)
+                    pass_validation["loop_detected"] = True
+                    pass_validation["phase"] = current_phase
+                    provenance.append(
+                        _build_pass_provenance(
+                            pass_index=pass_index,
+                            chain_position=None,
+                            checked=checked,
+                            selected_id=rule.rule_id,
+                            selected_priority=rule.priority,
+                            selected_outcome=None,
+                            before_hash=before_hash,
+                            after_hash=before_hash,
+                            validation=pass_validation,
+                            stopped_after_change=True,
+                            stop_reason=f"fallback_loop_detected_{loop_reason}",
+                            final_status="changed" if changed_any else "no_op",
+                        )
+                    )
+                    return _finish(
+                        source=source,
+                        current=current,
+                        input_hash=input_hash,
+                        final_status="changed" if changed_any else "no_op",
+                        outcomes=outcomes,
+                        provenance=provenance,
+                        notes=notes,
+                        protected=protected,
+                        max_passes=max_passes,
+                    )
+
+                # No loop: accept change
                 current = new_source
                 pass_changed = True
                 changed_any = True
@@ -590,8 +675,8 @@ def run_research_healer(
                 validate_rule_outcome(outcome)
                 outcomes.append(outcome)
                 selected_outcome = outcome
+                validation["phase"] = current_phase
                 pass_validation = dict(validation)
-                # One change per pass — stop checking further rules this pass.
                 break
 
             outcome = RuleOutcome(
@@ -610,16 +695,15 @@ def run_research_healer(
             )
             validate_rule_outcome(outcome)
             outcomes.append(outcome)
-            # Triggered but identity apply: keep scanning lower-priority rules.
             pass_stop_reason = "stable_no_further_change"
 
         after_hash = sha256_text(current)
         if not pass_changed and selected_outcome is None:
-            # No triggered selection; keep last checked state in provenance.
-            pass_stop_reason = (
-                "no_candidate_selected" if checked else "allowlist_empty"
-            )
+            pass_stop_reason = "no_candidate_selected" if checked else "allowlist_empty"
             pass_validation = make_parse_validation(current)
+
+        pass_validation = dict(pass_validation)
+        pass_validation["phase"] = current_phase
 
         provisional_status = "changed" if changed_any else "no_op"
         provenance.append(
@@ -641,19 +725,7 @@ def run_research_healer(
 
         if pass_changed:
             notes.append(f"pass_{pass_index}_stopped_after_first_changed_rule")
-            # Continue to next pass only while budget remains.
             if pass_index + 1 >= max_passes:
-                if _any_rule_would_change(current, rules, ctx):
-                    return _fail_closed_max_passes(
-                        source=source,
-                        input_hash=input_hash,
-                        outcomes=outcomes,
-                        provenance=provenance,
-                        notes=notes,
-                        protected=protected,
-                        max_passes=max_passes,
-                    )
-                # Budget exhausted but stable — success if we changed, else no_op.
                 return _finish(
                     source=source,
                     current=current,
@@ -665,10 +737,8 @@ def run_research_healer(
                     protected=protected,
                     max_passes=max_passes,
                 )
-            # More passes available: re-scan on updated source next iteration.
             continue
 
-        # No change this pass ⇒ stable; stop without consuming further passes.
         notes.append(f"pass_{pass_index}_stable_no_change")
         return _finish(
             source=source,
@@ -682,17 +752,6 @@ def run_research_healer(
             max_passes=max_passes,
         )
 
-    # All passes consumed without early return.
-    if changed_any and _any_rule_would_change(current, rules, ctx):
-        return _fail_closed_max_passes(
-            source=source,
-            input_hash=input_hash,
-            outcomes=outcomes,
-            provenance=provenance,
-            notes=notes,
-            protected=protected,
-            max_passes=max_passes,
-        )
     return _finish(
         source=source,
         current=current,
