@@ -1,0 +1,301 @@
+{
+  "manifest_id": "math16_three_model_five_seed_extension_v1",
+  "protocol_id": "MATH16-R05",
+  "title": "Math16 three-model five-seed extension",
+  "preregistered_at_commit_expected_parent": "7e888294f090a375929cba1fa311d565f5d9e6b0",
+  "healer_freeze_commit": "d9aa264cd5813fdf1393e53b45cf2dbdbbd0d948",
+  "ab3_preparation_baseline_commit": "2d54de29212a8c00729f89a1f8a42946a1a17c67",
+  "pool_id": "Math16-LaTeX-v1",
+  "scope_statement": "Final confirmatory geometry is three models × 16 tasks × Ab1/Ab2g/Ab2d × 5 seeds. Phase 1 executes only Qwen 3.5 4B/9B for the four new seeds. Phase 2 later executes Gemini 3.5 Flash under the identical task/condition/seed geometry. Final cross-model analysis is deferred until Gemini Phase 2 is completed.",
+  "phases": {
+    "phase_1": {
+      "name": "Qwen 4B/9B multiseed extension",
+      "models": ["qwen3.5:4b", "qwen3.5:9b"],
+      "seeds_executed_this_phase": [2026072001, 2026072002, 2026072003, 2026072004],
+      "seed_1_reuse_only": 2026071301,
+      "new_cells": 384,
+      "formula": "2 models × 16 tasks × 3 conditions × 4 new seeds = 384",
+      "status": "preregistered_not_started"
+    },
+    "phase_2": {
+      "name": "Gemini 3.5 Flash multiseed extension",
+      "models": ["gemini-3.5-flash"],
+      "seeds_executed_this_phase": [2026072001, 2026072002, 2026072003, 2026072004],
+      "seed_1_reuse_only": 2026071301,
+      "new_cells": 192,
+      "formula": "1 model × 16 tasks × 3 conditions × 4 new seeds = 192",
+      "status": "deferred_until_phase_1_complete",
+      "note": "Must follow the same tasks, conditions, seeds, evaluator, answer contract, extraction pipeline, Healer freeze, H0/H1 protocol, and first-attempt-only policy. Generation parameters remain the Gemini Seed-1 freeze (not Qwen sampling)."
+    }
+  },
+  "final_geometry": {
+    "models": ["gemini-3.5-flash", "qwen3.5:4b", "qwen3.5:9b"],
+    "tasks": 16,
+    "conditions": ["ab1", "ab2g", "ab2d"],
+    "seeds": [2026071301, 2026072001, 2026072002, 2026072003, 2026072004],
+    "cells_per_model": 240,
+    "cells_total_three_model": 720,
+    "formula": "3 models × 16 tasks × 3 conditions × 5 seeds = 720"
+  },
+  "seeds": {
+    "seed_1_existing": {
+      "seed": 2026071301,
+      "role": "Seed 1 / baseline; do not overwrite or regenerate",
+      "gemini_h0_directory": "docs/experiments/results/gemini35flash_math16_latex_v1_ab123_run_001",
+      "qwen35_4b_h0_directory": "docs/experiments/results/qwen35_4b_math16_ab123_run_002",
+      "qwen35_9b_h0_directory": "docs/experiments/results/qwen35_9b_math16_ab123_run_002"
+    },
+    "seeds_2_to_5_new": [2026072001, 2026072002, 2026072003, 2026072004]
+  },
+  "task_ids": [
+    "ce115_calc_polynomial_division_l1",
+    "ce115_calc_polynomial_factor_roots_l1",
+    "ce115_calc_exact_rational_expression_l1",
+    "ce115_calc_radical_simplification_l1",
+    "ce111_q02_polynomial_division_remainder",
+    "ce111_q08_polynomial_factor_parameter_recovery",
+    "ce111_q03_prime_factor_selection",
+    "ce112_q01_negative_integer_power",
+    "ce112_q09_divisor_multiple_intersection",
+    "ce111_nonchoice_q01_part1_exponential_growth",
+    "ce111_q05_exact_fraction_expression",
+    "ce113_q01_negative_fraction_subtraction",
+    "ce112_q12_independent_probability_fraction",
+    "ce112_q04_radical_simplification",
+    "ce111_q10_ordered_quadratic_roots_radical",
+    "ce113_q11_rationalize_denominator"
+  ],
+  "conditions": ["ab1", "ab2g", "ab2d"],
+  "models": {
+    "gemini_3_5_flash": {
+      "model_tag": "gemini-3.5-flash",
+      "provider": "google",
+      "digest": null,
+      "digest_note": "Cloud API model; no Ollama digest",
+      "quantization": null,
+      "seed_1_run_id": "gemini35flash_math16_latex_v1_ab123_run_001",
+      "seed_1_directory": "docs/experiments/results/gemini35flash_math16_latex_v1_ab123_run_001",
+      "phase_2_planned_run_id_prefix": "gemini35flash_math16_ab123_run_003_multiseed",
+      "generation_parameters_frozen_from_seed_1": {
+        "temperature": 0.0,
+        "max_output_tokens": 24576,
+        "request_timeout_seconds": 600,
+        "top_p": "not_explicitly_set",
+        "top_k": "not_explicitly_set",
+        "think": "not_applicable_gemini_transport",
+        "source": "scripts/ce115_v4_gemini_transport.py"
+      }
+    },
+    "qwen35_4b": {
+      "model_tag": "qwen3.5:4b",
+      "provider": "ollama",
+      "digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+      "quantization": "Q4_K_M",
+      "seed_1_run_id": "qwen35_4b_math16_ab123_run_002",
+      "seed_1_directory": "docs/experiments/results/qwen35_4b_math16_ab123_run_002",
+      "phase_1_run_id": "qwen35_4b_math16_ab123_run_003_multiseed",
+      "phase_1_directory": "docs/experiments/results/qwen35_4b_math16_ab123_run_003_multiseed"
+    },
+    "qwen35_9b": {
+      "model_tag": "qwen3.5:9b",
+      "provider": "ollama",
+      "digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+      "quantization": "Q4_K_M",
+      "seed_1_run_id": "qwen35_9b_math16_ab123_run_002",
+      "seed_1_directory": "docs/experiments/results/qwen35_9b_math16_ab123_run_002",
+      "phase_1_run_id": "qwen35_9b_math16_ab123_run_003_multiseed",
+      "phase_1_directory": "docs/experiments/results/qwen35_9b_math16_ab123_run_003_multiseed"
+    }
+  },
+  "quantization": {
+    "qwen3.5:4b": "Q4_K_M",
+    "qwen3.5:9b": "Q4_K_M",
+    "gemini-3.5-flash": null
+  },
+  "ollama": {
+    "runtime_version_seed1_and_required": "0.32.1",
+    "api": "/api/chat",
+    "base_url": "http://localhost:11434",
+    "adapter": "scripts/math16_qwen_ollama_adapter.py"
+  },
+  "hardware": {
+    "gpu_name": "NVIDIA GeForce RTX 5060 Ti",
+    "vram_mib": 16311,
+    "driver_version_at_preregistration": "591.86",
+    "note": "Host GPU observed at preregistration via nvidia-smi; Math16 Seed-1 run manifests did not embed hardware fields. Phase 1 Qwen generation must run on this same local Ollama host class unless an explicit protocol amendment is registered before generation."
+  },
+  "qwen_generation_parameters_frozen": {
+    "temperature": 0.7,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default",
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "think": false,
+    "runtime_mode": "non_thinking",
+    "stream": false,
+    "request_timeout_seconds": 1800,
+    "unset_options_use_ollama_defaults": {
+      "frequency_penalty": "ollama_default",
+      "min_p": "ollama_default",
+      "mirostat": "ollama_default",
+      "mirostat_eta": "ollama_default",
+      "mirostat_tau": "ollama_default",
+      "presence_penalty": "ollama_default",
+      "repeat_last_n": "ollama_default",
+      "repeat_penalty": "ollama_default",
+      "tfs_z": "ollama_default",
+      "typical_p": "ollama_default"
+    },
+    "source_manifests": [
+      "docs/experiments/results/qwen35_4b_math16_ab123_run_002/manifest.json",
+      "docs/experiments/results/qwen35_9b_math16_ab123_run_002/manifest.json"
+    ]
+  },
+  "prompt_hash_references": {
+    "pool_identity_hash": "2ff41465d818d7e3d9b990a27ad2a1535e72c271bb04b2a37abe29cec1824636",
+    "final_manifest_hash": "a4fc49b035cb6fed2d7a6946e241dc3ef36ed66f1a9fc09b3ecee5714a28a591",
+    "task_freeze_hash": "349dfb2f786a4aa029453d844cac7eca07deb24a777ba1be4ef70f7002882e14",
+    "manifest_file_sha256": "8f2d6b4a9bc55e2ba8d5c00b372b8421ba89463b9a0802865ff791ffce1c3b9e",
+    "prompt_lineage": "ce115_clean_incremental_ablation_v1",
+    "prompt_builder": "agent_tools/finals_rebuild/ce115_clean_incremental_ablation.py::build_condition_prompt",
+    "freeze_closeout_report": "docs/experiments/results/math16_latex_v1_freeze_closeout_report.json",
+    "canonical_48_prompt_hash_ssot_for_extension": "Seed-1 Qwen run_002 cell prompt_hash values (Ab2d-v2); identical across qwen35_4b and qwen35_9b run_002",
+    "ab2d_v2_note": "Do not mix Gemini freeze-closeout legacy Ab2d hashes with Ab2d-v2 hashes used by Qwen run_002 / domain_api_contract_hardening_v2.",
+    "ab2d_v2_freeze_manifest": "docs/experiments/results/domain_api_contract_hardening_v2/ab2d_v2_freeze_manifest.json",
+    "example_prompt_hashes_seed_independent": {
+      "ce115_calc_polynomial_division_l1__ab1": "fdf193cdb3bf18cbd3e37627168fd1824042198d278b2a45114ddc8bacd8ff86",
+      "ce115_calc_polynomial_division_l1__ab2g": "3d60a095612840e6d08496d68f759c891c049481c5af862609bd89ece29121b6",
+      "ce115_calc_polynomial_division_l1__ab2d": "79b1936f146728f178f71569aa7cab9c2d284ace6e3fa97604a96c7b97f250d0"
+    }
+  },
+  "evaluator": {
+    "revision": "math16_latex_semantic_v2",
+    "module": "agent_tools/finals_rebuild/math16_oracles.py",
+    "original_evaluator_hash": "6e937d0a2bc39b62eea475c3de02105bc2603c500af5851765396edeead47e7b",
+    "revised_evaluator_hash": "4ad49583eed1ad9b6b5bc38ce63acc800096ff818884f2651dd15a8df0a901a0",
+    "evidence": [
+      "docs/experiments/results/gemini35flash_math16_latex_v1_ab123_run_001/evaluation_revision_003/summary.json",
+      "docs/experiments/results/math16_latex_v1_preflight.json",
+      "docs/experiments/results/domain_api_contract_hardening_v2/freeze_gate_report.json"
+    ],
+    "policy": "Use the frozen revised evaluator only. No evaluator edits for new seeds."
+  },
+  "healer": {
+    "freeze_commit": "d9aa264cd5813fdf1393e53b45cf2dbdbbd0d948",
+    "ab3_freeze_manifest": "docs/experiments/manifests/math16_ab3_freeze_manifest.json",
+    "max_passes": 3,
+    "frozen_rule_allowlist": [
+      {
+        "rule_id": "L1_CLOSE_UNBALANCED_PARENTHESIS",
+        "layer": "L1",
+        "priority": 90
+      },
+      {
+        "rule_id": "L1_CLOSE_UNBALANCED_DELIMITER_EXTENDED",
+        "layer": "L1",
+        "priority": 95
+      },
+      {
+        "rule_id": "L1_PROSE_RESIDUE_NARROW",
+        "layer": "L1",
+        "priority": 98
+      },
+      {
+        "rule_id": "L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP",
+        "layer": "L2",
+        "priority": 100
+      },
+      {
+        "rule_id": "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
+        "layer": "L2",
+        "priority": 110
+      },
+      {
+        "rule_id": "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP",
+        "layer": "L2",
+        "priority": 120
+      }
+    ],
+    "rule_count": {
+      "L1": 3,
+      "L2": 3,
+      "total": 6
+    },
+    "policy": "No new rules, priority changes, allowlist edits, or max_passes changes because of Phase 1/2 results."
+  },
+  "itt_and_attempt_policy": {
+    "first_attempt_only": true,
+    "healer_during_generation": 0,
+    "api_retry_same_cell_infrastructure_only": true,
+    "no_result_based_retry": true,
+    "no_seed_swapping": true,
+    "no_regeneration_of_completed_cells": true
+  },
+  "h0_h1_protocol": {
+    "h0_byte_level_immutable": true,
+    "h0_must_not_receive_healer_fields_or_repaired_source": true,
+    "h1_independent_storage_required": true,
+    "pass_cell_source_mutation_is_protocol_violation": "PROTOCOL_VIOLATION_PASS_CELL_MUTATED",
+    "seed_1_run_002_must_remain_byte_level_unchanged": true
+  },
+  "resume_semantics": {
+    "complete_cell_identity_skip": true,
+    "incomplete_cell_may_resume": true,
+    "duplicate_divergent_raw_output_for_same_cell": "STOP_IMMEDIATELY",
+    "cells_per_model_per_seed_required": 48,
+    "write_targets": {
+      "allowed_phase_1": [
+        "docs/experiments/results/qwen35_4b_math16_ab123_run_003_multiseed/",
+        "docs/experiments/results/qwen35_9b_math16_ab123_run_003_multiseed/"
+      ],
+      "forbidden": [
+        "docs/experiments/results/qwen35_4b_math16_ab123_run_002/",
+        "docs/experiments/results/qwen35_9b_math16_ab123_run_002/",
+        "docs/experiments/results/gemini35flash_math16_latex_v1_ab123_run_001/"
+      ]
+    }
+  },
+  "ab3_outcomes_fixed": [
+    "no_trigger",
+    "guarded_abstain",
+    "layer_exposure",
+    "rescue_to_pass",
+    "regression",
+    "excluded_no_program_structure",
+    "evaluator_failure"
+  ],
+  "ab3_outcome_mapping": {
+    "triggered_changed_still_fail": "layer_exposure"
+  },
+  "prohibited_adaptations": [
+    "Do not add or modify Healer rules because of new results.",
+    "Do not modify Prompt text or prompt-construction logic.",
+    "Do not modify generation parameters.",
+    "Do not modify evaluator or answer contract.",
+    "Do not modify extraction pipeline.",
+    "Do not change allowlist, priorities, or max_passes.",
+    "Do not overwrite or regenerate Seed-1 run_002 / Gemini run_001 cells.",
+    "Do not retry or swap seeds because of poor outcomes.",
+    "Do not begin Gemini Phase 2 until Phase 1 is complete and accepted.",
+    "Do not issue full three-model conclusions from the Qwen Phase 1 interim report."
+  ],
+  "analysis_policy": {
+    "phase_1_report_title_required": "Qwen Phase 1 interim report",
+    "final_analysis_deferred_until_gemini_phase_2_completed": true,
+    "prediction_lock_required_before_generation": true
+  },
+  "cell_artifact_required_fields": [
+    "raw response",
+    "extracted candidate",
+    "artifact.json",
+    "raw/source/prompt hashes",
+    "model digest",
+    "effective generation settings",
+    "done_reason",
+    "token counts",
+    "durations",
+    "timestamp",
+    "cold_start/warm_run"
+  ]
+}
