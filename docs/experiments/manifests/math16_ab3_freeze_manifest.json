@@ -1,0 +1,85 @@
+{
+  "manifest_id": "math16_ab3_freeze_v1",
+  "frozen_baseline_commit": "2d54de29212a8c00729f89a1f8a42946a1a17c67",
+  "preparation_commits": {
+    "h0_immutability_protocol_rev2_and_archive": "9f9119f5885fb1754505748339c33a4e679ade7a",
+    "runner_semantics_and_tests": "00ade0ffcc3b3746da4ae1a8fa7f69625ad4a771",
+    "post_fix_two_cell_verification": "2d54de29212a8c00729f89a1f8a42946a1a17c67"
+  },
+  "frozen_rule_allowlist": [
+    {
+      "rule_id": "L1_CLOSE_UNBALANCED_PARENTHESIS",
+      "layer": "L1",
+      "priority": 90
+    },
+    {
+      "rule_id": "L1_CLOSE_UNBALANCED_DELIMITER_EXTENDED",
+      "layer": "L1",
+      "priority": 95
+    },
+    {
+      "rule_id": "L1_PROSE_RESIDUE_NARROW",
+      "layer": "L1",
+      "priority": 98
+    },
+    {
+      "rule_id": "L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP",
+      "layer": "L2",
+      "priority": 100
+    },
+    {
+      "rule_id": "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
+      "layer": "L2",
+      "priority": 110
+    },
+    {
+      "rule_id": "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP",
+      "layer": "L2",
+      "priority": 120
+    }
+  ],
+  "rule_priority_order": "ascending numeric priority; stop after the first changed rule in each pass",
+  "max_passes": 3,
+  "phases": {
+    "phase_a": "When the current source does not parse, evaluate only allowlisted L1 rules.",
+    "phase_b": "When the current source parses, evaluate only allowlisted L2 rules."
+  },
+  "rollback_semantics": "If the final allowed pass changes the source and another allowlisted rule would still change it, return max_passes_exceeded with transactional rollback to the original input and consumer_may_use_output=false.",
+  "cycle_detection_semantics": {
+    "phase_a": "If a proposed L1 change preserves the same SyntaxError message and line, reject that change and fall back to the previous accepted pass output.",
+    "phase_b": "When evaluator context is available, if a proposed L2 change preserves the same evaluator outcome, reject that change and fall back to the previous accepted pass output."
+  },
+  "h0_result_directories": [
+    "docs/experiments/results/gemini35flash_math16_latex_v1_ab123_run_001",
+    "docs/experiments/results/qwen35_4b_math16_ab123_run_002",
+    "docs/experiments/results/qwen35_9b_math16_ab123_run_002"
+  ],
+  "h1_qualification_evidence_directory": "docs/experiments/results/math16_healer_vnext_qualification_v1",
+  "predictions_sha256": {
+    "math16_ab3_full_predictions.json": "d07514c41f0865bc44802dbc16f1eecd58bc09d4306601845463c6e72a4f0135",
+    "qwen_math16_run_002_delimiter_extended_predictions.json": "ffe24652607b1a8f84345781cf0bbbc81441f90753787022750827ed152b2f28",
+    "qwen_math16_run_002_healer_predictions.json": "5a8359df95a9edd7b534598aebb218edb057006f1676cb65e5a4ed07c3abd228"
+  },
+  "report_sha256": {
+    "EVIDENCE_GAP_NOTE.md": "6f5d18d3f6131ff6440a489b841caafc1b407de2989f68fa39e0690679a0be23",
+    "healer_delimiter_extended_report_data.json": "c98e73927206f90e73cda8ef5f9626d25033a657ac0c287630bb81b92e43c9c1",
+    "healer_run_002_report_data.json": "3c94ead4530030b78adf2561b5ae7e068b2a8c5b639c9984c0f12ad485a13982",
+    "math16_ab3_full_report.md": "8ffd6e00da6b05922df3eb5d7d6fd5ca74e6bb41a1d57c5fdc4854a489573190",
+    "math16_ab3_full_report_data.json": "912c8933db13b37ea0f13063f94bfd064425f71a6c726c14434ffbb9bb9d0e13",
+    "qualification_report.md": "8884b826ff5ab020e2036731fa3eff3adf395c0183dd31f0c9b7dfe6b61b54c8",
+    "qwen_math16_run_002_healer_prescan.json": "3f5ebce24c54a5b6e874e5b7a6b53dd702b4f7b078739019496b8b01f1180589",
+    "qwen_run_002_no_trigger_pattern_analysis.json": "8880717e5963a9bb0996cc0926205b8aadc79de2abc3c49200de428729bffe6d"
+  },
+  "post_fix_verification_sha256": "6ce3d5e61846097935f14bcd46a09f821156a21fc93aaf670f5bfd6dd83fe380",
+  "deterministic_test": {
+    "command": "python -m pytest tests/finals_rebuild/test_ce115_research_healer_h1_h2.py tests/finals_rebuild/test_ce115_research_healer_h3_l2_payload_wrap.py tests/finals_rebuild/test_ce115_research_healer_h5_execution_policy.py tests/finals_rebuild/test_ce115_research_healer_l1_comment_only_if.py tests/finals_rebuild/test_ce115_research_healer_l2_promoted_chain.py tests/finals_rebuild/test_ce115_research_healer_audit_closeout.py tests/finals_rebuild/test_ce115_research_healer_vnext_phases.py -q --basetemp .pytest_tmp_r02",
+    "result": "68 passed, 0 failed",
+    "elapsed_seconds": 3.07,
+    "includes_two_l1_sequential_synthetic_test": true,
+    "includes_l1_to_l2_phase_transition_synthetic_test": true
+  },
+  "statements": [
+    "H0 artifacts are immutable and all H1 outputs are stored separately.",
+    "No model call and no formal evaluator rerun were performed during this preparation round. The two-cell post-fix verification ran the deterministic Healer only."
+  ]
+}
