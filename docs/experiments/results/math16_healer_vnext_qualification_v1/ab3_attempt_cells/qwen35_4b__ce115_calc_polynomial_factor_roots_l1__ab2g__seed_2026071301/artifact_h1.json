@@ -1,0 +1,293 @@
+{
+  "schema_version": 1,
+  "evidence_stage": "discarded_pre_freeze_ab3_attempt",
+  "cell_id": "qwen35_4b__ce115_calc_polynomial_factor_roots_l1__ab2g__seed_2026071301",
+  "h0_artifact_path": "docs/experiments/results/qwen35_4b_math16_ab123_run_002/cells/qwen35_4b__ce115_calc_polynomial_factor_roots_l1__ab2g__seed_2026071301/artifact.json",
+  "h0_artifact_sha256": "5fe2e783123d3e85491dfbd35b353a13706bdcf2d6f73544a6844c376707b955",
+  "h0_source_sha256": "3fb0053f12c1e0c55c3062893ded7aa72e77c9b7f003fd2e7c6c092440086b38",
+  "repaired_source_sha256": "9e434ce754f95c611c382f14c226e5a9be402404e9505c19b110dd53ae68377d",
+  "triggered_rule": "L1_CLOSE_UNBALANCED_DELIMITER_EXTENDED",
+  "healer_passes": [
+    {
+      "pass_index": 0,
+      "chain_position": 1,
+      "candidate_rules_checked": [
+        "L1_CLOSE_UNBALANCED_PARENTHESIS",
+        "L1_CLOSE_UNBALANCED_DELIMITER_EXTENDED"
+      ],
+      "selected_rule_id": "L1_CLOSE_UNBALANCED_DELIMITER_EXTENDED",
+      "selection_priority": 95,
+      "applicable": true,
+      "triggered": true,
+      "changed": true,
+      "guard_results": {
+        "task": {
+          "quadratic_coefficients": [
+            1,
+            4,
+            -12
+          ],
+          "skill_id": "ce115_calc_polynomial_factor_roots_l1",
+          "oracle_type": "math16_polynomial_factor_roots"
+        },
+        "frozen": {
+          "quadratic_coefficients": [
+            1,
+            4,
+            -12
+          ]
+        },
+        "l1_delimiter_analysis": {
+          "applicable": true,
+          "triggered": true,
+          "reason": "all_transform_guards_ready",
+          "guards": {
+            "fixed_source": "def generate(level=1, **kwargs):\n    quadratic_coefficients = [1, 4, -12]\n    \n    a, b, c = quadratic_coefficients[0], quadratic_coefficients[1], quadratic_coefficients[2]\n    \n    discriminant = b**2 - 4*a*c\n    \n    root1_num = (-b + discriminant) // (2 * a) if int(discriminant) >= 0 else None\n    root2_num = (-b - discriminant) // (2 * a) if int(discriminant) >= 0 else None\n    \n    # Ensure ascending order and integer roots for exact arithmetic in this level\n    if not quadratic_coefficients[1]**2 % (4*quadratic_coefficients[0]) == -(quadratic_coefficients[2]):\n        pass\n        \n    actual_root1 = int((-b + discriminant) / (2 * a)) if isinstance(discriminant, int) else None\n    actual_root2 = int((-b - discriminant) / (2 * a)) if isinstance(discriminant, int) else None\n    \n    roots_list = []\n    \n    # Solve ax^2+bx+c=0 exactly using integer arithmetic where possible\n    delta_sq_int = b*b\n    four_a_c = 4*a*c\n    \n    root1_val = None\n    root2_val = None\n    \n    if (delta_sq_int - four_a_c) >= 0:\n        sqrt_delta = int((delta_sq_int - four_a_c)**0.5)\n        # Check for perfect square to ensure integer roots as per level 1 spec implication of exact arithmetic without floats in final answer representation usually implying integers or simple rationals, but here coefficients are integers and delta is likely a perfect square given the sample [1,4,-12] -> x^2+4x-12=(x+6)(x-2)\n        if (sqrt_delta * sqrt_delta == (delta_sq_int - four_a_c)):\n            root_sum = (-b + sqrt_delta) // (2*a)\n            diff_root = (-b - sqrt_delta) // (2*a)\n            \n            # Sort ascending\n            roots_list.append(min(root_sum, diff_root))\n            roots_list.append(max(root_sum, diff_root))\n\n    if not quadratic_coefficients[1]**2 == 4*quadratic_coefficients[0]*(-c):\n        pass\n        \n    \n    factorization_latex = f\"x^{{{len(quadratic_coefficients)-1}}}\" + \" * x\" + str(min(roots_list) - min(roots_list)) if len(roots_list)>1 else \"\" # Placeholder logic for generation, correct math below\n    \n    # Correct Factorization Logic: (x - r1)(x - r2)\n    r_sorted = sorted([root_sum, diff_root]) if 'diff_root' in locals() and root_sum is not None else []\n    \n    final_roots = [r_sorted[0], r_sorted[1]] if len(r_sorted)==2 else [int((-b + (delta_sq_int - four_a_c)**0.5)/(2*a)), int((-b - (delta_sq_int - four_a_c)**0.5)/(2*a))]\n    \n    factor_latex_parts = []\n    for r in final_roots:\n        if r >= 0:\n            factor_latex_parts.append(f\"(x + {r})\") # If root is negative, x+r; wait standard form (x-r) where r is root. \n        else:\n             pass\n    \n    # Re-evaluating roots for [1, 4, -12]: x^2+4x-12=0 -> (x+6)(x-2). Roots are -6 and 2. Ascending: -6, 2.\n    # Factorization is (x + 6)(x - 2) or written as product of linear terms\n    \n    correct_ans_dict = {\n        \"roots\": [-6, 2],\n        \"factorization_latex\": r\"(x+{})(x-{})\".format(-r if r<0 else r for r in final_roots).replace(\"(\", \"\").replace(\")\", \"\")}# This is wrong latex rendering\n    \n    # Constructing proper LaTeX strings directly based on calculated roots [-6, 2]\n    root_minus = -final_roots[0] \n    root_plus = final_roots[1] \n    \n    factor_latex_str = f\"(x + {root_minus})(x - {root_plus})\" if root_minus > 0 else \"(x+{})(x-{})\".format(-6, 2)\n    \n    roots_latex_str = r\"{}, {}\".format(final_roots[0], final_roots[1])\n    \n    return {\n        \"question_text\": r\"\\text{Find the factorization and roots of } x^2 + 4x - 12 \\text{ over integers.}\",\n        \"correct_answer\": {\n            \"roots\": [-6, 2],\n            \"factorization_latex\": \"(x+6)(x-2)\",\n            \"roots_latex\": r\"-6, 2\"\n        },\n        \"oracle_payload\": quadratic_coefficients\n    }",
+            "fix_line": 61,
+            "repair_type": "insert_dict_brace_line_61",
+            "parse_error": "'{' was never closed (<unknown>, line 59)"
+          }
+        }
+      },
+      "before_hash": "3fb0053f12c1e0c55c3062893ded7aa72e77c9b7f003fd2e7c6c092440086b38",
+      "after_hash": "ddd7cdc720fafc63ae920dada4773b886f87772b69a8a224ff1da164d0d41ec6",
+      "validation": {
+        "ast_parse_success": true,
+        "parse_error": null,
+        "source_len": 3698,
+        "rule_id": "L1_CLOSE_UNBALANCED_DELIMITER_EXTENDED",
+        "production_approved": false,
+        "status": "experimental",
+        "full_repair_to_pass_claimed": true,
+        "semantic_preserving_claimed": true,
+        "repair_scope": "syntax_error_unbalanced_delimiter",
+        "before_parse_error": "'{' was never closed (<unknown>, line 59)",
+        "after_parse_error": null,
+        "fixed_lineno": 61,
+        "repair_type": "insert_dict_brace_line_61",
+        "evaluator_outcome": "runtime_failure",
+        "evaluator_rerun": true,
+        "evaluator_details_keys": [
+          "actual_question_text",
+          "composite_outcomes",
+          "evaluation_gates",
+          "exception_message",
+          "exception_type",
+          "ledger_stage",
+          "runtime_error",
+          "timeout"
+        ],
+        "next_layer_status": "runtime_failure",
+        "repair_attempted": true,
+        "reparsed_after_change": true,
+        "phase": "Phase_A"
+      },
+      "stop_reason": "changed_stop_pass",
+      "stopped_after_change": true,
+      "final_status": "changed"
+    },
+    {
+      "pass_index": 1,
+      "chain_position": null,
+      "candidate_rules_checked": [
+        "L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP",
+        "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
+        "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP"
+      ],
+      "selected_rule_id": null,
+      "selection_priority": null,
+      "applicable": false,
+      "triggered": false,
+      "changed": false,
+      "guard_results": {},
+      "before_hash": "ddd7cdc720fafc63ae920dada4773b886f87772b69a8a224ff1da164d0d41ec6",
+      "after_hash": "ddd7cdc720fafc63ae920dada4773b886f87772b69a8a224ff1da164d0d41ec6",
+      "validation": {
+        "ast_parse_success": true,
+        "parse_error": null,
+        "source_len": 3698,
+        "phase": "Phase_B"
+      },
+      "stop_reason": "no_candidate_selected",
+      "stopped_after_change": false,
+      "final_status": "changed"
+    }
+  ],
+  "final_transition": "layer_exposure",
+  "stop_reason": "no_candidate_selected",
+  "source_artifact_healer": {
+    "attempted": true,
+    "enabled": true,
+    "max_passes": 3,
+    "allowlist": [
+      "L1_CLOSE_UNBALANCED_PARENTHESIS",
+      "L1_CLOSE_UNBALANCED_DELIMITER_EXTENDED",
+      "L1_PROSE_RESIDUE_NARROW",
+      "L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP",
+      "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
+      "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP"
+    ],
+    "actual_outcome": "layer_exposure",
+    "final_status": "changed",
+    "rolled_back": false,
+    "provenance": [
+      {
+        "pass_index": 0,
+        "chain_position": 1,
+        "candidate_rules_checked": [
+          "L1_CLOSE_UNBALANCED_PARENTHESIS",
+          "L1_CLOSE_UNBALANCED_DELIMITER_EXTENDED"
+        ],
+        "selected_rule_id": "L1_CLOSE_UNBALANCED_DELIMITER_EXTENDED",
+        "selection_priority": 95,
+        "applicable": true,
+        "triggered": true,
+        "changed": true,
+        "guard_results": {
+          "task": {
+            "quadratic_coefficients": [
+              1,
+              4,
+              -12
+            ],
+            "skill_id": "ce115_calc_polynomial_factor_roots_l1",
+            "oracle_type": "math16_polynomial_factor_roots"
+          },
+          "frozen": {
+            "quadratic_coefficients": [
+              1,
+              4,
+              -12
+            ]
+          },
+          "l1_delimiter_analysis": {
+            "applicable": true,
+            "triggered": true,
+            "reason": "all_transform_guards_ready",
+            "guards": {
+              "fixed_source": "def generate(level=1, **kwargs):\n    quadratic_coefficients = [1, 4, -12]\n    \n    a, b, c = quadratic_coefficients[0], quadratic_coefficients[1], quadratic_coefficients[2]\n    \n    discriminant = b**2 - 4*a*c\n    \n    root1_num = (-b + discriminant) // (2 * a) if int(discriminant) >= 0 else None\n    root2_num = (-b - discriminant) // (2 * a) if int(discriminant) >= 0 else None\n    \n    # Ensure ascending order and integer roots for exact arithmetic in this level\n    if not quadratic_coefficients[1]**2 % (4*quadratic_coefficients[0]) == -(quadratic_coefficients[2]):\n        pass\n        \n    actual_root1 = int((-b + discriminant) / (2 * a)) if isinstance(discriminant, int) else None\n    actual_root2 = int((-b - discriminant) / (2 * a)) if isinstance(discriminant, int) else None\n    \n    roots_list = []\n    \n    # Solve ax^2+bx+c=0 exactly using integer arithmetic where possible\n    delta_sq_int = b*b\n    four_a_c = 4*a*c\n    \n    root1_val = None\n    root2_val = None\n    \n    if (delta_sq_int - four_a_c) >= 0:\n        sqrt_delta = int((delta_sq_int - four_a_c)**0.5)\n        # Check for perfect square to ensure integer roots as per level 1 spec implication of exact arithmetic without floats in final answer representation usually implying integers or simple rationals, but here coefficients are integers and delta is likely a perfect square given the sample [1,4,-12] -> x^2+4x-12=(x+6)(x-2)\n        if (sqrt_delta * sqrt_delta == (delta_sq_int - four_a_c)):\n            root_sum = (-b + sqrt_delta) // (2*a)\n            diff_root = (-b - sqrt_delta) // (2*a)\n            \n            # Sort ascending\n            roots_list.append(min(root_sum, diff_root))\n            roots_list.append(max(root_sum, diff_root))\n\n    if not quadratic_coefficients[1]**2 == 4*quadratic_coefficients[0]*(-c):\n        pass\n        \n    \n    factorization_latex = f\"x^{{{len(quadratic_coefficients)-1}}}\" + \" * x\" + str(min(roots_list) - min(roots_list)) if len(roots_list)>1 else \"\" # Placeholder logic for generation, correct math below\n    \n    # Correct Factorization Logic: (x - r1)(x - r2)\n    r_sorted = sorted([root_sum, diff_root]) if 'diff_root' in locals() and root_sum is not None else []\n    \n    final_roots = [r_sorted[0], r_sorted[1]] if len(r_sorted)==2 else [int((-b + (delta_sq_int - four_a_c)**0.5)/(2*a)), int((-b - (delta_sq_int - four_a_c)**0.5)/(2*a))]\n    \n    factor_latex_parts = []\n    for r in final_roots:\n        if r >= 0:\n            factor_latex_parts.append(f\"(x + {r})\") # If root is negative, x+r; wait standard form (x-r) where r is root. \n        else:\n             pass\n    \n    # Re-evaluating roots for [1, 4, -12]: x^2+4x-12=0 -> (x+6)(x-2). Roots are -6 and 2. Ascending: -6, 2.\n    # Factorization is (x + 6)(x - 2) or written as product of linear terms\n    \n    correct_ans_dict = {\n        \"roots\": [-6, 2],\n        \"factorization_latex\": r\"(x+{})(x-{})\".format(-r if r<0 else r for r in final_roots).replace(\"(\", \"\").replace(\")\", \"\")}# This is wrong latex rendering\n    \n    # Constructing proper LaTeX strings directly based on calculated roots [-6, 2]\n    root_minus = -final_roots[0] \n    root_plus = final_roots[1] \n    \n    factor_latex_str = f\"(x + {root_minus})(x - {root_plus})\" if root_minus > 0 else \"(x+{})(x-{})\".format(-6, 2)\n    \n    roots_latex_str = r\"{}, {}\".format(final_roots[0], final_roots[1])\n    \n    return {\n        \"question_text\": r\"\\text{Find the factorization and roots of } x^2 + 4x - 12 \\text{ over integers.}\",\n        \"correct_answer\": {\n            \"roots\": [-6, 2],\n            \"factorization_latex\": \"(x+6)(x-2)\",\n            \"roots_latex\": r\"-6, 2\"\n        },\n        \"oracle_payload\": quadratic_coefficients\n    }",
+              "fix_line": 61,
+              "repair_type": "insert_dict_brace_line_61",
+              "parse_error": "'{' was never closed (<unknown>, line 59)"
+            }
+          }
+        },
+        "before_hash": "3fb0053f12c1e0c55c3062893ded7aa72e77c9b7f003fd2e7c6c092440086b38",
+        "after_hash": "ddd7cdc720fafc63ae920dada4773b886f87772b69a8a224ff1da164d0d41ec6",
+        "validation": {
+          "ast_parse_success": true,
+          "parse_error": null,
+          "source_len": 3698,
+          "rule_id": "L1_CLOSE_UNBALANCED_DELIMITER_EXTENDED",
+          "production_approved": false,
+          "status": "experimental",
+          "full_repair_to_pass_claimed": true,
+          "semantic_preserving_claimed": true,
+          "repair_scope": "syntax_error_unbalanced_delimiter",
+          "before_parse_error": "'{' was never closed (<unknown>, line 59)",
+          "after_parse_error": null,
+          "fixed_lineno": 61,
+          "repair_type": "insert_dict_brace_line_61",
+          "evaluator_outcome": "runtime_failure",
+          "evaluator_rerun": true,
+          "evaluator_details_keys": [
+            "actual_question_text",
+            "composite_outcomes",
+            "evaluation_gates",
+            "exception_message",
+            "exception_type",
+            "ledger_stage",
+            "runtime_error",
+            "timeout"
+          ],
+          "next_layer_status": "runtime_failure",
+          "repair_attempted": true,
+          "reparsed_after_change": true,
+          "phase": "Phase_A"
+        },
+        "stop_reason": "changed_stop_pass",
+        "stopped_after_change": true,
+        "final_status": "changed"
+      },
+      {
+        "pass_index": 1,
+        "chain_position": null,
+        "candidate_rules_checked": [
+          "L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP",
+          "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
+          "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP"
+        ],
+        "selected_rule_id": null,
+        "selection_priority": null,
+        "applicable": false,
+        "triggered": false,
+        "changed": false,
+        "guard_results": {},
+        "before_hash": "ddd7cdc720fafc63ae920dada4773b886f87772b69a8a224ff1da164d0d41ec6",
+        "after_hash": "ddd7cdc720fafc63ae920dada4773b886f87772b69a8a224ff1da164d0d41ec6",
+        "validation": {
+          "ast_parse_success": true,
+          "parse_error": null,
+          "source_len": 3698,
+          "phase": "Phase_B"
+        },
+        "stop_reason": "no_candidate_selected",
+        "stopped_after_change": false,
+        "final_status": "changed"
+      }
+    ],
+    "reevaluation_status": "runtime_failure",
+    "reevaluation_details": {
+      "runtime_error": "IndexError: Replacement index 1 out of range for positional args tuple",
+      "exception_type": "IndexError",
+      "exception_message": "Replacement index 1 out of range for positional args tuple",
+      "timeout": false,
+      "ledger_stage": "observed",
+      "actual_question_text": null,
+      "evaluation_gates": {
+        "g1_evaluability": {
+          "status": "PASS",
+          "reason": "evaluability_passed",
+          "raw_output_present": true,
+          "extraction_succeeded": true,
+          "candidate_nonempty": true,
+          "parse_succeeded": true,
+          "required_entry_point_present": true
+        },
+        "g2_executability": {
+          "status": "FAIL",
+          "reason": "runtime_failure",
+          "load_succeeded": true,
+          "entry_point_called": true,
+          "timeout": false,
+          "exception_type": "IndexError",
+          "exception_message": "Replacement index 1 out of range for positional args tuple",
+          "return_value_produced": false
+        },
+        "g3_contract_compliance": {
+          "status": "NOT_ASSESSED",
+          "reason": "g2_not_passed"
+        },
+        "g4_semantic_correctness": {
+          "status": "NOT_ASSESSED",
+          "reason": "g2_not_passed"
+        },
+        "g5_problem_presentation": {
+          "status": "NOT_OBSERVED",
+          "reason": "actual_question_text_unavailable",
+          "question_present": false
+        },
+        "g6_math_notation": {
+          "status": "NOT_OBSERVED",
+          "reason": "actual_question_text_unavailable",
+          "uses_latex": false
+        }
+      },
+      "composite_outcomes": {
+        "technical_pass": "FAIL",
+        "presentation_pass": "NOT_OBSERVED",
+        "full_pass": "FAIL"
+      }
+    }
+  }
+}

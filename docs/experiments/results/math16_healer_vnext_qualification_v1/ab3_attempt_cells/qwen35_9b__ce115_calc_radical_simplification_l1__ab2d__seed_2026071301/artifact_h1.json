@@ -1,0 +1,251 @@
+{
+  "schema_version": 1,
+  "evidence_stage": "discarded_pre_freeze_ab3_attempt",
+  "cell_id": "qwen35_9b__ce115_calc_radical_simplification_l1__ab2d__seed_2026071301",
+  "h0_artifact_path": "docs/experiments/results/qwen35_9b_math16_ab123_run_002/cells/qwen35_9b__ce115_calc_radical_simplification_l1__ab2d__seed_2026071301/artifact.json",
+  "h0_artifact_sha256": "2bedfddb8e9b87b35075582e5b2a607969718865bedbd1940edaad5f6e34a4d6",
+  "h0_source_sha256": "6623dd881ca9d4ae3d22c6ba1b6a060a11476fc2b2b782c623ee3a15b7a5919f",
+  "repaired_source_sha256": "2cc4b9003c0b6d247086918d8b7fd2fb46d144adbd547fa2f7e7bb5d89f83fc9",
+  "triggered_rule": "L1_CLOSE_UNBALANCED_PARENTHESIS",
+  "healer_passes": [
+    {
+      "pass_index": 0,
+      "chain_position": 1,
+      "candidate_rules_checked": [
+        "L1_CLOSE_UNBALANCED_PARENTHESIS"
+      ],
+      "selected_rule_id": "L1_CLOSE_UNBALANCED_PARENTHESIS",
+      "selection_priority": 90,
+      "applicable": true,
+      "triggered": true,
+      "changed": true,
+      "guard_results": {
+        "parse_error_present": true,
+        "parse_error": "'(' was never closed (<unknown>, line 35)",
+        "unbalanced_paren_error": true,
+        "single_generate": true,
+        "fix_parses": true,
+        "fix_line": 35,
+        "fixed_source": "def generate(level=1, **kwargs):\n    frozen_params = kwargs.get(\"frozen_sampled_parameters\", {\"radicand\": 27})\n    \n    # Extract radicand from frozen parameters. \n    # If not present in the specific call context but expected as a default for this task spec:\n    if \"radicand\" not in frozen_params and level == 1:\n        # The prompt implies we should use the provided frozen sample or generate based on it.\n        # Since the instruction says \"Frozen sampled parameters: {\"radicand\": 27}\", \n        # we assume this is part of the context for the specific run, but functionally we read from kwargs.\n        radicand = frozen_params.get(\"radicand\", random.randint(10, 50))\n    else:\n        radicand = frozen_params[\"radicand\"]\n\n    # Ensure radicand is an integer and positive\n    if not isinstance(radicand, int):\n        radicand = int(radicand)\n    \n    coeff_in_problem = 1\n    \n    # Use domain API to simplify the term (coeff=1, radicand=radicand)\n    simplified_coeff, square_free_radicand = RadicalOps.simplify_term(coeff_in_problem, radicand)\n\n    if not isinstance(simplified_coeff, int):\n        simplified_coeff_num = numerator(simplified_coeff)\n        simplified_coeff_den = denominator(simplified_coeff)\n        \n    # Construct the LaTeX answer string manually to ensure exact integer formatting and no floats\n    coeff_str = str(int(simplified_coeff)) + \"x\" if simplified_coeff != 1 else \"x\"\n    \n    # Check for perfect square factors in radicand that might have been missed or re-verify simplification logic.\n    # RadicalOps.simplify_term should return the fully reduced form (coeff, square_free_radicand).\n    \n    canonical_latex = f\"{int(simplified_coeff)}\\\\sqrt{{{square_free_radicand}}}\"\n\n    question_text = r\"Simplify $\\displaystyle \\frac{1}{\\sqrt{\" + str(radicand) + \"}}$\" if simplified_coeff == 0 else (r\"Simplify $\\displaystyle $\" )\n        # Wait, the task is simplification of a radical term. Usually input is just radicand or coeff*radicand.\n        # Given frozen_params has only 'radicand', let's assume the expression to simplify was \\sqrt{N} * k where N=27?\n        # Or simply sqrt(27). Let's generate a standard simplification question: Simplify $\\sqrt{\" + str(radicand) + \"}$\"\n    \n    corrected_question_text = r\"Simplify $\\displaystyle \\sqrt{\" + str(radicand) + \"}$.\"\n\n    correct_answer_dict = {\n        \"question_text\": corrected_question_text,\n        \"correct_answer\": canonical_latex,\n        \"oracle_payload\": frozen_params\n    }\n\n    return correct_answer_dict",
+        "unique_trigger_verified": true
+      },
+      "before_hash": "6623dd881ca9d4ae3d22c6ba1b6a060a11476fc2b2b782c623ee3a15b7a5919f",
+      "after_hash": "85610809ca006e7f11d68b0652af814fadc7f3d801f4563fdf0a4fb6c9802599",
+      "validation": {
+        "ast_parse_success": true,
+        "parse_error": null,
+        "source_len": 2513,
+        "rule_id": "L1_CLOSE_UNBALANCED_PARENTHESIS",
+        "production_approved": true,
+        "status": "production_ready",
+        "full_repair_to_pass_claimed": true,
+        "semantic_preserving_claimed": true,
+        "repair_scope": "syntax_error_unclosed_paren",
+        "before_parse_error": "'(' was never closed (<unknown>, line 35)",
+        "after_parse_error": null,
+        "fixed_lineno": 35,
+        "evaluator_outcome": "runtime_failure",
+        "evaluator_rerun": true,
+        "evaluator_details_keys": [
+          "actual_question_text",
+          "composite_outcomes",
+          "evaluation_gates",
+          "exception_message",
+          "exception_type",
+          "ledger_stage",
+          "runtime_error",
+          "timeout"
+        ],
+        "next_layer_status": "runtime_failure",
+        "repair_attempted": true,
+        "reparsed_after_change": true,
+        "phase": "Phase_A"
+      },
+      "stop_reason": "changed_stop_pass",
+      "stopped_after_change": true,
+      "final_status": "changed"
+    },
+    {
+      "pass_index": 1,
+      "chain_position": null,
+      "candidate_rules_checked": [
+        "L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP",
+        "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
+        "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP"
+      ],
+      "selected_rule_id": null,
+      "selection_priority": null,
+      "applicable": false,
+      "triggered": false,
+      "changed": false,
+      "guard_results": {},
+      "before_hash": "85610809ca006e7f11d68b0652af814fadc7f3d801f4563fdf0a4fb6c9802599",
+      "after_hash": "85610809ca006e7f11d68b0652af814fadc7f3d801f4563fdf0a4fb6c9802599",
+      "validation": {
+        "ast_parse_success": true,
+        "parse_error": null,
+        "source_len": 2513,
+        "phase": "Phase_B"
+      },
+      "stop_reason": "no_candidate_selected",
+      "stopped_after_change": false,
+      "final_status": "changed"
+    }
+  ],
+  "final_transition": "layer_exposure",
+  "stop_reason": "no_candidate_selected",
+  "source_artifact_healer": {
+    "attempted": true,
+    "enabled": true,
+    "max_passes": 3,
+    "allowlist": [
+      "L1_CLOSE_UNBALANCED_PARENTHESIS",
+      "L1_CLOSE_UNBALANCED_DELIMITER_EXTENDED",
+      "L1_PROSE_RESIDUE_NARROW",
+      "L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP",
+      "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
+      "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP"
+    ],
+    "actual_outcome": "layer_exposure",
+    "final_status": "changed",
+    "rolled_back": false,
+    "provenance": [
+      {
+        "pass_index": 0,
+        "chain_position": 1,
+        "candidate_rules_checked": [
+          "L1_CLOSE_UNBALANCED_PARENTHESIS"
+        ],
+        "selected_rule_id": "L1_CLOSE_UNBALANCED_PARENTHESIS",
+        "selection_priority": 90,
+        "applicable": true,
+        "triggered": true,
+        "changed": true,
+        "guard_results": {
+          "parse_error_present": true,
+          "parse_error": "'(' was never closed (<unknown>, line 35)",
+          "unbalanced_paren_error": true,
+          "single_generate": true,
+          "fix_parses": true,
+          "fix_line": 35,
+          "fixed_source": "def generate(level=1, **kwargs):\n    frozen_params = kwargs.get(\"frozen_sampled_parameters\", {\"radicand\": 27})\n    \n    # Extract radicand from frozen parameters. \n    # If not present in the specific call context but expected as a default for this task spec:\n    if \"radicand\" not in frozen_params and level == 1:\n        # The prompt implies we should use the provided frozen sample or generate based on it.\n        # Since the instruction says \"Frozen sampled parameters: {\"radicand\": 27}\", \n        # we assume this is part of the context for the specific run, but functionally we read from kwargs.\n        radicand = frozen_params.get(\"radicand\", random.randint(10, 50))\n    else:\n        radicand = frozen_params[\"radicand\"]\n\n    # Ensure radicand is an integer and positive\n    if not isinstance(radicand, int):\n        radicand = int(radicand)\n    \n    coeff_in_problem = 1\n    \n    # Use domain API to simplify the term (coeff=1, radicand=radicand)\n    simplified_coeff, square_free_radicand = RadicalOps.simplify_term(coeff_in_problem, radicand)\n\n    if not isinstance(simplified_coeff, int):\n        simplified_coeff_num = numerator(simplified_coeff)\n        simplified_coeff_den = denominator(simplified_coeff)\n        \n    # Construct the LaTeX answer string manually to ensure exact integer formatting and no floats\n    coeff_str = str(int(simplified_coeff)) + \"x\" if simplified_coeff != 1 else \"x\"\n    \n    # Check for perfect square factors in radicand that might have been missed or re-verify simplification logic.\n    # RadicalOps.simplify_term should return the fully reduced form (coeff, square_free_radicand).\n    \n    canonical_latex = f\"{int(simplified_coeff)}\\\\sqrt{{{square_free_radicand}}}\"\n\n    question_text = r\"Simplify $\\displaystyle \\frac{1}{\\sqrt{\" + str(radicand) + \"}}$\" if simplified_coeff == 0 else (r\"Simplify $\\displaystyle $\" )\n        # Wait, the task is simplification of a radical term. Usually input is just radicand or coeff*radicand.\n        # Given frozen_params has only 'radicand', let's assume the expression to simplify was \\sqrt{N} * k where N=27?\n        # Or simply sqrt(27). Let's generate a standard simplification question: Simplify $\\sqrt{\" + str(radicand) + \"}$\"\n    \n    corrected_question_text = r\"Simplify $\\displaystyle \\sqrt{\" + str(radicand) + \"}$.\"\n\n    correct_answer_dict = {\n        \"question_text\": corrected_question_text,\n        \"correct_answer\": canonical_latex,\n        \"oracle_payload\": frozen_params\n    }\n\n    return correct_answer_dict",
+          "unique_trigger_verified": true
+        },
+        "before_hash": "6623dd881ca9d4ae3d22c6ba1b6a060a11476fc2b2b782c623ee3a15b7a5919f",
+        "after_hash": "85610809ca006e7f11d68b0652af814fadc7f3d801f4563fdf0a4fb6c9802599",
+        "validation": {
+          "ast_parse_success": true,
+          "parse_error": null,
+          "source_len": 2513,
+          "rule_id": "L1_CLOSE_UNBALANCED_PARENTHESIS",
+          "production_approved": true,
+          "status": "production_ready",
+          "full_repair_to_pass_claimed": true,
+          "semantic_preserving_claimed": true,
+          "repair_scope": "syntax_error_unclosed_paren",
+          "before_parse_error": "'(' was never closed (<unknown>, line 35)",
+          "after_parse_error": null,
+          "fixed_lineno": 35,
+          "evaluator_outcome": "runtime_failure",
+          "evaluator_rerun": true,
+          "evaluator_details_keys": [
+            "actual_question_text",
+            "composite_outcomes",
+            "evaluation_gates",
+            "exception_message",
+            "exception_type",
+            "ledger_stage",
+            "runtime_error",
+            "timeout"
+          ],
+          "next_layer_status": "runtime_failure",
+          "repair_attempted": true,
+          "reparsed_after_change": true,
+          "phase": "Phase_A"
+        },
+        "stop_reason": "changed_stop_pass",
+        "stopped_after_change": true,
+        "final_status": "changed"
+      },
+      {
+        "pass_index": 1,
+        "chain_position": null,
+        "candidate_rules_checked": [
+          "L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP",
+          "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
+          "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP"
+        ],
+        "selected_rule_id": null,
+        "selection_priority": null,
+        "applicable": false,
+        "triggered": false,
+        "changed": false,
+        "guard_results": {},
+        "before_hash": "85610809ca006e7f11d68b0652af814fadc7f3d801f4563fdf0a4fb6c9802599",
+        "after_hash": "85610809ca006e7f11d68b0652af814fadc7f3d801f4563fdf0a4fb6c9802599",
+        "validation": {
+          "ast_parse_success": true,
+          "parse_error": null,
+          "source_len": 2513,
+          "phase": "Phase_B"
+        },
+        "stop_reason": "no_candidate_selected",
+        "stopped_after_change": false,
+        "final_status": "changed"
+      }
+    ],
+    "reevaluation_status": "runtime_failure",
+    "reevaluation_details": {
+      "runtime_error": "NameError: name 'RadicalOps' is not defined",
+      "exception_type": "NameError",
+      "exception_message": "name 'RadicalOps' is not defined",
+      "timeout": false,
+      "ledger_stage": "observed",
+      "actual_question_text": null,
+      "evaluation_gates": {
+        "g1_evaluability": {
+          "status": "PASS",
+          "reason": "evaluability_passed",
+          "raw_output_present": true,
+          "extraction_succeeded": true,
+          "candidate_nonempty": true,
+          "parse_succeeded": true,
+          "required_entry_point_present": true
+        },
+        "g2_executability": {
+          "status": "FAIL",
+          "reason": "runtime_failure",
+          "load_succeeded": true,
+          "entry_point_called": true,
+          "timeout": false,
+          "exception_type": "NameError",
+          "exception_message": "name 'RadicalOps' is not defined",
+          "return_value_produced": false
+        },
+        "g3_contract_compliance": {
+          "status": "NOT_ASSESSED",
+          "reason": "g2_not_passed"
+        },
+        "g4_semantic_correctness": {
+          "status": "NOT_ASSESSED",
+          "reason": "g2_not_passed"
+        },
+        "g5_problem_presentation": {
+          "status": "NOT_OBSERVED",
+          "reason": "actual_question_text_unavailable",
+          "question_present": false
+        },
+        "g6_math_notation": {
+          "status": "NOT_OBSERVED",
+          "reason": "actual_question_text_unavailable",
+          "uses_latex": false
+        }
+      },
+      "composite_outcomes": {
+        "technical_pass": "FAIL",
+        "presentation_pass": "NOT_OBSERVED",
+        "full_pass": "FAIL"
+      }
+    }
+  }
+}
