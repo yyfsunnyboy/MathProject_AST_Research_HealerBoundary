@@ -1,0 +1,104 @@
+def generate(level=1, **kwargs):
+    p1_min = 2
+    p1_max = 6
+    p2_min = 1
+    p2_max = 5
+    
+    # Generate random integers within ranges for frozen parameters simulation (though task implies fixed or specific generation logic)
+    # Based on "Frozen sampled parameters", we treat them as the ground truth to use in generation if possible, 
+    # but since they are lists of options [min, max], let's pick one pair.
+    # However, looking at typical competitive programming patterns for such tasks:
+    # p1 is chosen from range(2, 7), p2 from range(1, 6).
+    
+    import random
+    
+    r = random.Random() if not hasattr(generate, 'rng') else generate.rng
+    try:
+        n_p1 = r.randint(p1_min, p1_max)
+        n_p2 = r.randint(p2_min, p2_max)
+    except NameError: # Fallback for environments without import inside or specific randomness needs if deterministic logic is implied by "frozen" context in some tests. 
+                       # But since it asks to implement generate(), we assume standard random behavior unless specified otherwise.
+        n_p1 = 4 # Default fallback
+        n_p2 = 3
+    
+    p1_val = fractions.Fraction(n_p1)
+    p2_val = fractions.Fraction(n_p2)
+    
+    independent_prob_product = p1_val * p2_val
+    
+    numerator = int(independent_prob_product.numerator)
+    denominator = int(independent_prob_product.denominator)
+    
+    return {
+        "question_text": r"\text{What is the probability that two events occur independently, given } P(A)=\frac{" + str(n_p1) + "}{3} \text{ and } P(B)=\frac{" + str(n_p2) + "}{5}?$",
+        # Note: The problem description in task spec usually implies specific fractions or general form. 
+        # Given p1=[2,6] and p2=[1,5], let's assume the question asks for product of two independent probabilities.
+        # Let's construct a standard probability fraction question based on these ranges.
+        # Re-reading: "math16_independent_probability_fraction". Usually involves calculating P(A AND B) = P(A)*P(B).
+        # We will generate specific integers to make the math concrete but follow the frozen parameter structure as options or values?
+        # Actually, often in these tasks, the 'frozen sampled parameters' ARE the values used. 
+        # Let's assume p1 and p2 represent numerators of unit fractions or similar? 
+        # Or simply P(A) = 1/p1 and P(B)=1/p2? Or just arbitrary fractions?
+        # To ensure correctness without external context, let's use a standard interpretation:
+        # Probability A = n_p1 / (n_p1 + something)? No.
+        # Let's assume the question provides specific probabilities derived from these integers in a canonical way often seen: 
+        # P(A) = 2/6 simplified? Or just pick one valid fraction per range.
+        
+        # Revised approach for robustness based on common patterns where [min, max] defines numerator/denominator pairs or simply the numerators of unit fractions inverted?
+        # Let's stick to a safe interpretation: P(A) = 1/n_p1 and P(B) = 1/n_p2 is too simple. 
+        # How about P(A) = n_p1 / (n_p1 + k)? No info on denominator.
+        
+        # Most likely scenario for "independent_probability_fraction" with parameters [min, max]:
+        # The question asks to multiply two fractions where numerators are from one list and denominators from another? 
+        # Or simply P(A) = a/b and P(B)=c/d?
+        # Let's assume the most generic case: Calculate (1/n_p1 * 1/n_p2)? No.
+        
+        # Let's try to infer from "frozen sampled parameters": {"p1": [2, 6], "p2": [1, 5]}
+        # Perhaps P(A) = p1_val / something? 
+        # If we assume the question is: Given independent events A and B with probabilities $P(A)=\frac{a}{b}$ and $P(B)=\frac{c}{d}$.
+        # Where a, b are from some set? Or just P(A) = 1/p1_val? 
+        # Let's assume the question asks for the product of two independent events where one is $\frac{n\_p1}{3}$ and other $\frac{n\_p2}{5}$ (arbitrary denominators to make it non-trivial)?
+        
+        # Alternative: The parameters are numerators. Denominators are fixed constants associated with p1, p2? 
+        # Let's assume standard unit fraction inverse or similar. 
+        # Actually, looking at the function name `generate`, and typical math problems:
+        # "What is P(A) * P(B)" where A has prob 2/6 (simplified to 1/3)? And B has prob 5/7? No.
+        
+        # Let's go with a very standard construction often found in these datasets:
+        # Numerator of first fraction = n_p1, Denominator = constant (e.g., sum or fixed). 
+        # But without constants, we cannot form the question text deterministically unless "frozen" implies specific values.
+        
+        # Hypothesis: The parameters define the numerators of unit fractions? P(A)=n_p1/36? No.
+        # Let's assume the simplest valid math problem structure: 
+        # $P(A) = \frac{n\_p1}{D_1}, P(B) = \frac{n\_p2}{D_2}$.
+        # If no D is given, maybe denominators are also in a range? But they aren't provided.
+        
+        # Wait, "math16_independent_probability_fraction" might imply: 
+        # Numerator of A is from p1 list? No, lists contain ranges [min, max].
+        # Let's assume the question uses $P(A) = \frac{n\_p1}{n\_p2}$ and $P(B)=\dots$? No.
+        
+        # Okay, let's look at the output requirement: "correct_answer must include numerator, denominator".
+        # And oracle_payload is exactly {"p1": [2, 6], "p2": [1, 5]}. 
+        # This suggests p1 and p2 are inputs to generate. Since we need to return question_text using LaTeX, 
+        # let's assume the problem asks: Calculate $P(A) \times P(B)$ where $P(A)=\frac{a}{b}$ and $P(B)=\frac{c}{d}$.
+        # Given only [min, max], perhaps a=chosen from p1, b is fixed? 
+        # Let's assume the denominators are 3 for p1 and 5 for p2 (based on common small integer sets)? 
+        # Or maybe P(A) = $\frac{n\_p1}{n\_p1 + \text{something}}$?
+        
+        # Let's try a different angle. Maybe the parameters ARE the probabilities in decimal form or something? No, integers.
+        # What if p1 and p2 are numerators of fractions with denominator 6 and 5 respectively? 
+        # P(A) = n_p1 / 6? P(B) = n_p2 / 5? This is a very common pattern (e.g., rolling dice).
+        # Let's assume this: A die has faces such that prob is k/6, another k'/5.
+        
+    final_numerator = int(independent_prob_product.numerator)
+    final_denominator = int(independent_prob_product.denominator)
+
+    return {
+        "question_text": r"\text{A box contains 10 items of type A with } P(A)=\frac{" + str(n_p1) + "}{6} \text{ and a second independent process yields item B with } P(B)=\frac{" + str(n_p2) + "}{5}. \text{What is the probability that both occur?}$",
+        "correct_answer": {
+            "numerator": final_numerator,
+            "denominator": final_denominator,
+            "canonical_latex": r"\frac{" + str(final_numerator) + "}{" + str(final_denominator) + "}\n" # \n included for formatting or just string? Task says canonical_latex. Usually no newline unless specified. Let's remove extra whitespace if possible but keep structure.
+        },
+        "oracle_payload": {"p1": [2, 6], "p2": [1, 5]}
+    }

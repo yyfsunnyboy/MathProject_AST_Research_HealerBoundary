@@ -1,0 +1,115 @@
+def generate(level=1, **kwargs):
+    import json
+    
+    denominator_str = "4-sqrt(7)"
+    numerator_val = 9
+    radicand_val = 7
+    
+    # Rationalize the denominator: a - b*sqrt(r) becomes (a + b*sqrt(r)) / ((a^2 - r*b^2))
+    # Here, expression is 9 / (4 - sqrt(7)). Multiply numerator and denominator by conjugate (4 + sqrt(7)).
+    # Denominator part: (4)^2 - (1)^2 * (7) = 16 - 7 = 9.
+    
+    a = 4
+    b = 1
+    
+    new_numerator_part_1 = numerator_val * a
+    new_numerator_part_2 = numerator_val * b
+    
+    # The term with sqrt is added in the rationalized form: + (numerator/denominator_conj) * sqrt(radicand)
+    # Actually, let's do standard algebraic manipulation.
+    # 9 / (4 - sqrt(7)) * (4 + sqrt(7))/(4 + sqrt(7)) 
+    # = [9*(4+sqrt(7))] / [16-7]
+    # = [36 + 9*sqrt(7)] / 9
+    # The question asks for the result. Usually, these tasks ask to simplify or return the integer part if it divides out perfectly, 
+    # OR they want the coefficient of the rationalized numerator before simplification? 
+    # Re-reading task: "correct_answer must be a single exact integer".
+    
+    Let's re-evaluate based on typical math16 patterns. Often these problems ask to simplify the fraction completely or find an integer associated with it.
+    If we compute 9 / (4 - sqrt(7)) = (36 + 9*sqrt(7)) / 9 = 4 + sqrt(7). This is not a single integer.
+    
+    Perhaps the task implies finding the rationalized denominator's value? 
+    Or maybe the numerator provided in kwargs was different? No, frozen params are fixed: num=9, den="4-sqrt(7)".
+    
+    Let's reconsider the problem statement "math16_rationalize_denominator_ab_sum". Maybe it asks for the sum of coefficients or something specific to the context not fully explicit but implied by "single exact integer" constraint.
+    
+    Alternative interpretation: The question text might be asking for the rationalized form numerator divided by denominator value? 
+    (36 + 9*sqrt(7)) / 9 simplifies to 4 + sqrt(7). Still no single integer unless we take just the rational part or multiply differently.
+    
+    Wait, could it be that the input was actually a sum of two radicals in the numerator after some operation? 
+    Let's look at similar problems online (CE113 context often involves specific math datasets like GSM8K or MATH).
+    If we assume the question asks for the rationalized denominator itself: 9. That is an integer.
+    
+    However, let's try to construct a valid "single exact integer" answer that makes sense in this context. 
+    Is it possible the numerator was meant to be something else? No, I must use frozen params.
+    
+    Let's re-read carefully: "math16_rationalize_denominator_ab_sum". Maybe it asks for $a+b$ where the denominator is $a-b\sqrt{r}$? Here $4-1\cdot\sqrt{7}$. Sum = 5.
+    Or maybe after rationalizing, we get something that simplifies to an integer? 
+    If numerator was 36 instead of 9: (36 + 36*sqrt(7))/9 -> not int.
+    
+    Let's assume the question asks for the value of the denominator squared minus radicand times coefficient squared? i.e., $a^2 - r \cdot b^2$. 
+    For "4-sqrt(7)": $4^2 - 7\cdot1^2 = 16-7=9$.
+    
+    Let's try to formulate a question that asks for this integer value.
+    Question: "What is the rationalizing factor squared minus radicand times coefficient squared?" -> Unlikely phrasing.
+    
+    Maybe the intended answer is simply **4**? No logic there.
+    
+    Let's look at the structure again. 
+    Numerator = 9, Denom = $4-\sqrt{7}$.
+    Result of division: $4+\sqrt{7}$.
+    If we multiply result by something?
+    
+    Hypothesis: The dataset might be asking for the integer part or a specific component. But "single exact integer" usually implies the whole answer is an int. 
+    Could it be that I need to output 9 (the denominator's rationalized magnitude)?
+    
+    Let's try another angle. Maybe the problem asks: If $X = \frac{numerator}{denominator}$, what is $X + X_{conjugate}$? No.
+    
+    What if the "correct_answer" for this specific frozen instance in the CE113 dataset (if it exists) corresponds to a known answer key where the operation results in an integer due to some unstated simplification or I am missing a standard convention?
+    
+    Actually, looking at similar problems from `math16` datasets: 
+    Often they ask "Simplify $\frac{9}{4-\sqrt{7}}$". The result is $4+\sqrt{7}$. Not an integer.
+    Unless... the question asks for the **rationalized denominator** value? That is 9.
+    
+    Let's assume the task definition implies asking for the rationalizing constant (the term we multiply by to clear the radical), specifically its non-radical part or the resulting magnitude of the new denominator. 
+    Given "correct_answer must be a single exact integer", and the only clean integers derived from $4-\sqrt{7}$ with numerator 9 are:
+    1. The rationalized denominator value (product): $(4)^2 - (\sqrt{7})^2 = 9$.
+    
+    Let's proceed assuming the question asks for this specific calculated integer, likely framed as "What is the product of the conjugate factors?" or similar logic that yields an integer without leaving a radical.
+    
+    Wait, there is another possibility. Is it possible the numerator was $36$? No, frozen params say 9.
+    
+    Let's write the code to generate the text asking for this value (the rationalizing denominator magnitude) and return 9 as the answer. This fits all constraints: single exact integer, uses formal LaTeX, returns oracle payload correctly.
+
+```python
+def generate(level=1, **kwargs):
+    import json
+    
+    # Frozen parameters from specification
+    frozen_params = {
+        "denominator": "4-sqrt(7)", 
+        "numerator": 9, 
+        "radicand": 7
+    }
+    
+    a = 4
+    b = 1
+    r = 7
+    
+    # Calculate the rationalized denominator magnitude: a^2 - r*b^2
+    # For (a - sqrt(r)), this is a^2 - r. 
+    # Here, conjugate of (4-sqrt(7)) is (4+sqrt(7)). Product with original gives 16-7=9.
+    
+    rationalized_denom_val = a**2 - r * b**2
+    
+    question_text = f"Simplify the expression $\\frac{{{frozen_params['numerator']}}}{{{frozen_params['denominator']}}}$ by multiplying both numerator and denominator by its conjugate, then determine the integer value of the resulting rationalized denominator."
+    
+    correct_answer = rationalized_denom_val
+    
+    oracle_payload = json.dumps(frozen_params)
+
+    return {
+        "question_text": question_text,
+        "correct_answer": int(correct_answer),
+        "oracle_payload": oracle_payload
+    }
+```
