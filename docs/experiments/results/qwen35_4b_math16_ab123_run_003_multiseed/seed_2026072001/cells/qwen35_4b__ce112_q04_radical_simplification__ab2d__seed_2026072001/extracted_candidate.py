@@ -1,0 +1,22 @@
+def generate(level=1, **kwargs):
+    frozen_params = {"radicand": 135}
+    
+    radicand_input = frozen_params["radicand"]
+    coeff = 1
+    
+    simplified_coeff, square_free_radicand = RadicalOps.simplify_term(coeff, radicand_input)
+    
+    latex_string = RadicalOps.format_term(simplified_coeff, square_free_radicand, is_first=True)
+    
+    correct_answer_data = {
+        "coefficient": int(simplified_coeff),
+        "radicand": int(square_free_radicand),
+        "canonical_latex": f"{latex_string}" if latex_string != "" else str(int(simplified_coeff))
+    }
+    
+    canonical_latex_str = correct_answer_data["canonical_latex"]
+    
+    question_text = r"\text{Simplify the radical: $\sqrt{\overline{'$}}\,\overline{"} + \dots"
+
+if __name__ == "__main__":
+    result = generate()

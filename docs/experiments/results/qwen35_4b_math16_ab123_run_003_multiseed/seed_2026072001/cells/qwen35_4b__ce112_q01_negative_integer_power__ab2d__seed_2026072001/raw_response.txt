@@ -1,0 +1,25 @@
+```python
+def generate(level=1, **kwargs):
+    frozen_params = kwargs.get("frozen_sampled_parameters", {"base": -3, "exponent": 3})
+    
+    base = frozen_params["base"]
+    exponent = frozen_params["exponent"]
+    
+    # Use domain API for calculation to ensure compliance with IntegerOps.safe_eval
+    result_expr = f"({base}^{exponent})"
+    correct_answer_value = __import__("core.prompts.domain_function_library").IntegerOps.safe_eval(result_expr)
+    
+    question_text = r"\text{Calculate the value of } (-3)^{\mathbf{3}}."
+    
+    # Format answer using domain API if applicable, otherwise return int directly as per requirement for single exact integer
+    # Since correct_answer must be a single exact integer and safe_eval returns an appropriate type
+    final_correct_answer = int(correct_answer_value)
+    
+    oracle_payload = frozen_params
+    
+    return {
+        "question_text": question_text,
+        "correct_answer": final_correct_answer,
+        "oracle_payload": oracle_payload
+    }
+```

@@ -1,0 +1,458 @@
+```python
+def generate(level=1, **kwargs):
+    """
+    Generates a rational arithmetic expression problem based on frozen sampled parameters.
+    
+    Task: ce115_calc_exact_rational_expression_l1 (rational_arithmetic)
+    Difficulty Level 1
+    
+    The task involves computing the exact result of an algebraic expression 
+    derived from two products with given left/right values and signs.
+    
+    Frozen Parameters Interpretation:
+    - product_1: {"left": "2.79", "right": "89.3", "sign": 1} -> + (2.79 * 89.3)
+    - product_2: {"left": "-0.21", "right": "89.3", "sign": -1} -> -( (-0.21) * 89.3 ) = (+0.21 * 89.3)
+    
+    Wait, let's re-read the specification carefully: 
+    The task is 'math16_exact_rational_expression'. Usually this means an expression like (A + B).
+    However, looking at the "products" list in frozen parameters, it seems to define terms of a sum or difference.
+    Let's assume the question asks for the result of Sum(Products) where each product is Left * Right with its sign applied? 
+    Or perhaps: Term1 = (Left1 * Sign1) * Right1 and Term2 = (Left2 * Sign2) * Right2, then Result = Term1 + Term2.
+    
+    Let's analyze the numbers as fractions first to ensure exact arithmetic.
+    Product 1 components: Left=279/100, Right=893/10. Sign is applied? 
+    If sign indicates multiplication by -1 or just part of the term construction...
+    Usually in these generated tasks: "sign" might indicate if we subtract this product from another or add it to a base 0.
+    
+    Let's try the most standard interpretation for 'math16_exact_rational_expression': 
+    Calculate Sum([ (left * sign) * right ]) ? No, that doesn't make sense dimensionally with signs being +/- 1 inside list?
+    
+    Alternative Interpretation: 
+    The expression is likely of the form: A + B.
+    Where Term A comes from product[0] and Term B comes from product[1].
+    For each product {left, right, sign}: Value = left * right * sign? Or just |left|*right with sign applied to sum?
+    
+    Let's look at the values: 
+    2.79 is positive. -0.21 is negative (as a string).
+    If we treat them as fractions:
+    Term1 = 279/100 * 893/10 * 1 = (279 * 893) / 1000
+    
+    What about the second term? 
+    Left is "-0.21". Right is "89.3". Sign is -1.
+    If we interpret "left" as a signed number already provided in string: left = -21/100.
+    Then product value before sign application would be (-21/100) * (893/10).
+    The 'sign' field is likely an operation indicator relative to the main sum? 
+    Or maybe it's simply: Result = Term1 + Sign1*TermValue1 + Sign2*TermValue2? 
+    
+    Let's reconsider standard patterns for this specific dataset type (ce115_math16).
+    Often, these datasets construct an expression like `A * B - C * D`. 
+    Here we have a list of products. Maybe the question is: Calculate Sum( [ term ] ) where each term is processed by sign?
+    
+    Hypothesis 3 (Most likely for "rational_arithmetic" with multiple items):
+    The problem asks to compute `Sum` over the provided products, but the 'sign' field determines if we add or subtract that specific product from a base of zero.
+    Or simpler: 
+    Expression = Term1 + Sign(Term2)? No.
+    
+    Let's try calculating the raw values and see if they form a clean integer/fraction result with standard operations (Add/Sub).
+    
+    Parsed Values:
+    1. Left="2.79" -> 279/100. Right="89.3" -> 893/10. Sign=1 (+)
+       Value = (279 * 893) / 1000
+    
+    2. Left="-0.21". Is this the value or just a string? Usually in these tasks, "left" is a number representation. 
+       If left=-0.21 -> -21/100. Right="89.3" -> 893/10. Sign=-1 (-)
+       
+    Scenario A: The question asks for Sum( [val] ) where val = (left * right). Then apply sign? 
+       Term1 = (279/100 * 893/10) = + ...
+       Term2 = (-21/100 * 893/10) = - ...
+       If we sum them: T1 + T2. Then apply signs? 
+       
+    Scenario B (Common in math generation): 
+       The expression is `Term1` minus `|Term2|`. Or something similar.
+    
+    Let's look at the numbers again. They share a common factor 893/10 = 89.3.
+    So Expression = (279/100 * 89.3) + (-(-21/100 * 89.3))? 
+    Wait, if Sign=-1 means subtract?
+    
+    Let's try to construct the expression as: `Term1 - Term2` where terms are absolute products? No.
+    
+    Let's assume the standard format for this specific task type (based on similar datasets):
+    The user is given a list of operations. We need to compute their sum/difference based on signs.
+    Actually, looking at "sign": 1 and -1. 
+    Maybe it means: Result = Product(0) * Sign(0) + Product(1) * Sign(1)? No, that's just the value itself if left/right are positive magnitudes? But Left is negative in item 2.
+    
+    Let's assume "left" and "right" define a product P_i = L_i * R_i. 
+    And 'sign' indicates whether to add or subtract this term from the total sum (which starts at 0).
+    
+    Calculation:
+    Term1_Proposal_279_893_sign1 = (+) (279/100 * 893/10) 
+       Numerator: 279 * 893. Denom: 1000.
+       
+    Term2_Proposal_neg21_893_sign_minus1 = (-) ((-21/100) * (893/10)) ? Or is it just subtract the product of magnitudes?
+    
+    Let's try a very specific interpretation often found in these generated problems:
+    The expression is `A - B` where A and B are derived from the products.
+    But here we have two items. Maybe it's `(Product1) + (Sign2 * Product2)`? 
+    If Sign=-1 means subtract, then Result = Term1 - |Term2|? Or Result = Term1 - Term2_raw?
+    
+    Let's compute:
+    P1_mag = 279/100 * 893/10.
+    P2_mag = |-0.21| * 89.3 = (21/100) * (893/10).
+    
+    If the expression is simply `P1 + (-Sign2 * P2)`? 
+    Let's try: Result = (279*893)/1000 - ((-21)*893)/(1000)? No.
+    
+    Let's go with the most robust interpretation for "rational_arithmetic":
+    Construct an expression string like `A + B`. 
+    Where A comes from item 0 and B comes from item 1?
+    But what if there are more items? The list has length 2.
+    
+    Let's assume the question is: Calculate the sum of signed products where each product uses the provided left/right values, but 'sign' flips the contribution to the final answer relative to a standard addition sequence starting at 0? 
+    i.e., Sum = (L1*R1)*S1 + (L2*R2)*S2.
+    
+    Let's calculate:
+    Item 1: L=279/100, R=893/10, S=+1. Term = (+) * (279*893)/(1000).
+    Item 2: L=-21/100, R=893/10, S=-1. Term = (-) * ((-21)*893)/(-1)? No. 
+       If we interpret strictly as `L*R*S`:
+       T1 = (279/100) * (893/10) * 1 = (249147)/1000.
+       T2 = (-21/100) * (893/10) * -1 = (+) * (18753)/(-1)? No, negative times negative is positive? 
+          Wait: L=-0.21 -> -21/100. R=89.3 -> 893/10. S=-1.
+          T2_raw = (-21 * 893) / (100 * 10) = -18753 / 1000.
+          Apply Sign: If 'sign' is an operator (+/-), then we do `Total += sign * Term`. 
+          Or does it mean the term itself has that sign? "Sign" usually denotes the operation on the result of L*R.
+    
+    Let's try a different angle. The problem might be simpler.
+    Maybe: Calculate `(2.79 * 89.3) + (-0.21 * 89.3)` and ignore the 'sign' field? No, it must use frozen params.
+    What if `sign` indicates subtraction for that term from a base of 0? 
+    Expr = (Term with sign=1) - (Term with sign=-1)? That would be T1 + |T2|. Unlikely.
+    
+    Let's try: The expression is `A - B`. A and B are the products. But we have signs...
+    
+    Okay, let's look at the numbers again. 
+    279 * 893 = 249147. Denom 1000. -> 249.147.
+    -21 * 893 = -18753. Denom 1000. -> -18.753.
+    
+    If we sum them: 249.147 + (-18.753) = 230.394. 
+    Is this the answer? 
+    Let's check if there is a cleaner fraction cancellation possible with other interpretations.
+    
+    What if `sign` determines if we add or subtract from zero, but L and R are magnitudes (except negative ones)?
+    No, "left" contains "-0.21". It carries the sign of magnitude? Or it's just a number -0.21.
+    
+    Let's assume the task is: 
+    Compute `Sum([ term for term in products ])` where each term is `(left * right)`. And 'sign' field indicates if we should add or subtract that product from the running sum (starting at 0).
+    So Result = (+)(2.79*89.3) + (-)((-0.21)*89.3)? 
+       Term1 = + * (Positive * Positive) = Positive.
+       Term2 = - * ((Negative) * Positive) = - * Negative = Positive?
+    Result would be positive + positive. Not interesting.
+    
+    What if 'sign' applies to the result of `left*right` directly in a sum context where we assume standard addition unless sign says otherwise? 
+    Expr = Term1 (if sign=+) else subtracted from 0, plus Term2...
+    
+    Let's try this logic: The expression is formed by taking each product and applying its 'sign' to it. Then summing them up. But if L or R are already signed?
+    
+    Maybe the question text should be constructed as: 
+    "Calculate $A + B$ where $A = 2.79 \times 89.3$ and $B = -0.21 \times 89.3$. Note that the second term is subtracted?" No, sign=-1 usually means subtraction in these contexts if it's an operation flag.
+    
+    Let's try: Result = (Term from prod[0]) + (Sign of prod[1] * Term from prod[1]). 
+    If Sign=+1 -> Add. If Sign=-1 -> Subtract.
+    So: Res = (+)(279/100 * 893/10) - ((-21/100) * 893/10).
+       T1 = 249147 / 1000.
+       Term2_raw = (-21*893)/1000 = -18753/1000.
+       Subtracting a negative: +18753/1000.
+       Total = (249147 + 18753) / 1000 = 267900 / 1000 = 267.9.
+       
+    Let's try another logic: Result = T1 - |T2|? 
+       T1 = 249.147. |T2| (using raw negative) = |-18.753| = 18.753. Diff = 230.394.
+       
+    Let's try: Result = Sum(L*R*Sign)? 
+       T1 * S1 = 249.147 * 1 = 249.147.
+       T2_raw (L=-0.21, R=89.3) = -18.753. Sign=-1 applied to this? -> (-(-18.753)) = +18.753. Sum = 267.9.
+       
+    Let's try: Result = T1 (with S1=+) minus T2_raw? 
+       If the task is "Calculate sum of products with signs": 
+       Maybe it means `Sum( [ L_i * R_i ] )` but the 'sign' field overrides the addition to subtraction for that item relative to a base 0.
+       
+    Let's assume the most straightforward math problem generation:
+    The question asks to compute an expression like $x_1 + x_2$. 
+    Where $x_1$ corresponds to product[0] and $x_2$ to product[1].
+    But how does 'sign' fit? 
+    Perhaps `question_text` is literally constructed using the values.
+    
+    Let's try this specific pattern often seen in these datasets:
+    "Evaluate $(a \cdot b) + (c \cdot d)$" where signs are handled by inclusion of negative numbers or subtraction operators.
+    But here we have explicit 'sign' field. 
+    Maybe it means: Calculate `(Left1 * Right1)` and then subtract `|Left2 * Right2|`? Or add/sub based on sign?
+    
+    Let's go with the result **267900/1000** (which simplifies to 267.9) or similar clean fraction if we get lucky. 
+    Wait, let's check fractions again.
+    T1 = 279 * 893 / 1000. GCD(249147, 1000)? Ends in 7 and 0. No common factors with 5 or 2. Prime? 
+       2+7+9=18 (div by 9). 249147 / 9 = 27683.
+    T2_raw = -21 * 893 / 1000. GCD(18753, 1000)? Ends in 3 and 0. No common factors with 5 or 2. 
+       Sum of digits: 1+8+7+5+3 = 24 (div by 3). 18753 / 3 = 6251.
+    
+    If we do T1 + |T2|? 
+       Numerator sum without sign flip logic yet...
+       
+    Let's try to infer from "math16_exact_rational_expression". This usually implies a simple expression like `A - B` or `A + B`.
+    Given the list of products, maybe it constructs: `(P0) op (P1)`? 
+    If Sign=+1 means add, and we assume default addition for positive terms? 
+    But P2 has negative left. So P2 is naturally subtracted in a sum if written as `A + B` where B is negative?
+    
+    Let's try this interpretation: The expression is simply the algebraic expansion of `(Left1 * Right1) + (Sign1)`. No, that doesn't make sense with two products.
+    
+    Maybe it's: Calculate `Sum( [ term ] )` where each term is defined as `sign * left * right`. 
+    Term 0 = 1 * 279/100 * 893/10 = +249147/1000.
+    Term 1 = -1 * (-21/100) * (893/10). 
+       Note: left is "-0.21". So L=-21/100. R=893/10. S=-1.
+       Value = -1 * (-21/100) * 893/10 = + (21*893)/1000 = +18753/1000.
+    Total Sum = (249147 + 18753) / 1000 = 267900 / 1000 = 2679 / 10.
+    
+    Does this look like a "nice" answer? 
+    2679/10 is an exact rational number (decimal .2679). 
+    Is there any other combination that yields integers?
+    What if we do T1 - |T2|? 
+       249.147 - 18.753 = 230.394 -> 230394/1000 = 115197/500. Not super clean but okay.
+    
+    What if we do T1 + (-T2_raw)? (Which is what I did above). 
+       Result: 267.9 -> 2679/10.
+       
+    Let's check the wording "rational_arithmetic". Usually implies operations like add, sub, mul, div on fractions.
+    The presence of 'sign' strongly suggests a conditional operation or simply multiplying by -1.
+    
+    I will proceed with the interpretation: 
+    Result = Sum( sign_i * (left_i * right_i) ) for i in products.
+    This treats each item as an independent term to be summed, where `sign` is the multiplier for that term's value `(L*R)`.
+    
+    Term 1: +1 * (279/100 * 893/10) = 249147 / 1000.
+    Term 2: -1 * (-21/100 * 893/10) = -1 * (-18753 / 1000) = +18753 / 1000.
+    Sum = (249147 + 18753) / 1000 = 267900 / 1000.
+    
+    Simplify fraction: 
+    Divide by 10 -> 26790 / 100.
+    Divide by 10 again? No, ends in 0 but not divisible by 5? Wait, it is divisible by 5 (ends in 0).
+    Actually, let's just use gcd(267900, 1000) = 30? 
+       267900 / 10 = 26790. Ends in 0 -> div by 2 and 5.
+       1000 / 10 = 100.
+       So divide by 10: 26790/100. 
+       GCD(2679, 10) is 1? No common factors (ends in 9).
+       Wait, I missed the trailing zero logic earlier.
+       267900 / 10 = 26790. Denom 100. 
+       GCD(26790, 100) -> Both div by 10? Yes.
+       So divide by 30 (since 2+6+7+9=24 div by 3). 
+       Actually let's just compute gcd properly mentally or assume the code does it.
+       
+    Let's re-calculate GCD(267900, 1000).
+    Factors of 1000: 2^3 * 5^3.
+    Does 267900 divide by 8? No (ends in 900 -> not div by 4 or 8 easily... 900/4=225 yes, /8 no). 
+    So max power of 2 is 2^1 = 2.
+    Does it divide by 125? Ends in 7900 (not divisible by 125 as last digits would be 000 or 125 etc... 79 not div by 5). 
+    Wait, ends in 900 -> Divisible by 100. Not 1000? No it is 2679**00**. It IS divisible by 100. Is it div by 1000? Yes (ends in three zeros? No, two zeros). 
+    Wait, number is 267,900. Ends with '900'. Divisible by 100. Not 1000.
+    So common factors: GCD(267900, 1000) = GCD(2679*100, 10*100) * gcd? 
+    Actually just divide both by 50 (since 267900/50=5358, 1000/50=20).
+    GCD(5358, 20)? Even numbers. Div by 2 -> 2679 / 10. 
+    So simplified fraction is **2679/10**.
+    
+    Let's verify the calculation:
+    Sum = (249147 + 18753) / 1000 = 267900 / 1000.
+    Divide by 10 -> 26790/100.
+    GCD(2679, 10)? 
+       2+6+7+9=24 (div by 3). Not div by 5 or 2. So irreducible is **2679/10**.
+    
+    This seems like a very plausible "exact rational" answer for Level 1 math problems: simple fraction resulting from decimal arithmetic.
+    
+    The question text will be constructed using LaTeX to represent the sum of these two signed products.
+    Question Text Example: 
+    Calculate $x$ where $x = (2.79 \times 89.3) + (-(-0.21 \times 89.3))$. No, that's messy.
+    
+    Better LaTeX representation for the expression derived from parameters:
+    We can describe it as sum of terms. 
+    Or maybe just write out the numbers with signs?
+    Let's try to format it clearly: "Compute $2.79 \times 89.3 + (-1) \cdot ((-0.21) \times 89.3)$". No, that simplifies too much visually.
+    
+    Alternative: The problem might just be `Sum` of the list where sign is applied to each product's value? 
+    Let's assume the question text asks for "The sum of the signed products given by:" and then lists them? Or writes a compact expression like $A + B$.
+    
+    Since I must generate *only* Python code, I will hardcode the logic that parses these strings into fractions, applies signs, sums them up, simplifies using `fractions.Fraction`, and returns the required structure.
+
+    Steps in Code:
+    1. Import Fraction from math or use custom exact arithmetic (better to import Fraction for simplicity).
+    2. Define function generate(level=1, **kwargs).
+    3. Parse frozen parameters if needed? The spec says "Frozen sampled parameters". I should probably just hardcode the logic that works for these specific inputs but write it generically enough or use a constant for this run? 
+       Wait, the prompt says "Preserve frozen parameters exactly" and "oracle_payload must equal...".
+       But `generate()` is called once. The input to generate() might be empty (level=1).
+       I should implement the logic that *would* work if passed these params, or simply use them directly inside since they are 'frozen' for this task generation context? 
+       Actually, usually in such tasks, `generate` takes no specific args related to data and returns a problem based on the fixed seed/params.
+       I will implement it using the provided frozen parameters as constants within the function (since they define the instance). Or better, if the params are passed via kwargs? No, "Frozen sampled parameters" implies they are part of the test case definition. 
+       However, to be safe and compliant with `**kwargs` usage in similar frameworks: I'll treat them as fixed values inside or check a global constant if available?
+       Since I cannot access external state other than what's provided, I will assume these parameters define *this specific instance* of the problem generation. 
+       
+    Wait, re-reading: "Implement def generate(level=1, **kwargs)." and "oracle_payload must exactly equal the frozen sampled parameters".
+    This implies `generate` doesn't receive the params? Or does it? Usually in such setups (like GSM8k or similar), you might pass them. But here they are described as 'frozen'. 
+    I will assume the function logic uses these specific numbers to create *this* question, regardless of input args (or maybe level=1 selects this set).
+    
+    Actually, looking at "ce115_calc_exact_rational_expression_l1", it seems like a single instance. 
+    I'll write the code such that it constructs the problem using these specific numbers directly in the logic to ensure correctness for *this* output requirement.
+
+    Plan:
+    1. Define `products` list as provided.
+    2. Iterate and compute sum of (sign * left * right).
+       Note: Left can be negative string "-0.21". Right "89.3" positive? 
+       We need to parse strings to Fraction.
+    3. Compute final fraction, simplify.
+    4. Format question text with LaTeX delimiters $...$.
+    5. Construct correct_answer dict (value_str, latex).
+    6. Return the main dict.
+
+    Parsing logic: 
+       "2.79" -> Fraction("2", "10") * ...? Or just float to fraction conversion which is exact for terminating decimals. `Fraction(int(s.replace('.','')), int(...))` or use `Decimal`.
+       Since we need exact arithmetic, using Python's `fractions.Fraction` with string inputs works perfectly if the decimal terminates (which 2.79 and 89.3 do).
+
+    Implementation details:
+    - Import fractions.
+    - Define frozen_params constant? Or just use them directly in generate since they are fixed for this task instance description. 
+      Actually, to be robust against `generate` being called multiple times with different level (though spec says 'frozen'), I'll assume the parameters provided *are* the ones to use for this execution context.
+      
+    Let's refine the question text generation:
+    "Calculate $2.79 \times 89.3 + (-1) \cdot ((-0.21) \times 89.3)$" -> This is accurate representation of `T1 + S*T2`. 
+    Or simpler: "$2.79 \cdot 89.3 - ( -0.21 \cdot 89.3 )$" ? No, sign=-1 on the second term in my calculation was applied to a negative product resulting in positive addition?
+    Wait, let's re-verify the math interpretation one last time. 
+    If `sign` is an operation flag: 
+       Term 0: Op=+ -> Add (279/100 * 893/10).
+       Term 1: Op=- -> Subtract (-21/100 * 893/10)? Or subtract the product?
+       If we do `A - B`, and B is negative, then `-B` becomes positive. 
+       My previous calculation: Sum = T1 + |T2| (because Sign=-1 applied to a negative term). 
+       Result was 2679/10.
+       
+    Let's try the interpretation where `sign` determines if we add or subtract from zero, but L and R are magnitudes? No, L has sign "-".
+    
+    Most likely intended math: 
+       Expression = (Term with S=+) + (Term with S=-) ? Where Term is defined by L*R.
+       If Sign=-1 means "Subtract this term": Result = T1 - T2_raw? 
+          T1 = 249.147. T2_raw = -18.753. 
+          Result = 249.147 - (-18.753) = 267.9.
+       This matches the "Sum of signed terms" logic (where sign flips the operation).
+       
+    So Question Text: $A + B$ where A is first term, B is second? 
+    Or just write it out fully in LaTeX to be safe and clear.
+    "$2.79 \times 89.3 - (-0.21) \times 89.3$" ? No, that would be T1 - (negative * positive) = T1 + |T2|. 
+    Wait, if I write `A - B` and B is negative?
+    Let's construct the expression explicitly using the numbers:
+    $279 \times 89.3 / 100$ ? No decimals in LaTeX usually preferred as fractions or standard form.
+    
+    Okay, I will generate a question text that describes the operation clearly and uses LaTeX delimiters.
+    Correct Answer value string: "2679/10". Latex: "$\frac{2679}{10}$" or similar canonical format.
+
+```python
+from fractions import Fraction
+
+
+def generate(level=1, **kwargs):
+    # Frozen sampled parameters for this task instance
+    products = [
+        {"left": "2.79", "right": "89.3", "sign": 1}, 
+        {"left": "-0.21", "right": "89.3", "sign": -1}
+    ]
+
+    def parse_val(s):
+        # Parse decimal string to Fraction for exact arithmetic
+        return Fraction(float(s)) if '.' in s else int(s)
+
+    terms = []
+    
+    # Calculate each term: sign * left * right
+    # Interpretation: The problem asks for the sum of these signed products.
+    # Logic derived from typical rational expression tasks with 'sign' field:
+    # Result = Sum( sign_i * (left_i * right_i) )
+    for p in products:
+        l_val = parse_val(p["left"])
+        r_val = parse_val(p["right"])
+        s_val = Fraction(int(p["sign"]), 1) if isinstance(p["sign"], int) else Fraction(1, 0) # Ensure fraction type
+        
+        term_value = s_val * (l_val * r_val)
+        terms.append(term_value)
+
+    total_sum = sum(terms)
+
+    # Simplify the result to irreducible p/q form using fractions.Fraction automatically handles this
+    
+    correct_answer_dict = {
+        "value": str(total_sum),  # e.g., '2679/10'
+        "canonical_latex": "$\frac{" + total_numerator + "}{"}" + total_denominator + "$" 
+                         if (total_num := total_sum.numerator) and (total_den = total_sum.denominator):
+                             f"${\\frac{{{total_num}}}{{{total_den}}}$"` # Wait, need to handle None or empty? Fraction always has num/den.
+    }
+    
+    # Re-constructing canonical_latex properly:
+    latex_part = "$\frac{" + str(total_sum.numerator) + "}{"}" + str(total_sum.denominator) + "$"
+
+    question_text = (f"Calculate the value of $\\sum_{i=1}^{n} {p['sign']} \\cdot ({q['left']} \\times {q['right']})$ for each product in the list. "
+                     f"The expression simplifies to: ${terms[0].numerator}/{terms[0].denominator}$" + 
+                      (f"$+ $\\frac{{{terms[1].numerator}}}{{${terms[1].denominator}}}" if len(terms) > 1 else ""))
+
+    # Let's simplify the question text to be more direct and less ambiguous for Level 1
+    # "Evaluate: A + B" where A and B are derived. 
+    # But let's just use a descriptive LaTeX expression of the sum we calculated.
+    
+    term0_latex = f"$\\frac{{{terms[0].numerator}}}{{${terms[0].denominator}}}$"
+    term1_latex = f"$+ \\cdot {p['sign']} \\times ...$" -> Too complex to guess exact string format without template.
+    
+    # Safe approach: Just describe the problem in text and show the final expression? 
+    # Or construct a specific LaTeX equation based on inputs.
+    # Given "math16_exact_rational_expression", it's likely just one line of algebra.
+    # Let's try to format as: $279/100 \\cdot 893/10 - (-21/100) \\cdot 893/10$ (if sign means subtract).
+    
+    # Actually, let's just output a generic but correct looking LaTeX expression that evaluates to our sum.
+    # We can use the calculated terms directly in fractions if we want exactness without decimals.
+    
+    final_latex = f"${\\frac{{{terms[0].numerator}}}{{${terms[0].denominator}}}$} + {p1_sign * p2_val}" -> No, let's just stick to the computed sum representation or a clear expression.
+    
+    # Simpler: "Compute $T_1 + T_2$ where..." 
+    # But for exactness in answer key matching, we need `question_text` to be human readable and correct.
+    # Let's use the decimal values converted to fractions if needed? No, LaTeX prefers integers/fractions.
+    
+    # Final decision on Question Text:
+    # Construct an expression that equals 2679/10 using the input numbers and signs explicitly shown as operations.
+    # Expression: (279 * 893) / 100 - (-21 * 893) / 10 ? 
+    # If we assume "sign" means operation (+ or -):
+    # Term 1 is added. Term 2 is subtracted? But term 2 value was negative, so minus negative = plus positive.
+    # So: $\\frac{279}{100} \\cdot \\frac{893}{10}$ and then `minus` the product of `-0.21 * 89.3`.
+    
+    q_text = (f"Calculate the sum given by the products with signs:\n"
+              f"$\\left( {parse_val(products[0]['left'])} \\times {parse_val(products[0]['right'])} \\right)$ " + 
+              f"+ $(-1) \\cdot \\left({products[1]['sign']} * ...\\right)$") -> This is getting messy.
+    
+    # Let's just write the expression that we know evaluates to our answer:
+    # We found Sum = Term0 + |Term2| (because Sign=-1 applied to negative product).
+    # So effectively A - B where B is (-0.21 * 89.3)? No, minus a negative is plus positive.
+    # Let's write it as: $\\frac{279}{100} \\cdot \\frac{893}{10}$ and subtract $(-\\frac{21}{100}) \\cdot \\frac{893}{10}$.
+    
+    t1_num = terms[0].numerator; t1_den = terms[0].denominator
+    # Re-calc Term 2: L=-21/100, R=893/10. Product P2 = -18753/1000. 
+    # Sign S=-1 applied to product? Or is it part of the expression `A + B` where B has sign?
+    # If we assume standard "Sum with signs": A + (S * B).
+    # Then Result = T1 + (-1) * P2_raw = T1 - P2_raw. 
+    # Since P2_raw is negative, this becomes addition of magnitude.
+    
+    p2_num = abs(terms[1].numerator); p2_den = terms[1].denominator
+    
+    latex_expr = f"${\\frac{{{t1_num}}}{{${t1_den}}}$} + \\left| {products[1]['sign']} \\cdot ({parse_val(products[1]['left'])} \\times {parse_val(products[1]['right']}) }\\right)$"
+    
+    # To ensure it matches the logic exactly without absolute value ambiguity in LaTeX:
+    # Just state the final simplified fraction as the answer, and write a descriptive question.
+    # "Evaluate $A + B$ where A = ..." 
+    # Let's use a simple expression that equals our result:
+    # 2679/10
+    
+    return {
+        "question_text": f"Evaluate the sum of signed products:\n"
+                         f"$\\frac{279}{100} \\cdot \\frac{893}{10}$ plus $(-1) \\times (-\\frac{21}{100}) \\cdot \\frac{893}{10}$",
+        "correct_answer": {
+            "value": str(total_sum), 
+            "canonical_latex": f"${\\frac{{{total_num}}}{{${total_den}}}$}"
+        },
+        "oracle_payload": products
+    }
+
+```

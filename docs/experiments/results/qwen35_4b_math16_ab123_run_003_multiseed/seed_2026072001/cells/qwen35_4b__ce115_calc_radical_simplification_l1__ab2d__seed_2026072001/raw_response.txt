@@ -1,0 +1,25 @@
+from fractions import Fraction
+import math16_radical_simplification as ms
+
+def generate(level=1, **kwargs):
+    frozen_params = {"radicand": 27}
+    
+    radicand_input = kwargs.get("radicand", frozen_params["radicand"])
+    
+    coeff, square_free_radicand = ms.RadicalOps.simplify_term(1, radicand_input)
+    
+    correct_answer_coefficient = int(coeff)
+    correct_answer_radicand = int(square_free_radicand)
+    canonical_latex = f"{correct_answer_coefficient} \\sqrt{{{int(square_free_radicand)}}}}"
+
+    question_text = r"$$ \text{Simplify } 1\sqrt{\overline{{\textbf{$r$}}}}} $$, where $r=\overline{{\textbf{$x$"}}}"
+    
+    return {
+        "question_text": question_text.replace("$", "$$").replace("\\\\$", "\\") + r"$$, \quad x=27$" if not isinstance(radicand_input, int) else f"Simplify the radical expression: $1 \\sqrt{{{radicand_input}}}$. What is the simplified form in the format $a\sqrt{b}$?",
+        "correct_answer": {
+            "coefficient": correct_answer_coefficient,
+            "radicand": correct_answer_radicand,
+            "canonical_latex": canonical_latex
+        },
+        "oracle_payload": frozen_params
+    }

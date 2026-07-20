@@ -1,0 +1,22 @@
+def generate(level=1, **kwargs):
+    frozen_params = {
+        "days": 15,
+        "hours_per_generation": 20,
+        "initial": 1,
+        "split_factor": 4
+    }
+
+    # Calculate total generations: days * hours per generation (assuming one generation per hour)
+    total_generations = frozen_params["days"] * frozen_params["hours_per_generation"]
+    
+    # Exponential growth formula: final_amount = initial * split_factor ^ total_generations
+    expression_str = f"{frozen_params['initial']} * {frozen_params['split_factor']} ** {total_generations}"
+    result_value = IntegerOps.safe_eval(expression_str)
+
+    correct_answer_dict = {"k": int(result_value)}
+
+    return {
+        "question_text": r"Consider a bacterial culture that starts with $\text{1}$ cell. If each generation, the population splits into $4$ times its previous size (binary fission implies doubling per split, but here we follow the explicit factor), and there are $15 \times 20 = 300$ generations in total over a period of days where each hour constitutes one full generation cycle. What is the final population count after all generations complete?",
+        "correct_answer": correct_answer_dict,
+        "oracle_payload": frozen_params
+    }
