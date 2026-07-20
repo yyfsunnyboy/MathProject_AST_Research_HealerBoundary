@@ -35,6 +35,9 @@ from agent_tools.finals_rebuild.ce115_clean_incremental_ablation import (
     prompt_sha256,
 )
 from agent_tools.finals_rebuild.generator_success import evaluate_math_notation
+from agent_tools.finals_rebuild.failure_classification_v2 import (
+    classify_math16_cell_for_future_runner,
+)
 from agent_tools.finals_rebuild.git_blob_hash import sha256_git_blob_lf
 from agent_tools.finals_rebuild.latex_render_validation import evaluate_notation_lint
 from agent_tools.finals_rebuild.math16_pool import (
@@ -595,6 +598,13 @@ def run_live(output_dir: Path, *, model: str) -> dict[str, Any]:
                 "latex_g6": g6,
                 "latex_g6a": g6a,
                 "gates": details.get("evaluation_gates") or details.get("gates"),
+                "failure_classification_v2": classify_math16_cell_for_future_runner(
+                    evaluation_gates=details.get("evaluation_gates") or details.get("gates"),
+                    evaluator_status=evaluator,
+                    validity=validity,
+                    infrastructure_valid=validity != "INVALID_INFRASTRUCTURE",
+                    raw_response_present=bool(raw),
+                ),
                 "hashes": {
                     "prompt": _hash(prompt),
                     "raw": _hash(raw),
