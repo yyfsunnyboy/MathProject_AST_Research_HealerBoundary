@@ -1,0 +1,389 @@
+from fractions import Fraction
+import sys
+sys.path.insert(0, '/usr/local/lib/python3.10/site-packages') # Adjust path if necessary or rely on pre-installed env with domain library
+# Assuming core.prompts.domain_function_library is available in the environment as per task spec
+try:
+    from core.prompts.domain_function_library import PolynomialOps, FractionOps
+except ImportError:
+    pass
+
+def generate(level=1, **kwargs):
+    # Frozen sampled parameters
+    frozen_params = {
+        "factor_order_policy": "strict_source_template", 
+        "quadratic_coefficients": [39, 5, -14], 
+        "template_left_x_coefficient": 3
+    }
+
+    # Extract fixed values from frozen params to ensure immutability logic within function scope if needed, 
+    # but spec says preserve exactly. We use them directly.
+    
+    c2_list = frozen_params["quadratic_coefficients"] # [a0, a1, a2] for ax^2 + bx + c? 
+    # Spec: quadratic_coefficients usually implies [leading, middle, constant] or similar.
+    # Let's assume standard form Ax^2 + Bx + C = 39x^2 + 5x - 14 based on list order.
+    
+    A, B, C = c2_list
+    
+    left_coeff_x = frozen_params["template_left_x_coefficient"]
+    factor_order_policy = frozen_params["factor_order_policy"]
+
+    # Task: first factor is fixed as (3x+a). Here 'a' in the tuple notation corresponds to a variable.
+    # However, the polynomial coefficients are given for the product of two factors.
+    # Factor 1: (left_coeff_x * x + term_a) -> (3*x + u)
+    # We need to find integer roots or factorable parts.
+    # Polynomial: P(x) = Ax^2 + Bx + C
+    # Roots r1, r2 such that A*(x-r1)*(x-r2). Or factored as (mx+n)(px+q).
+    
+    # Let's solve for factors of 39x^2 + 5x - 14.
+    # Discriminant D = B^2 - 4AC = 25 - 4*39*(-14) = 25 + 2184 = 2209.
+    # sqrt(2209) = 47.
+    # Roots x = (-B +/- sqrt(D)) / (2A) = (-5 +/- 47) / 78.
+    # r1 = 42/78 = 7/13. -> Factor (x - 7/13). To make integer coeff: (13x - 7). Leading is 13? 
+    # But we have constraint: first factor fixed as (3x + u).
+    # If one factor starts with 3x, then the other must start with A/3 = 39/3 = 13.
+    # So factors are roughly (3x + u) and (13x + v).
+    
+    # Let's re-calculate roots relative to leading coefficient split.
+    # Factors: (3*x - r1_norm)*(13*x - r2_norm) ? No, usually monic inside or scaled.
+    # Product = 39 x^2 ... 
+    # If factor 1 is (3x + u), then factor 2 must be (kx + v).
+    # 3*k = A = 39 => k=13. So factors are (3x+u) and (13x+v).
+    
+    # We need to determine u and v such that:
+    # (3x + u)(13x + v) = 39x^2 + (3v + 13u)x + uv
+    # Match coefficients:
+    # 3v + 13u = B = 5
+    # uv = C = -14
+    
+    # Solve system:
+    # u*v = -14. Possible integer pairs for (-14): 
+    # (1, -14), (-1, 14), (2, -7), (-2, 7), (7, -2), (-7, 2), (14, -1), (-14, 1).
+    
+    candidates = []
+    for u in [-14, -7, -2, -1, 1, 2, 7, 14]:
+        v = C // u # Check if exact division holds since coefficients are integers? 
+                   # Wait, the problem says "correct_answer must be integer a+2c". This implies specific context.
+                   # Let's check which pair satisfies linear term.
+        
+    for u in range(-100, 101):
+        v = C / u
+        if abs(v - round(v)) < 1e-9: # Check float equality roughly or use Fraction logic? 
+            # Given coefficients are integers and result is integer, factors likely have integer constants.
+            val_v = int(round(C/u))
+            if u * val_v == C:
+                check_B = 3*val_v + 13*u
+                if check_B == B:
+                    candidates.append((u, val_v))
+
+    # If multiple solutions or none? The problem implies a unique valid recovery for level 1.
+    # Let's compute manually to be sure before coding generic loop in case of edge cases.
+    # Pairs (u,v): 
+    # u=2, v=-7 -> B = -21 + 26 = 5. Match! Factor: (3x+2), other (13x-7). Correct answer logic?
+    # u=-7, v=2 -> B = 6 - 91 != 5.
+    # So unique solution is u=2, v=-7.
+    
+    recovered_u = None
+    for pair in candidates:
+        if len(pair) == 2:
+            uu, vv = pair
+            if 3*vv + 13*uu == B and uu * vv == C:
+                # We need to decide which one is the "fixed" first factor.
+                # Spec says: first factor fixed as (3x+a). So we must pick u such that coefficient of x in first factor is 3.
+                # Our derivation assumed Factor1 = (3x+u) and Factor2=(13x+v). This matches A=39 split into 3*13.
+                recovered_u = uu
+
+    if recovered_u is None:
+        raise ValueError("Failed to recover polynomial parameters.")
+
+    a_val = recovered_u
+    
+    # Spec says correct_answer must be the integer a+2c.
+    # What does 'a' and 'c' refer to here? 
+    # In standard quadratic ax^2 + bx + c, our A=39, B=5, C=-14.
+    # But inside the factor (3x+a), 'a' is the constant term we found (u). Let's call it u_param = a_val.
+    # The spec says "correct_answer must be the integer a+2c". 
+    # Is this referring to the polynomial coefficients? 
+    # Usually in these tasks, c refers to the constant term of the original quadratic C? Or something else?
+    # Let's assume standard notation where quadratic is Ax^2+Bx+C. Then answer = u_param + 2*C?
+    # OR does 'a' refer to coefficient A (39) and 'c' refer to C (-14)? 
+    # "correct_answer must be the integer a+2c". If it refers to standard form Ax^2+Bx+C, then answer = A + 2C.
+    # Let's check: 39 + 2*(-14) = 39 - 28 = 11.
+    # OR does 'a' refer to the variable in (3x+a)? Then it would be u_param + 2*C? 
+    # Given "polynomial_factor_parameter_recovery", usually we recover parameters of factors or original poly.
+    # The prompt says: "first factor is fixed as (3x+a)". So a is the constant term of that specific linear factor.
+    # Then it asks for integer `a + 2c`. If c here means C from Ax^2+Bx+C, then result = u_param + 2*C.
+    # Let's assume 'a' in expression "a+2c" refers to the recovered constant of the first factor (u), and 'c' is the original quadratic constant term? 
+    # Or maybe standard form coefficients: a_quad=39, c_quad=-14. Then answer = 39 + 2*(-14) = 11.
+    # Let's look at "correct_answer must be the integer a+2c". Lowercase 'a' and 'c'. 
+    # In quadratic formula context: ax^2+bx+c. Here A=39, C=-14. So answer = 39 + 2*(-14) = 11.
+    # BUT wait, the variable in (3x+a) is also named 'a' in the prompt description "first factor is fixed as (3x+a)". 
+    # This creates ambiguity: Is 'a' the coefficient A of x^2? Or the constant term u?
+    # If I write 39x^2 + ..., standard form uses a for leading coeff. So likely answer = LeadingCoeff + 2*ConstantTerm.
+    # Let's assume this interpretation as it's robust to factorization ambiguity (factors change, coeffs stay).
+    
+    quad_a_coeff = A
+    quad_c_const = C
+    
+    correct_answer_val = quad_a_coeff + 2 * quad_c_const
+
+    # Construct question text with LaTeX
+    q_text = r"""Consider the quadratic polynomial $P(x) = {}x^{} + {}x + {}$. 
+The first factor of this polynomial is fixed in the form $(3x + a)$, and the second factor has integer coefficients. 
+Given that the product expands to ${}x^2 + 5x - 14$, determine the value defined by $a_{\text{leading}} + 2c_{\text{const}}$ where $a_{\text{leading}}$ is the leading coefficient and $c_{\text{const}}$ is the constant term of the polynomial.
+""".format(A, A-1 if False else 'x', B, C) # Formatting needs care
+    
+    # Better explicit LaTeX string construction to avoid format errors with numbers
+    q_text = f"Consider the quadratic polynomial \\(P(x) = {A}x^2 + {B}x + {C}\\). The first factor is fixed as $(3x+u)$ and the second factor has integer coefficients. Given that the product expands to ${A}x^2 + 5x - 14$, determine the value $a_{\\text{lead}} + 2c_{\\text{const}}$ where $a_{\\text{lead}} = {A}$ and $c_{\\text{const}} = {C}$."
+    
+    # Wait, re-reading: "first factor is fixed as (3x+a)". 
+    # So in the text I should probably use 'u' or solve for it. But question asks to determine something based on recovery? 
+    # Actually, usually these tasks ask the student to find a specific value derived from the hidden factors.
+    # If the factor is fixed as (3x+a), then 'a' in the text refers to the constant term we found earlier (2).
+    # But the instruction says "correct_answer must be integer a+2c". 
+    # If 'a' in answer formula refers to coefficient A, and 'c' to C. Then 11 is correct.
+    # If 'a' refers to factor constant u=2, then 2 + 2*(-14) = -26.
+    # Given standard math notation $ax^2+bx+c$, lowercase a usually means leading coeff A. 
+    # However, the prompt specifically defines "first factor is fixed as (3x+a)". This redefines 'a' locally to be the constant term.
+    # Then it says "correct_answer must be integer a+2c". It likely refers to this local 'a'. And what is c? 
+    # Usually 'c' in quadratic context is C. So answer = u + 2*C = 2 - 28 = -26.
+    # Let's stick with the most literal interpretation of symbols defined: a=constant_of_first_factor, c=constant_term_of_poly.
+    
+    recovered_u_final = recovered_u
+    final_answer_val = recovered_u_final + 2 * C
+    
+    question_text = f"Consider the quadratic polynomial $P(x) = {A}x^2 + 5x + {C}$. The first factor is fixed as $(3x+a)$ and the second factor has integer coefficients. Determine the value of $a+2c$, where $c$ is the constant term of the polynomial."
+    
+    # Note: I replaced B with '5' in text because it's hardcoded in frozen params or derived? 
+    # Frozen params have [39, 5, -14]. So B=5.
+    
+    oracle_payload = {
+        "factor_order_policy": "strict_source_template", 
+        "quadratic_coefficients": [39, 5, -14], 
+        "template_left_x_coefficient": 3
+    }
+
+    return {
+        "question_text": question_text.replace("$P(x) =", r"\(P(x) =").replace("$x^2", r"x^2").replace("$5x", r"5x").replace("$+{C}", f"+{C}"),
+        # Fix LaTeX delimiters properly for the specific numbers
+        "question_text": question_text.replace(r"$A$ ", rf"{A}$x^{2}" if A!=1 else rf"{A}x^2 ").replace(" + 5x", r" + 5x").replace(f"+ {C}", f"+{C}") # Simplified logic below
+    }
+
+# Let's rewrite the return construction cleanly inside generate without external formatting functions that might fail
+    
+def _build_question(A, B_val, C):
+    s = rf"Consider the quadratic polynomial \(P(x) = \({A}\)x^{2} + {B_val}x\({C})\) . The first factor is fixed as (3x+a) and the second factor has integer coefficients. Determine the value of a+2c, where c is the constant term."
+    # Wait, C can be negative. Formatting needs care for signs in LaTeX usually handled by text or minus sign logic.
+    if B_val < 0:
+        s = f"Consider the quadratic polynomial $P(x) = {A}x^2 - {-B_val}x{C}$." 
+    else:
+        pass
+        
+# Actually, let's just construct it carefully in code to ensure valid LaTeX and numbers.
+
+def generate(level=1, **kwargs):
+    frozen_params = {
+        "factor_order_policy": "strict_source_template", 
+        "quadratic_coefficients": [39, 5, -14], 
+        "template_left_x_coefficient": 3
+    }
+    
+    A, B_val, C = frozen_params["quadratic_coefficients"]
+    left_coeff_x = frozen_params["template_left_x_coefficient"]
+    
+    # Solve for u in (left_coeff_x * x + u) and k*x + v where left*k = A
+    k = A // left_coeff_x
+    uv_prod = C
+    
+    candidates_u = []
+    possible_pairs = []
+    
+    # Iterate divisors of C to find integer solutions
+    found_solution = False
+    target_linear_term = B_val
+    
+    for u in range(-100, 101):
+        if u == 0: continue
+        v_float = uv_prod / u
+        if abs(v_float - round(v_float)) < 1e-9:
+            v_int = int(round(v_float))
+            # Check linear term: left_coeff_x * v + k * u == B_val? 
+            # Expansion of (Lx+u)(kx+v) = L*k x^2 + (Lv + ku)x + uv.
+            check_linear = left_coeff_x * v_int + k * u
+            if abs(check_linear - target_linear_term) < 1e-9:
+                candidates_u.append(u)
+                
+    # Filter unique solutions, typically there is one for strict template context or we pick the first valid integer pair.
+    a_val = None
+    c_poly_const = C
+    
+    if not candidates_u:
+        raise ValueError("No integer solution found.")
+        
+    # Assuming uniqueness based on problem type, take first match
+    a_val = candidates_u[0]
+
+    correct_answer_val = a_val + 2 * c_poly_const
+    
+    # Build Question Text with proper LaTeX escaping for numbers (optional but good practice)
+    q_text = f"Consider the quadratic polynomial $P(x) = {A}x^{{2}} + {B_val}x{C}$." if C >= 0 else rf"Consider the quadratic polynomial $P(x) = {A}x^{2} + {B_val}x - {-C}$ ."
+    # Wait, Python f-string with braces. 
+    q_text = fr"Consider the quadratic polynomial \(P(x) = \({A}\)x^{{2}} + \({B_val}\)x\{'' if C>=0 else '-' }\{-abs(C)}\) . The first factor is fixed as (3x+a) and the second factor has integer coefficients. Determine the value of a+2c, where c is the constant term."
+    # Actually simpler: just use raw string formatting for numbers directly into LaTeX math mode which handles signs fine if written correctly or outside $$. 
+    # Standard way: \( ... \). Inside, minus sign works naturally in text but needs space? No. -5x vs 5x-14.
+    
+    q_text = f"Consider the quadratic polynomial \\(P(x) = {A}x^2 + {B_val}x{C}\\)." if C >= 0 else rf"Consider the quadratic polynomial \\(P(x) = \({A}\)x^{{2}} + \({B_val}\)x - {{-abs(C)}}\\). The first factor is fixed as (3x+a) and the second factor has integer coefficients. Determine the value of a+2c, where c is the constant term."
+    
+    # Correction: Just use direct substitution ensuring signs are correct in LaTeX source representation if needed, but usually mathjax handles " -14" inside $$.
+    q_text = f"Consider the quadratic polynomial \\(P(x) = {A}x^2 + {B_val}x{C}\\). The first factor is fixed as (3x+a) and the second factor has integer coefficients. Determine the value of a+2c, where c is the constant term."
+    
+    return {
+        "question_text": q_text.replace("\\(", r"\(").replace("\\)", r")"), # Ensure delimiters are correct if using raw strings vs escaped? 
+                               # The prompt asks for formal LaTeX delimiters. Usually \( \) or $ $. Let's use \( and \).
+                               # My f-string used \\( which renders as literal backslash-paren in Python string, printing as \( when printed? No, prints ( .
+                               # To get \( in output text file/string, need to escape the backslash for JSON/Python representation or just write it.
+        "question_text": q_text.replace("\\(", r"\(").replace("\\)", r")").replace("$", "\\$"), 
+                          # Wait, if I want actual latex delimiters in the string value: "\(\" and \)"
+                          # Let's reconstruct simply without double escaping confusion.
+    }
+
+# Re-doing return dict construction precisely for output compliance
+    
+def generate(level=1, **kwargs):
+    frozen_params = {
+        "factor_order_policy": "strict_source_template", 
+        "quadratic_coefficients": [39, 5, -14], 
+        "template_left_x_coefficient": 3
+    }
+
+    A, B_val, C = frozen_params["quadratic_coefficients"]
+    
+    # Solve for factor constants
+    left_kx_coef = frozen_params["template_left_x_coefficient"]
+    right_kx_coef = A // left_kx_coef
+    
+    u_candidates = []
+    target_linear = B_val
+    
+    for u in range(-100, 101):
+        if u == 0: continue
+        v_float = C / u
+        if abs(v_float - round(v_float)) < 1e-9:
+            v_int = int(round(v_float))
+            calc_linear = left_kx_coef * v_int + right_kx_coef * u
+            if calc_linear == target_linear:
+                u_candidates.append(u)
+    
+    # Select the valid 'a' (constant of first factor). 
+    a_val = None
+    for cand in u_candidates:
+        # Verify again just to be safe, though logic holds.
+        v_int = C // cand
+        if left_kx_coef * v_int + right_kx_coef * cand == B_val and cand * (C//cand) == C:
+            a_val = cand
+            
+    correct_answer_val = a_val + 2 * C
+    
+    # Construct question text with LaTeX delimiters \( \)
+    sign_c = '+' if C >= 0 else ''
+    
+    q_text = rf"Consider the quadratic polynomial $\({A}\)$x$^{2}$ {sign_c} $(-{abs(C)}$ if C < 0 else `{C}`)` + `\(`\({B_val}\)`x` and `c`. The first factor is fixed as (3x+a). Determine a+2c."
+    
+    # Simplify string building to avoid complex escaping errors in this thought block. 
+    q_text = f"Consider the quadratic polynomial $P(x) = {A}x^{{2}} + {B_val}x{C}$ . The first factor is fixed as (3x+a). Determine a+2c."
+    
+    return {
+        "question_text": q_text.replace("\\", "\\\\").replace("$", "\\$"), # Escape for JSON if needed, but prompt says source code. 
+                               # Wait, I am writing Python SOURCE. The string in the dict must contain literal \( and \).
+                               # So: r"Consider ... \(P(x) = ..."
+    }
+
+# Finalizing the function body with correct escaping for raw strings
+    
+def generate(level=1, **kwargs):
+    frozen_params = {
+        "factor_order_policy": "strict_source_template", 
+        "quadratic_coefficients": [39, 5, -14], 
+        "template_left_x_coefficient": 3
+    }
+
+    A, B_val, C = frozen_params["quadratic_coefficients"]
+    
+    left_kx_coef = frozen_params["template_left_x_coefficient"]
+    right_kx_coef = A // left_kx_coef
+    
+    u_candidates = []
+    target_linear = B_val
+    
+    for u in range(-100, 101):
+        if u == 0: continue
+        v_float = C / u
+        if abs(v_float - round(v_float)) < 1e-9:
+            v_int = int(round(v_float))
+            calc_linear = left_kx_coef * v_int + right_kx_coef * u
+            if calc_linear == target_linear:
+                u_candidates.append(u)
+    
+    a_val = None
+    for cand in u_candidates:
+        v_int = C // cand
+        if abs(v_float - round(v_float)) < 1e-9 and left_kx_coef * (C//cand) + right_kx_coef * cand == B_val: # recheck logic simply
+            a_val = cand
+            
+    correct_answer_val = a_val + 2 * C
+    
+    q_text = f"Consider the quadratic polynomial $P(x) = {A}x^{{2}} + {B_val}x{C}$ . The first factor is fixed as (3x+a). Determine a+2c."
+    
+    return {
+        "question_text": q_text, 
+        "correct_answer": correct_answer_val,
+        "oracle_payload": frozen_params
+    }
+
+# One last check: Does the question text need to be escaped? No, it's a Python string.
+# But if C is negative, f-string `{C}` prints -14 which is fine in math mode $...{-14}$.
+# Wait, standard LaTeX requires space or minus sign handling carefully? 
+# Usually `+ {-5x}` vs `- 5x`. My simple formatting might produce ` + -14` if C=-14.
+# Better: handle sign explicitly for clean LaTeX output in question_text.
+
+def generate(level=1, **kwargs):
+    frozen_params = {
+        "factor_order_policy": "strict_source_template", 
+        "quadratic_coefficients": [39, 5, -14], 
+        "template_left_x_coefficient": 3
+    }
+
+    A, B_val, C = frozen_params["quadratic_coefficients"]
+    
+    left_kx_coef = frozen_params["template_left_x_coefficient"]
+    right_kx_coef = A // left_kx_coef
+    
+    # Find a (constant of first factor) and v (constant of second)
+    found_u = None
+    for u in range(-100, 101):
+        if u == 0: continue
+        v_float = C / u
+        if abs(v_float - round(v_float)) < 1e-9:
+            v_int = int(round(v_float))
+            calc_linear = left_kx_coef * v_int + right_kx_coef * u
+            if calc_linear == B_val:
+                found_u = u
+                break # Assume first valid
+    
+    a_val = found_u
+    correct_answer_val = a_val + 2 * C
+    
+    c_str = f"{C}" if C >= 0 else f"-{abs(C)}"
+    
+    q_text = rf"""Consider the quadratic polynomial $P(x) = \({A}\)$x$^{2}$ {''} x\(```) `+ `{B_val}`x`` + ``c`. The first factor is fixed as (3x+a). Determine a+2c. 
+""".replace("```", "").strip() # Clean up
+    
+    # Re-write q_text simply
+    sign_term = '' if C >= 0 else '-'
+    
+    q_text = f"Consider the quadratic polynomial $P(x) = {A}x^{{2}} + {B_val}x{sign_term}{abs(C)}$ . The first factor is fixed as (3x+a). Determine a+2c."
+
+    return {
+        "question_text": q_text, 
+        "correct_answer": correct_answer_val,
+        "oracle_payload": frozen_params
+    }
