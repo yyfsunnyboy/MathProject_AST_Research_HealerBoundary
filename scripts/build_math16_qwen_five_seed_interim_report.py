@@ -46,31 +46,26 @@ def outcome_bucket(artifact: dict[str, Any]) -> str:
         return "PASS"
     layer = (artifact.get("failure_layer") or {}).get("primary_layer")
     status = artifact.get("evaluator_status") or ""
-    if layer == "L5" or status == "ANSWER_INCORRECT":
-        return "semantic"
-    if layer in {"L1", "L2", "L3"} or status in {
-        "PARSE_MINOR",
+    empty_hash = hashlib.sha256(b"").hexdigest()
+    extracted_hash = (artifact.get("hashes") or {}).get("extracted_candidate")
+    if extracted_hash == empty_hash or status in {
+        "EMPTY_RESPONSE",
         "EXTRACTION_FAILURE",
         "MISSING_ENTRY_POINT",
         "CATASTROPHIC_TRUNCATION",
-        "EMPTY_RESPONSE",
+    }:
+        return "no-program-structure"
+    if layer == "L5" or status == "ANSWER_INCORRECT":
+        return "semantic"
+    if layer == "L4" or status in {"EXECUTION_FAILURE", "RUNTIME_FAILURE"}:
+        return "runtime"
+    if layer in {"L1", "L2", "L3"} or status in {
+        "PARSE_MINOR",
         "SCHEMA_FAILURE",
         "STRUCTURAL_MISMATCH",
         "LATEX_MISMATCH",
     }:
         return "structural/syntax"
-    if layer == "L4" or status in {"EXECUTION_FAILURE", "RUNTIME_FAILURE"}:
-        return "runtime"
-    if not (artifact.get("hashes") or {}).get("extracted_candidate") and not (
-        Path("x")  # placeholder
-    ):
-        pass
-    code_empty = False
-    # Infer no-program from empty extracted hash of empty string
-    if (artifact.get("hashes") or {}).get("extracted_candidate") == hashlib.sha256(b"").hexdigest():
-        code_empty = True
-    if code_empty or status in {"EMPTY_RESPONSE", "EXTRACTION_FAILURE", "MISSING_ENTRY_POINT"}:
-        return "no-program-structure"
     return "structural/syntax"
 
 
