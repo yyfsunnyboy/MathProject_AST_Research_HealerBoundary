@@ -1,0 +1,47 @@
+def generate(level=1, **kwargs):
+    frozen_params = kwargs.get("frozen_sampled_parameters", {"radicand": 27}) if "frozen_sampled_parameters" in kwargs else {}
+    
+    radicand_input = frozen_params.get("radicand", 27)
+    
+    # Ensure we are working with an integer for the radical simplification logic
+    n = int(radicand_input)
+    
+    # Use the domain API to simplify the term (coefficient, square-free radicand)
+    coeff_result, sq_free_radicand = RadicalOps.simplify_term(1, n)
+    
+    coefficient = int(coeff_result) if isinstance(coeff_result, Fraction) else coeff_result
+    new_radicand = int(sq_free_radicand)
+    
+    # Construct the canonical LaTeX string for the answer: k \sqrt{m} or just m if k=0 (though not possible here usually)
+    # If coefficient is 1, we write \sqrt{n}, else coeff\sqrt{n}
+    if coefficient == 1 and new_radicand > 1:
+        canonical_latex = f"\\sqrt{{{new_radicand}}}"
+    elif coefficient == -1 and new_radicand > 1:
+        canonical_latex = f"-\\sqrt{{{new_radicand}}}"
+    else:
+        if coefficient < 0:
+            sign_str = "-"
+            coeff_mag = abs(coefficient)
+        else:
+            sign_str = ""
+            coeff_mag = coefficient
+        
+        # Handle single digit radicands without braces in sqrt, but standard practice often uses braces for clarity or specific formatting. 
+        # Given "canonical_latex", we will use \\sqrt{...} consistently for correctness with multi-digit and to be safe with LaTeX parsers that might misinterpret nested digits if not braced (though usually fine).
+        canonical_latex = f"{sign_str}\\{{{coeff_mag}}\\sqrt{{{{new_radicand}}}}}"
+
+    # Format question text formally using LaTeX delimiters. 
+    # Question: Simplify the radical expression \\sqrt{{{radicand_input}}}
+    question_text = rf"Simplify the radical expression \sqrt{{{radicand_input}}}"
+
+    correct_answer_dict = {
+        "coefficient": coefficient,
+        "radicand": new_radicand,
+        "canonical_latex": canonical_latex
+    }
+
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer_dict,
+        "oracle_payload": frozen_params if isinstance(frozen_params, dict) else {"radicand": radicand_input}
+    }
