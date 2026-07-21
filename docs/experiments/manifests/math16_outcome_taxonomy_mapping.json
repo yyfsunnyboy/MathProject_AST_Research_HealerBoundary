@@ -1,0 +1,153 @@
+{
+  "manifest_id": "math16_outcome_taxonomy_mapping_v1",
+  "protocol_id": "MATH16-R06-FIXED",
+  "purpose": "Cross-model canonical outcome mapping for Math16 five-seed three-model aggregation. Does not rewrite existing Qwen or Gemini Seed-1 stored fields.",
+  "sd_definition": "sample_standard_deviation_n_minus_1",
+  "sources": {
+    "qwen_phase1_report": "docs/experiments/reports/math16_qwen_five_seed_interim_report.md",
+    "qwen_phase1_report_data": "docs/experiments/reports/math16_qwen_five_seed_interim_report_data.json",
+    "qwen_ab3": "docs/experiments/results/math16_qwen_multiseed_ab3_phase1/ab3_report_data.json",
+    "seed1_ab3": "docs/experiments/results/math16_ab3_full_report_data.json"
+  },
+  "h0_pass_fail": {
+    "PASSED": {
+      "canonical": "PASS",
+      "layer": null,
+      "included": true,
+      "aggregation_treatment": "count_as_pass",
+      "notes": "H0 evaluator_status PASSED / confirmatory PASSED"
+    },
+    "all_non_PASSED": {
+      "canonical": "FAIL",
+      "included": true,
+      "aggregation_treatment": "count_as_fail_then_layer"
+    }
+  },
+  "failure_layers": {
+    "L0": {
+      "qwen_names": ["L0"],
+      "gemini_names": ["L0", "INFRASTRUCTURE_FAILURE", "L0_INVALID_INFRASTRUCTURE"],
+      "canonical": "L0",
+      "layer": "L0",
+      "included": true,
+      "aggregation_treatment": "failure_layer_share_among_fail"
+    },
+    "L1": {
+      "qwen_names": ["L1"],
+      "gemini_names": ["L1", "PARSE_MINOR", "EXTRACTION_FAILURE", "MISSING_ENTRY_POINT", "CATASTROPHIC_TRUNCATION", "EMPTY_RESPONSE"],
+      "canonical": "L1",
+      "layer": "L1",
+      "included": true,
+      "aggregation_treatment": "failure_layer_share_among_fail"
+    },
+    "L2": {
+      "qwen_names": ["L2"],
+      "gemini_names": ["L2", "SCHEMA_FAILURE"],
+      "canonical": "L2",
+      "layer": "L2",
+      "included": true,
+      "aggregation_treatment": "failure_layer_share_among_fail"
+    },
+    "L3": {
+      "qwen_names": ["L3"],
+      "gemini_names": ["L3", "STRUCTURAL_MISMATCH", "LATEX_MISMATCH"],
+      "canonical": "L3",
+      "layer": "L3",
+      "included": true,
+      "aggregation_treatment": "failure_layer_share_among_fail"
+    },
+    "L4": {
+      "qwen_names": ["L4"],
+      "gemini_names": ["L4", "EXECUTION_FAILURE", "RUNTIME_FAILURE"],
+      "canonical": "L4",
+      "layer": "L4",
+      "included": true,
+      "aggregation_treatment": "failure_layer_share_among_fail"
+    },
+    "L5": {
+      "qwen_names": ["L5"],
+      "gemini_names": ["L5", "ANSWER_INCORRECT", "INTRINSIC_SAFETY"],
+      "canonical": "L5",
+      "layer": "L5",
+      "included": true,
+      "aggregation_treatment": "failure_layer_share_among_fail"
+    }
+  },
+  "ab3_outcomes": {
+    "identity_reuse": {
+      "qwen_name": "identity_reuse",
+      "gemini_name": "identity_reuse",
+      "canonical": "identity_reuse",
+      "layer": null,
+      "included": true,
+      "aggregation_treatment": "h0_pass_negative_control",
+      "notes": "H0 PASS identity reuse; healer not applied"
+    },
+    "no_trigger": {
+      "qwen_name": "no_trigger",
+      "gemini_name": "no_trigger",
+      "canonical": "no_trigger",
+      "included": true,
+      "aggregation_treatment": "ab3_fail_path_count"
+    },
+    "guarded_abstain": {
+      "qwen_name": "guarded_abstain",
+      "gemini_name": "guarded_abstain",
+      "canonical": "guarded_abstain",
+      "included": true,
+      "aggregation_treatment": "ab3_fail_path_count"
+    },
+    "layer_exposure": {
+      "qwen_name": "layer_exposure",
+      "gemini_name": "layer_exposure",
+      "canonical": "layer_exposure",
+      "included": true,
+      "aggregation_treatment": "ab3_fail_path_count",
+      "aliases": ["triggered_changed_still_fail"],
+      "notes": "triggered_changed_still_fail MUST map to layer_exposure; not false positive"
+    },
+    "rescue_to_pass": {
+      "qwen_name": "rescue_to_pass",
+      "gemini_name": "rescue_to_pass",
+      "canonical": "rescue_to_pass",
+      "included": true,
+      "aggregation_treatment": "ab3_fail_path_count"
+    },
+    "regression": {
+      "qwen_name": "regression",
+      "gemini_name": "regression",
+      "canonical": "regression",
+      "included": true,
+      "aggregation_treatment": "ab3_pass_path_violation_count"
+    },
+    "excluded_no_program_structure": {
+      "qwen_name": "excluded_no_program_structure",
+      "gemini_name": "excluded_no_program_structure",
+      "canonical": "excluded_no_program_structure",
+      "included": false,
+      "aggregation_treatment": "excluded_from_evaluable_fail_denominator",
+      "notes": "Counted in H0 FAIL but subtracted for evaluable FAIL"
+    },
+    "evaluator_failure": {
+      "qwen_name": "evaluator_failure",
+      "gemini_name": "evaluator_failure",
+      "canonical": "evaluator_failure",
+      "included": true,
+      "aggregation_treatment": "ab3_fail_path_count"
+    }
+  },
+  "stability_outcome_buckets": {
+    "PASS": {"canonical": "PASS"},
+    "semantic": {"canonical": "semantic", "typical_layers": ["L5"]},
+    "structural/syntax": {"canonical": "structural/syntax", "typical_layers": ["L1", "L2", "L3"]},
+    "runtime": {"canonical": "runtime", "typical_layers": ["L4"]},
+    "no-program-structure": {"canonical": "no-program-structure"}
+  },
+  "mapping_rules": [
+    "One-to-one where names already match across Qwen and Gemini Phase reports.",
+    "Many-to-one only for evaluator_status synonyms into L0–L5 via preliminary_failure_layer.",
+    "Do not merge distinct Ab3 outcomes.",
+    "Do not rewrite stored Qwen artifacts; mapping is for aggregation views only.",
+    "triggered_changed_still_fail → layer_exposure always."
+  ]
+}
