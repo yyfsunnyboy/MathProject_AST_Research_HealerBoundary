@@ -113,6 +113,23 @@ ALLOWED_STOP_REASONS: frozenset[str | None] = frozenset(
     }
 )
 
+# Producer (ce115_research_healer_runner) emits dynamic loop-fallback stop_reasons:
+#   f"fallback_loop_detected_{loop_reason}"
+# where loop_reason is one of:
+#   - "compiler_loop_at_line_{lineno}"
+#   - "evaluator_loop_with_verdict_{evaluator_outcome}"
+# Accept the frozen prefix without enumerating every suffix (protocol consistency only;
+# does not change repair / loop detection semantics).
+FALLBACK_LOOP_STOP_REASON_PREFIX: str = "fallback_loop_detected_"
+
+
+def is_allowed_stop_reason(stop_reason: str | None) -> bool:
+    if stop_reason in ALLOWED_STOP_REASONS:
+        return True
+    return isinstance(stop_reason, str) and stop_reason.startswith(
+        FALLBACK_LOOP_STOP_REASON_PREFIX
+    )
+
 FINAL_STATUSES: frozenset[str] = frozenset(
     {"no_op", "changed", "validation_failed", "max_passes_exceeded", "error"}
 )
@@ -269,10 +286,11 @@ def validate_rule_outcome(outcome: RuleOutcome) -> None:
         raise RuleProtocolError("after_hash must be 64-char lowercase hex SHA-256")
     if not isinstance(outcome.validation, Mapping):
         raise RuleProtocolError("validation must be a mapping")
-    if outcome.stop_reason not in ALLOWED_STOP_REASONS:
+    if not is_allowed_stop_reason(outcome.stop_reason):
         allowed = sorted(r for r in ALLOWED_STOP_REASONS if r is not None) + [None]
         raise RuleProtocolError(
-            f"stop_reason must be one of {allowed}, got {outcome.stop_reason!r}"
+            f"stop_reason must be one of {allowed} or start with "
+            f"{FALLBACK_LOOP_STOP_REASON_PREFIX!r}, got {outcome.stop_reason!r}"
         )
 
     # Semantic ladder: changed ⇒ triggered ⇒ applicable
@@ -329,10 +347,11 @@ def validate_provenance(prov: PassProvenance) -> None:
         raise RuleProtocolError("after_hash must be 64-char lowercase hex SHA-256")
     if not isinstance(prov.validation, Mapping):
         raise RuleProtocolError("validation must be a mapping")
-    if prov.stop_reason not in ALLOWED_STOP_REASONS:
+    if not is_allowed_stop_reason(prov.stop_reason):
         allowed = sorted(r for r in ALLOWED_STOP_REASONS if r is not None) + [None]
         raise RuleProtocolError(
-            f"stop_reason must be one of {allowed}, got {prov.stop_reason!r}"
+            f"stop_reason must be one of {allowed} or start with "
+            f"{FALLBACK_LOOP_STOP_REASON_PREFIX!r}, got {prov.stop_reason!r}"
         )
     if prov.final_status not in FINAL_STATUSES:
         raise RuleProtocolError(
