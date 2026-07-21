@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce112_q12_independent_probability_fraction__ab2d__seed_2026072004",
+  "task_id": "ce112_q12_independent_probability_fraction",
+  "family": "fraction",
+  "condition": "ab2d",
+  "seed": 2026072004,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072004
+  },
+  "prompt_sha256": "e0ceba6ddea69db946947e44372f0667b4445539f11857bbafa275c518a9506a",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "import random\nfrom fractions import Fraction as PyFraction\nfrom typing import Dict, Any\n\n\ndef generate(level=1, **kwargs) -> Dict[str, Any]:\n    p1_min = kwargs.get(\"p1\", [2])[0] if isinstance(kwargs.get(\"p1\"), list) else 2\n    p1_max = kwargs.get(\"p1\", [6])[1] if isinstance(kwargs.get(\"p1\"), list) else 6\n    \n    p2_min = kwargs.get(\"p2\", [1])[0] if isinstance(kwargs.get(\"p2\"), list) else 1\n    p2_max = kwargs.get(\"p2\", [5])[1] if isinstance(kwargs.get(\"p2\"), list) else 5\n\n    # Generate random probabilities within the frozen ranges to ensure variability while respecting constraints\n    prob_a = PyFraction(random.randint(p1_min, p1_max), 100)\n    prob_b = PyFraction(random.randint(p2_min, p2_max), 100)\n\n    # Calculate independent probability: P(A and B) = P(A) * P(B)\n    numerator = (prob_a.numerator * prob_b.numerator).numerator if hasattr(prob_a.numerator, 'numerator') else int(prob_a.numerator) * int(prob_b.numerator)\n    denominator = (prob_a.denominator * prob_b.denominator).denominator if hasattr(prob_a.denominator, 'denominator') else int(prob_a.denominator) * int(prob_b.denominator)\n\n    # Simplify fraction manually to ensure irreducibility as per standard math rules for this task type\n    common_divisor = 1\n    test_num = abs(numerator)\n    if denominator == 0:\n        raise ValueError(\"Denominator cannot be zero\")\n    \n    d_val = int(denominator)\n    n_val = numerator\n    \n    # Find GCD manually to simplify\n    a, b = abs(int(n_val)), int(d_val)\n    while b != 0:\n        a, b = b, a % b\n    gcd_value = a\n\n    simplified_numerator = n_val // gcd_value if isinstance(n_val, (int, PyFraction)) else str(int(simplified_numerator)) # Handle type safety loosely for output construction logic here but strictly using FractionOps below\n    \n    # Re-calculate properly using domain APIs as requested in DOMAIN section\n    from core.prompts.domain_function_library import FractionOps\n\n    p1_frac = int(prob_a.numerator) / prob_a.denominator if hasattr(prob_a, 'denominator') else float(n_val)/d_val\n    p2_frac = int(prob_b.numerator) / prob_b.denominator if hasattr(prob_b, 'denominator') else float(int(d_val))/int(abs(n_val)) # This logic is flawed in thought trace, let's restart with clean FractionOps usage\n\n    # Correct approach using domain APIs strictly as per instruction\n    p1_frac = PyFraction(random.randint(p1_min, p1_max), 10) if isinstance(kwargs.get(\"p1\"), list) else PyFraction(2, 10)\n    p2_frac = PyFraction(random.randint(p2_min, p2_max), 10) if isinstance(kwargs.get(\"p2\"), list) else PyFraction(1, 10)\n\n    # Ensure we use the provided frozen parameters exactly for oracle_payload but generate random values within them for the question\n    final_p1 = PyFraction(random.randint(p1_min, p1_max), 100) if isinstance(kwargs.get(\"p1\"), list) else PyFraction(2, 100)\n    final_p2 = PyFraction(random.randint(p2_min, p2_max), 100) if isinstance(kwargs.get(\"p2\"), list) else PyFraction(1, 100)\n\n    product_frac = FractionOps.mul(final_p1, final_p2)\n    \n    # Ensure irreducible fraction representation via domain API or manual reduction logic compatible with output requirements\n    # The task requires canonical_latex for an irreducible fraction. \n    # We will construct the numerator and denominator strings based on the result of multiplication\n    \n    num_str = str(product_frac.numerator) if hasattr(product_frac, 'numerator') else \"1\"\n    den_str = str(product_frac.denominator) if hasattr(product_frac, 'denominator') else \"1\"\n\n    # Canonical LaTeX for irreducible fraction: \\frac{num}{den}\n    canonical_latex = f\"\\\\frac{{{num_str}}}{{{' '.join(map(str, [d_val]))}}}\" \n    # Wait, let's use the domain API to_string or similar if available? No specific string conversion in list.\n    # We will construct it manually ensuring irreducibility by using Fraction logic\n    \n    from fractions import gcd as math_gcd\n    g = math_gcd(int(num_str), int(den_str))\n    \n    clean_num = num_str // g\n    clean_den = den_str // g\n\n    canonical_latex_final = f\"\\\\frac{{{clean_num}}}{{{' '.join(map(str, [int(clean_den)])})}}\" # This is getting messy. Let's simplify the thought process for code generation\n    \n    # Final Clean Implementation Plan:\n    1. Import necessary modules.\n    2. Define generate function.\n    3. Extract frozen parameters from kwargs (p1=[2,6], p2=[1,5]).\n    4. Generate random integers within these ranges for numerator/denominator construction of probabilities.\n    5. Use FractionOps.mul to multiply two fractions derived from these numbers.\n    6. Construct the question text using LaTeX delimiters.\n    7. Prepare correct_answer with numerator, denominator, and canonical_latex.\n    8. Set oracle_payload to the frozen parameters dict exactly.\n\n    # Re-implementing logic cleanly\n    \n    p1_range = kwargs.get(\"p1\", [2]) if isinstance(kwargs.get(\"p1\"), list) else [2]\n    p2_range = kwargs.get(\"p2\", [1]) if isinstance(kwargs.get(\"p2\"), list) else [1]\n\n    # Generate specific values for the problem instance (random within range)\n    n_a = random.randint(p1_range[0], p1_range[-1]) * 5 + 3 # Arbitrary scaling to make it non-trivial but solvable\n    d_a = 2\n    \n    n_b = random.randint(p2_range[0], p2_range[-1]) * 7 + 4 \n    d_b = 6\n\n    frac_a = PyFraction(n_a, d_a)\n    frac_b = PyFraction(n_b, d_b)\n    \n    result_frac = FractionOps.mul(frac_a, frac_b)\n    \n    numerator_val = int(result_frac.numerator)\n    denominator_val = int(result_frac.denominator)\n\n    question_text = r\"\\text{What is the probability of event A and B occurring independently? } \\frac{\\text{{numerator}}}{\\text{{denominator}}} = ?\" # Placeholder logic\n    \n    # Actually, let's make it a standard math problem text\n    q_num_a = random.randint(p1_range[0], p1_range[-1]) + 2\n    q_denom_a = 5\n    q_num_b = random.randint(p2_range[0], p2_range[-1]) + 3\n    q_denom_b = 4\n    \n    # Recalculate with these specific numbers for the question text to be deterministic based on randomness seed if any, but here we just pick one instance.\n    \n    final_q_n_a = random.randint(p1_range[0], p1_range[-1]) + 2\n    final_q_d_a = 5\n    \n    final_q_n_b = random.randint(p2_range[0], p2_range[-1]) + 3\n    final_q_d_b = 4\n\n    q_frac_1 = PyFraction(final_q_n_a, final_q_d_a)\n    q_frac_2 = PyFraction(final_q_n_b, final_q_d_b)\n    \n    ans_frac = FractionOps.mul(q_frac_1, q_frac_2)\n    \n    # Get numerator and denominator from the result fraction\n    num_ans = str(ans_frac.numerator)\n    den_ans = str(ans_frac.denominator)\n    \n    canonical_latex_str = f\"\\\\frac{{{num_ans}}}{{{' '.join(map(str, [int(den_ans)])})}}\" \n    # Wait, FractionOps.to_latex is available. Let's use it if possible or construct manually.\n    # The spec says: correct_answer must include numerator, denominator, and canonical_latex for an irreducible fraction.\n    \n    from core.prompts.domain_function_library import FractionOps\n    \n    lat_str = FractionOps.to_latex(ans_frac)\n    \n    return {\n        \"question_text\": r\"\\text{Calculate the product of two independent probabilities: } \\frac{{{final_q_n_a}}}{{5}} \\times \\frac{{{final_q_n_b}}}{{4}}\",\n        \"correct_answer\": {\n            \"numerator\": num_ans,\n            \"denominator\": den_ans,\n            \"canonical_latex\": lat_str\n        },\n        \"oracle_payload\": {\"p1\": [2, 6], \"p2\": [1, 5]}\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T16:09:47.833005+00:00",
+  "completed_at_utc": "2026-07-21T16:10:09.123895+00:00",
+  "duration": 21.290881199995056,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 21.290870300028473,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 368,
+      "eval_count": 1987,
+      "total_token_count": 2355,
+      "total_duration": 19270497800,
+      "load_duration": 259603700,
+      "done_reason": "stop",
+      "latency_ms": 21290,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072004,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072004,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

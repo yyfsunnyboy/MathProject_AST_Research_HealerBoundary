@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce111_q03_prime_factor_selection__ab2g__seed_2026072004",
+  "task_id": "ce111_q03_prime_factor_selection",
+  "family": "integer",
+  "condition": "ab2g",
+  "seed": 2026072004,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072004
+  },
+  "prompt_sha256": "5436b011cb2be3d0edee52770f8c5a28348f9ef4763ae485b8c6a80798ef1cbf",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    candidates = kwargs.get(\"candidates\", [11, 12, 13, 14])\n    n = kwargs.get(\"n\", 156)\n    \n    # Find prime factors of n that are in the candidate list\n    temp_n = n\n    selected_factors = []\n    \n    for c in candidates:\n        if c == 1 or (c < 2):\n            continue\n        while temp_n % c == 0 and temp_n > 1:\n            selected_factors.append(c)\n            temp_n //= c\n    \n    # If no factors found from list, check standard prime factorization of n\n    if not selected_factors:\n        for i in range(2, int(n**0.5)+1):\n            while n % i == 0 and (i < len([x for x in candidates]) or True): \n                # Ensure we only pick from candidates if possible, but fallback to actual factors if needed\n                pass\n        \n    # Re-evaluate: The task is prime factor selection using the provided candidates as a filter pool.\n    # We need to find which numbers in 'candidates' are factors of n and include them all (with multiplicity).\n    \n    temp_n = n\n    selected_factors = []\n    \n    for c in candidates:\n        if c > 1:\n            while temp_n % c == 0:\n                selected_factors.append(c)\n                temp_n //= c\n    \n    # If after checking all candidates, there are still factors left (unlikely given the specific numbers), \n    # we assume the problem implies selecting from the candidate set that divides n.\n    \n    if not selected_factors and n > 1:\n        # Fallback to actual prime factorization just in case logic missed something, though with [11..14] it should cover factors of 156 (2*2*3*13)\n        # Wait, 156 = 2^2 * 3 * 13. Candidates are 11, 12, 13, 14. Only 13 is a factor here? \n        # Let's re-read: \"prime_factor_selection\". Usually means find the prime factors from the set of candidates that divide n.\n        # Factors of 156: 2, 3, 4(no), 6(no), 12(yes but not prime?), 13, etc. \n        # If it asks for \"prime\" factor selection, we should only pick primes from candidates? Or just factors present in the list?\n        # Given \"candidates\": [11, 12, 13, 14], and n=156 (factors: 2, 2, 3, 13). \n        # Intersection of prime factors of 156 {2, 3, 13} and candidates {11, 12, 13, 14} is {13}.\n        # If we select all divisors from the list: only 13 divides 156. \n        # Result would be [13]. Sum = 13? Or product? Usually \"selection\" implies sum or just the set.\n        # Let's assume it wants the sum of selected factors found in candidates that divide n.\n        \n        pass\n    \n    final_answer = sum(selected_factors) if selected_factors else None\n\n    question_text = r\"\"\"Find the sum of all prime numbers from the given candidate list $[11, 12, 13, 14]$ that are also factors of $n$. If no such primes exist, return 0.\"\"\"\n    \n    correct_answer = final_answer\n    \n    oracle_payload = {\n        \"candidates\": candidates, \n        \"n\": n\n    }\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T16:00:29.188351+00:00",
+  "completed_at_utc": "2026-07-21T16:00:39.703058+00:00",
+  "duration": 10.514697399921715,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 10.514684000052512,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 223,
+      "eval_count": 860,
+      "total_token_count": 1083,
+      "total_duration": 8489216100,
+      "load_duration": 231703700,
+      "done_reason": "stop",
+      "latency_ms": 10514,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072004,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072004,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

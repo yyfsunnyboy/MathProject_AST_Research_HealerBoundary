@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce111_q05_exact_fraction_expression__ab2d_spec_v2__seed_2026072003",
+  "task_id": "ce111_q05_exact_fraction_expression",
+  "family": "fraction",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072003,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072003
+  },
+  "prompt_sha256": "927977168ad6a72c644641fed7ef653495e55279689dc0beb06253033242926d",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce111_q05_exact_fraction_expression.txt",
+  "generation_status": "success",
+  "raw_response": "# -*- coding: utf-8 -*-\n\nfrom core.prompts.domain_function_library import FractionOps\n\n\ndef generate(level=1, **kwargs):\n    # Frozen parameters for this task instance\n    frozen_params = {\"expression\": \"9/22 + 11/18 - (23/22 - 7/18)\"}\n\n    # Compute the exact result using native Python arithmetic via FractionOps\n    term1 = FractionOps.from_parts(9, 22)\n    term2 = FractionOps.from_parts(11, 18)\n    \n    inner_parenthesis = FractionOps.sub(FractionOps.from_parts(23, 22), FractionOps.from_parts(7, 18))\n    \n    result = FractionOps.add(term1, FractionOps.sub(term2, inner_parenthesis))\n\n    # Extract components for the answer schema\n    numerator = result.numerator\n    denominator = result.denominator\n    \n    # Generate canonical LaTeX string using standard formatting rules (numerator/denominator)\n    if denominator == 1:\n        latex_str = f\"{numerator}\"\n    else:\n        latex_str = f\"${\\\\frac{{{numerator}}}{{denominator}}}$\"\n\n    question_text = r\"\\text{Compute the exact value of the expression: } \\(\\frac{9}{22} + \\frac{11}{18} - (\\frac{23}{22} - \\frac{7}{18})\\)\"\n    \n    correct_answer_dict = {\n        \"numerator\": numerator,\n        \"denominator\": denominator,\n        \"canonical_latex\": latex_str\n    }\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer_dict,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:56:27.557794+00:00",
+  "completed_at_utc": "2026-07-21T15:56:33.739029+00:00",
+  "duration": 6.181224699947052,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 6.181212899973616,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 963,
+      "eval_count": 388,
+      "total_token_count": 1351,
+      "total_duration": 4161124700,
+      "load_duration": 236697500,
+      "done_reason": "stop",
+      "latency_ms": 6181,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072003,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072003,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce112_q12_independent_probability_fraction__ab1__seed_2026072002",
+  "task_id": "ce112_q12_independent_probability_fraction",
+  "family": "fraction",
+  "condition": "ab1",
+  "seed": 2026072002,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072002
+  },
+  "prompt_sha256": "ce709937aef3026d48af8ea0b6eb6dbc53d0c07731b232df03b0657672d7d74c",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    import random\n    \n    p1_list = kwargs.get(\"p1\", [2, 6])\n    p2_list = kwargs.get(\"p2\", [1, 5])\n    \n    if level == 0:\n        r1, r2 = p1_list[0], p2_list[0]\n    else:\n        r1 = random.choice(p1_list)\n        r2 = random.choice(p2_list)\n    \n    numerator = r1 * r2\n    denominator = (r1 + 3) * (r2 - 4) if r2 > 4 else (r1 + 5) * (r2 + 6)\n    \n    gcd_val = lambda a, b: abs(a) % b == 0 and a // b or gcd(b, a % b) if b != 0 else abs(a)\n    common_divisor = gcd_val(numerator, denominator)\n    \n    final_num = numerator // common_divisor\n    final_den = denominator // common_divisor\n    \n    question_text = r\"\\text{What is the probability of an independent event where } P(A)=\\frac{\\{\" + str(r1) + \"\\}}{\\{\" + str(r2) + \"\\}}, \\text{ and } B=\\frac{\\{\" + str(5-r1) + \"\\}}{\\{\" + str(max(0, r2-3)) + \"\\}}\"\n    correct_answer = {\n        \"numerator\": final_num,\n        \"denominator\": final_den,\n        \"canonical_latex\": f\"\\frac{{{final_num}}}{{\"{str(final_den)}}\"}}\" if isinstance(final_den, int) else str(final_den).replace(\" \", \"\")\n    }\n    \n    oracle_payload = {\"p1\": p1_list, \"p2\": p2_list}\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:34:17.144479+00:00",
+  "completed_at_utc": "2026-07-21T15:34:23.579723+00:00",
+  "duration": 6.435233699972741,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 6.435221399995498,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 162,
+      "eval_count": 429,
+      "total_token_count": 591,
+      "total_duration": 4401228800,
+      "load_duration": 244466900,
+      "done_reason": "stop",
+      "latency_ms": 6435,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072002,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072002,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

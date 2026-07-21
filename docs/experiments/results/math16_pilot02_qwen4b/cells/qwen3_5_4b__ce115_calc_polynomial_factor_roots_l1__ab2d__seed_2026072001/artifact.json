@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce115_calc_polynomial_factor_roots_l1__ab2d__seed_2026072001",
+  "task_id": "ce115_calc_polynomial_factor_roots_l1",
+  "family": "polynomial",
+  "condition": "ab2d",
+  "seed": 2026072001,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072001
+  },
+  "prompt_sha256": "46eb44551fe48e5def0a14fdfe506b30e5987c44c0dee69f259bf42b90ab54a0",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "import math\nfrom fractions import Fraction\nfrom typing import Dict, Any, List\n\n# Mocking required domain functions based on specification constraints\nclass PolynomialOps:\n    @staticmethod\n    def factor_quadratic_exact(a: int, b: int, c: int) -> tuple[list[dict], dict]:\n        \"\"\"Returns list of factors and a dictionary with roots.\"\"\"\n        # Solve ax^2 + bx + c = 0 using exact arithmetic via quadratic formula logic adapted for integers/Fractions\n        discriminant = b*b - 4*a*c\n        \n        if discriminant < 0:\n            return [], {\"error\": \"no_real_roots\"}\n        \n        sqrt_disc = int(math.isqrt(discriminant))\n        \n        # Roots are (-b +/- sqrt_d) / (2a)\n        root1_num = -b + sqrt_disc\n        root2_num = -b - sqrt_disc\n        \n        roots_list = []\n        if 2*a != 0:\n            r1 = Fraction(root1_num, 2*a)\n            r2 = Fraction(root2_num, 2*a)\n            \n            # Sort ascending\n            if r1 < r2:\n                roots_list.append(r1)\n                roots_list.append(r2)\n            else:\n                roots_list.append(r2)\n                roots_list.append(r1)\n        \n        return [\n            {\"x_coefficient\": a, \"constant\": c}, # Simplified factor representation for display logic if needed, but spec says fixed length 2 keys. \n                                                  # Actually standard form (ax+c)(bx+d). Let's assume simple integer factors first attempt or use Fraction conversion later.\n          ], {\n            \"roots\": roots_list,\n            \"factorization_latex\": f\"({a}x+{root1_num})({(b//2)}x-{sqrt_disc})\", # Placeholder logic for latex generation based on inputs provided in spec context\n        }\n\nclass FractionOps:\n    @staticmethod\n    def create(value) -> Fraction:\n        return value if isinstance(value, Fraction) else Fraction(value)\n\n# Helper to convert list of Fractions to string representation and LaTeX\ndef format_roots(roots_list):\n    latex_parts = []\n    for r in roots_list:\n        # Convert Fraction to exact numerator/denominator or integer if possible\n        num = int(r.numerator)\n        den = int(r.denominator)\n        \n        if den == 1:\n            s = str(num)\n        else:\n            s = f\"{num}/{den}\"\n        latex_parts.append(s)\n    return \", \".join(latex_parts)\n\ndef generate(level=1, **kwargs):\n    frozen_params = {\"quadratic_coefficients\": [1, 4, -12]}\n    \n    # Extract coefficients from frozen params (a, b, c for ax^2 + bx + c)\n    a = frozen_params[\"quadratic_coefficients\"][0]\n    b = frozen_params[\"quadratic_coefficients\"][1]\n    c = frozen_params[\"quadratic_coefficients\"][2]\n    \n    # Use domain API to factor and get roots structure\n    factors_info, root_dict = PolynomialOps.factor_quadratic_exact(a, b, c)\n    \n    # Ensure correct_answer uses exact arithmetic (Fractions handled by Fraction class)\n    roots_list = sorted(root_dict[\"roots\"]) if \"error\" not in str(factors_info[1]) else []\n    \n    # Construct LaTeX strings exactly as requested: formal delimiters $...$ or \\left( ... \\right)\n    factorization_latex = f\"${a}x+{b}$\" # Simplified representation for the prompt context, ensuring exact match with input coefficients logic\n    \n    correct_answer_dict = {\n        \"roots\": roots_list,\n        \"factorization_latex\": \"$\\\\frac{-4 \\\\pm 10}{2}$\", # Standard quadratic formula result format for x values derived from -b +/- sqrt(d)/(2a) -> (-4+10)/2=3, (-4-10)/2=-7. \n                                                              # Wait, let's re-calculate manually to ensure correctness without relying on mock logic outputting specific strings\n        \"roots_latex\": \"$\\\\frac{-4 \\\\pm 10}{2}$\"\n    }\n    \n    # Manual verification of roots for x^2 + 4x - 12 = 0:\n    # (x+6)(x-2) -> Roots are -6, 2. Ascending order: [-6, 2]\n    # Discriminant: 16 - 4(1)(-12) = 16 + 48 = 64. sqrt(64)=8.\n    # x = (-4 +/- 8)/2 -> (-4+8)/2=2, (-4-8)/2=-3? NO. \n    # Let's re-solve: ax^2+bx+c. a=1, b=4, c=-12.\n    # D = 4^2 - 4*1*(-12) = 16 + 48 = 64. sqrt(D)=8.\n    # x = (-b +/- sqrtD)/(2a) = (-4 +/- 8)/2.\n    # Root 1: (-4+8)/2 = 4/2 = 2.\n    # Root 2: (-4-8)/2 = -12/2 = -6.\n    # Ascending order: [-6, 2].\n    \n    correct_answer_dict[\"roots\"] = [Fraction(-6), Fraction(2)]\n    factorization_latex_str = \"$\\\\left(x+6\\\\right)\\\\left(x-2\\\\right)$\"\n    roots_latex_str = f\"$x_1=-{abs(int(correct_answer_dict['roots'][0]))}, x_2={int(correct_answer_dict['roots'][1])}$\" # Simplified for clarity, or standard form\n    \n    correct_answer_dict[\"factorization_latex\"] = factorization_latex_str\n    correct_answer_dict[\"roots_latex\"] = f\"$\\\\frac{-4 \\\\pm 8}{2} \\Rightarrow -6, 2$\"\n\n    question_text = r\"Find the roots and factorization of the quadratic polynomial defined by coefficients $a=1$, $b=4$, $c=-12$.\"\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer_dict,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:15:33.580017+00:00",
+  "completed_at_utc": "2026-07-21T15:15:49.111110+00:00",
+  "duration": 15.531082600005902,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 15.531071300036274,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 374,
+      "eval_count": 1405,
+      "total_token_count": 1779,
+      "total_duration": 13494887400,
+      "load_duration": 236731400,
+      "done_reason": "stop",
+      "latency_ms": 15531,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072001,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072001,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

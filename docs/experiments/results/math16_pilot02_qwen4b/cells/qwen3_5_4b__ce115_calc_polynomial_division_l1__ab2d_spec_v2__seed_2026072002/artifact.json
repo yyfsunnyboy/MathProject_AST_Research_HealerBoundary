@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce115_calc_polynomial_division_l1__ab2d_spec_v2__seed_2026072002",
+  "task_id": "ce115_calc_polynomial_division_l1",
+  "family": "polynomial",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072002,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072002
+  },
+  "prompt_sha256": "aac0a64fb450e071435c5a4a1537bb5d9c1725f83c32044002263cfa175d7361",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce115_calc_polynomial_division_l1.txt",
+  "generation_status": "success",
+  "raw_response": "```python\n# -*- coding: utf-8 -*-\n\ndef generate(level=1, **kwargs):\n    # Frozen sampled parameters as per task specification\n    frozen_params = {\n        \"dividend_coefficients\": [6, 0, 6],\n        \"divisor_coefficients\": [1, -4]\n    }\n\n    from core.prompts.domain_function_library import PolynomialOps\n    \n    dividend_coeffs = frozen_params[\"dividend_coefficients\"]\n    divisor_coeffs = frozen_params[\"divisor_coefficients\"]\n    \n    # Perform polynomial division using the domain library\n    quotient, remainder = PolynomialOps.div_qr(dividend_coeffs, divisor_coeffs)\n\n    def format_latex(coeffs):\n        if not coeffs:\n            return \"0\"\n        \n        terms = []\n        for i, coeff in enumerate(reversed(coeffs)):\n            power = len(coeffs) - 1 - i\n            \n            # Skip leading zeros but handle the case where all are zero (handled by logic above mostly, \n            # though div_qr might return empty list if divisor is constant and dividend is smaller degree? No, usually returns [0])\n            # Actually standard polynomial representation: highest power first.\n            \n            term = str(coeff)\n            if coeff != 1 or coeff != -1:\n                term += \"x\"\n            if power > 0:\n                term += f\"^{{{power}}}\"\n            terms.append(term)\n        \n        return \"\\\\text{\" + \"+\".join(terms) + \"} \\\\cdot x^{\\\\max\\_deg} ... wait, simpler format needed.\"\n\n    # Re-implementing latex formatting to be safe and precise based on standard math notation expectations in these tasks.\n    def poly_to_latex(coeffs):\n        if not coeffs:\n            return \"0\"\n        \n        terms = []\n        for i, coeff in enumerate(reversed(coeffs)):\n            power = len(coeffs) - 1 - i\n            \n            # Skip leading zeros? The input [6, 0, 6] implies 6x^2 + 0x + 6. \n            # If the result has internal zeros (like x), we usually write it as just 'x' or keep zero if strictly required by format.\n            # Standard convention: omit coefficient of 1 and -1 unless specified otherwise, but include powers correctly.\n            \n            term = str(coeff)\n            if coeff == 0: \n                continue\n            \n            if power > 0:\n                if abs(coeff) == 1:\n                    sign_str = \"\" if coeff > 0 else \"-\"\n                    terms.append(f\"{sign_str}x^{power}\")\n                else:\n                    term += f\"x^{power}\"\n            elif power == 0 and abs(coeff) != 1: # e.g. constant -2 or 3\n                 pass\n            \n        # Let's refine the logic to match typical output expectations for such tasks\n        final_terms = []\n        \n        # Iterate from highest degree down to 0\n        n = len(coeffs)\n        for i in range(n):\n            coeff = coeffs[i]\n            power = n - 1 - i\n            \n            if coeff == 0:\n                continue\n                \n            term_str = str(coeff)\n            \n            if abs(term_str) > 1 or (term_str != \"1\" and term_str != \"-1\"):\n                 # Coefficient is not +/-1, so always write it out with x^p unless p=0? \n                 # Usually: -2x + 3. If coeff is 5, power 4 -> 5x^4.\n                if abs(coeff) == 1 and term_str != \"1\" and term_str != \"-1\":\n                    pass\n                \n            # Construct string based on coefficient value\n            c = int(term_str)\n            \n            part = \"\"\n            if c > 0:\n                sign = \"+\"\n            else:\n                sign = \"-\"\n                \n            abs_c = str(abs(c))\n            \n            term_part = f\"{abs_c}x^{power}\" if power > 0 else \"1\" # Wait, constant terms need handling\n            \n            # Correct logic for LaTeX polynomial sum\n            pass\n\n    # Let's use a robust helper function to generate the string representation\n    \n    def get_poly_str(coeffs):\n        if not coeffs: return \"0\"\n        \n        parts = []\n        n = len(coeffs)\n        for i, c in enumerate(reversed(coeffs)):\n            p = n - 1 - i\n            \n            # Skip zero coefficients? Yes. But wait, the input [6, 0, 6] has a zero. \n            # If we skip it, we get \"6x^2 + 6\". Correct.\n            \n            if c == 0: continue\n\n            term = str(abs(c))\n            if p > 0:\n                term += f\"x^{p}\"\n                \n            sign = \"\"\n            if c < 0 and len(parts) > 0: # Add minus before next positive? No, standard is + - ...\n                 pass\n            \n            # Simpler approach for LaTeX construction in these specific tasks often expects explicit signs or just concatenation with '+'\n            # Let's assume the format: \"6x^2+6\" -> \"\\\\(6x^{2}+6\\\\)\" \n            # Or with spaces? Usually compact.\n            \n            term_str = f\"{term}\" if p > 0 else str(c)\n            \n            parts.append(term_str)\n\n        return \"+\".join(parts)\n\n\n    quotient_latex = r\"\\(\" + get_poly_str(quotient) + r\"\\)\"\n    remainder_latex = r\"\\(\" + get_poly_str(remainder) + r\"\\)\"\n    \n    # Construct the correct_answer dict structure as requested: \n    # \"correct_answer must include quotient_coefficients, remainder_coefficients, quotient_latex, and remainder_latex.\"\n    # The return value of generate() is a dict with keys: question_text, correct_answer, oracle_payload.\n    \n    qa_dict = {\n        \"quotient_coefficients\": quotient,\n        \"remainder_coefficients\": remainder,\n        \"quotient_latex\": quotient_latex,\n        \"remainder_latex\": remainder_latex\n    }\n\n    # Construct the full return dictionary\n    result = {\n        \"question_text\": r\"Perform polynomial division of \\( 6x^2 + 0x + 6 \\) by \\( x - 4 \\).\",\n        \"correct_answer\": qa_dict,\n        \"oracle_payload\": frozen_params\n    }\n\n    return result\n```",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:26:04.063869+00:00",
+  "completed_at_utc": "2026-07-21T15:26:19.629366+00:00",
+  "duration": 15.565488299936987,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 15.565475200070068,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 672,
+      "eval_count": 1401,
+      "total_token_count": 2073,
+      "total_duration": 13512955900,
+      "load_duration": 267605800,
+      "done_reason": "stop",
+      "latency_ms": 15565,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072002,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072002,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce113_q11_rationalize_denominator__ab2g__seed_2026071301",
+  "task_id": "ce113_q11_rationalize_denominator",
+  "family": "radical",
+  "condition": "ab2g",
+  "seed": 2026071301,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026071301
+  },
+  "prompt_sha256": "61d3826e10d9cccb5d18a02c8aa951421bd38216d4cd773792201aac261778a7",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    import re\n    \n    denominator_str = \"4-sqrt(7)\"\n    numerator = 9\n    radicand = 7\n    \n    # The expression is (numerator) / (denominator).\n    # To rationalize the denominator of a/b where b = x - sqrt(y), we multiply by conjugate x + sqrt(y).\n    # Here, x=4, y=7. Conjugate is 4+sqrt(7).\n    # Numerator becomes: num * (x + sqrt(y)) = 9*(4 + sqrt(7)) = 36 + 9*sqrt(7)\n    # Denominator becomes: (x - sqrt(y))*(x + sqrt(y)) = x^2 - y = 16 - 7 = 9.\n    # The rationalized fraction is (36 + 9*sqrt(7)) / 9.\n    # Simplifying by dividing numerator and denominator by their GCD (which includes the integer part).\n    # We need to check if there's a common factor for both terms in the new numerator relative to the new denominator.\n    # New Numerator: 36 + 9*sqrt(7) = 9*(4 + sqrt(7))\n    # New Denominator: 9\n    # Resulting Fraction: (9 * (4 + sqrt(7))) / 9 = 4 + sqrt(7).\n    \n    # The question asks for the rationalized denominator form, which usually implies writing it as a sum of an integer and a radical.\n    # So the answer is 4+sqrt(7). However, the task specification says \"correct_answer must be a single exact integer\".\n    # Let's re-read carefully: \"math16_rationalize_denominator_ab_sum\" with frozen params {\"denominator\": \"4-sqrt(7)\", ...}.\n    # Usually rationalizing 9/(4-sqrt(7)) results in (36+9sqrt(7))/9 = 4 + sqrt(7). This is not an integer.\n    \n    # Is it possible the task implies extracting a specific component or there's a trick?\n    # Or perhaps I need to rationalize differently? No, standard algebraic manipulation yields 4+sqrt(7).\n    # Let's reconsider the \"single exact integer\" constraint. \n    # Maybe the input is different in a way that makes it an integer?\n    # If denominator was sqrt(something), result might be irrational unless numerator cancels out perfectly which isn't possible here with simple integers.\n    \n    # Wait, could the question text ask for something else derived from this?\n    # Or maybe I should output 4 + int(sqrt(7))? No, that's not standard math notation in these tasks usually.\n    # Let's look at similar problems (e.g., rationalizing a/b where b is quadratic). \n    # If the result was an integer, then sqrt(7) term must vanish or be absorbed. It doesn't here.\n    \n    # Hypothesis: The prompt constraint \"correct_answer must be a single exact integer\" might be a generic instruction for this specific task type that assumes inputs are chosen such that it works, OR I am misinterpreting the math16_rationalize_denominator_ab_sum logic.\n    # Let's re-calculate: \n    # Expression: 9 / (4 - sqrt(7))\n    # Multiply by (4 + sqrt(7))/(4 + sqrt(7)):\n    # Num: 9 * (4 + sqrt(7)) = 36 + 9*sqrt(7)\n    # Denom: 16 - 7 = 9\n    # Result: (36/9) + (9/9)*sqrt(7) = 4 + sqrt(7).\n    \n    # Is it possible the \"numerator\" provided in frozen params is actually part of a larger expression where cancellation happens? \n    # No, numerator=9.\n    \n    # Let's consider if the task expects the answer to be formatted as `a+b` but constrained to integer implies maybe I should return 4 + int(math.sqrt(7)) which is invalid mathematically for exactness unless sqrt(7) was a perfect square (it isn't).\n    \n    # Alternative interpretation: Maybe the \"oracle_payload\" contains hints? No, it's just params.\n    # Could the question text be asking to rationalize and then evaluate something specific? \n    # Or maybe I should assume there is an error in my derivation or the problem setup implies a different operation?\n    \n    # Let's try another angle: Maybe the denominator was `sqrt(4) - sqrt(something)`? No, it says \"4-sqrt(7)\".\n    \n    # What if the question asks for the integer part after rationalization? Or maybe the result is actually an integer due to a specific property I'm missing? \n    # Wait, what if the numerator was 9*sqrt(7)? Then (63 + 81)/... no.\n    \n    # Let's assume there might be a typo in my understanding of \"single exact integer\" for this specific frozen set, OR the expected answer is indeed an integer because I am missing a step like squaring? \n    # No, rationalize denominator usually means removing sqrt from bottom. The result 4+sqrt(7) has no sqrt at bottom (it's in numerator).\n    \n    # Is it possible the question asks for `a` where answer is `a + b*sqrt(c)` and we only return `a`? \n    # Or maybe the \"correct_answer\" constraint here forces me to find an integer solution, implying my calculation of 4+sqrt(7) might be wrong or the problem expects a different interpretation.\n    \n    # Let's reconsider the math16_rationalize_denominator_ab_sum task definition from typical datasets (like GSM8K style synthetic data). \n    # Often these tasks generate questions where the answer IS an integer. \n    # Example: Rationalize 3/(sqrt(4)-something) -> result is int?\n    # If denominator was `2 - sqrt(something)` and numerator adjusted...\n    \n    # Given I cannot change frozen params, I must work with them.\n    # Params: num=9, den=\"4-sqrt(7)\". Result 4+sqrt(7). \n    # Constraint: correct_answer is single exact integer.\n    # This implies either:\n    # 1. The result IS an integer and my math is wrong (impossible for sqrt(7)).\n    # 2. The question asks to extract the rational part? i.e., \"What is the rational number in the sum?\" -> 4.\n    # 3. There's a specific formatting or context where `sqrt(7)` cancels out completely which requires different inputs, but I must use these.\n    \n    # Let's assume option 2: The question asks for the integer component of the rationalized expression. \n    # Question text could be \"What is the rational part of the simplified fraction?\" or similar.\n    # But standard phrasing would just ask to simplify. If it simplifies to A + B*sqrt(C), and answer must be int... maybe C=1? No, radicand=7.\n    \n    # Let's try one more check: Is `4-sqrt(7)` a typo for something that yields an integer? \n    # e.g. if den was 3 - sqrt(something) where num matches to cancel the radical in denominator after multiplication by conjugate? No, rationalization always leaves radical in numerator unless it's a perfect square difference which leads to int denom but irrational num (unless num has matching factor).\n    \n    # Wait! If the result is `4 + sqrt(7)` and we are forced to return an integer... \n    # Maybe the question asks for `(numerator * conjugate) / denominator` evaluated modulo something? No.\n    \n    # Let's look at the constraint again: \"correct_answer must be a single exact integer\".\n    # If I strictly follow math, 4+sqrt(7) is not an integer. \n    # However, in some synthetic datasets generated by scripts, there might be cases where they expect `int(result)` or similar if it's close? No, that violates \"exact\".\n    \n    # Is it possible the numerator provided (9) allows factoring out sqrt(7)? \n    # 36 + 9*sqrt(7). Factor out 9: 9*(4+sqrt(7)). Denom is 9. Result 4+sqrt(7). Still irrational.\n    \n    # Could the \"numerator\" be interpreted differently? No, it's an integer.\n    \n    # Let's assume the question text asks for `a` in `a + b*sqrt(c)`. \n    # Then answer is 4. This satisfies \"single exact integer\".\n    # I will construct the question to ask for this specific part or ensure the math leads there if possible (but it doesn't lead elsewhere).\n    \n    # Actually, looking at similar problems online (e.g., from datasets like 'math16'), sometimes they have cases where the answer is an integer. \n    # Example: Rationalize 8/(sqrt(4)-2)? No sqrt in denom then?\n    # Maybe I should check if `9` and `(4-sqrt(7))` interact differently? \n    # What if the operation was NOT rationalization but something else? Task name says \"rationalize_denominator\".\n    \n    # Okay, let's proceed with the assumption that the question asks for the integer part of the result. This is a common pattern when constraints force an integer output from irrational inputs in synthetic tasks (asking for 'a' in `a + b*sqrt(c)`).\n    \n    rational_part = 4\n    \n    frozen_params = {\"denominator\": \"4-sqrt(7)\", \"numerator\": 9, \"radicand\": 7}\n    \n    question_text = r\"Rationalize the denominator of the fraction $\\frac{9}{4-\\sqrt{7}}$. Express your answer in the form $a + b\\sqrt{n}$ where $n$ is square-free. What is the value of $a$?\"\n    \n    # Wait, if I ask for 'a', then correct_answer is 4. \n    # But usually these tasks want the full expression or a specific number derived from it. \n    # If the constraint says \"correct_answer must be a single exact integer\", and my math gives an irrational... asking for 'a' is the only logical path to satisfy constraints without changing frozen params.\n    \n    correct_answer = 4\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:07:24.959507+00:00",
+  "completed_at_utc": "2026-07-21T15:07:49.320729+00:00",
+  "duration": 24.36121080000885,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 24.361197000020184,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 228,
+      "eval_count": 2327,
+      "total_token_count": 2555,
+      "total_duration": 22339282000,
+      "load_duration": 244853100,
+      "done_reason": "stop",
+      "latency_ms": 24361,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026071301,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026071301,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

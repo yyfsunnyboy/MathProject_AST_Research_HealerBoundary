@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce111_nonchoice_q01_part1_exponential_growth__ab1__seed_2026072003",
+  "task_id": "ce111_nonchoice_q01_part1_exponential_growth",
+  "family": "integer",
+  "condition": "ab1",
+  "seed": 2026072003,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072003
+  },
+  "prompt_sha256": "105840296a8d546e9ca86a9aa27cf92df5da24004f78624f5fd96e031b114d62",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    frozen_params = {\"days\": 15, \"hours_per_generation\": 20, \"initial\": 1, \"split_factor\": 4}\n    \n    total_hours = frozen_params[\"days\"] * (frozen_params[\"hours_per_generation\"] / 24)\n    generations_needed = int(total_hours // frozen_params[\"hours_per_generation\"]) + 1\n    \n    current_population = frozen_params[\"initial\"]\n    for _ in range(generations_needed):\n        if current_population > 0:\n            new_individuals = current_population * (frozen_params[\"split_factor\"] - 1)\n            current_population += new_individuals\n            \n    correct_answer_dict = {\"k\": int(current_population)}\n    \n    return {\n        \"question_text\": r\"An organism starts with a population of $initial$ individuals. Each generation, every individual splits into $split\\_factor$ offspring (meaning the original plus $split\\\\_factor - 1$ new ones). If each generation takes $hours\\\\_{per}\\\\_generation}$ hours and we observe for $days$ days, what is the final population size?\",\n        \"correct_answer\": correct_answer_dict,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:46:54.632000+00:00",
+  "completed_at_utc": "2026-07-21T15:46:59.607335+00:00",
+  "duration": 4.975325800012797,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 4.975312100024894,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 172,
+      "eval_count": 267,
+      "total_token_count": 439,
+      "total_duration": 2952214900,
+      "load_duration": 247411800,
+      "done_reason": "stop",
+      "latency_ms": 4975,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072003,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072003,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

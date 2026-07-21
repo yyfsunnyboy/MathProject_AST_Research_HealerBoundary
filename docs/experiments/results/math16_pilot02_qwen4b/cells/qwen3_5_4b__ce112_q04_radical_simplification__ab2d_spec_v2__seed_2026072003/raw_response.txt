@@ -1,0 +1,31 @@
+```python
+# -*- coding: utf-8 -*-
+
+def generate(level=1, **kwargs):
+    # Frozen sampled parameters used for this task instance
+    frozen_params = {"radicand": 135}
+    
+    from core.prompts.domain_function_library import RadicalOps
+    
+    radicand_input = frozen_params["radicand"]
+    
+    coeff, simplified_radicand = RadicalOps.simplify_term(0, radicand_input)
+    
+    # Construct the correct answer components
+    coefficient = str(coeff) if isinstance(coeff, int) else f"{coeff}"
+    canonical_latex = r"\sqrt{" + str(simplified_radicand) + "}"
+    
+    question_text = r"$$ \text{Simplify } \sqrt{\overline{\text{{radicand}}}} $$ where $\overline{\text{{radicand}}} = $ {frozen_params['radicand']}$."
+    
+    correct_answer_dict = {
+        "coefficient": coefficient,
+        "radicand": simplified_radicand,
+        "canonical_latex": canonical_latex
+    }
+
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer_dict,
+        "oracle_payload": frozen_params
+    }
+```

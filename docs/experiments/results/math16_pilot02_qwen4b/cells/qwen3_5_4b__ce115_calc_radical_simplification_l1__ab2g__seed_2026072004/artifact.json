@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce115_calc_radical_simplification_l1__ab2g__seed_2026072004",
+  "task_id": "ce115_calc_radical_simplification_l1",
+  "family": "radical",
+  "condition": "ab2g",
+  "seed": 2026072004,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072004
+  },
+  "prompt_sha256": "a88ec9aa5f19dc7b5348cdd1cfdc9b503c1fbefcc0ad12889e21eeff5cb19621",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    radicand = kwargs.get(\"radicand\", 27) if \"radicand\" in kwargs else 27\n    \n    import math\n    \n    def simplify_radical(n):\n        \"\"\"Simplify the radical n.\"\"\"\n        # Find largest perfect square factor of n\n        i = int(math.sqrt(n))\n        while i > 0:\n            root, remainder = divmod(i * i, n)\n            if remainder == 0:\n                coefficient = root\n                simplified_radicand = n // (i * i)\n                break\n            i -= 1\n        \n        # If no perfect square factor found other than 1*1\n        if not isinstance(coefficient, int):\n            return \"n\", radicand\n            \n        canonical_latex = f\"{coefficient}\\\\sqrt{{{simplified_radicand}}}\"\n        \n    simplified_n, final_radicand = simplify_radical(radicand)\n    \n    question_text = r\"$$\\text{Simplify the radical: } \\sqrt{\\overline{{radicand}}}$$\"\n    correct_answer = f\"{final_radicand}, {simplified_n}\"\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": {\"radicand\": radicand}\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T16:08:52.098108+00:00",
+  "completed_at_utc": "2026-07-21T16:08:57.240815+00:00",
+  "duration": 5.1426967000588775,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 5.142684999969788,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 218,
+      "eval_count": 293,
+      "total_token_count": 511,
+      "total_duration": 3106708600,
+      "load_duration": 244135300,
+      "done_reason": "stop",
+      "latency_ms": 5142,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072004,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072004,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

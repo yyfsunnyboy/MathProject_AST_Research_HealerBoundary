@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce111_nonchoice_q01_part1_exponential_growth__ab2g__seed_2026072001",
+  "task_id": "ce111_nonchoice_q01_part1_exponential_growth",
+  "family": "integer",
+  "condition": "ab2g",
+  "seed": 2026072001,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072001
+  },
+  "prompt_sha256": "93f82f61b6271d56cbaf1b7bf1276afc821b055cf767d2e9a496414ee933441e",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    frozen_params = {\"days\": 15, \"hours_per_generation\": 20, \"initial\": 1, \"split_factor\": 4}\n    \n    # Calculate total generations based on days and hours per generation\n    total_hours_available = level * frozen_params[\"days\"] * (frozen_params[\"hours_per_generation\"] / 24) if isinstance(level, int) else level * frozen_params[\"days\"] * (frozen_params[\"hours_per_generation\"] / 24)\n    \n    # Assuming each day has 24 hours and generations happen every 'hours_per_generation' hours within the total time frame scaled by level? \n    # Re-reading spec: \"math16_exponential_growth_generation_count\". Usually implies calculating how many times it splits.\n    # Let's assume standard interpretation for such problems: Total Time = days * 24 hours. Generations happen every 'hours_per_generation' hours.\n    total_hours_in_scenario = frozen_params[\"days\"] * 24\n    \n    generations = int(total_hours_in_scenario // frozen_params[\"hours_per_generation\"]) + 1 # Start with initial count as generation 0 or just the split count? \n    # Usually \"generation_count\" means how many splits occur.\n    # Let's calculate final population: P_n = P_0 * (split_factor)^n where n is number of generations/splits.\n    \n    # If days=15, hours_per_gen=20 -> 37.5 gens per day? That seems high for discrete math problems unless it's continuous or specific logic applies.\n    # Let's assume the question asks for the final count after a certain duration defined by 'days'.\n    # Total time = 15 days * 24 hours/day = 360 hours.\n    # Generations per day? Or is \"hours_per_generation\" defining the rate? \n    # If it takes 20 hours to generate one batch, then in 360 hours: floor(360/20) + 1 (initial)? No, usually just count of splits.\n    # Let's assume n = total_hours // hours_per_generation. But wait, the frozen params have \"days\" and \"hours\". \n    # Perhaps generations happen daily? Or continuously?\n    # Given \"exponential_growth\", let's calculate based on time duration provided by 'days'.\n    \n    # Interpretation: The process runs for `level` * `days`. Each generation takes `hours_per_generation`.\n    # Total hours = level * days * 24. \n    # Number of generations (splits) n = floor(Total_hours / hours_per_generation).\n    # However, often these problems imply a fixed number of steps per day or simply use the 'days' as the exponent base if units align differently?\n    # Let's stick to strict time conversion: 15 days * 24 hrs/day = 360 hrs. \n    # Steps = floor(360 / 20) = 18 steps per level? Or is 'level' a multiplier for the duration? Yes, \"generate(level=...)\".\n    \n    total_duration_hours = level * frozen_params[\"days\"] * 24\n    num_generations = int(total_duration_hours // frozen_params[\"hours_per_generation\"]) + 1 # Including initial state as generation 0? Or just splits? \n    # If we start with 1, and split factor is 4. After n generations (splits), count = initial * 4^n.\n    # Let's assume the question asks for the final population size after these generations.\n    \n    k = frozen_params[\"initial\"] * (frozen_params[\"split_factor\"]) ** num_generations\n    \n    return {\n        \"question_text\": r\"An organism starts with a single cell ($P_0$). It undergoes exponential growth where each generation splits into $S$ cells, resulting in the next population size being multiplied by $S$. If one full generation cycle takes $H$ hours and the simulation runs for $D$ days at level $L$, what is the final population count? Assume integer division for generations.\",\n        \"correct_answer\": {\"k\": k},\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:12:23.512460+00:00",
+  "completed_at_utc": "2026-07-21T15:12:34.565298+00:00",
+  "duration": 11.05282810004428,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 11.052815899951383,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 236,
+      "eval_count": 913,
+      "total_token_count": 1149,
+      "total_duration": 9026470800,
+      "load_duration": 249556900,
+      "done_reason": "stop",
+      "latency_ms": 11052,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072001,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072001,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

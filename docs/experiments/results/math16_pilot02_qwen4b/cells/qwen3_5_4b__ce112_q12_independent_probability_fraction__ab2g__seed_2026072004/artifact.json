@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce112_q12_independent_probability_fraction__ab2g__seed_2026072004",
+  "task_id": "ce112_q12_independent_probability_fraction",
+  "family": "fraction",
+  "condition": "ab2g",
+  "seed": 2026072004,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072004
+  },
+  "prompt_sha256": "d68af74fd5f59ae1178e9835684479397bd58a2b1f31fd9ef7b022e34b96fcf1",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "import math\nfrom fractions import Fraction\n\ndef generate(level=1, **kwargs):\n    p1_list = kwargs.get(\"p1\", [2, 6])\n    p2_list = kwargs.get(\"p2\", [1, 5])\n    \n    # Select random values from the frozen sampled parameters lists\n    n_p1 = p1_list[level - 1] if level <= len(p1_list) else p1_list[0]\n    n_p2 = p2_list[level - 1] if level <= len(p2_list) else p2_list[0]\n\n    # Calculate probability of independent events: P(A and B) = P(A) * P(B)\n    prob_a = Fraction(n_p1, 6)\n    prob_b = Fraction(n_p2, 5)\n    \n    result_fraction = prob_a * prob_b\n    \n    numerator = result_fraction.numerator\n    denominator = result_fraction.denominator\n\n    # Format LaTeX for the fraction using \\frac{numerator}{denominator}\n    canonical_latex = f\"\\\\frac{{{numerator}}}{{{'1' if denominator == 1 else str(denominator)}}}\"\n\n    question_text = r\"\"\"Let $A$ and $B$ be independent events. The probability of event $A$, denoted as $P(A)$, is $\\frac{2}{6}$. The probability of event $B$, denoted as $P(B)$, is $\\frac{n_2}{5}$ where $n_2 \\in [1, 5]$. What is the probability that both events occur? Express your answer as an irreducible fraction in LaTeX format.\"\"\"\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": {\n            \"numerator\": numerator,\n            \"denominator\": denominator,\n            \"canonical_latex\": canonical_latex\n        },\n        \"oracle_payload\": {\"p1\": p1_list, \"p2\": p2_list}\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T16:09:41.372885+00:00",
+  "completed_at_utc": "2026-07-21T16:09:47.827306+00:00",
+  "duration": 6.454410700011067,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 6.454399800044484,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 226,
+      "eval_count": 424,
+      "total_token_count": 650,
+      "total_duration": 4420213700,
+      "load_duration": 249370200,
+      "done_reason": "stop",
+      "latency_ms": 6454,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072004,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072004,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

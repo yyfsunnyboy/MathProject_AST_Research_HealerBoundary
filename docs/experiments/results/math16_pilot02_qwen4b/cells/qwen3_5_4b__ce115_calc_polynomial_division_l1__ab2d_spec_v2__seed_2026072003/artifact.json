@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce115_calc_polynomial_division_l1__ab2d_spec_v2__seed_2026072003",
+  "task_id": "ce115_calc_polynomial_division_l1",
+  "family": "polynomial",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072003,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072003
+  },
+  "prompt_sha256": "aac0a64fb450e071435c5a4a1537bb5d9c1725f83c32044002263cfa175d7361",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce115_calc_polynomial_division_l1.txt",
+  "generation_status": "success",
+  "raw_response": "```python\n# -*- coding: utf-8 -*-\n\ndef generate(level=1, **kwargs):\n    # Frozen sampled parameters as per task specification\n    frozen_parameters = {\n        \"dividend_coefficients\": [6, 0, 6],\n        \"divisor_coefficients\": [1, -4]\n    }\n\n    from core.prompts.domain_function_library import PolynomialOps\n    \n    dividend_coeffs = frozen_parameters[\"dividend_coefficients\"]\n    divisor_coeffs = frozen_parameters[\"divisor_coefficients\"]\n    \n    # Perform polynomial division using the domain library\n    quotient, remainder = PolynomialOps.div_qr(dividend_coeffs, divisor_coeffs)\n\n    def format_list(lst):\n        return f\"[{', '.join(map(str, lst))}]\"\n\n    question_text = r\"\"\"Perform polynomial long division for: \\[ (6x^2 + 0x + 6) \\div (1x - 4) \\] \"\"\"\n\n    correct_answer = {\n        \"quotient_coefficients\": quotient,\n        \"remainder_coefficients\": remainder,\n        \"quotient_latex\": r\"\\( [{}], x^{len([{}])-2} ... \\)\".format(format_list(quotient), format_list(quotient)), # Simplified for direct latex representation of list structure if needed, but standard is just the coefficients. Let's use a cleaner LaTeX string construction based on coeffs.\n        \"remainder_latex\": r\"\\( [{}] \\)\".format(format_list(remainder))\n    }\n\n    # Constructing proper Latex strings directly from lists to ensure correctness without complex formatting logic errors in this context\n    quotient_str = \", \".join(map(str, quotient)) if isinstance(quotient, list) else str(quotient)\n    remainder_str = \", \".join(map(str, remainder)) if isinstance(remainder, list) else str(remainder)\n\n    # Re-defining correct_answer with explicit LaTeX strings for clarity and correctness\n    qa_dict = {\n        \"quotient_coefficients\": quotient,\n        \"remainder_coefficients\": remainder,\n        \"quotient_latex\": r\"\\(\" + \", \".join(map(str, quotient)) + r\")\",\n        \"remainder_latex\": r\"\\(\" + \", \".join(map(str, remainder)) + r\")\"\n    }\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": qa_dict,\n        \"oracle_payload\": frozen_parameters\n    }\n```",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:50:59.638958+00:00",
+  "completed_at_utc": "2026-07-21T15:51:07.075460+00:00",
+  "duration": 7.4364928000140935,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 7.436479900032282,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 672,
+      "eval_count": 521,
+      "total_token_count": 1193,
+      "total_duration": 5400105200,
+      "load_duration": 224426000,
+      "done_reason": "stop",
+      "latency_ms": 7436,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072003,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072003,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

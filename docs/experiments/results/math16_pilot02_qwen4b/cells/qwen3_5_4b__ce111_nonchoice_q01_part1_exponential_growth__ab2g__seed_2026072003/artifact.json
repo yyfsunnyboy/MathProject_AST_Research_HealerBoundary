@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce111_nonchoice_q01_part1_exponential_growth__ab2g__seed_2026072003",
+  "task_id": "ce111_nonchoice_q01_part1_exponential_growth",
+  "family": "integer",
+  "condition": "ab2g",
+  "seed": 2026072003,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072003
+  },
+  "prompt_sha256": "93f82f61b6271d56cbaf1b7bf1276afc821b055cf767d2e9a496414ee933441e",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    import json\n    \n    frozen_params = {\"days\": 15, \"hours_per_generation\": 20, \"initial\": 1, \"split_factor\": 4}\n    \n    # Calculate total generations based on days and hours per generation\n    total_hours_available = level * frozen_params[\"days\"] * (frozen_params[\"hours_per_generation\"] / 24) if isinstance(frozen_params[\"days\"], int) else frozen_params[\"days\"] * (frozen_params[\"hours_per_generation\"] / 24)\n    \n    # Assuming 'level' scales the time available linearly for this specific task context based on typical exponential growth problem structures where level often implies duration multiplier or similar. \n    # However, looking at standard interpretations: if days=15 is fixed and hours_per_gen=20 (which is 4/3 of a day), let's calculate generations directly from the frozen params first to ensure correctness for Level 1.\n    \n    # Re-evaluating based on strict \"frozen sampled parameters\" usage without external logic assumptions:\n    # Total time in days = level * 15? Or is 'days' just one of many inputs scaled by level? \n    # Given the task name implies exponential growth, usually N(t) = P0 * r^t.\n    # Let's assume standard interpretation where 'level' might scale the duration or it's a fixed problem instance for Level 1.\n    # To be safe and robust: Calculate generations as (total_days_available / hours_per_generation). \n    # If level=1, days=15. Hours per gen = 20. Generations = floor(15 * 24 / 20) ? Or simply based on the provided 'days' being total duration?\n    # Let's assume the problem asks for growth over a specific number of generations derived from the parameters.\n    \n    # Standard interpretation: \n    # Initial population P0 = frozen_params[\"initial\"] (1)\n    # Growth factor r = frozen_params[\"split_factor\"] (4, meaning 4x per generation? Or split into 4 parts?)\n    # \"Split factor\" in exponential growth usually implies multiplication by that factor. So N(t+1) = N(t) * 4.\n    \n    # How many generations? \n    # If 'days' is the total duration and 'hours_per_generation' is the time per generation:\n    # Generations = floor( (level * frozen_params[\"days\"]) / (frozen_params[\"hours_per_generation\"] / 24) ) ?\n    # Or simply using the raw numbers if level=1 acts as a base. \n    # Let's calculate generations based on days provided in frozen params, assuming 'level' scales time linearly for this specific challenge type often found in these datasets (e.g., Project Euler style or similar coding challenges).\n    \n    total_days = level * frozen_params[\"days\"]\n    hours_per_gen = frozen_params[\"hours_per_generation\"]\n    # Convert days to hours and divide by hours per generation\n    generations = int(total_days * 24 / hours_per_gen)\n    \n    initial_pop = frozen_params[\"initial\"]\n    split_factor = frozen_params[\"split_factor\"]\n    \n    final_population = initial_pop * (split_factor ** generations)\n    \n    question_text = r\"\"\"Consider a population that grows exponentially. If the initial population is $P_0$ and it splits by a factor of $r$ every generation, what will be the population after $n$ generations? Given: $P_0 = 1$, $r = 4$. Calculate the final population if there are exactly $\\text{generations}$ generations.\"\"\"\n    \n    correct_answer_dict = {\"k\": int(final_population)}\n    \n    oracle_payload = frozen_params\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer_dict,\n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:46:59.614396+00:00",
+  "completed_at_utc": "2026-07-21T15:47:10.310600+00:00",
+  "duration": 10.696190700051375,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 10.696177200064994,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 236,
+      "eval_count": 845,
+      "total_token_count": 1081,
+      "total_duration": 8668318400,
+      "load_duration": 252468100,
+      "done_reason": "stop",
+      "latency_ms": 10696,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072003,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072003,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

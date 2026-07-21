@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce112_q12_independent_probability_fraction__ab2d_spec_v2__seed_2026072001",
+  "task_id": "ce112_q12_independent_probability_fraction",
+  "family": "fraction",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072001,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072001
+  },
+  "prompt_sha256": "183c3a708e2a1361e9ccd41de1cb33c51bb169b1f6b7cd99d874f98aa23ada51",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce112_q12_independent_probability_fraction.txt",
+  "generation_status": "success",
+  "raw_response": "# -*- coding: utf-8 -*-\n\ndef generate(level=1, **kwargs):\n    from core.prompts.domain_function_library import FractionOps\n    \n    frozen_params = {\"p1\": [2, 6], \"p2\": [1, 5]}\n    \n    p1_num, p1_den = frozen_params[\"p1\"]\n    p2_num, p2_den = frozen_params[\"p2\"]\n    \n    fraction_p1 = FractionOps.from_parts(p1_num, p1_den)\n    fraction_p2 = FractionOps.from_parts(p2_num, p2_den)\n    \n    product_fraction = FractionOps.mul(fraction_p1, fraction_p2)\n    \n    numerator = product_fraction.numerator\n    denominator = product_fraction.denominator\n    \n    latex_str = f\"\\\\frac{{{numerator}}}{{denominator}}\"\n    \n    question_text = r\"\\text{What is the probability of both events occurring? } \\left( p_1=\\frac{\\text{\" + str(p1_num) + \"}}{\\text{\" + str(p1_den) + \"}}, p_2=\\frac{\\text{\" + str(p2_num) + \"}}{\\text{\" + str(p2_den) + \"}} \\right)\"\n    \n    correct_answer = {\n        \"numerator\": numerator,\n        \"denominator\": denominator,\n        \"canonical_latex\": latex_str\n    }\n    \n    oracle_payload = frozen_params\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:20:37.977068+00:00",
+  "completed_at_utc": "2026-07-21T15:20:43.520469+00:00",
+  "duration": 5.543392900028266,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 5.543379900045693,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 931,
+      "eval_count": 338,
+      "total_token_count": 1269,
+      "total_duration": 3514191500,
+      "load_duration": 295070100,
+      "done_reason": "stop",
+      "latency_ms": 5543,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072001,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072001,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

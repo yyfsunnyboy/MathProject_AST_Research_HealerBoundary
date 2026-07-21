@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce112_q12_independent_probability_fraction__ab2d_spec_v2__seed_2026072004",
+  "task_id": "ce112_q12_independent_probability_fraction",
+  "family": "fraction",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072004,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072004
+  },
+  "prompt_sha256": "183c3a708e2a1361e9ccd41de1cb33c51bb169b1f6b7cd99d874f98aa23ada51",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce112_q12_independent_probability_fraction.txt",
+  "generation_status": "success",
+  "raw_response": "# -*- coding: utf-8 -*-\n\ndef generate(level=1, **kwargs):\n    # Frozen parameters as per task specification\n    frozen_params = {\"p1\": [2, 6], \"p2\": [1, 5]}\n    \n    p1_num, p1_den = frozen_params[\"p1\"]\n    p2_num, p2_den = frozen_params[\"p2\"]\n    \n    # Compute product using native Python arithmetic (simplified for difficulty level 1)\n    # Result numerator: p1 * p2\n    result_numerator = p1_num * p2_num\n    \n    # Result denominator: lcm(p1_den, p2_den). Since denominators are small integers here, \n    # we can compute LCM manually or use gcd.\n    def gcd(a, b):\n        while b:\n            a, b = b, a % b\n        return a\n\n    common_divisor = gcd(p1_den, p2_den)\n    \n    lcm_result_numerator = (p1_num * p2_num) // common_divisor\n    \n    # Denominator becomes LCM of original denominators divided by the GCD factor already handled in numerator? \n    # Actually: Result = (n1/n2) * (m/m') = (n*m)/(n'*m').\n    # To reduce, we divide both num and den by gcd(num, den).\n    \n    result_denominator = p1_den * p2_den // common_divisor\n    \n    final_numerator = lcm_result_numerator\n    final_denominator = result_denominator\n    \n    # Reduce fraction if not already irreducible (though direct multiplication often needs reduction)\n    g_final = gcd(final_numerator, final_denominator)\n    \n    canonical_num = final_numerator // g_final\n    canonical_den = final_denominator // g_final\n\n    question_text = r\"\\text{What is the probability of both independent events occurring? The probabilities are } \\frac{\\text{\" + str(p1_num) + \"}}{\\text{\" + str(p1_den) + \"}\"} \\text{ and } \\frac{\\text{\" + str(p2_num) + \"}}{\\text{\" + str(p2_den) + \"}}\"\n    \n    correct_answer = {\n        \"numerator\": canonical_num,\n        \"denominator\": canonical_den,\n        \"canonical_latex\": r\"\\frac{\" + str(canonical_num) + \"}{\" + str(canonical_den) + \"}\"\n    }\n\n    oracle_payload = frozen_params\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T16:10:09.129893+00:00",
+  "completed_at_utc": "2026-07-21T16:10:16.959968+00:00",
+  "duration": 7.8300654999911785,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 7.830052500008605,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 931,
+      "eval_count": 566,
+      "total_token_count": 1497,
+      "total_duration": 5809603900,
+      "load_duration": 251268700,
+      "done_reason": "stop",
+      "latency_ms": 7830,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072004,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072004,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

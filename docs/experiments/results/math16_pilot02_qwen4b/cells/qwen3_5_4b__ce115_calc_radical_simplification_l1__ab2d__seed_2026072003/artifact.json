@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce115_calc_radical_simplification_l1__ab2d__seed_2026072003",
+  "task_id": "ce115_calc_radical_simplification_l1",
+  "family": "radical",
+  "condition": "ab2d",
+  "seed": 2026072003,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072003
+  },
+  "prompt_sha256": "7277f140eeaadbdfe1f64a2215413acadf06fb134b09efa280f2011d19e5588c",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "from fractions import Fraction\nimport sys\nsys.path.insert(0, '.')\nfrom core.prompts.domain_function_library import RadicalOps\n\ndef generate(level=1, **kwargs):\n    radicand = kwargs.get(\"radicand\", 27) if \"radicand\" in kwargs else 27\n    \n    coeff = 1\n    simplified_coeff, square_free_radicand = RadicalOps.simplify_term(coeff, radicand)\n    \n    correct_answer_dict = {\n        \"coefficient\": int(simplified_coeff),\n        \"radicand\": int(square_free_radicand),\n        \"canonical_latex\": f\"{int(simplified_coeff)}\\\\sqrt{{{square_free_radicand}}}\"\n    }\n    \n    return {\n        \"question_text\": r\"$$\\text{Simplify the radical: }\\sqrt{\\overline{\\text{{radicand}}}}$$\",\n        \"correct_answer\": correct_answer_dict,\n        \"oracle_payload\": {\"radicand\": radicand}\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:55:56.317179+00:00",
+  "completed_at_utc": "2026-07-21T15:56:00.858485+00:00",
+  "duration": 4.541294399998151,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 4.5412827000254765,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 309,
+      "eval_count": 216,
+      "total_token_count": 525,
+      "total_duration": 2512940000,
+      "load_duration": 236619900,
+      "done_reason": "stop",
+      "latency_ms": 4541,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072003,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072003,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

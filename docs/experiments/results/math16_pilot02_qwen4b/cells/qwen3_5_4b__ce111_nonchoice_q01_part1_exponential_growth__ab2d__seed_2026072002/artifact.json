@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce111_nonchoice_q01_part1_exponential_growth__ab2d__seed_2026072002",
+  "task_id": "ce111_nonchoice_q01_part1_exponential_growth",
+  "family": "integer",
+  "condition": "ab2d",
+  "seed": 2026072002,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072002
+  },
+  "prompt_sha256": "1f1491d3b68e9620550398001b27cd72e2f8b6c08c2debbf346396314a69cb42",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "import json\nfrom core.prompts.domain_function_library import IntegerOps\n\n\ndef generate(level=1, **kwargs):\n    frozen_params = {\"days\": 15, \"hours_per_generation\": 20, \"initial\": 1, \"split_factor\": 4}\n    \n    total_hours = kwargs.get(\"total_hours\", None) or (frozen_params[\"days\"] * frozen_params[\"hours_per_generation\"])\n    generations = int(total_hours / frozen_params[\"hours_per_generation\"]) if total_hours else frozen_params[\"days\"] // 15\n    \n    initial_population = IntegerOps.safe_eval(frozen_params[\"initial\"])\n    \n    for _ in range(generations):\n        current_pop = IntegerOps.safe_eval(initial_population)\n        \n        split_factor = IntegerOps.safe_eval(frozen_params[\"split_factor\"])\n        new_offspring = int(current_pop * (split_factor / 2))\n        initial_population += new_offspring\n        \n    final_answer = IntegerOps.fmt_num(IntegerOps.safe_eval(final_population := current_pop + new_offspring - frozen_params[\"initial\"]))\n\n    question_text = r\"\"\"Consider a population that starts with $1$ individual. Each generation, the existing individuals produce offspring such that for every 2 parents there are $\\frac{4}{2}$ children born (a net doubling of the total count per parent pair). If this process continues for $N$ generations where each generation takes $H$ hours to complete, what is the final population size? Calculate based on a scenario with specific parameters provided.\"\"\"\n\n    correct_answer = {\"k\": IntegerOps.safe_eval(final_population)}\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:23:23.173511+00:00",
+  "completed_at_utc": "2026-07-21T15:23:29.053368+00:00",
+  "duration": 5.879846299998462,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 5.879829299985431,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 344,
+      "eval_count": 367,
+      "total_token_count": 711,
+      "total_duration": 3842557100,
+      "load_duration": 243667700,
+      "done_reason": "stop",
+      "latency_ms": 5879,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072002,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072002,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

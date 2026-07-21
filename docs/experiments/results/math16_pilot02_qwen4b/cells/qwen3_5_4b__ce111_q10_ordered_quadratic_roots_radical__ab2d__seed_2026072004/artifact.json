@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce111_q10_ordered_quadratic_roots_radical__ab2d__seed_2026072004",
+  "task_id": "ce111_q10_ordered_quadratic_roots_radical",
+  "family": "radical",
+  "condition": "ab2d",
+  "seed": 2026072004,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072004
+  },
+  "prompt_sha256": "79e4e1abeee04352b1acfd797ec10815f2614f37bd4c94f0090c6ffef957d2c6",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "from fractions import Fraction\nimport math\nfrom typing import Dict, Any\n\n# Mocking required domain functions as they are not in standard library\nclass RadicalOps:\n    @staticmethod\n    def simplify_term(coeff: int, radicand: int) -> tuple[int, int]:\n        # Simplify sqrt(radicand). For (x-2)^2 = 3 => x^2 -4x +4=3 => x^2-4x+1=0. Roots are (4 +/- sqrt(16-4))/2 = 2 +/- sqrt(3).\n        # Coefficient is 1, radicand is 3. No further simplification needed for integer inputs here unless perfect square factor exists.\n        return coeff, radicand\n\n    @staticmethod\n    def format_expression(terms_dict: Dict[str, Any], denominator: int = 1) -> str:\n        # Format terms like \"2a+b\" into LaTeX radical form if applicable or just the expression string for coefficients\n        pass\n\nclass FractionOps:\n    @staticmethod\n    def create(value):\n        return value\n\ndef generate(level=1, **kwargs):\n    frozen_params = {\"equation\": \"(x-2)^2=3\", \"order\": \"a>b\", \"target\": \"2a+b\"}\n    \n    # Parse equation (x-2)^2 = 3 -> x^2 - 4x + 4 = 3 -> x^2 - 4x + 1 = 0\n    a, b, c = 1, -4, 1\n    \n    discriminant = b**2 - 4*a*c # (-4)^2 - 4*1*1 = 16 - 4 = 12\n    sqrt_discriminant = math.sqrt(discriminant) # sqrt(12) = 2*sqrt(3) -> coeff=2, radicand=3\n    \n    root_a = (-(b) + sqrt_discriminant) / (2*a) # (-(-4) + 2*sqrt(3)) / 2 = (4 + 2*sqrt(3))/2 = 2 + sqrt(3)\n    \n    # Extract components for correct_answer based on root_a = 2a' + b' where a'=1, b'=sqrt(3)\n    # The question asks to express in form involving rational and radical.\n    # Root is 2 + 1*sqrt(3). Rational part: 2 (Fraction), Radical coeff: 1, Radicand: 3.\n    \n    from fractions import Fraction\n    \n    rational_part = Fraction(4) / 2 # From calculation above: 4/2 = 2\n    radical_coefficient = 1 \n    radicand = 3 \n    \n    canonical_latex = r\"\\\\sqrt{3}\"\n    \n    correct_answer_data = {\n        \"rational\": str(rational_part),\n        \"radical_coefficient\": int(radical_coefficient),\n        \"radicand\": int(radicand),\n        \"canonical_latex\": canonical_latex\n    }\n\n    question_text = r\"$$ \\text{Solve for } x: (x-2)^2=3. $$ Express the larger root in the form $r + c\\sqrt{n}$ where $n$ is square-free.\"\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer_data,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T16:05:59.834309+00:00",
+  "completed_at_utc": "2026-07-21T16:06:09.383289+00:00",
+  "duration": 9.54897110001184,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 9.548959499923512,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 435,
+      "eval_count": 747,
+      "total_token_count": 1182,
+      "total_duration": 7501789300,
+      "load_duration": 261009600,
+      "done_reason": "stop",
+      "latency_ms": 9548,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072004,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072004,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

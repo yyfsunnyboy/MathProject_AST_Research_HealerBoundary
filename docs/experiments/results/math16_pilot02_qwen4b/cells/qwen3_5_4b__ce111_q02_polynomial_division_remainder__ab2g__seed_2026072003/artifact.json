@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce111_q02_polynomial_division_remainder__ab2g__seed_2026072003",
+  "task_id": "ce111_q02_polynomial_division_remainder",
+  "family": "polynomial",
+  "condition": "ab2g",
+  "seed": 2026072003,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072003
+  },
+  "prompt_sha256": "1cb912077ad2776904919f36b8947a00c6986c58c24c9311c1d8872dbc447e31",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "```python\ndef generate(level=1, **kwargs):\n    frozen_params = {\"dividend_coefficients\": [6, 4, 0], \"divisor_coefficients\": [2, 0, 0]}\n    \n    dividend_coeffs = frozen_params[\"dividend_coefficients\"]\n    divisor_coeffs = frozen_params[\"divisor_coefficients\"]\n    \n    # Convert coefficients to polynomials: a_n*x^n + ... + a_1*x + a_0\n    def poly_to_expr(coeffs):\n        terms = []\n        for i, c in enumerate(reversed(coeffs)):\n            if c != 0:\n                x_power = \"x\" * (len(coeffs) - i)\n                term = f\"{c}{x_power}\" if len(x_power) > 1 else str(c) + (\"^2\" if len(x_power)==2 and int(term[-1]) == '4' else \"\") # Simplified logic for specific case [6,4,0] -> 6x^3+4\n                terms.append(f\"{c} * x^{len(coeffs)-i}\" if c != 0 else \"0\")\n        return \"+\".join(terms)\n\n    dividend_str = poly_to_expr(dividend_coeffs).replace(\"+\", \"\\\\+\")\n    \n    # Perform polynomial division manually for [6, 4, 0] / [2, 0, 0] (which is 2x^3 + 0x^2 + 0x -> wait, divisor coeffs are [2,0,0] meaning degree 2? \n    # Standard convention: coeff list usually starts from highest power.\n    # Divisor [2, 0, 0] implies 2*x^2 + 0*x + 0 = 2x^2.\n    # Dividend [6, 4, 0] implies 6*x^3 + 4*x^2 + 0*x = 6x^3 + 4x^2.\n    \n    # Division: (6x^3 + 4x^2) / (2x^2)\n    # Quotient term 1: 6/2 * x^(3-2) = 3x\n    \n    correct_answer_remainder = \"0\"\n    canonical_latex_quotient = r\"3x\"\n\n    question_text = f\"\"\"Perform polynomial division to find the remainder of $\\\\frac{6x^3 + 4x^2}{2x^2}$. \nThe quotient is {canonical_latex_quotient}. What is the remainder?\n$$ \\\\text{Remainder: } \\_\\_ $$\"\"\"\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": f\"{{'remainder': '{correct_answer_remainder}', 'quotient': '{canonical_latex_quotient}'}}\", # String representation of dict for JSON compatibility if needed, but spec says include remainder and canonical latex. Let's format as a string containing both clearly or just the values. \n        # Re-reading: \"correct_answer must include only remainder and canonical_latex\".\n        # I will return them in a structured way within the text or separate fields? The key is 'correct_answer'.\n        # It says \"include\", so likely a formatted string or dict representation. Given it's an answer field, let's make it clear.\n        correct_answer: f\"Remainder: {correct_answer_remainder}, Quotient (for reference): {{canonical_latex_quotight}}\" if False else None \n    }\n\n# Correct implementation following spec strictly\n    \ndef generate(level=1, **kwargs):\n    frozen_params = {\"dividend_coefficients\": [6, 4, 0], \"divisor_coefficients\": [2, 0, 0]}\n    \n    dividend_coeffs = frozen_params[\"dividend_coefficients\"] # [6, 4, 0] -> 6x^3 + 4x^2\n    divisor_coeffs = frozen_params[\"divisor_coefficients\"]   # [2, 0, 0] -> 2x^2\n    \n    dividend_str_latex = r\"6x^3+4x^2\"\n    divisor_str_latex = r\"2x^2\"\n    \n    # Division: (6x^3 + 4x^2) / (2x^2) = 3x. Remainder is 0.\n    remainder_val = \"0\"\n    quotient_latex = r\"3x\"\n\n    question_text = f\"\"\"Calculate the polynomial division of $\\\\frac{6x^3+4x^2}{2x^2}$. \nFind the **remainder**. The canonical form of the quotient is {quotient_latex}.\n$$ \\\\text{Remainder: } \\_\\_ $$\"\"\"\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": f\"{{'remainder': '{remainder_val}', 'canonical_quotient': '{quotient_latex}'}}\", # Ensuring both are present as requested. \n        \"oracle_payload\": frozen_params\n    }\n```",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:47:29.673652+00:00",
+  "completed_at_utc": "2026-07-21T15:47:42.322132+00:00",
+  "duration": 12.648469800013117,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 12.648458399926312,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 238,
+      "eval_count": 1094,
+      "total_token_count": 1332,
+      "total_duration": 10632930800,
+      "load_duration": 232193000,
+      "done_reason": "stop",
+      "latency_ms": 12648,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072003,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072003,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

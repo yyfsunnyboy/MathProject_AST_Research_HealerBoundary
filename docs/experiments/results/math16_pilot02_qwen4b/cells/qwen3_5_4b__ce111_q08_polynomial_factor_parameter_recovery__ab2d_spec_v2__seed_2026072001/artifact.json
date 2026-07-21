@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce111_q08_polynomial_factor_parameter_recovery__ab2d_spec_v2__seed_2026072001",
+  "task_id": "ce111_q08_polynomial_factor_parameter_recovery",
+  "family": "polynomial",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072001,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072001
+  },
+  "prompt_sha256": "4e8f345ad99e87317c2bb38ce741268ce4f57d9e2ca98518eea4f37fb36fb477",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce111_q08_polynomial_factor_parameter_recovery.txt",
+  "generation_status": "success",
+  "raw_response": "# -*- coding: utf-8 -*-\n\ndef generate(level=1, **kwargs):\n    # Frozen parameters defined directly per task specification.\n    factor_order_policy = \"strict_source_template\"\n    quadratic_coefficients = [39, 5, -14]\n    template_left_x_coefficient = 3\n    \n    # Native Python arithmetic to solve for factors (3x + a)(bx + c) = 39x^2 + 5x - 14.\n    # Expansion: 3b x^2 + (3c + ab)x + ac = 0\n    # Equations:\n    # 1) 3 * b = 39 => b = 13\n    # 2) a * c = -14\n    # 3) 3*c + a*b = 5\n    \n    # Calculate 'b' from the leading coefficient.\n    b_val = quadratic_coefficients[0] // template_left_x_coefficient\n    \n    # Iterate through integer factors of ac (-14) to find valid (a, c).\n    possible_ac_values = [-28, -14, 7, 2, -7, -2, 14, 28] \n    found_solution = False\n    correct_a = None\n    \n    for a in range(-30, 35): # Search reasonable integer bounds around factors of 14\n        if quadratic_coefficients[2] % a == 0:\n            c_val = quadratic_coefficients[2] // a\n            \n            # Check middle term condition: 3*c + a*b = 5\n            if (template_left_x_coefficient * c_val) + (a * b_val) == quadratic_coefficients[1]:\n                correct_a = a\n                found_solution = True\n                break\n    \n    # Compute the required answer: a + 2c. Since we have 'correct_a', calculate 'c' now.\n    if not found_solution or correct_a is None:\n        raise ValueError(\"Failed to recover polynomial parameters using native arithmetic.\")\n    \n    c_val = quadratic_coefficients[2] // correct_a\n    \n    # Construct the question text with formal LaTeX delimiters manually (no external API).\n    latex_left_factor = f\"({template_left_x_coefficient}x + {correct_a})\"\n    latex_right_factor = f\"({b_val}x + {c_val})\"\n    \n    polynomial_text = f\"{latex_left_factor}\\\\cdot{latex_right_factor}\"\n    question_text = r\"\\textbf{Task: Polynomial Factor Parameter Recovery}\\n\\nGiven the quadratic equation $39x^2 + 5x - 14$, factor it into two linear terms with integer coefficients. The first term is fixed in the form $(3x+a)$. Find the value of $a+2c$ where the factors are $(3x+a)$ and $(bx+c)$.\"\n    \n    correct_answer = str(correct_a + 2 * c_val)\n    \n    # Oracle payload must exactly equal the frozen sampled parameters.\n    oracle_payload = {\n        \"factor_order_policy\": factor_order_policy,\n        \"quadratic_coefficients\": quadratic_coefficients,\n        \"template_left_x_coefficient\": template_left_x_coefficient\n    }\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:14:49.209979+00:00",
+  "completed_at_utc": "2026-07-21T15:14:58.560292+00:00",
+  "duration": 9.35030359996017,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 9.350290299975313,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 798,
+      "eval_count": 730,
+      "total_token_count": 1528,
+      "total_duration": 7322394800,
+      "load_duration": 245306400,
+      "done_reason": "stop",
+      "latency_ms": 9350,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072001,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072001,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce112_q12_independent_probability_fraction__ab2g__seed_2026072002",
+  "task_id": "ce112_q12_independent_probability_fraction",
+  "family": "fraction",
+  "condition": "ab2g",
+  "seed": 2026072002,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072002
+  },
+  "prompt_sha256": "d68af74fd5f59ae1178e9835684479397bd58a2b1f31fd9ef7b022e34b96fcf1",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "import math\nfrom fractions import Fraction\n\ndef generate(level=1, **kwargs):\n    p1_list = kwargs.get(\"p1\", [2, 6])\n    p2_list = kwargs.get(\"p2\", [1, 5])\n    \n    # Select random values from the frozen lists (simulating sampling)\n    if level == 0:\n        n_p1 = p1_list[0]\n        d_p1 = p1_list[1]\n        n_p2 = p2_list[0]\n        d_p2 = p2_list[1]\n    else:\n        # For higher levels, we can sample randomly from the lists if needed, \n        # but for this specific task structure with fixed frozen parameters,\n        # using the first pair is a safe deterministic approach matching typical test cases.\n        n_p1 = random.choice(p1_list)\n        d_p1 = p2_list[0] # Assuming independent selection logic based on lists provided in spec context usually implies pairing or separate sampling\n        \n    # Re-evaluating based strictly on \"frozen sampled parameters\": {\"p1\": [2, 6], \"p2\": [1, 5]}\n    # The task asks for an independent probability fraction. \n    # Let's assume the question is P(A and B) = p1 * p2 where p1 comes from list 1 and p2 from list 2.\n    # To ensure determinism without external random seed specified in frozen params, we pick the first elements as a standard base case for level=0 or default behavior if not seeded.\n    \n    n_p1 = p1_list[0]\n    d_p1 = p1_list[1]\n    n_p2 = p2_list[0]\n    d_p2 = p2_list[1]\n\n    # Calculate the product of two independent probabilities: (n/d) * (m/k) = nm / dk\n    numerator = n_p1 * n_p2\n    denominator = d_p1 * d_p2\n    \n    fraction = Fraction(numerator, denominator)\n    \n    q_text = r\"\\text{What is the probability that both events occur? } P(A \\cap B)\"\n    correct_ans_num = str(fraction.numerator)\n    correct_ans_den = str(fraction.denominator)\n    canonical_latex = f\"\\\\frac{{{correct_ans_num}}}{{\"{correct_ans_den}\"}}\".replace(\"'\", \"\") # Fix latex escaping\n    \n    oracle_payload = {\"p1\": p1_list, \"p2\": p2_list}\n\n    return {\n        \"question_text\": q_text,\n        \"correct_answer\": {\n            \"numerator\": correct_ans_num,\n            \"denominator\": correct_ans_den,\n            \"canonical_latex\": f\"\\\\frac{{{fraction.numerator}}}{{\"{fraction.denominator}\"}}\"\n        },\n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:34:23.585981+00:00",
+  "completed_at_utc": "2026-07-21T15:34:31.738126+00:00",
+  "duration": 8.152133099967614,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 8.152120199985802,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 226,
+      "eval_count": 624,
+      "total_token_count": 850,
+      "total_duration": 6129300400,
+      "load_duration": 236959000,
+      "done_reason": "stop",
+      "latency_ms": 8152,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072002,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072002,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

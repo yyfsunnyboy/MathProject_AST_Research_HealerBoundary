@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce115_calc_radical_simplification_l1__ab2d__seed_2026072002",
+  "task_id": "ce115_calc_radical_simplification_l1",
+  "family": "radical",
+  "condition": "ab2d",
+  "seed": 2026072002,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072002
+  },
+  "prompt_sha256": "7277f140eeaadbdfe1f64a2215413acadf06fb134b09efa280f2011d19e5588c",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "import math\nfrom fractions import Fraction\nfrom typing import Dict, Any\n\ndef generate(level: int = 1, **kwargs: Any) -> Dict[str, Any]:\n    radicand_input = kwargs.get(\"radicand\", 27)\n    \n    # Ensure input is integer for calculation logic if needed, though spec says exact integers only in output\n    coeff = 1\n    \n    try:\n        from core.prompts.domain_function_library import RadicalOps\n        \n        simplified_coeff, square_free_radicand = RadicalOps.simplify_term(coeff, radicand_input)\n        \n        correct_answer_dict = {\n            \"coefficient\": int(simplified_coeff),\n            \"radicand\": int(square_free_radicand),\n            \"canonical_latex\": f\"{int(simplified_coeff)}\\\\sqrt{{{square_free_radicand}}}\"\n        }\n    except ImportError:\n        # Fallback logic if domain API is unavailable, though spec mandates its use\n        coeff_val = 1\n        simplified_coeff = int(coeff_val) * (radicand_input ** (1/2)) / math.sqrt(radicand_input)\n        \n        # Manual simplification for 27: 3^3 -> 3*sqrt(9)=3*3=9? No, sqrt(27) = 3*sqrt(3). \n        # General manual logic: find largest square factor.\n        temp_radicand = radicand_input\n        while True:\n            root_temp = int(math.sqrt(temp_radicand))\n            if root_temp * root_temp == temp_radicand:\n                break\n            else:\n                pass\n        \n        # Re-implementing manual simplification for robustness without external dependency failure blocking the task logic entirely, \n        # but prioritizing the domain API as per instruction. Assuming standard environment has core.prompts.domain_function_library.\n        \n    return {\n        \"question_text\": r\"$$\\sqrt{\\text{radicand}} = \\text{coefficient} \\cdot \\sqrt{\\text{radicand}}$$\",\n        \"correct_answer\": correct_answer_dict,\n        \"oracle_payload\": radicand_input\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:33:30.685346+00:00",
+  "completed_at_utc": "2026-07-21T15:33:37.472959+00:00",
+  "duration": 6.787601699936204,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 6.787588799954392,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 309,
+      "eval_count": 458,
+      "total_token_count": 767,
+      "total_duration": 4774163100,
+      "load_duration": 271732100,
+      "done_reason": "stop",
+      "latency_ms": 6787,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072002,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072002,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

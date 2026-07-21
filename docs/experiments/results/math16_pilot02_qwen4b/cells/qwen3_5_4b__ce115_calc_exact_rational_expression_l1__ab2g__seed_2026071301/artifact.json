@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce115_calc_exact_rational_expression_l1__ab2g__seed_2026071301",
+  "task_id": "ce115_calc_exact_rational_expression_l1",
+  "family": "fraction",
+  "condition": "ab2g",
+  "seed": 2026071301,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026071301
+  },
+  "prompt_sha256": "5f397d56fab2649201b606af7abf51780a93d6d74269fd5f5d216a538aa8b8d9",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    import fractions\n    \n    # Frozen sampled parameters as per specification\n    frozen_params = {\n        \"products\": [\n            {\"left\": \"2.79\", \"right\": \"89.3\", \"sign\": 1},\n            {\"left\": \"-0.21\", \"right\": \"89.3\", \"sign\": -1}\n        ]\n    }\n\n    # Parse the first product: left = 2.79, right = 89.3, sign = +1\n    p1_str = str(frozen_params[\"products\"][0][\"left\"])\n    q1_num, p1_denom = fractions.Fraction(p1_str).numerator, fractions.Fraction(p1_str).denominator\n    \n    r1_str = str(frozen_params[\"products\"][0][\"right\"])\n    q2_num, p2_denom = fractions.Fraction(r1_str).numerator, fractions.Fraction(r1_str).denom\n\n    # Calculate the first term: 2.79 * 89.3\n    term1_numerator = q1_num * q2_num\n    term1_denominator = p1_denom * p2_denom\n    \n    # Parse the second product: left = -0.21, right = 89.3, sign = -1\n    p3_str = str(frozen_params[\"products\"][1][\"left\"])\n    q3_num, p3_denom = fractions.Fraction(p3_str).numerator, fractions.Fraction(p3_str).denominator\n    \n    r2_str = str(frozen_params[\"products\"][1][\"right\"])\n    q4_num, p4_denom = fractions.Fraction(r2_str).numerator, fractions.Fraction(r2_str).denom\n\n    # Calculate the second term: -0.21 * 89.3 (with sign applied)\n    # The expression is effectively: (2.79 * 89.3) + (-(-0.21 * 89.3)) \n    # Wait, looking at standard rational arithmetic problems of this type:\n    # Usually it's a sum or difference of products. Given the \"sign\" field in params often indicates operation direction relative to subtraction.\n    # Let's interpret as: Result = (left1 * right1) - (abs(left2) * right2) if sign is negative? \n    # Or simply calculate both and combine based on standard algebraic structure implied by such tasks.\n    # A common pattern for \"exact rational expression\" level 1 with two products is a subtraction: Term1 - Term2 or Term1 + Term2.\n    # Given the second product has sign=-1, it likely implies we subtract its magnitude from the first term, \n    # OR we calculate (A * B) and then add/subtract based on signs provided in input strings directly?\n    \n    # Let's assume the expression is: (2.79 * 89.3) - (-0.21 * 89.3) ? No, that would be addition of negatives.\n    # Standard interpretation for such datasets often involves constructing an equation like A*B + C*D or similar.\n    # However, the \"sign\" field suggests a specific operation logic: \n    # Expression = (left_0 * right_0) - |left_1| * right_1 if sign is negative?\n    # Let's try to construct: Result = Fraction(2.79)*Fraction(89.3) + (-0.21)*Fraction(89.3). \n    # This simplifies to (2.79 - 0.21) * 89.3? No, the second left is negative already.\n    \n    # Let's stick to strict arithmetic based on the values provided and signs indicating operation polarity if needed.\n    # Most likely: Calculate Term A = 2.79 * 89.3. Calculate Term B = -0.21 * 89.3. \n    # The \"sign\" field might indicate whether to add or subtract this term from the first? \n    # If sign=+1, we add (or it's positive). If sign=-1, we subtract (or it's negative contribution)?\n    # Actually, a very common pattern is: Result = Term1 - |Term2| if signs differ in context.\n    # But let's look at the numbers: 2.79 and -0.21. \n    # If we simply compute sum of products as written with their explicit values including sign:\n    # (2.79 * 89.3) + (-0.21 * 89.3). This equals (2.79 - 0.21) * 89.3 = 2.58 * 89.3.\n    \n    term_a_numerator, term_a_denominator = fractions.Fraction(p1_str), fractions.Fraction(r1_str) # Wait, p/q logic above was mixed up in variable names\n    \n    # Re-calculation cleanly:\n    val_0_left = Fraction(frozen_params[\"products\"][0][\"left\"])\n    val_0_right = Fraction(frozen_params[\"products\"][0][\"right\"])\n    \n    val_1_left = Fraction(frozen_params[\"products\"][1][\"left\"])\n    val_1_right = Fraction(frozen_params[\"products\"][1][\"right\"])\n\n    # The expression is likely: (val_0_left * val_0_right) + (val_1_left * val_1_right) \n    # OR (val_0_left * val_0_right) - abs(val_1_left) * val_1_right?\n    # Given the \"sign\" field exists, it probably dictates the operation between the two products.\n    # If sign is +1: Add. If sign is -1: Subtract. \n    # But wait, the second product already has a negative left operand (-0.21).\n    # Let's assume the task asks for (Product 1) +/- (Product 2 magnitude)?\n    # Or simply sum of two terms where one term uses the signed value?\n    \n    # Hypothesis: The expression is Term1 - |Term2| if sign=-1, else Term1 + |Term2|. \n    # But usually \"sign\" in these datasets indicates the operation operator between the main components.\n    # Let's try: Result = (val_0_left * val_0_right) - abs(val_1_left * val_1_right)? No, that ignores sign=+1 case logic if it was subtraction too? \n    # Actually, looking at similar problems: \"sign\" often indicates the operation relative to a base.\n    # Let's assume the simplest exact arithmetic interpretation of the provided data structure as an expression generator.\n    # Expression = (2.79 * 89.3) - (-0.21 * 89.3)? That is addition. \n    # Maybe: Result = (val_0_left * val_0_right) + sign * abs(val_1_left) * val_1_right?\n    \n    # Let's go with the most robust interpretation for \"exact rational\":\n    # Compute T1 = 2.79 * 89.3\n    # Compute T2 magnitude = |-0.21| * 89.3\n    # If sign is +1, add? Or maybe the expression is just a sum of two products where one has negative input?\n    # Let's calculate both terms and combine them as: (Term1) - |Term2| if we assume \"sign\" overrides the explicit value? \n    # No, let's treat it as: Result = Term1 + sign * T2_explicit.\n    \n    term1_numerator = val_0_left.numerator * val_0_right.numerator\n    term1_denominator = val_0_left.denominator * val_0_right.denominator\n    \n    abs_val_1_left = Fraction(abs(val_1_left)) # 0.21\n    t2_mag_numerator = abs_val_1_left.numerator * val_1_right.numerator\n    t2_mag_denominator = abs_val_1_left.denominator * val_1_right.denom\n    \n    if frozen_params[\"products\"][1][\"sign\"] == 1:\n        # Add the second term (positive contribution)\n        total_numerator = term1_numerator + t2_mag_numerator\n        total_denominator = term1_denominator\n    else:\n        # Subtract the magnitude of the second term? Or add the negative value? \n        # If sign=-1, usually implies subtraction in these templates.\n        total_numerator = term1_numerator - t2_mag_numerator\n        total_denominator = term1_denom\n\n    # Simplify fraction\n    common_divisor = fractions.gcd(total_numerator, total_denominator)\n    \n    final_p = total_numerator // common_divisor\n    final_q = total_denominator // common_divisor\n    \n    correct_answer_value = f\"{final_p}/{final_q}\"\n    canonical_latex = r\"\\frac{\" + str(final_p) + \"}{\"} + str(final_q) + r\"}\"\n\n    question_text = rf\"Evaluate the expression: {val_0_left} \\\\times {val_0_right} \\\\\\\\ - {{abs({val_1_left})}} \\times {val_1_right}\"\n    \n    # Wait, let's refine the question text to be generic and formal based on inputs.\n    q_str = f\"Calculate: ({p1_str} * {r1_str}) + sign_{frozen_params['products'][0]['sign']}({abs_val_1_left.numerator}/{abs_val_1_left.denom} * {r2_str})\" \n    # Actually, let's just construct a clean LaTeX string.\n    \n    final_question = r\"Evaluate the expression: $ \\frac{279}{100} \\times \\frac{893}{10} - |\\frac{-21}{100}| \\times \\frac{893}{10} $\"\n\n    return {\n        \"question_text\": final_question,\n        \"correct_answer\": f\"{final_p}/{final_q}\",\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:10:12.310657+00:00",
+  "completed_at_utc": "2026-07-21T15:10:35.612646+00:00",
+  "duration": 23.301980099990033,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 23.301968499901704,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 264,
+      "eval_count": 2227,
+      "total_token_count": 2491,
+      "total_duration": 21260255700,
+      "load_duration": 225785600,
+      "done_reason": "stop",
+      "latency_ms": 23301,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026071301,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026071301,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce111_q03_prime_factor_selection__ab1__seed_2026071301",
+  "task_id": "ce111_q03_prime_factor_selection",
+  "family": "integer",
+  "condition": "ab1",
+  "seed": 2026071301,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026071301
+  },
+  "prompt_sha256": "398a9ab7067574286a3f7b6a955033b2f3af8d244d34098aa907623bb706bcc4",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    candidates = kwargs.get(\"candidates\", [11, 12, 13, 14])\n    n = kwargs.get(\"n\", 156)\n    \n    def get_prime_factors(num):\n        factors = []\n        d = 2\n        temp = num\n        while d * d <= temp:\n            if temp % d == 0:\n                factors.append(d)\n                while temp % d == 0:\n                    temp //= d\n            d += 1\n        if temp > 1:\n            factors.append(temp)\n        return sorted(factors)\n    \n    all_factors = []\n    for c in candidates:\n        all_factors.extend(get_prime_factors(c))\n    \n    target_factors = get_prime_factors(n)\n    \n    selected_factors = [f for f in target_factors if f in all_factors]\n    \n    correct_answer = sum(selected_factors)\n    \n    question_text = r\"\"\"Find the sum of prime factors that divide $n$ and are also present as divisors among the candidates. Given: \\begin{align*} n &= 156 \\\\ \\text{candidates} &\\in [11, 12, 13, 14] \\end{align*}. Note: Prime factors must be prime numbers.\"\"\"\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": {\"candidates\": candidates, \"n\": n}\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T14:57:10.826873+00:00",
+  "completed_at_utc": "2026-07-21T14:57:23.506935+00:00",
+  "duration": 12.680050399969332,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 12.680030899937265,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 159,
+      "eval_count": 331,
+      "total_token_count": 490,
+      "total_duration": 10672863800,
+      "load_duration": 7288150200,
+      "done_reason": "stop",
+      "latency_ms": 12680,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026071301,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026071301,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

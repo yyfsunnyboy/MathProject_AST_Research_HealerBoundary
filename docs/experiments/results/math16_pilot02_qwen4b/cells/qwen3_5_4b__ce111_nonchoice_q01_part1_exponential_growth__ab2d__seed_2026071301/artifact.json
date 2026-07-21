@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce111_nonchoice_q01_part1_exponential_growth__ab2d__seed_2026071301",
+  "task_id": "ce111_nonchoice_q01_part1_exponential_growth",
+  "family": "integer",
+  "condition": "ab2d",
+  "seed": 2026071301,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026071301
+  },
+  "prompt_sha256": "1f1491d3b68e9620550398001b27cd72e2f8b6c08c2debbf346396314a69cb42",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "import json\nfrom core.prompts.domain_function_library import IntegerOps.safe_eval, IntegerOps.fmt_num\n\n\ndef generate(level=1, **kwargs):\n    frozen_params = {\"days\": 15, \"hours_per_generation\": 20, \"initial\": 1, \"split_factor\": 4}\n\n    total_hours = kwargs.get(\"total_hours\", hours_per_generation * days) if \"days\" in kwargs else None\n    \n    # Calculate final population using exponential growth formula: P(t) = P(0) * r^t\n    # Here t is number of generations, r is split_factor\n    initial_pop = frozen_params[\"initial\"]\n    split_factor = frozen_params[\"split_factor\"]\n    \n    total_generations = kwargs.get(\"total_generations\", 15) if \"days\" in kwargs else None\n    \n    final_population = safe_eval(f\"{initial_pop} * {split_factor} ** {total_generations}\")\n    \n    question_text = f\"The initial population is $P_0$. Each generation, the population splits into four times its previous size. After ${total_generations}$ generations, what is the final population? Express your answer as an integer.\"\n    \n    correct_answer_dict = {\"k\": int(final_population)}\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer_dict,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T14:58:41.601920+00:00",
+  "completed_at_utc": "2026-07-21T14:58:47.186879+00:00",
+  "duration": 5.584949499927461,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 5.584935499937274,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 344,
+      "eval_count": 297,
+      "total_token_count": 641,
+      "total_duration": 3533854100,
+      "load_duration": 314435900,
+      "done_reason": "stop",
+      "latency_ms": 5584,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026071301,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026071301,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

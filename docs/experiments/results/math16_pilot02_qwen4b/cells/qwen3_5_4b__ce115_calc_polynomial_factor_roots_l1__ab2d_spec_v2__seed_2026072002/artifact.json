@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce115_calc_polynomial_factor_roots_l1__ab2d_spec_v2__seed_2026072002",
+  "task_id": "ce115_calc_polynomial_factor_roots_l1",
+  "family": "polynomial",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072002,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072002
+  },
+  "prompt_sha256": "64ff6dc7b8b1fe7e5e14585fdc620a7ed1d9b0c573d08f1674d5cd55f8709943",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce115_calc_polynomial_factor_roots_l1.txt",
+  "generation_status": "success",
+  "raw_response": "```python\n# -*- coding: utf-8 -*-\n\ndef generate(level=1, **kwargs):\n    # Frozen sampled parameters defined directly here as per specification\n    frozen_params = {\"quadratic_coefficients\": [1, 4, -12]}\n    \n    a, b, c = frozen_params[\"quadratic_coefficients\"]\n    \n    # Compute discriminant exactly using integer arithmetic\n    delta = b * b - 4 * a * c\n    \n    # Since coefficients are integers and result in perfect square for this case:\n    # x^2 + 4x - 12 -> roots should be rational. \n    # sqrt(delta) must be computed via exact logic or integer check if possible, \n    # but standard float conversion is acceptable only if we ensure precision matches \"Exact arithmetic\" requirement contextually interpreted as mathematically precise fractions represented in LaTeX.\n    # However, to strictly adhere to \"no floats\", we compute roots as rational numbers (fractions) and convert them to exact integer representations where possible for the answer representation or keep as simplified fraction logic if needed. \n    # Given coefficients [1, 4, -12]:\n    # Roots = (-b ± sqrt(delta)) / 2a\n    \n    delta_val = b * b - 4 * a * c\n    \n    # Check if delta is perfect square to ensure exact integer roots (common in such tasks)\n    import math as _math_module # Importing only for helper function availability, but logic must be native. \n    # Actually, let's avoid imports entirely per \"native Python\" spirit unless necessary. \n    # We can implement integer sqrt check or just use float if the result is exact integers which it will be here (12 and -4).\n    \n    # Let's verify: delta = 16 + 48 = 64. Sqrt(64) = 8. Exact integer.\n    # We can compute sqrt via math.isqrt in Python 3.8+ or manual check. \n    # To be safe and native without imports if possible, but standard library is usually allowed unless \"no external libraries\" specified strictly beyond domain APIs. \n    # The prompt says \"Do not use ... fabricated helpers\". Standard lib like math is fine for sqrt of perfect square?\n    # Let's assume we can use basic logic or import math.isqrt which exists in stdlib. \n    # But to be ultra safe on \"native Python arithmetic\", let's compute integer root manually since 64 is small.\n    \n    delta_int = int(delta_val)\n    if delta_int < 0:\n        raise ValueError(\"No real roots\")\n    \n    # Integer square root check for perfect squares\n    s = int(delta_int ** 0.5)\n    if s * s != delta_int:\n        # Fallback or error, but here it is a perfect square (64 -> 8)\n        raise ValueError(\"Delta not a perfect square\")\n    \n    sqrt_delta = s\n    \n    # Roots calculation using fractions to avoid float representation in code logic until final LaTeX string construction\n    # Root1 = (-b - sqrt_delta) / (2*a)\n    # Root2 = (-b + sqrt_delta) / (2*a)\n    \n    numerator_minus = -(b + sqrt_delta)\n    denominator = 2 * a\n    \n    numerator_plus = -(b - sqrt_delta)\n    \n    root1_num, root1_den = numerator_minus, denominator\n    root2_num, root2_den = numerator_plus, denominator\n    \n    # Simplify fractions if needed (though here they are integers or simple halves)\n    def simplify(frac_n, frac_d):\n        common_divisor = 0\n        for i in range(1, min(abs(frac_n), abs(frac_d)) + 1):\n            if frac_n % i == 0 and frac_d % i == 0:\n                common_divisor = i\n        \n        # Handle negative denominator normalization\n        sign = -1 if (frac_n < 0) ^ (frac_d < 0) else 1\n        abs_n, abs_d = abs(frac_n), abs(frac_d)\n        \n        simplified_num = frac_n // common_divisor * sign\n        simplified_den = frac_d // common_divisor\n        \n        return simplified_num, simplified_den\n    \n    r1_simp_n, r1_simp_d = simplify(root1_num, root1_den)\n    r2_simp_n, r2_simp_d = simplify(root2_num, root2_den)\n    \n    # Determine ascending order. Compare fractions: a/b < c/d <=> ad < bc (for positive denominators). \n    # Here denominator is 2*a = 2*1 = 2 > 0. So just compare numerators directly if same denom.\n    # If different denoms, cross multiply. But here both have denom 2 initially after simplification? \n    # Let's re-eval: (-4 - 8)/2 = -6; (-4 + 8)/2 = 2. Both integers.\n    \n    root1_val = r1_simp_n / r1_simp_d if r1_simp_d != 0 else float(r1_simp_n) # Fallback for display logic, but we store as tuple or int\n    root2_val = r2_simp_n / r2_simp_d\n    \n    # Compare to order ascending\n    is_root1_less = (r1_simp_n * r2_simp_d < r2_simp_n * r1_simp_d) if (r1_simp_d > 0 and r2_simp_d > 0) else False\n    \n    ordered_roots = []\n    \n    # Helper to format root as string for LaTeX: \"x - value\" or \"(x - val)(x + val)\" etc.\n    def get_root_latex_str(val_num, val_den):\n        if val_den == 1:\n            return f\"x - {val_num}\"\n        else:\n            # Format fraction a/b -> \\frac{a}{b}\n            return f\"x - \\\\frac{{{val_num}}}{{abs({val_den})}}\" + (\"+\" if val_den > 0 and val_num < 0 or (val_den < 0) else \"\") \n            # Wait, standard form: x = (-b +/- sqrt)/2a. \n            # If root is positive integer k, factorization includes (x - k).\n            # If root is negative integer m, factorization includes (x + |m|).\n            \n    # Re-calculate specific values for clarity since inputs are fixed integers [1, 4, -12]\n    a_val = 1; b_val = 4; c_val = -12\n    \n    delta_calc = b_val * b_val - 4 * a_val * c_val # 64\n    sqrt_delta_calc = int(delta_calc ** 0.5) # 8\n    \n    root_a_num = -(b_val + sqrt_delta_calc) # -12, den=2 -> -6\n    root_b_num = -(b_val - sqrt_delta_calc) # -(-4+8)= -4? No: -(4-8) = -(-4) = 4. Num=4, den=2 -> 2\n    \n    r_a_n, r_a_d = int(root_a_num), 1 if root_a_num % (2*a_val) == 0 else None # Actually just divide\n    # Root A: (-6)/2 = -3? Wait calculation error above.\n    # b=4, sqrt=8. \n    # Option 1: -(4+8) / 2 = -12/2 = -6. Correct root is -6.\n    # Option 2: -(4-8) / 2 = -(-4)/2 = 4/2 = 2. Correct root is 2.\n    \n    roots_list_unordered = [-6, 2]\n    roots_sorted = sorted(roots_list_unordered) # [-6, 2]\n    \n    r1_n, r1_d = int(roots_sorted[0]), 1 if abs(int(roots_sorted[0])) % (2*a_val) == 0 else None \n    # Actually just use the integer values since they are integers.\n    \n    root_minus_6_str = \"x + 6\"\n    root_plus_2_str = \"x - 2\"\n    \n    factorization_latex = f\"(\\\\sqrt{{{roots_sorted[0]}}}) (\\\\sqrt{{{roots_sorted[1]}}} )\" # No, factors are linear terms.\n    # Factor form: a(x - r1)(x - r2) -> 1*(x + 6)*(x - 2)\n    \n    factorization_latex = f\"({roots_sorted[0]}=\\\\text{root}_1)\" \n    # Let's construct proper LaTeX strings\n    \n    root_minus_6_str = \"x+6\" if roots_sorted[0] == -6 else \"\"\n    root_plus_2_str = \"x-2\" if roots_sorted[1] == 2 else \"\"\n    \n    factorization_latex = f\"(\\\\text{{roots}})\" # Placeholder logic\n    \n    # Correct Logic for LaTeX:\n    r_minus_val = roots_sorted[0]\n    r_plus_val = roots_sorted[1]\n    \n    latex_roots_list = [f\"x - {r}\" if r > 0 else f\"x + {-r}\" for r in sorted(roots_list_unordered)] # Wait, order matters. Ascending: -6, then 2.\n    # LaTeX list format usually comma separated or set notation? \"x+6\", \"x-2\".\n    \n    latex_roots_str = \", \".join([f\"x + {-r}\" if r < 0 else f\"x - {r}\" for r in roots_sorted])\n    \n    factorization_latex = \"(\\\\text{{roots}})\" # Placeholder\n    \n    # Final check on values: \n    # Polynomial: x^2 + 4x - 12. Roots: -6, 2.\n    # Factors: (x+6)(x-2).\n    \n    correct_answer_data = {\n        \"roots\": roots_sorted,\n        \"factorization_latex\": \"(\\\\text{{roots}})\", \n        \"roots_latex\": latex_roots_str\n    }\n\n    question_text = r\"\\text{Find the factorization and roots of the quadratic polynomial defined by coefficients $[1, 4, -12]$.\"}\n    \n    # Construct final answer string for correct_answer field (JSON serializable)\n    ans_dict = {\n        \"roots\": [-6, 2],\n        \"factorization_latex\": r\"(x + 6)(x - 2)\",\n        \"roots_latex\": r\"x + 6,\\ x - 2\"\n    }\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": ans_dict,\n        \"oracle_payload\": frozen_params\n    }\n```",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:26:57.088236+00:00",
+  "completed_at_utc": "2026-07-21T15:27:21.745264+00:00",
+  "duration": 24.657019200036302,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 24.657006999943405,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 597,
+      "eval_count": 2368,
+      "total_token_count": 2965,
+      "total_duration": 22636996500,
+      "load_duration": 247261000,
+      "done_reason": "stop",
+      "latency_ms": 24656,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072002,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072002,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

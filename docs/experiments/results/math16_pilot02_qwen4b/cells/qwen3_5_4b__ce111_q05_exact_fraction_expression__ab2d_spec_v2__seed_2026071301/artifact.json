@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce111_q05_exact_fraction_expression__ab2d_spec_v2__seed_2026071301",
+  "task_id": "ce111_q05_exact_fraction_expression",
+  "family": "fraction",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026071301,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026071301
+  },
+  "prompt_sha256": "927977168ad6a72c644641fed7ef653495e55279689dc0beb06253033242926d",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce111_q05_exact_fraction_expression.txt",
+  "generation_status": "success",
+  "raw_response": "# -*- coding: utf-8 -*-\n\ndef generate(level=1, **kwargs):\n    from core.prompts.domain_function_library import FractionOps\n    \n    # Frozen parameters for this task instance\n    frozen_params = {\"expression\": \"9/22 + 11/18 - (23/22 - 7/18)\"}\n    \n    # Compute the exact result using native Python arithmetic via fractions module logic \n    # to ensure precision and irreducibility without external API misuse beyond allowed imports.\n    # We use Fraction class directly as it is standard library, but since task specifies FractionOps usage:\n    # Let's construct terms manually then combine.\n    \n    term1 = FractionOps.from_parts(9, 22)\n    term2 = FractionOps.from_parts(11, 18)\n    inner_sub = FractionOps.sub(FractionOps.from_parts(23, 22), FractionOps.from_parts(7, 18))\n    \n    # Expression: term1 + term2 - inner_sub\n    result_add = FractionOps.add(term1, term2)\n    final_result = FractionOps.sub(result_add, inner_sub)\n    \n    numerator = final_result.numerator\n    denominator = final_result.denominator\n    \n    # Generate LaTeX representation for irreducible fraction\n    canonical_latex = f\"\\\\frac{{{numerator}}}{{denominator}}\" if (numerator < 0 and denominator > 0):\n        sign_str = \"-\" + str(-abs(numerator))\n        denom_val = abs(denominator)\n        canonical_latex = f\"-\\\\\\\\frac{{{sign_str}}{{{denom_val}}}\"\n    else:\n        # Handle negative numerator or both signs same (simplified by Fraction class usually handles normalization, \n        # but let's ensure standard form where denominator is positive and sign on top if needed.\n        # Python fractions normalize so denom > 0 always. If num < 0, it stays negative.\n        canonical_latex = f\"\\\\\\\\frac{{{numerator}}}{{denominator}}\"\n\n    question_text = r\"\\text{Compute the exact value of: } \\(\\frac{9}{22} + \\frac{11}{18} - \\left( \\frac{23}{22} - \\frac{7}{18} \\right)\\)\"\n    \n    correct_answer_data = {\n        \"numerator\": numerator,\n        \"denominator\": denominator,\n        \"canonical_latex\": canonical_latex\n    }\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer_data,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:08:55.527141+00:00",
+  "completed_at_utc": "2026-07-21T15:09:03.446519+00:00",
+  "duration": 7.919368600007147,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 7.919354500016198,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 963,
+      "eval_count": 568,
+      "total_token_count": 1531,
+      "total_duration": 5882009400,
+      "load_duration": 253214400,
+      "done_reason": "stop",
+      "latency_ms": 7919,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026071301,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026071301,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

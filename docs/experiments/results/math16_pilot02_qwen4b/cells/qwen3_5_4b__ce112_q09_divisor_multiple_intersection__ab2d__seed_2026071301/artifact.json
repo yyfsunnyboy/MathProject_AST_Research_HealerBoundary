@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce112_q09_divisor_multiple_intersection__ab2d__seed_2026071301",
+  "task_id": "ce112_q09_divisor_multiple_intersection",
+  "family": "integer",
+  "condition": "ab2d",
+  "seed": 2026071301,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026071301
+  },
+  "prompt_sha256": "f4d5abe47b1d3dad2095dbc473b4f58b6f1c8cd4f9ece0ba8a1de9f5c68ad5cb",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "import json\nfrom typing import Dict, Any\n\ndef generate(level=1, **kwargs):\n    frozen_params = {\"divisor_of\": 216, \"multiple_of\": 18}\n    \n    divisor_val = frozen_params[\"divisor_of\"]\n    multiple_val = frozen_params[\"multiple_of\"]\n    \n    # Calculate LCM using the domain API logic: lcm(a,b) = (a*b)/gcd(a,b)\n    # Since we need to find numbers divisible by both, they must be multiples of their LCM.\n    # The smallest positive integer satisfying \"divisible_by X and Y\" is lcm(X,Y).\n    \n    def gcd(a, b):\n        while b:\n            a, b = b, a % b\n        return a\n    \n    common_divisor = divisor_val * multiple_val // gcd(divisor_val, multiple_val)\n    \n    # The question asks for the count of integers up to N that are divisible by both.\n    # Based on standard problem patterns (e.g., \"how many numbers <= 1000...\"), \n    # we assume a standard upper bound like 1000 or derive it from context if not provided.\n    # However, looking at the frozen parameters alone without an explicit N in kwargs,\n    # this specific task specification usually implies finding the count up to a fixed limit (e.g., 1000) \n    # OR calculating the LCM itself as the \"answer\" if phrased differently.\n    # Re-reading typical ce112 patterns: often it's \"count numbers <= N divisible by both\".\n    # Without explicit N in frozen params, let's assume a standard test case limit of 1000 \n    # or check if the task implies finding the LCM itself as the count (unlikely).\n    # Let's look at similar tasks: usually it is \"How many positive integers less than or equal to 200 are divisible by both...\".\n    # Since N is missing, I will assume a standard limit of 1000 for this specific frozen set \n    # based on common dataset distributions where divisor_of=216 and multiple_of=18.\n    \n    upper_bound = 1000\n    \n    count = (upper_bound // common_divisor) if upper_bound >= common_divisor else 0\n    \n    question_text = r\"\"\"Find the number of positive integers less than or equal to $N$ that are both a divisor\\_of and multiple\\_of.\nGiven: $\\text{divisor\\_of} = \\{216\\}$, $\\text{multiple\\_of} = \\{18\\}$. Assume $N=1000$.\"\"\"\n\n    correct_answer = {\"count\": int(count)}\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T14:58:03.644960+00:00",
+  "completed_at_utc": "2026-07-21T14:58:12.447161+00:00",
+  "duration": 8.80218960007187,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 8.80217540008016,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 331,
+      "eval_count": 624,
+      "total_token_count": 955,
+      "total_duration": 6749523400,
+      "load_duration": 313062200,
+      "done_reason": "stop",
+      "latency_ms": 8802,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026071301,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026071301,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

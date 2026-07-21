@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce111_q02_polynomial_division_remainder__ab1__seed_2026072003",
+  "task_id": "ce111_q02_polynomial_division_remainder",
+  "family": "polynomial",
+  "condition": "ab1",
+  "seed": 2026072003,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072003
+  },
+  "prompt_sha256": "138e8eae8822fb96a655fd1cfb5c14873f5397fb4b5a09ed617defd5fc0e42e5",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    polynomials = {\n        \"dividend_coefficients\": [6, 4, 0],\n        \"divisor_coefficients\": [2, 0, 0]\n    }\n    \n    dividend_poly = sum(c * (x**i) for i, c in enumerate(reversed(polynomials[\"dividend_coefficients\"])) if len([c for c in polynomials[\"dividend_coefficients\"]]) > 1 and not isinstance(c, float)) or \"6 + 4x\" # Simplified representation based on coefficients [6, 4, 0] -> 6 + 4x\n    divisor_poly = sum(c * (x**i) for i, c in enumerate(reversed(polynomials[\"divisor_coefficients\"])) if len([c for c in polynomials[\"divisor_coefficients\"]]) > 1 and not isinstance(c, float)) or \"2\" # Simplified representation based on coefficients [2, 0, 0] -> 2\n    \n    dividend_str = f\"{polynomials['dividend_coefficients'][0]} + {polynomials['dividend_coefficients'][1]}x\"\n    divisor_str = str(polynomials[\"divisor_coefficients\"][0])\n    \n    # Perform polynomial division manually for [6, 4, 0] divided by [2] (constant)\n    # Dividing a quadratic-like structure represented as coefficients [a, b, c] where c=0 effectively means linear if we treat it strictly. \n    # However, standard interpretation of coeffs [c_n, ..., c_1, c_0]: 6 + 4x divided by 2.\n    # Quotient: (6/2) + (4/2)x = 3 + 2x. Remainder: 0.\n    \n    remainder_val = 0\n    \n    question_text = r\"Find the remainder when dividing $P(x)$ by $Q(x)$, where $P(x)$ has coefficients $\\{6, 4, 0\\}$ and $Q(x)$ has coefficients $\\{2, 0, 0\\}$. Express your answer in LaTeX.\"\n    correct_answer = f\"Remainder: {remainder_val}, Canonical Latex: \\\\text{{\\\\$}}0\\\\text{{\\\\$}}\"\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": polynomials\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:47:22.251724+00:00",
+  "completed_at_utc": "2026-07-21T15:47:29.666349+00:00",
+  "duration": 7.41461320000235,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 7.414601700031199,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 174,
+      "eval_count": 527,
+      "total_token_count": 701,
+      "total_duration": 5362397000,
+      "load_duration": 237588600,
+      "done_reason": "stop",
+      "latency_ms": 7414,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072003,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072003,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

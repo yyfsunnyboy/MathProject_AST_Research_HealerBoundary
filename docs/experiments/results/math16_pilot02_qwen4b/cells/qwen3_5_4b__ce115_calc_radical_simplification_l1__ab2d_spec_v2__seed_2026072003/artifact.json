@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce115_calc_radical_simplification_l1__ab2d_spec_v2__seed_2026072003",
+  "task_id": "ce115_calc_radical_simplification_l1",
+  "family": "radical",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072003,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072003
+  },
+  "prompt_sha256": "2708207ae203981a2788e092fe304786ba7cfebc62173946b16030a1bf045aee",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce115_calc_radical_simplification_l1.txt",
+  "generation_status": "success",
+  "raw_response": "# -*- coding: utf-8 -*-\n\ndef generate(level=1, **kwargs):\n    # Frozen sampled parameters for this task instance\n    radicand = 27\n    \n    # Import RadicalOps to handle radical simplification logic\n    from core.prompts.domain_function_library import RadicalOps\n    \n    # Compute the simplified form a*sqrt(b) using the frozen radicand\n    coeff, new_radicand = RadicalOps.simplify_term(1, radicand)\n    \n    # Construct the correct answer components (integers only)\n    coefficient = int(coeff)\n    final_radicand = int(new_radicand)\n    \n    # Generate canonical LaTeX representation: a\\sqrt{b}\n    latex_str = f\"{coefficient}\\\\sqrt{{{final_radicand}}}\"\n    \n    return {\n        \"question_text\": r\"$\\sqrt{\\text{{27}}}$\",\n        \"correct_answer\": {\n            \"coefficient\": coefficient,\n            \"radicand\": final_radicand,\n            \"canonical_latex\": latex_str\n        },\n        \"oracle_payload\": {\"radicand\": radicand}\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:56:00.863992+00:00",
+  "completed_at_utc": "2026-07-21T15:56:05.597795+00:00",
+  "duration": 4.733792899991386,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 4.733779600006528,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 643,
+      "eval_count": 244,
+      "total_token_count": 887,
+      "total_duration": 2699988900,
+      "load_duration": 229818500,
+      "done_reason": "stop",
+      "latency_ms": 4733,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072003,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072003,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

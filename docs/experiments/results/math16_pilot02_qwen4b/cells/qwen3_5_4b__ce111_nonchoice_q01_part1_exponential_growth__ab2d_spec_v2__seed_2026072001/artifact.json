@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce111_nonchoice_q01_part1_exponential_growth__ab2d_spec_v2__seed_2026072001",
+  "task_id": "ce111_nonchoice_q01_part1_exponential_growth",
+  "family": "integer",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072001,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072001
+  },
+  "prompt_sha256": "5d8e3f4084038b1e99a581bf26ad77e49c295362a076ff374e5614960f38c019",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce111_nonchoice_q01_part1_exponential_growth.txt",
+  "generation_status": "success",
+  "raw_response": "# -*- coding: utf-8 -*-\n\ndef generate(level=1, **kwargs):\n    # Frozen sampled parameters defined directly as per task specification\n    days = 15\n    hours_per_generation = 20\n    initial = 1\n    split_factor = 4\n    \n    # Convert total time to generations based on the rule: k is the number of complete generations.\n    # Total available time in hours = days * 24\n    total_hours_available = days * 24\n    \n    # Calculate maximum possible generations (integer division)\n    max_generations_possible = total_hours_available // hours_per_generation\n    \n    # Determine k based on task specification: \"k is the exponent of split_factor\" and context implies growth count.\n    # Given the frozen parameters, we calculate how many full cycles fit in 15 days with a 20-hour cycle.\n    # 15 * 24 = 360 hours total available per day? No, \"days\": 15 usually means duration of simulation or observation window.\n    # However, the task says \"k is the number of complete generations\". \n    # If we assume the process runs for 'days' amount of time where each generation takes 'hours_per_generation':\n    # Total hours = days * 24? Or does 'days' represent something else?\n    # Re-reading: \"Convert days to hours using 24 hours per day.\" -> This implies total duration is days * 24.\n    # k = floor((days * 24) / hours_per_generation)\n    \n    k = (days * 24) // hours_per_generation\n    \n    correct_answer = {\"k\": int(k)}\n    \n    question_text = r\"\"\"The population starts with $initial$ individuals and undergoes exponential growth. Each generation, the population splits by a factor of $split\\_factor$. The process runs for a total duration of $days$ days, where each day has 24 hours, and one complete generation takes $hours\\_per\\_generation$ hours. Determine $k$, which represents the number of complete generations that can occur within this timeframe.\"\"\"\n    \n    oracle_payload = {\n        \"days\": days,\n        \"hours_per_generation\": hours_per_generation,\n        \"initial\": initial,\n        \"split_factor\": split_factor\n    }\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:12:40.290751+00:00",
+  "completed_at_utc": "2026-07-21T15:12:47.623396+00:00",
+  "duration": 7.332635700004175,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 7.33262429991737,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 580,
+      "eval_count": 529,
+      "total_token_count": 1109,
+      "total_duration": 5302167900,
+      "load_duration": 243929900,
+      "done_reason": "stop",
+      "latency_ms": 7332,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072001,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072001,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

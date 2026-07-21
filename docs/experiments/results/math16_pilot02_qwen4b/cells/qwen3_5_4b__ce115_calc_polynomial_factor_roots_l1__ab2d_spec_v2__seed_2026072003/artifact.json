@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce115_calc_polynomial_factor_roots_l1__ab2d_spec_v2__seed_2026072003",
+  "task_id": "ce115_calc_polynomial_factor_roots_l1",
+  "family": "polynomial",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072003,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072003
+  },
+  "prompt_sha256": "64ff6dc7b8b1fe7e5e14585fdc620a7ed1d9b0c573d08f1674d5cd55f8709943",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce115_calc_polynomial_factor_roots_l1.txt",
+  "generation_status": "success",
+  "raw_response": "# -*- coding: utf-8 -*-\n\ndef generate(level=1, **kwargs):\n    # Frozen sampled parameters defined directly as per specification\n    frozen_params = {\"quadratic_coefficients\": [1, 4, -12]}\n    \n    a, b, c = frozen_params[\"quadratic_coefficients\"]\n    \n    # Compute discriminant: D = b^2 - 4ac\n    d = b * b - 4 * a * c\n    \n    # Since coefficients are integers and result in perfect square for this case (16 + 48 = 64)\n    sqrt_d = int(d ** 0.5)\n    \n    # Compute roots using exact arithmetic logic, then convert to float only if necessary for representation, \n    # but the spec requires \"Exact arithmetic; no floats\" in correct_answer structure implies symbolic or integer representation where possible.\n    # However, standard polynomial roots are often non-integers unless specified otherwise.\n    # For x^2 + 4x - 12 = (x+6)(x-2), roots are integers: -6 and 2.\n    \n    root1_num = (-b + sqrt_d) // (2 * a) if d % ((2*a)**2) == 0 else float((-b + d**0.5)/(2*a)) # Simplified logic for integer check first\n    # Actually, let's compute precisely:\n    # x = [-4 +/- sqrt(16 - 4*1*(-12))] / 2\n    # x = [-4 +/- sqrt(64)] / 2\n    # x = (-4 + 8)/2 = 2, (-4 - 8)/2 = -6\n    \n    root_a_num = -b + sqrt_d\n    root_b_num = -b - sqrt_d\n    \n    if (root_a_num % (2 * a)) == 0:\n        root1 = int(root_a_num // (2 * a))\n        root2 = int(root_b_num // (2 * a))\n    else:\n        # Fallback for non-integer roots, though spec says exact arithmetic. \n        # Given the frozen params [1, 4, -12], roots are integers.\n        pass\n    \n    if root1 > root2:\n        r_asc = [root2, root1]\n    else:\n        r_asc = [root1, root2]\n    \n    # Generate LaTeX strings for factorization and roots\n    # Factorization of x^2 + 4x - 12 is (x+6)(x-2) or generally a(x-r1)(x-r2) if non-integers.\n    # Here: (x - (-6))(x - 2) -> (x+6)(x-2)\n    \n    factorization_latex = r\"\\\\left(x + \\\\frac{-b_0}{a} + \\\\sqrt{\\\\frac{D}{4a^2}}\\\\right)\\\\left(x + \\\\frac{-b_0}{a} - \\\\sqrt{\\\\frac{D}{4a^2}}\\\\right)\"\n    # Substitute values for clean LaTeX: (x+6)(x-2)\n    factorization_latex = r\"(x + 6)(x - 2)\"\n    \n    roots_latex_list = [str(r) if isinstance(r, int) else f\"{r:.10g}\" for r in r_asc]\n    roots_latex_str = \", \".join(roots_latex_list)\n\n    question_text = r\"Find the factorization and roots of the quadratic polynomial $x^2 + 4x - 12$.\"\n    \n    correct_answer = {\n        \"roots\": [r for r in sorted([root_a_num // (2*a), root_b_num // (2*a)]) if isinstance(r, int) else [-6.0, 2.0], # Ensure list of numbers\n        \"factorization_latex\": factorization_latex,\n        \"roots_latex\": roots_latex_str\n    }\n\n    oracle_payload = frozen_params\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:51:49.627544+00:00",
+  "completed_at_utc": "2026-07-21T15:52:00.640367+00:00",
+  "duration": 11.01281340001151,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 11.01279959990643,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 597,
+      "eval_count": 910,
+      "total_token_count": 1507,
+      "total_duration": 8971184800,
+      "load_duration": 245470100,
+      "done_reason": "stop",
+      "latency_ms": 11012,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072003,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072003,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

@@ -1,0 +1,146 @@
+```python
+# -*- coding: utf-8 -*-
+
+def generate(level=1, **kwargs):
+    # Frozen sampled parameters as per task specification
+    frozen_params = {
+        "dividend_coefficients": [6, 0, 6],
+        "divisor_coefficients": [1, -4]
+    }
+
+    from core.prompts.domain_function_library import PolynomialOps
+    
+    dividend_coeffs = frozen_params["dividend_coefficients"]
+    divisor_coeffs = frozen_params["divisor_coefficients"]
+    
+    # Perform polynomial division using the provided library
+    quotient, remainder = PolynomialOps.div_qr(dividend_coeffs, divisor_coeffs)
+
+    def format_latex(coeffs):
+        if not coeffs:
+            return "0"
+        
+        terms = []
+        for i, c in enumerate(coeffs):
+            power = len(coeffs) - 1 - i
+            
+            # Skip zero coefficients to keep expression clean (except leading zeros logic handled by structure usually)
+            # However, standard representation includes all powers if we are strictly following coefficient lists.
+            # Let's construct the string based on non-zero terms for readability unless strict positional is needed.
+            # Given [6, 0, 6] -> 6x^2 + 0*x + 6 = 6x^2 + 6. 
+            # The prompt asks for formal LaTeX delimiters around the expression.
+            
+            if c != 0:
+                term_str = f"{c}x^{power}"
+                terms.append(term_str)
+        
+        return " ".join(terms).replace(" ", "")
+
+    quotient_latex = format_latex(quotient) + "\$"
+    remainder_latex = format_latex(remainder) + "\$" if len(remainder) > 0 else "$" # Remainder is constant usually
+    
+    # Constructing the question text with LaTeX delimiters as requested: \( \) / \[ \]
+    dividend_str = f"{dividend_coeffs[0]}x^{len(dividend_coeffs)-1}" + " + ".join([f"{c}x^{{{i}}}" for i, c in enumerate(reversed(dividend_coeffs)) if c != 0])
+    
+    # Reconstructing properly from coefficients [6, 0, 6] -> 6x^2 + 6
+    dividend_terms = []
+    for idx, coeff in enumerate(dividend_coeffs):
+        power = len(dividend_coeffs) - 1 - idx
+        if coeff != 0:
+            term = f"{coeff}x^{power}"
+            dividend_terms.append(term)
+    
+    divisor_str_parts = [f"{c}x^{{{i}}}" for i, c in enumerate(reversed(divisor_coeffs)) if c != 0]
+
+    question_text = r"""Perform polynomial division of the following polynomials: \[ P(x) = " + " ".join(dividend_terms) + " ", Q(x) = " + " ".join(divisor_str_parts) + " \]. Find the quotient and remainder."""
+    
+    correct_answer = {
+        "quotient_coefficients": quotient,
+        "remainder_coefficients": remainder,
+        "quotient_latex": f"\\left( \\{format_latex(list(reversed(quotient)))}x^{len(dividend_coeffs)-1-len(quotient)} + ... \\right)$", # Simplified logic for latex generation based on coeffs provided in spec usually implies standard form. 
+    }
+    
+    # Let's refine the LaTeX construction to be precise and simple matching the coefficients directly if possible, or reconstructed.
+    # Quotient of (6x^2+6)/(x-4) -> 6x + 24 with remainder -90? 
+    # Manual check: (6x^2+6) = (x-4)(6x+24) + R
+    # x(6x+24) = 6x^2 + 24x. Subtract from dividend: -24x + 6.
+    # Next term in quotient? No, degree of remainder must be < divisor (degree 1). 
+    # Wait, manual calc: 
+    # Dividend: 6x^2 + 0x + 6
+    # Divisor: x - 4
+    
+    # Step 1: Divide leading terms. 6x^2 / x = 6x.
+    # Multiply divisor by 6x: (x-4)*6x = 6x^2 - 24x.
+    # Subtract from dividend: (6x^2 + 0x + 6) - (6x^2 - 24x) = 24x + 6.
+    
+    # Step 2: Divide leading terms of remainder by divisor. 24x / x = 24.
+    # Multiply divisor by 24: (x-4)*24 = 24x - 96.
+    # Subtract from current remainder: (24x + 6) - (24x - 96) = 102.
+    
+    # So Quotient is [6, 24] -> 6x + 24? Wait order in list usually high to low or low to high? 
+    # PolynomialOps.div_qr typically returns lists from highest degree to lowest (standard math notation).
+    # If input was [6, 0, 6] (deg 2), output should be deg 1 -> [6, 24]. Remainder constant -> [102]? Or [-90]? 
+    # Let's re-calculate: 
+    # Dividend = 6x^2 + 6.
+    # Quotient Q(x) = ax+b. (ax+b)(x-4) = ax^2 - 4ax + bx - 4b = ax^2 + (-4a+b)x - 4b.
+    # Match x^2: a=6.
+    # Match constant: -4b = 6 => b=-1.5? No, integer arithmetic expected per "Exact arithmetic". 
+    # Let's re-read the divisor coefficients: [1, -4] -> x - 4. Correct.
+    # Dividend: [6, 0, 6] -> 6x^2 + 6.
+    
+    # Re-calculation with integers:
+    # (6x^2 + 6) / (x-4). 
+    # If Q = 6x+15? (6x)(x-4)=6x^2-24x. Rem=24x+6. Next term 24(x-4)? No, we need to match degree.
+    # Actually: 6x^2 + 0x + 6 divided by x - 4.
+    # Q = 6x -> (x-4)*6x = 6x^2 - 24x. 
+    # Rem1 = (6x^2+6) - (6x^2-24x) = 24x + 6.
+    # Next term in Q: 24? -> (x-4)*24 = 24x - 96.
+    # Final Rem = (24x+6) - (24x-96) = 102.
+    # So Quotient coeffs [6, 24], Remainder [102]. 
+    # Wait, is there a mistake in my manual math? 
+    # Let's try Q=6x+24 again. (6x+24)(x-4) = 6x^2 -24x + 24x -96 = 6x^2 -96.
+    # Dividend is 6x^2 + 6. Difference is 102. Correct. 
+    # But usually these problems have cleaner answers like remainder 0 or small integer? 
+    # Maybe I misread the divisor sign? [1, -4] -> x-4. Yes.
+    # Maybe dividend coefficients order? [6, 0, 6]. High to low: 6x^2 + 0x + 6. Correct.
+    
+    # Let's assume PolynomialOps handles this correctly with integer arithmetic as requested ("Exact arithmetic; no floats"). 
+    # The result will be integers if the division is exact or remainder exists.
+    
+    correct_answer = {
+        "quotient_coefficients": quotient,
+        "remainder_coefficients": remainder,
+        "quotient_latex": f"\\left( \\{format_latex(list(reversed(quotient)))}x^{len(dividend_coeffs)-1-len(quotient)} + ... \\right)$", 
+    }
+
+    # Re-generating the latex strings cleanly for output
+    def get_poly_str(coeffs):
+        if not coeffs: return "0"
+        terms = []
+        deg = len(coeffs) - 1
+        for i, c in enumerate(reversed(coeffs)): # Iterate from highest power down? 
+            # Actually list is usually [a_n, a_{n-1}, ..., a_0]
+            p = len(coeffs) - 1 - i
+            if c != 0:
+                terms.append(f"{c}x^{p}")
+        return " + ".join(terms).replace(" + ", "+")
+
+    q_str = get_poly_str(quotient)
+    r_str = get_poly_str(remainder)
+    
+    # Constructing the final answer structure exactly as requested
+    correct_answer = {
+        "quotient_coefficients": quotient,
+        "remainder_coefficients": remainder,
+        "quotient_latex": f"\\left({q_str}\\right)$", 
+        "remainder_latex": r"$${r_str}$$" if len(remainder) > 0 else "$$0$$" # Adjusting for constant term representation in latex usually just the number.
+    }
+
+    oracle_payload = frozen_params
+    
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer,
+        "oracle_payload": oracle_payload,
+    }
+```

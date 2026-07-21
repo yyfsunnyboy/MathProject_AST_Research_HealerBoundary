@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce111_q03_prime_factor_selection__ab1__seed_2026072001",
+  "task_id": "ce111_q03_prime_factor_selection",
+  "family": "integer",
+  "condition": "ab1",
+  "seed": 2026072001,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072001
+  },
+  "prompt_sha256": "398a9ab7067574286a3f7b6a955033b2f3af8d244d34098aa907623bb706bcc4",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    candidates = kwargs.get(\"candidates\", [11, 12, 13, 14])\n    n = kwargs.get(\"n\", 0)\n    \n    if level == 1:\n        # Find the prime factor of n that is in candidates. If none exist or n=0, return None for answer logic but per spec we need an integer. \n        # Let's assume standard behavior: find p such that p divides n and p is prime from candidates.\n        target_prime = None\n        for c in candidates:\n            if isinstance(c, int) and all(c % i != 0 for i in range(2, int(c**0.5)+1)): # Check primality\n                if n > 0 and n % c == 0:\n                    target_prime = c\n                    break\n        \n        question_text = r\"Find the prime factor of $n$ that is present in the list $\\{c_1, c_2\\}$.\"\n        \n        correct_answer = None # If not found based on frozen params (156 factors are 2^2*3*13; candidates have primes 11, 13. Only 13 divides 156). \n                             # Wait: 156 / 13 = 12. So 13 is the answer.\n        correct_answer = target_prime\n        \n    else:\n        question_text = \"Unknown format for level > 1.\"\n        correct_answer = None\n\n    oracle_payload = {\"candidates\": candidates, \"n\": n}\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:11:13.842741+00:00",
+  "completed_at_utc": "2026-07-21T15:11:19.916128+00:00",
+  "duration": 6.07337560004089,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 6.073363599949516,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 159,
+      "eval_count": 377,
+      "total_token_count": 536,
+      "total_duration": 4044807200,
+      "load_duration": 236504800,
+      "done_reason": "stop",
+      "latency_ms": 6073,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072001,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072001,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

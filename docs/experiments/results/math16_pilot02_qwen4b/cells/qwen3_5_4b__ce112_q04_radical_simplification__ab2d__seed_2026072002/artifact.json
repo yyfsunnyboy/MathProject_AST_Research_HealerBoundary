@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce112_q04_radical_simplification__ab2d__seed_2026072002",
+  "task_id": "ce112_q04_radical_simplification",
+  "family": "radical",
+  "condition": "ab2d",
+  "seed": 2026072002,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072002
+  },
+  "prompt_sha256": "f4766019ab80cfea7d15b358786ad841f542d8cd57b9dd61f4e7098712dba731",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "import math\nfrom fractions import Fraction\nfrom typing import Dict, Any\n\n# Mocking the required domain functions as they are not in standard library\nclass RadicalOps:\n    @staticmethod\n    def simplify_term(coeff: int | float, radicand: int) -> tuple[int | Fraction, int]:\n        # Simplify logic for perfect squares within the integer part of coeff and radicand\n        if isinstance(coeff, (int, float)):\n            c = round(coeff)\n        else:\n            c = 0\n        \n        simplified_radicand = radicand\n        temp_c = c\n        \n        while True:\n            sqrt_val = math.isqrt(simplified_radicand)\n            if sqrt_val * sqrt_val == simplified_radicand:\n                factor = int(sqrt_val)\n                # Distribute the square root into coefficient\n                new_coeff = Fraction(factor, 1) * temp_c\n                simplified_radicand //= (factor ** 2)\n                break\n            \n            else:\n                if c != 0 or radicand > 1:\n                    raise ValueError(\"No perfect square factor found to simplify further\")\n                return int(c), simplified_radicand\n        \n        # Handle the case where coefficient was a float that needs rounding for integer math logic in this specific context\n        final_coeff = round(coeff) if isinstance(coeff, (int, float)) else 0\n        return final_coeff, simplified_radicand\n\n    @staticmethod\n    def format_term(coeff: int | Fraction, radicand: int, is_first: bool = True) -> str:\n        sign = \"\"\n        if coeff < 0:\n            sign = \"-\"\n            coeff = abs(coeff)\n        \n        latex_coeff = f\"{coeff}\"\n        latex_radicand = f\"{{{radicand}}}\"\n        \n        term_str = f\"{sign}{latex_coeff}\\\\sqrt{latex_radicand}\"\n        return term_str\n\ndef generate(level: int = 1, **kwargs) -> Dict[str, Any]:\n    frozen_params = kwargs.get(\"frozen_parameters\", {}) or {\"radicand\": 135}\n    \n    radicand_val = frozen_params[\"radicand\"]\n    \n    # Initial coefficient is assumed to be 1 for this specific task unless specified otherwise in a broader context not present here. \n    # Based on the sample, we start with coeff=1 and radicand=135.\n    initial_coeff = 1\n    \n    simplified_coeff, simplified_radicand = RadicalOps.simplify_term(initial_coeff, radicand_val)\n    \n    latex_str = RadicalOps.format_term(simplified_coeff, simplified_radicand)\n    \n    question_text = r\"\\text{Simplify the radical: } $\\\\sqrt{\" + str(radicand_val) + \"}$\"\n    \n    correct_answer_dict = {\n        \"coefficient\": int(simplified_coeff),\n        \"radicand\": int(simplified_radicand),\n        \"canonical_latex\": latex_str\n    }\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer_dict,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:28:31.846201+00:00",
+  "completed_at_utc": "2026-07-21T15:28:40.841772+00:00",
+  "duration": 8.995559299946763,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 8.995546500082128,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 350,
+      "eval_count": 669,
+      "total_token_count": 1019,
+      "total_duration": 6969197300,
+      "load_duration": 317468900,
+      "done_reason": "stop",
+      "latency_ms": 8995,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072002,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072002,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

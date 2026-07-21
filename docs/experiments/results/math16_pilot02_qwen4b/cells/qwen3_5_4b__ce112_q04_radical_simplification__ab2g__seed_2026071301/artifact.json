@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce112_q04_radical_simplification__ab2g__seed_2026071301",
+  "task_id": "ce112_q04_radical_simplification",
+  "family": "radical",
+  "condition": "ab2g",
+  "seed": 2026071301,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026071301
+  },
+  "prompt_sha256": "6d252e1058c14eee07326788693fec710a5247c404e7dd74f3d22156235a82f4",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    radicand = kwargs.get(\"radicand\", 135) if \"radicand\" in kwargs else 135\n    \n    import math\n    \n    def simplify_radical(n):\n        \"\"\"Simplify the radical n.\"\"\"\n        temp_n = int(abs(float(n)))\n        \n        # Find all divisors of temp_n to check for perfect squares\n        max_divisor = int(math.sqrt(temp_n)) + 1\n        \n        for i in range(2, max_divisor + 1):\n            if temp_n % i == 0:\n                divisor_a = i\n                divisor_b = temp_n // i\n                \n                # Check both divisors and their pairs to find the largest perfect square factor\n                factors_to_check = [divisor_a, divisor_b]\n                \n                for d in factors_to_check:\n                    if math.isqrt(d) ** 2 == d:\n                        return simplify_radical(temp_n // (d * math.sqrt(d))) # This logic is recursive and slightly flawed for direct extraction. Let's use a cleaner approach below.\n\n    def get_largest_square_factor(n):\n        \"\"\"Returns the largest perfect square factor of n.\"\"\"\n        max_sq = 1\n        i = int(math.isqrt(n))\n        while i > 0:\n            if math.isqrt(i) ** 2 == i and (n % i) == 0: # Check if i is a perfect square AND divides n\n                return i, n // i\n            \n            i -= 1\n        \n        return max_sq, n\n\n    def simplify(n):\n        \"\"\"Simplify the radical expression.\"\"\"\n        largest_square_factor, remaining = get_largest_square_factor(int(abs(float(n))))\n        \n        coefficient = math.isqrt(largest_square_factor)\n        radicand_simplified = int(remaining) if isinstance(remaining, int) else float(remaining).is_integer() and int(remaining) or str(round(float(remaining))) # Ensure it's an integer\n        \n        return {\n            \"coefficient\": coefficient,\n            \"radicand\": radicand_simplified,\n            \"canonical_latex\": f\"{coefficient}\\\\sqrt{{{int(radicand_simplified)}}}}\" if not isinstance(coefficient, int) or not isinstance(radicand_simplified, int) else str(int(coefficient)) + \"\\\\sqrt{\" + str(int(radicand_simplified)) + \"}\" # Fix logic for latex\n        }\n\n    # Corrected Simplification Logic\n    n = radicand\n    \n    if n < 0:\n        return {\n            \"coefficient\": -1,\n            \"radicand\": abs(n),\n            \"canonical_latex\": \"-\\\\sqrt{\" + str(int(abs(float(n)))) + \"}\"\n        }\n\n    # Find largest square factor k such that n = k * m and k is a perfect square\n    max_k = 1\n    \n    for i in range(2, int(math.isqrt(n)) + 1):\n        if n % (i*i) == 0:\n            max_k = i*i\n            \n    coefficient = math.sqrt(max_k).astype(int) # Convert to int safely\n    radicand_final = int((n / float(max_k)))\n\n    latex_str = f\"{coefficient}\\\\sqrt{{{radicand_final}}}\" if isinstance(coefficient, (int, float)) and not isinstance(radicand_final, str) else \"Error\"\n\n    return {\n        \"question_text\": r\"$\\text{Simplify the radical: } \\sqrt{\\overline{\" + str(n) + \"}\"}$\",\n        \"correct_answer\": latex_str if isinstance(latex_str, str) and not (isinstance(coefficient, float)) else f\"{int(coefficient)}\\\\sqrt{{{radicand_final}}}\", # Ensure int types for safety in string representation logic used below\n        \"oracle_payload\": {\"radicand\": n}\n    }\n\n# Re-implementing the core math cleanly to ensure correctness without recursion issues or type errors\n    \ndef generate(level=1, **kwargs):\n    radicand = kwargs.get(\"radicand\", 135) if \"radicand\" in kwargs else 135\n    n = int(radicand)\n\n    # Handle negative numbers explicitly for the coefficient sign\n    is_negative = False\n    abs_n = abs(n)\n    \n    if abs_n < 0:\n        pass\n    \n    # Find largest perfect square factor of abs_n\n    max_sq_factor = 1\n    i = int(math.isqrt(abs_n))\n    while i > 0:\n        sq_val = i * i\n        if abs_n % sq_val == 0:\n            max_sq_factor = sq_val\n        else:\n            # If not divisible, try smaller factors? No, we just need the largest square factor.\n            # Actually, iterating down from sqrt(n) is efficient enough for small numbers like 135.\n            pass\n        i -= 1\n    \n    coefficient = int(math.sqrt(max_sq_factor))\n    radicand_simplified = abs_n // max_sq_factor\n\n    if n < 0:\n        latex_ans = f\"-{coefficient}\\\\sqrt{{{radicand_simplified}}}\"\n    else:\n        latex_ans = f\"{coefficient}\\\\sqrt{{{radicand_simplified}}}\"\n\n    return {\n        \"question_text\": r\"$\\text{Simplify the radical: } \\sqrt{\\overline{\" + str(n) + \"}\"}$\",\n        \"correct_answer\": latex_ans,\n        \"oracle_payload\": {\"radicand\": n}\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:06:53.217661+00:00",
+  "completed_at_utc": "2026-07-21T15:07:07.025193+00:00",
+  "duration": 13.80752150004264,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 13.807507800054736,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 213,
+      "eval_count": 1200,
+      "total_token_count": 1413,
+      "total_duration": 11783776600,
+      "load_duration": 243684900,
+      "done_reason": "stop",
+      "latency_ms": 13807,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026071301,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026071301,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

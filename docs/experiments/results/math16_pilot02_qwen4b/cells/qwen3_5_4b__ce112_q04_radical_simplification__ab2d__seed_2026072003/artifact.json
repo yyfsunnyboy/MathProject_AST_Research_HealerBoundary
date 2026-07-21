@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce112_q04_radical_simplification__ab2d__seed_2026072003",
+  "task_id": "ce112_q04_radical_simplification",
+  "family": "radical",
+  "condition": "ab2d",
+  "seed": 2026072003,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072003
+  },
+  "prompt_sha256": "f4766019ab80cfea7d15b358786ad841f542d8cd57b9dd61f4e7098712dba731",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "from fractions import Fraction\nimport math\nfrom typing import Dict, Any\n\n# Mocking the required domain function library structure since it's not provided in scope\nclass RadicalOps:\n    @staticmethod\n    def simplify_term(coeff: int | float, radicand: int) -> tuple[int | Fraction, int]:\n        \"\"\"Simplifies a radical term. Returns (coefficient, square_free_radicand).\"\"\"\n        if coeff == 0 or radicand <= 1:\n            return coeff, radicand\n        \n        # Handle negative numbers by moving sign to coefficient\n        is_negative = False\n        if radicand < 0:\n            is_negative = True\n            radicand = -radicand\n            \n        temp_radicand = abs(radicand)\n        \n        # Find the largest perfect square factor\n        max_factor = int(math.sqrt(temp_radicand)) + 1\n        \n        for i in range(2, max_factor):\n            if (i * i) <= temp_radicand:\n                while temp_radicand % (i * i) == 0:\n                    coeff *= i\n                    temp_radicand //= (i * i)\n        \n        final_coeff = int(coeff)\n        return final_coeff, abs(temp_radicand), is_negative\n\n    @staticmethod\n    def format_term(coeff: int | Fraction, radicand: int, is_first: bool = True) -> str:\n        \"\"\"Formats a single radical term into LaTeX string.\"\"\"\n        if coeff == 1 and not isinstance(coeff, Fraction):\n            sign_str = \"\"\n        elif coeff == -1:\n            sign_str = \"-\"\n        else:\n            # Format fraction or integer coefficient\n            if isinstance(coeff, Fraction) and coeff.denominator != 1:\n                num = str(int(coeff)) + \"/\" + str(abs(coeff.numerator // abs(coeff.denominator))) \n                # Simplified logic for display assuming standard fractions are handled by the caller's context usually\n                # But here we assume integer coefficient mostly based on problem type.\n                # Let's stick to simple formatting: coeff * sqrt(radicand) or -coeff * sqrt(radicand)\n                sign_str = \"\" if coeff > 0 else \"-\"\n            elif isinstance(coeff, int):\n                sign_str = \"- \" if coeff < 0 else \"\"\n            \n        radicand_part = f\"\\\\sqrt{{{radicand}}}\"\n        \n        # Construct the term string based on coefficient presence and value\n        result_parts = []\n        \n        abs_coeff = abs(int(coeff)) if isinstance(coeff, int) else int(abs(float(coeff)))\n        \n        if coeff == 0:\n            return \"0\"\n            \n        if is_first or (coeff != -1): # Logic adjustment for sign handling in LaTeX usually puts minus before term\n             pass\n        \n        # Standard format: coefficient * sqrt(radicand)\n        # If negative, it becomes -coefficient * ...\n        \n        latex_str = \"\"\n        if coeff == 0:\n            return \"0\"\n            \n        abs_c = int(coeff) if isinstance(coeff, int) else int(float(coeff))\n        \n        if is_first or (coeff > 0): # Positive term starts normally\n             if abs_c != 1 and not isinstance(abs_c, Fraction):\n                 latex_str += f\"{abs_c} \\\\sqrt{{{radicand}}}\"\n             elif radicand == 2: # Special case for sqrt(2) often written without coeff if it's just the radical itself but here we have a coefficient context. \n                pass\n        \n        # Refined logic based on typical math16 output expectations\n        term_str = f\"{abs_c} \\\\sqrt{{{radicand}}}\"\n        \n        return term_str\n\n# Re-implementing simplify_term and format_term to strictly match the task requirements using standard Python since imports are restricted in this specific execution context without external libs. \n# However, I will simulate the domain API behavior as requested by wrapping logic that mimics `RadicalOps`.\n\ndef _simplify_radicand(radicand: int) -> tuple[int | Fraction, int]:\n    \"\"\"Internal helper to mimic RadicalOps.simplify_term.\"\"\"\n    if radicand <= 0: return 1, abs(radicand) # Handle edge cases\n    \n    n = radicand\n    coeff = 1\n    \n    for i in range(2, int(n**0.5)+1):\n        while n % (i*i) == 0:\n            coeff *= i\n            n //= (i*i)\n            \n    return coeff, abs(int(n))\n\ndef _format_latex(coeff: int | Fraction, radicand: int) -> str:\n    \"\"\"Internal helper to mimic RadicalOps.format_term.\"\"\"\n    if isinstance(coeff, Fraction):\n        c_str = f\"{coeff.numerator}/{abs(coeff.denominator)}\"\n    else:\n        c_str = str(int(abs(coeff)))\n    \n    # Handle negative sign placement correctly for LaTeX display usually requires -c * sqrt or just -(c*sqrt) depending on context. \n    # Given the task asks for \"complete single-term LaTeX including coefficient/sign\":\n    if coeff < 0 and radicand == 2: return \"-\\\\sqrt{2}\" # Simplified special case often seen in datasets, but let's be general\n    \n    sign = \"\"\n    abs_coeff = int(abs(coeff))\n    \n    term = f\"{abs_coeff} \\\\sqrt{{{radicand}}}\"\n    \n    if coeff < 0 and radicand != 1: \n        return \"- \" + term # Standard math formatting for negative terms in lists, but single term might just be -a. Let's assume standard list item style or standalone. \n                          # Usually datasets expect something like \"\\\\sqrt{2} * \\\\frac{3}{4}\" if fraction coeff exists.\n    \n    # Re-evaluating based on common dataset patterns (e.g., MATH, GSM8K math tasks):\n    # If coefficient is 1 and radicand is not a perfect square: just sqrt(radicand) or -sqrt(...)\n    # The prompt asks for \"coefficient\" in correct_answer. \n    return term if coeff > 0 else f\"- {term}\"\n\ndef generate(level=1, **kwargs):\n    \"\"\"Generates the radical simplification problem.\"\"\"\n    \n    frozen_params = {\"radicand\": 135} # Frozen sampled parameters\n    \n    radicand_val = frozen_params[\"radicand\"]\n    \n    # Simplify logic manually to ensure correctness without external deps failing in this isolated environment\n    coeff, square_free_radicand = _simplify_radicand(radicand_val)\n    \n    if isinstance(coeff, Fraction):\n        c_str = f\"{coeff.numerator}/{abs(coeff.denominator)}\"\n    else:\n        c_str = str(int(abs(coeff)))\n        \n    # Construct LaTeX components\n    latex_coefficient = \"\"\n    if coeff == 1 and not isinstance(coeff, int) or (isinstance(coeff, Fraction) and coeff.numerator != abs(coeff.denominator)):\n         pass\n    \n    # Final construction for correct_answer structure: {coefficient}, {radicand}, canonical_latex\n    final_radicand = square_free_radicand\n    \n    if radicand_val == 135:\n        # 135 = 9 * 15 = 81/4? No. \n        # 135 / 27 = 5 -> sqrt(135) = sqrt(27*5) = 3sqrt(15). Wait, 27 is not square free part of radicand logic above.\n        # My manual loop: i=2 (no), i=3 (yes). \n        # n=135. 135/9=15. coeff*=3 -> 3. n=15. \n        # Next i=4,5... stop at sqrt(15)=3. Loop ends.\n        # Result: coeff=3, radicand=15. Correct.\n        \n    latex_term = f\"{c_str} \\\\sqrt{{{final_radicand}}}\" if c_str != \"0\" else \"0\"\n    \n    question_text = r\"\\text{Simplify the radical expression: } \\frac{\\sqrt{{\\text{\" + str(radicand_val) + \"}}}}{}\" # Wait, task is simplification. Usually input is just sqrt(N). \n    # Let's assume standard format for this dataset type (math16): Simplify $\\sqrt{n}$.\n    \n    question_text = r\"\\text{Simplify the radical: } \\sqrt{\\text{\" + str(radicand_val) + \"}}\"\n\n    correct_answer_dict = {\n        \"coefficient\": int(coeff), # Or Fraction if applicable, but 135 yields integer coeff here.\n        \"radicand\": final_radicand,\n        \"canonical_latex\": latex_term\n    }\n    \n    oracle_payload = frozen_params\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer_dict,\n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:53:35.853013+00:00",
+  "completed_at_utc": "2026-07-21T15:53:56.454407+00:00",
+  "duration": 20.601384500041604,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 20.601371300057508,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 350,
+      "eval_count": 1946,
+      "total_token_count": 2296,
+      "total_duration": 18586458100,
+      "load_duration": 232958800,
+      "done_reason": "stop",
+      "latency_ms": 20601,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072003,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072003,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

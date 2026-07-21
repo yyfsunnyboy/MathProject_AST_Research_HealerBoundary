@@ -1,0 +1,15 @@
+Write only Python source. Implement def generate(level=1, **kwargs).
+Task: ce111_q10_ordered_quadratic_roots_radical (radicals, difficulty level 1).
+Task specification: math16_ordered_quadratic_roots_radical.
+Frozen sampled parameters: {"equation": "(x-2)^2=3", "order": "a>b", "target": "2a+b"}
+generate() must return a dict with exactly question_text, correct_answer, and oracle_payload. question_text must use formal LaTeX delimiters. correct_answer must include result with rational, radical_coefficient (may be +1 or -1), radicand, and canonical_latex. Structured comparison is required; do not rely on string-only equality. oracle_payload must exactly equal the frozen sampled parameters. Do not use input, files, network, subprocess, Markdown fences, or explanations.
+
+## Clean-incremental GENERIC
+Output complete Python source only. Do not use Markdown fences or explanatory prose. Preserve frozen parameters exactly. Verify that generate() exists. Verify that the return value has exactly the three required top-level keys. Verify field types match the stated contract and that oracle_payload equals the frozen parameters.
+
+## Clean-incremental DOMAIN
+Task-local domain APIs (use only these):
+- `RadicalOps.simplify_term` | import: `core.prompts.domain_function_library` | signature: `(coeff, radicand)` | returns: tuple[int | Fraction, int]  # semantic (coefficient, square-free radicand)
+- `FractionOps.create` | import: `core.prompts.domain_function_library` | signature: `(value)` | returns: Fraction  # not JSON serializable; use the to_exact adapter
+- `RadicalOps.format_expression` | import: `core.prompts.domain_function_library` | signature: `(terms_dict, denominator=1)` | returns: str  # complete compound-radical LaTeX
+Use the listed domain API for each supported core operation, and ensure the returned value contributes to correct_answer.

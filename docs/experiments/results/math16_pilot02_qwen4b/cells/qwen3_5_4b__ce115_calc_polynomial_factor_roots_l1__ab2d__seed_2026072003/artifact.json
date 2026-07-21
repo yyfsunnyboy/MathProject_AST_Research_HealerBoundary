@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce115_calc_polynomial_factor_roots_l1__ab2d__seed_2026072003",
+  "task_id": "ce115_calc_polynomial_factor_roots_l1",
+  "family": "polynomial",
+  "condition": "ab2d",
+  "seed": 2026072003,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072003
+  },
+  "prompt_sha256": "46eb44551fe48e5def0a14fdfe506b30e5987c44c0dee69f259bf42b90ab54a0",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "from fractions import Fraction as F\nimport sys\nsys.path.insert(0, 'core')\nfrom prompts.domain_function_library import PolynomialOps, FractionOps\n\ndef generate(level=1, **kwargs):\n    frozen_params = {\"quadratic_coefficients\": [1, 4, -12]}\n    \n    a, b, c = frozen_params[\"quadratic_coefficients\"]\n    \n    # Factorization using domain API\n    factor_result = PolynomialOps.factor_quadratic_exact(a, b, c)\n    \n    x_coeffs_list = []\n    constants_list = []\n    for item in factor_result:\n        coeff_val = str(item['x_coefficient']) if isinstance(item['x_coefficient'], F) else int(item['x_coefficient'])\n        const_val = str(item['constant']) if isinstance(item['constant'], F) else int(item['constant'])\n        \n        # Construct fraction string for exact representation (e.g., \"1/3\") or integer\n        def to_fraction_str(val):\n            if isinstance(val, F):\n                return f\"{val.numerator}/{val.denominator}\"\n            elif val == 0:\n                return \"0\"\n            else:\n                # Ensure positive denominator and handle negative numerators correctly for display\n                sign = \"-\" if val < 0 else \"\"\n                abs_val = -val if val < 0 else val\n                num, den = divmod(abs_val, 1)\n                if den == 1:\n                    return str(int(val))\n                elif int(num) > 0 and den != 1: # Mixed number logic simplified for exact fraction output requirement usually implies improper or mixed form based on context. \n                    # Given the constraint \"int or 'p/q'\", we stick to p/q if not integer, but standard math notation prefers integers when possible.\n                    # However, factor_quadratic_exact returns coefficients of factors like (x + r).\n                    pass\n                \n                return f\"{val.numerator}/{val.denominator}\"\n\n        x_coeffs_list.append(to_fraction_str(coeff_val))\n        constants_list.append(to_fraction_str(const_val))\n    \n    roots = []\n    for i in range(len(factor_result)):\n        # Roots are -constant / coefficient of x (since factor is ax + b => root = -b/a)\n        if isinstance(factor_result[i]['x_coefficient'], F):\n            num = int(-factor_result[i]['constant'].numerator * factor_result[i]['x_coefficient'].denominator)\n            den = abs(factor_result[i]['x_coefficient'].numerator * factor_result[i]['constant'].denominator) # Handle signs carefully for root calculation: -b/a\n            \n            # Correct logic: Root r satisfies a*x + b = 0 => x = -b/a\n            neg_b_num = -factor_result[i]['constant'].numerator if isinstance(factor_result[i]['constant'], F) else (-1 * factor_result[i]['constant'])\n            \n            num_root = int(neg_b_num * factor_result[i]['x_coefficient'].denominator)\n            den_root = abs(factor_result[i]['x_coefficient'].numerator * (factor_result[i]['constant'].denominator if isinstance(factor_result[i]['constant'], F) else 1)) # Simplified for integer case\n            \n            # Re-evaluating root calculation precisely with Fractions\n            x_c = factor_result[i]['x_coefficient']\n            const_val = factor_result[i]['constant']\n            \n            if not (isinstance(x_c, int) and isinstance(const_val, int)):\n                r_num = -const_val.numerator * x_c.denominator\n                r_den = abs(x_c.numerator * const_val.denominator) # Ensure positive denominator for canonical form usually, but let's stick to exact arithmetic representation.\n            else:\n                if x_c < 0 and const_val > 0:\n                    num_root = -const_val / (-x_c)\n                elif x_c > 0 and const_val < 0:\n                    num_root = -const_val / x_c\n                else: # signs match, root is positive or zero? No. ax+b=0 -> x=-b/a. If a,b same sign, result negative.\n                     r_num = -(x_c * const_val) if isinstance(const_val, int) and isinstance(x_c, int) else -const_val / x_c\n            \n            # Let's recalculate roots directly from the factors (ax+b)(cx+d). Roots are -b/a and -d/c.\n            root1 = F(-factor_result[0]['constant']) / factor_result[0]['x_coefficient'] if isinstance(factor_result[0]['x_coefficient'], F) else (-factor_result[0]['constant']) // factor_result[0]['x_coefficient'] # Integer division might fail for fractions, use float logic then convert? No, exact arithmetic.\n            \n            # Robust root calculation: -b/a where a is x-coeff of first term in (ax+b), b is constant part.\n            def get_root(factor):\n                if isinstance(factor['x_coefficient'], F) and isinstance(factor['constant'], F):\n                    return -(factor['constant']) / factor['x_coefficient']\n                elif not isinstance(factor['x_coefficient'], F) or not isinstance(factor['constant'], F): # Mixed case unlikely in exact integer factors but handle safely\n                     if isinstance(factor['x_coefficient'], int) and isinstance(factor['constant'], (int, str)):\n                         val = -factor['constant'] / factor['x_coefficient']\n                         return val\n                else:\n                    pass\n            \n            r1 = get_root(factor_result[0])\n            r2 = get_root(factor_result[1])\n            \n            roots.append(r1)\n            roots.append(r2)\n\n    # Sort ascending (exact comparison for Fractions or ints)\n    if all(isinstance(x, F) for x in roots):\n        sorted_roots = sorted(roots)\n    else:\n        mixed_ints_fractions = []\n        for r in roots:\n            try:\n                float_r = float(r)\n                # Convert back to Fraction or int for sorting stability if needed, but F supports comparison.\n                # If some are ints and some Fractions, convert all to Fraction? \n                # Actually, the problem guarantees exact arithmetic. Roots of integer polynomials with rational coeffs might be fractional.\n                # Let's assume roots can be mixed types (int or Fraction).\n                if isinstance(r, F):\n                    float_r = r.numerator / r.denominator\n                else:\n                    float_r = int(r)\n                \n                # Reconstruct comparable object? \n                # Simpler approach: convert all to Fraction for sorting then back.\n                pass\n            \n            except Exception as e:\n                print(e, file=sys.stderr)\n        \n        sorted_roots = []\n        for r in roots:\n            if isinstance(r, F):\n                f_r = r\n            else:\n                # If it's an int or string representation of a number that isn't Fraction? \n                # The domain API returns Fractions. So all should be Fractions unless the input was integer and result is integer (which is also a subclass in some libs, but here F).\n                f_r = r if isinstance(r, F) else F(int(r))\n            sorted_roots.append(f_r)\n        sorted_roots.sort()\n\n    # Construct LaTeX strings for roots ascending\n    def to_latex_root(root):\n        if root == 0: return \"0\"\n        num = str(abs(root.numerator)) if isinstance(root, F) else abs(int(root))\n        den = str(abs(root.denominator)) if isinstance(root, F) else \"\" # Denom is always 1 for int\n        \n        sign = \"-\" if (isinstance(root, F) and root < 0) or (not isinstance(root, F) and int(root) < 0) else \"+\"\n        \n        if den == \"\": return f\"{num}\"\n        elif num % den != 0: # Mixed number logic? Usually LaTeX uses improper fraction for exactness unless specified. \n            # Standard math16 format often prefers mixed numbers or simple fractions. Let's use proper fraction form a/b with sign prefix.\n            if isinstance(root, F):\n                return f\"{sign}{num}/{den}\"\n        else:\n             val = int(num) // den\n             rem = num % den\n             if rem == 0: return str(val * (1 if not root < 0 or len(str(root))>2 and 'F' in str(type(root))) else -1) # This logic is getting messy. \n             # Let's rely on the fact that roots of integer polynomials are either integers or simple fractions p/q where q divides leading coeff? Not necessarily for general quadratics with rational coeffs, but here input is int.\n             pass\n        \n        return f\"{sign}{num}/{den}\" if den != \"\" else str(int(root))\n\n    # Re-implementing root formatting cleanly based on Fraction properties\n    roots_latex = []\n    factorization_latex_parts = [\"(\"]\n    \n    for i, fr in enumerate(factor_result):\n        x_c_str = to_fraction_str(fr['x_coefficient']) if isinstance(fr['x_coefficient'], F) else str(int(fr['x_coefficient']))\n        const_str = to_fraction_str(fr['constant']) if isinstance(fr['constant'], F) else str(int(fr['constant']))\n        \n        # Factor form: (ax + b). If a is negative, we might want positive leading term? \n        # Standard factorization usually keeps integer coefficients. \n        # e.g., x^2 - 4 = (x-2)(x+2). Here coeffs are [1,0,-4].\n        # Our input: [1, 4, -12] -> (x+6)(x-2) or (-x-6)(x+2)? \n        # factor_quadratic_exact returns factors such that product is original.\n        \n        if isinstance(fr['x_coefficient'], F):\n            x_c_str = f\"{fr['x_coefficient'].numerator}/{fr['x_coefficient'].denominator}\"\n            const_str = f\"{fr['constant'].numerator}/{fr['constant'].denominator}\"\n            \n            # Determine sign for mixed number display if denominator > 1 and numerator divisible? \n            # Let's stick to improper fraction or integer. The prompt says \"int or 'p/q'\".\n            pass\n        \n        factorization_latex_parts.append(f\"{x_c_str}+{const_str}\")\n        \n    roots_latex = [to_latex_root(r) for r in sorted_roots]\n\n    # Finalize correct_answer structure\n    correct_answer = {\n        \"roots\": [str(int(r)) if isinstance(r, F) and r.denominator == 1 else f\"{r.numerator}/{r.denominator}\" for r in sorted_roots], \n        \"factorization_latex\": \"\".join(factorization_latex_parts), # Simplified join logic assuming standard form\n        \"roots_latex\": \",\".join(roots_latex)\n    }\n\n    question_text = r\"\\text{Factor the polynomial with coefficients $1, 4, -12$ into linear factors and find its roots.\"}\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:51:23.811610+00:00",
+  "completed_at_utc": "2026-07-21T15:51:49.621293+00:00",
+  "duration": 25.8096729000099,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 25.809661000035703,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 374,
+      "eval_count": 2431,
+      "total_token_count": 2805,
+      "total_duration": 23777461900,
+      "load_duration": 256127900,
+      "done_reason": "stop",
+      "latency_ms": 25809,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072003,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072003,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

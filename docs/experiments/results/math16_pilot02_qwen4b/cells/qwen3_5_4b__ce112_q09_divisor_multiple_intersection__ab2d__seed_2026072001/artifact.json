@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce112_q09_divisor_multiple_intersection__ab2d__seed_2026072001",
+  "task_id": "ce112_q09_divisor_multiple_intersection",
+  "family": "integer",
+  "condition": "ab2d",
+  "seed": 2026072001,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072001
+  },
+  "prompt_sha256": "f4d5abe47b1d3dad2095dbc473b4f58b6f1c8cd4f9ece0ba8a1de9f5c68ad5cb",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "import json\nfrom typing import Dict, Any\n\ndef generate(level=1, **kwargs):\n    frozen_params = {\"divisor_of\": 216, \"multiple_of\": 18}\n    \n    divisor_val = frozen_params[\"divisor_of\"]\n    multiple_val = frozen_params[\"multiple_of\"]\n    \n    # Calculate LCM using the formula: lcm(a,b) = (a*b)/gcd(a,b)\n    # Since we need numbers that are multiples of 'multiple_val' and divisors of 'divisor_val',\n    # the intersection set is {x | x % multiple_val == 0 AND divisor_of(x, divisor_val)}.\n    # The problem asks for integers satisfying both conditions.\n    # Let's find the count of such positive integers within a reasonable range or all if finite?\n    # Usually \"intersection\" in these contexts implies finding numbers that are multiples of A and divisors of B.\n    # If we consider positive integers: x must be a multiple of 18 AND a divisor of 216.\n    # The maximum such number is min(ceil(multiple_val), floor(divisor_val)) if they overlap, \n    # but specifically here the set is finite because divisors are bounded by 216 and multiples grow indefinitely?\n    # Wait: \"divisor_of\" means x divides divisor_val. So x <= divisor_val (for positive integers).\n    # \"multiple_of\" means multiple_val divides x. So x >= multiple_val (for positive integers) if we assume standard counting from 1.\n    # Actually, the set of divisors of 216 is finite. The subset that are also multiples of 18 is what we count.\n    \n    import math\n    \n    def gcd(a: int, b: int) -> int:\n        while b:\n            a, b = b, a % b\n        return a\n\n    # Calculate LCM to find the largest multiple of 'multiple_val' that could possibly divide 216? \n    # Actually simpler logic: Find all divisors of 216. Check which ones are multiples of 18. Count them.\n    \n    count = 0\n    \n    for i in range(1, divisor_val + 1):\n        if IntegerOps.is_divisible(divisor_val, i):\n            # If it is a divisor of 216, check if it is a multiple of 18\n            try:\n                remainder = safe_eval(f\"{i} % {multiple_val}\")\n                if remainder == 0:\n                    count += 1\n            except ValueError:\n                continue\n    \n    correct_answer_dict = {\"count\": int(count)}\n\n    return {\n        \"question_text\": r\"Find the number of positive integers that are both multiples of $18$ and divisors of $216$. Express your answer as an integer.\",\n        \"correct_answer\": json.dumps(correct_answer_dict),\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:12:05.431648+00:00",
+  "completed_at_utc": "2026-07-21T15:12:13.773890+00:00",
+  "duration": 8.342233499977738,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 8.342222700011916,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 331,
+      "eval_count": 638,
+      "total_token_count": 969,
+      "total_duration": 6318281500,
+      "load_duration": 233062700,
+      "done_reason": "stop",
+      "latency_ms": 8342,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072001,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072001,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce111_q10_ordered_quadratic_roots_radical__ab2g__seed_2026071301",
+  "task_id": "ce111_q10_ordered_quadratic_roots_radical",
+  "family": "radical",
+  "condition": "ab2g",
+  "seed": 2026071301,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026071301
+  },
+  "prompt_sha256": "6179a8fb58654189712d53044e6df49b7171ccf57f1b1666d3e735f38758a766",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    import re\n    \n    # Frozen sampled parameters must be preserved exactly in oracle_payload\n    frozen_params = {\n        \"equation\": \"(x-2)^2=3\", \n        \"order\": \"a>b\", \n        \"target\": \"2a+b\"\n    }\n    \n    # Parse the equation to extract coefficients for a quadratic form ax^2 + bx + c = 0\n    # Equation: (x-2)^2 = 3 => x^2 - 4x + 4 = 3 => x^2 - 4x + 1 = 0\n    # Here, a=1, b=-4, c=1\n    \n    equation_str = frozen_params[\"equation\"]\n    \n    # Construct the question text using formal LaTeX delimiters\n    question_text = r\"\\text{Solve for } x \\text{ in the quadratic equation: } \" + r\"$(x-2)^2=3$.\"\n    \n    # Calculate roots manually to ensure correctness and structure\n    # Equation form after expansion: 1*x^2 - 4*x + (4-3) = 0 => x^2 - 4x + 1 = 0\n    a_val = 1\n    b_val = -4\n    \n    discriminant = b_val**2 - 4*a_val*1 # c is implicitly 1 from expansion logic above, but let's re-verify: (x-2)^2=3 -> x^2-4x+4=3 -> x^2-4x+1=0. Yes, c=1.\n    # Wait, the prompt asks for radical form specifically. \n    # Roots are (-b ± sqrt(discriminant)) / 2a\n    \n    discriminant = b_val**2 - 4*a_val*1 \n    \n    if discriminant < 0:\n        raise ValueError(\"No real roots found.\")\n    \n    root_part_a = -b_val / (2 * a_val) # This is the rational part of the linear term adjustment, but for standard form (-B)/2A. \n    # Actually, let's stick to the formula directly from x^2 - 4x + 1 = 0\n    # Roots: [4 ± sqrt(16 - 4)] / 2 = [4 ± sqrt(12)] / 2 = [4 ± 2*sqrt(3)] / 2 = 2 ± sqrt(3)\n    \n    # Let's re-calculate based on the specific equation (x-2)^2=3 to be absolutely sure.\n    # x^2 - 4x + 4 = 3\n    # x^2 - 4x + 1 = 0\n    \n    a_coeff = 1\n    b_coeff = -4\n    c_coeff = 1\n    \n    delta = b_coeff**2 - 4*a_coeff*c_coeff # (-4)^2 - 4*1*1 = 16 - 4 = 12\n    \n    sqrt_delta_val = int(delta ** 0.5) if delta.is_integer() else float('inf')\n    \n    # Since discriminant is 12, which is not a perfect square in integers but the problem asks for radical form.\n    # The roots are (4 ± √12)/2 = 2 ± √3\n    \n    # We need to format this as: rational_part + coefficient * sqrt(radicand)\n    # Rational part of root 1: 2, Radical coeff: 1, Radicand: 3\n    # Or we can keep it unsimplified if the prompt implies a specific structure. \n    # \"correct_answer must include result with rational, radical_coefficient (may be +1 or -1), radicand\"\n    \n    # Let's simplify sqrt(12) to 2*sqrt(3).\n    # Root = 2 ± √3\n    \n    rational_part = delta_val := int(delta ** 0.5) if isinstance(int(delta**0.5), float) else None \n    # Re-evaluating: delta=12, sqrt(12)=2*sqrt(3).\n    \n    simplified_radicand = 3\n    radical_coefficient = 1\n    \n    # The roots are 2 + √3 and 2 - √3.\n    # We will present the set of solutions or a specific format? \n    # Usually \"ordered quadratic roots\" implies listing them in order (ascending).\n    root_1 = rational_part_base := int(delta**0.5) if isinstance(int(delta**0.5), float) else None \n    \n    # Let's do this cleanly:\n    # Roots are (-(-4) ± sqrt(12)) / 2 \n    # = (4 ± 2*sqrt(3)) / 2 \n    # = 2 ± sqrt(3)\n    \n    rational_part_val = 2.0\n    \n    # Construct the answer string components\n    canonical_latex_root_1 = r\"2 + \\sqrt{3}\"\n    canonical_latex_root_2 = r\"2 - \\sqrt{3}\"\n    \n    correct_answer_str = f\"{rational_part_val} \\\\pm \\\\sqrt{{{simplified_radicand}}}\"\n    \n    # Construct the full answer object as a dict for structured comparison if needed, \n    # but the spec says \"correct_answer must include result with...\". \n    # I will return a string representation that contains these elements clearly.\n    \n    correct_answer = f\"{rational_part_val} \\\\pm \\\\sqrt{{{simplified_radicand}}}\"\n    \n    oracle_payload = frozen_params\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:06:02.884152+00:00",
+  "completed_at_utc": "2026-07-21T15:06:17.110841+00:00",
+  "duration": 14.226679799961857,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 14.226668699993752,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 262,
+      "eval_count": 1250,
+      "total_token_count": 1512,
+      "total_duration": 12195815100,
+      "load_duration": 263556900,
+      "done_reason": "stop",
+      "latency_ms": 14226,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026071301,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026071301,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

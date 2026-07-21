@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce113_q01_negative_fraction_subtraction__ab2d_spec_v2__seed_2026072002",
+  "task_id": "ce113_q01_negative_fraction_subtraction",
+  "family": "fraction",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072002,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072002
+  },
+  "prompt_sha256": "319926943ccbc9ca260979e04cf024cc1d896f00bc3e6be23e7b9632170ca54a",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce113_q01_negative_fraction_subtraction.txt",
+  "generation_status": "success",
+  "raw_response": "# -*- coding: utf-8 -*-\n\ndef generate(level=1, **kwargs):\n    from core.prompts.domain_function_library import FractionOps\n    \n    # Frozen parameters must be used exactly as specified in the task specification.\n    frozen_expression = \"3/7 - (-1/4)\"\n    \n    # Parse and compute using native Python arithmetic for simplicity given the small expression size, \n    # ensuring irreducible fraction output via standard math operations which Fraction handles automatically.\n    # We construct fractions manually to avoid API misuse while adhering to logic requirements.\n    num1 = 3\n    den1 = 7\n    num2 = -(-1)  # This is effectively +1, but we treat the term as (-1/4), so subtracting it means adding positive part? \n                 # Wait: Expression is \"3/7 - (-1/4)\". Subtracting a negative fraction adds its value.\n                 # So mathematically: (3/7) + (1/4).\n    den2 = 4\n    \n    # Compute common denominator and result using native arithmetic to ensure correctness without API overhead for simple ops,\n    # then format as required by the task specification schema.\n    \n    lcm_denominator = den1 * den2 // math.gcd(den1, den2) if False else (den1 * den2) \n    # Since gcd is not imported yet and logic is trivial: 7*4=28\n    \n    common_num1 = num1 * (lcm_denominator // den1)\n    common_num2 = -num2 * (lcm_denominator // den2) if False else (-(-1)) * (lcm_denominator // den2) # Actually we are subtracting the fraction. \n    # Let's re-evaluate: 3/7 - (-1/4). This is equivalent to adding 1/4.\n    # Term A: 3/7 -> numerator 3, denominator 7\n    # Term B: -(-1/4) = +1/4 -> we are ADDING this term in the subtraction operation? \n    # No, standard order of operations: subtract (-1/4). So add (1/4).\n    \n    # Let's stick to strict Fraction logic without external imports if possible or use minimal math.\n    import math\n    \n    common_den = 28\n    adjusted_num_3over7 = 3 * 4  # 12\n    adjusted_num_pos_one_over_4 = 1 * 7  # 7 (since we are adding)\n    \n    final_numerator = adjusted_num_3over7 + adjusted_num_pos_one_over_4\n    final_denominator = common_den\n    \n    from fractions import Fraction as PyFraction\n    \n    res_frac = PyFraction(final_numerator, final_denominator)\n    \n    # Format correct_answer with numerator, denominator, and canonical_latex\n    num_str = str(res_frac.numerator)\n    den_str = str(res_frac.denominator)\n    latex_num = r\"\\frac{\" + num_str + \"}{\\text{\" + den_str + \"} }\" if False else f\"{num_str}\\\\over{den_str}\" # Standard LaTeX fraction\n    \n    correct_answer_dict = {\n        \"numerator\": res_frac.numerator,\n        \"denominator\": res_frac.denominator,\n        \"canonical_latex\": r\"\\frac{\" + str(res_frac.numerator) + \"}{\" + str(res_frac.denominator) + \"}\"\n    }\n\n    question_text = f\"Compute the value of: {frozen_expression}.\"\n    \n    oracle_payload = frozen_expression\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer_dict,\n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:35:11.612880+00:00",
+  "completed_at_utc": "2026-07-21T15:35:21.534692+00:00",
+  "duration": 9.921801100019366,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 9.921786999912001,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 929,
+      "eval_count": 802,
+      "total_token_count": 1731,
+      "total_duration": 7884639900,
+      "load_duration": 269598800,
+      "done_reason": "stop",
+      "latency_ms": 9921,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072002,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072002,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

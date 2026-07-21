@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce111_q10_ordered_quadratic_roots_radical__ab2d__seed_2026072001",
+  "task_id": "ce111_q10_ordered_quadratic_roots_radical",
+  "family": "radical",
+  "condition": "ab2d",
+  "seed": 2026072001,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072001
+  },
+  "prompt_sha256": "79e4e1abeee04352b1acfd797ec10815f2614f37bd4c94f0090c6ffef957d2c6",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "from fractions import Fraction\nimport math\n\ndef generate(level=1, **kwargs):\n    frozen_params = {\"equation\": \"(x-2)^2=3\", \"order\": \"a>b\", \"target\": \"2a+b\"}\n    \n    # Parse equation (x-2)^2 = 3 -> x^2 - 4x + 4 = 3 -> x^2 - 4x + 1 = 0\n    a, b_val, c = 1, -4, 1\n    \n    discriminant = b_val**2 - 4*a*c # (-4)^2 - 4*1*1 = 16-4=12\n    sqrt_discriminant = math.sqrt(discriminant) # sqrt(12) = 2*sqrt(3)\n    \n    x_plus = (-(b_val) + sqrt_discriminant) / (2*a) # (4 + 2*sqrt(3)) / 2 = 2 + sqrt(3)\n    x_minus = (-(b_val) - sqrt_discriminant) / (2*a) # (4 - 2*sqrt(3)) / 2 = 2 - sqrt(3)\n    \n    # Identify terms for 'a' and 'b' based on order \"a>b\" where a is the larger root coefficient part? \n    # The target says \"2a+b\". Usually in these problems, roots are expressed as A + B*sqrt(C).\n    # Root 1: 2 + sqrt(3) -> coeff of integer part = 2, radical part = 1.\n    # Root 2: 2 - sqrt(3) -> coeff of integer part = 2, radical part = -1 (or just subtractive term).\n    \n    # Let's assume the standard form x = p + q*sqrt(r).\n    # Here roots are 2 + sqrt(3) and 2 - sqrt(3).\n    # If we map a to one root component and b to another? \n    # The target \"2a+b\" suggests linear combination.\n    # Given the frozen params, let's construct the answer string directly based on standard quadratic formula output format for this specific equation.\n    \n    # Roots: 2 + sqrt(3), 2 - sqrt(3)\n    # Let a = 1 (coefficient of integer part in first root?), b = 0? No.\n    # Perhaps the question asks to solve and express roots as A +/- B*sqrt(C).\n    # Root form: x = 2 + sqrt(3), x = 2 - sqrt(3)\n    \n    # Let's construct the canonical LaTeX for both roots combined or individually if specified by context. \n    # Usually \"ordered quadratic roots\" implies listing them in order (descending value).\n    # Order a>b usually refers to coefficients of some variable, but here it likely defines the ordering logic: Root1 > Root2.\n    \n    root_str_1 = f\"{x_plus.numerator}/{x_plus.denominator} + {sqrt_discriminant:.0f}\" -> This is float approximation which violates precision requirements for radicals.\n    \n    # Recalculate using Fraction and RadicalOps to ensure exact representation.\n    from fractions import Fraction as F\n    \n    int_part_num, int_part_den = 2, 1\n    radical_coeff, radicand_val = sqrt_discriminant / 2 # (2*sqrt(3))/2 = sqrt(3) -> coeff=1, rad=3\n    \n    term_int = F(int_part_num)\n    \n    # Construct the answer string for both roots: x_1 and x_2\n    # Format: \"x_{1} = \\frac{4 + 2\\sqrt{3}}{2}, x_{2} = \\frac{4 - 2\\sqrt{3}}{2}\" -> Simplified to integers.\n    \n    # Using domain APIs for formatting if needed, but standard LaTeX construction is safer for \"canonical_latex\".\n    # However, task requires using RadicalOps.simplify_term and format_expression? \n    # The prompt says: \"correct_answer must include result with rational, radical_coefficient (may be +1 or -1), radicand, and canonical_latex.\"\n    \n    # Let's build the answer as a list of roots in descending order.\n    root_1 = F(2) + 1 * math.sqrt(F(3))\n    root_2 = F(2) - 1 * math.sqrt(F(3))\n    \n    # Since we need to output text, let's construct the LaTeX manually ensuring correctness based on domain logic concepts.\n    # The roots are $x = \\frac{4 + 2\\sqrt{3}}{2}$ and $x = \\frac{4 - 2\\sqrt{3}}{2}$.\n    # Simplified: $x_1 = 2 + \\sqrt{3}, x_2 = 2 - \\sqrt{3}$.\n    \n    latex_roots = r\"x_{1}=2+\\sqrt{3},\\ x_{2}=2-\\sqrt{3}\"\n    \n    correct_answer_data = {\n        \"rational\": [F(2), F(2)], # Integer parts of both roots\n        \"radical_coefficient\": [+1, -1], \n        \"radicand\": 3,\n        \"canonical_latex\": latex_roots\n    }\n    \n    correct_answer = f\"{correct_answer_data['rational'][0]} + {correct_answer_data['radical_coefficient'][0]}\\sqrt{{{correct_answer_data['radicand']}}}},\\ \\{correct_answer_data['rational'][1]} - {{abs({correct_answer_data['radical_coefficient'][2]) if False else 1}}}...\" \n    # Wait, the structure requested is likely a specific string format or dict.\n    # \"correct_answer must include result with rational, radical_coefficient... and canonical_latex\" implies these fields should be present in the returned value? Or just that the answer text reflects them?\n    # Re-reading: \"return a dict with exactly question_text, correct_answer, and oracle_payload\". \n    # The description of 'correct_answer' says it must *include* result... This usually means the string itself or an object. Given `canonical_latex` is requested as part of the answer content, let's make `correct_answer` be a dict containing these fields to satisfy \"Structured comparison\", OR just ensure the LaTeX contains them clearly. \n    # However, often in these tasks, 'correct_answer' is the string representation, and the description explains what it *contains*. But since structured comparison is required (\"do not rely on string-only equality\"), having `canonical_latex` as a separate field or ensuring the answer object has parseable parts is key. \n    # Let's assume `correct_answer` should be an object/dict with these fields to allow strict structural checking, OR if it must be a string, we ensure the LaTeX matches exactly.\n    # Given \"canonical_latex\" is listed as a required component of correct_answer description, I will make `correct_answer` a dictionary containing: 'rational', 'radical_coefficient', 'radicand', and 'canonical_latex'. This satisfies all constraints perfectly for structured comparison.\n\n    final_correct_ans = {\n        \"rational\": [F(2), F(2)],\n        \"radical_coefficient\": [+1, -1], \n        \"radicand\": 3,\n        \"canonical_latex\": r\"x_{1}=2+\\sqrt{3},\\ x_{2}=2-\\sqrt{3}\"\n    }\n\n    question_text = r\"Solve the quadratic equation $(x-2)^2=3$ for $x$. Express roots in the form $a \\pm b\\sqrt{n}$.\"\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": final_correct_ans,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:16:26.986337+00:00",
+  "completed_at_utc": "2026-07-21T15:16:45.503017+00:00",
+  "duration": 18.51667019992601,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 18.51665659993887,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 435,
+      "eval_count": 1712,
+      "total_token_count": 2147,
+      "total_duration": 16478219700,
+      "load_duration": 242700400,
+      "done_reason": "stop",
+      "latency_ms": 18516,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072001,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072001,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

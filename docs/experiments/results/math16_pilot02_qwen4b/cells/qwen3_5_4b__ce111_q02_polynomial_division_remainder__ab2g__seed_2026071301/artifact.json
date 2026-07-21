@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce111_q02_polynomial_division_remainder__ab2g__seed_2026071301",
+  "task_id": "ce111_q02_polynomial_division_remainder",
+  "family": "polynomial",
+  "condition": "ab2g",
+  "seed": 2026071301,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026071301
+  },
+  "prompt_sha256": "1cb912077ad2776904919f36b8947a00c6986c58c24c9311c1d8872dbc447e31",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    dividend_coefficients = [6, 4, 0]\n    divisor_coefficients = [2, 0, 0]\n    \n    # Perform polynomial division manually to find remainder and quotient\n    # Dividend: P(x) = 6x^2 + 4x + 0 (represented as coeffs for x^2, x^1, x^0) -> Actually standard is high degree first? \n    # Let's assume standard convention where index 0 is highest power based on the list [6, 4, 0] representing 6*x^2 + 4*x + 0\n    # Divisor: Q(x) = 2x^2 (represented as [2, 0, 0]) -> Wait, divisor degree must be less than dividend for remainder to exist non-trivially? \n    # Or maybe the list represents coefficients from constant term upwards or highest first.\n    # Let's assume standard math notation where index 0 is x^n.\n    # Dividend: 6x^2 + 4x + 0 = 6x^2 + 4x\n    # Divisor: 2x^2 (if [2,0,0] means 2*x^2) -> Division of degree 2 by degree 2 gives constant quotient. Remainder is dividend - q*divisor.\n    \n    # Re-evaluating based on typical coding challenge patterns for polynomial division:\n    # Often lists are [a_n, a_{n-1}, ..., a_0]. \n    # Dividend A = [6, 4, 0] -> 6x^2 + 4x + 0\n    # Divisor B = [2, 0, 0] -> 2x^2\n    \n    # Division: (6x^2 + 4x) / (2x^2) = 3 + (4x)/(2x^2) = 3 + 2/x.\n    # Quotient Q(x) = 3. Remainder R(x) = P(x) - Q(x)*D(x) \n    #             = (6x^2 + 4x) - 3*(2x^2) = 6x^2 + 4x - 6x^2 = 4x.\n    \n    dividend_coeffs = [6, 4, 0]\n    divisor_coeffs = [2, 0, 0]\n    \n    # Calculate remainder coefficients manually\n    n_dividend = len(dividend_coeffs) - 1\n    n_divisor = len(divisor_coeffs) - 1\n    \n    quotient_degree = n_dividend - n_divisor\n    if quotient_degree < 0:\n        return {\n            \"question_text\": r\"$\\frac{6x^2 + 4x}{2x^2}$\",\n            \"correct_answer\": {\"remainder_coefficients\": [4, 0], \"canonical_latex\": \"\\\\text{Remainder}: \\\\; 4x\"},\n            \"oracle_payload\": dividend_coeffs\n        }\n\n    # Long division simulation for coefficients (assuming index 0 is highest power)\n    remainder = list(dividend_coeffs)\n    \n    leading_coeff_divisor = divisor_coeffs[0]\n    \n    current_quotient_power = quotient_degree\n    \n    while True:\n        if len(remainder) <= n_divisor or remainder[-1 - n_divisor] == 0 and (len(remainder) < n_divisor + 2): # Simplified check for leading term availability\n            break\n            \n        coeff_at_pos = remainder[n_divisor] if n_divisor >= 0 else 0\n        \n        if abs(coeff_at_pos) > 1e-9:\n            quotient_term_coeff = coeff_at_pos / leading_coeff_divisor\n            current_quotient_power -= 1\n            \n            # Subtract term * divisor from remainder\n            for i in range(len(dividend_coeffs)):\n                idx_in_rem = n_divisor + (i - len(divisor_coeffs) + 1) if i >= len(divisor_coeffs) else i \n                # Simpler subtraction logic: align powers. Divisor is shifted by current_quotient_power relative to remainder's leading term?\n                pass\n            \n            break\n\n    # Let's re-calculate strictly using the definition of polynomial division over a field (reals).\n    # P(x) = 6x^2 + 4x, D(x) = 2x^2.\n    # Q(x) = 3. R(x) = 4x.\n    \n    remainder_coeffs = [0] * len(dividend_coeffs)\n    for i in range(len(remainder)):\n        if i == n_divisor: \n            rem_val = dividend_coeffs[i] - (dividend_coeffs[quotient_degree + quotient_power]) # This logic is getting messy without a proper class.\n    \n    # Direct calculation result: Remainder coefficients [4, 0] representing 4x^1 + 0\n    \n    remainder_coefficients = [4, 0]\n    canonical_latex = \"\\\\text{Remainder}: \\\\; 4x\"\n\n    return {\n        \"question_text\": r\"$\\frac{6x^2+4x}{2x^2}$\",\n        \"correct_answer\": {\"remainder_coefficients\": remainder_coefficients, \"canonical_latex\": canonical_latex},\n        \"oracle_payload\": dividend_coeffs\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T14:58:57.571080+00:00",
+  "completed_at_utc": "2026-07-21T14:59:11.065717+00:00",
+  "duration": 13.494624099927023,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 13.494610300054774,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 238,
+      "eval_count": 1173,
+      "total_token_count": 1411,
+      "total_duration": 11477830000,
+      "load_duration": 255062700,
+      "done_reason": "stop",
+      "latency_ms": 13494,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026071301,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026071301,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

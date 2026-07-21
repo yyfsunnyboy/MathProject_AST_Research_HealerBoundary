@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce111_q02_polynomial_division_remainder__ab2d__seed_2026072002",
+  "task_id": "ce111_q02_polynomial_division_remainder",
+  "family": "polynomial",
+  "condition": "ab2d",
+  "seed": 2026072002,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072002
+  },
+  "prompt_sha256": "d625ce0bed3b073c6289454121ab9960e1c1965a824c9db6a575d7ecbd3c0aa9",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "```python\nfrom typing import Dict, Any, Tuple, List\nimport sys\nsys.path.insert(0, '.')  # Ensure imports work in this environment context if needed locally, though standard library is preferred for frozen params logic\n\n# Mocking the domain function structure to ensure self-containment as per \"Write only Python source\" constraint \n# while adhering to the API specification provided. In a real execution environment with `core.prompts.domain_function_library` available:\ntry:\n    from core.prompts.domain_function_library import PolynomialOps, format_latex\n    \n    # Using actual domain APIs if they exist in the injected context\n    def _get_div_qr(dividend_coeffs: List[int], divisor_coeffs: List[int]) -> Tuple[List[Any], List[Any]]:\n        return PolynomialOps.div_qr(dividend_coeffs, divisor_coeffs)\n\n    def _format_latex(coeffs: List[int | str], var='x') -> str:\n        return format_latex(coeffs, var=var)\nexcept ImportError:\n    # Fallback implementation if the specific module is not injected but logic must be present for verification\n    class PolynomialOps:\n        @staticmethod\n        def div_qr(dividend_coeffs: List[int], divisor_coeffs: List[int]) -> Tuple[List[Any], List[Any]]:\n            # Simple polynomial division algorithm (long division) assuming coefficients are ordered from highest degree to lowest.\n            if not dividend_coeffs or not divisor_coeffs:\n                return [], []\n            \n            n = len(dividend_coeffs) - 1\n            m = len(divisor_coeffs) - 1\n            \n            quotient_degree = n - m\n            remainder_degree = max(-1, n - m) # If degree < 0, it's zero polynomial (degree -infinity), but we return list of coeffs.\n            \n            q_coefficients = [0] * (quotient_degree + 1) if quotient_degree >= 0 else []\n            r_coefficients = dividend_coeffs[:]\n            \n            for i in range(quotient_degree + 1):\n                # Leading term adjustment\n                divisor_lead = divisor_coeffs[0]\n                \n                if len(r_coefficients) > m:\n                    factor = r_coefficients[i] / divisor_lead\n                    \n                    q_coefficients[n - (m-i)] = int(factor) # Assuming integer coefficients result based on problem type usually, but keeping float logic safe then casting or checking. \n                                                            # Given input [6,4,0]/[2,0,0], 6/2=3.\n                    \n                    for j in range(m + 1):\n                        r_coefficients[i+j] -= factor * divisor_coeffs[j]\n                else:\n                    break\n            \n            return q_coefficients, r_coefficients\n\n    def format_latex(coeffs: List[int | str], var='x') -> str:\n        terms = []\n        for i, c in enumerate(reversed(coeffs)): # Reverse to get low degree first? No, standard is high to low. \n            # The API spec says coeffs are likely high-to-low based on typical polynomial representation [6,4,0] (6x^2 + 4x).\n            pass\n        \n        # Re-implementing format_latex logic for safety if module missing:\n        terms = []\n        n = len(coeffs) - 1\n        for i in range(n):\n            c = coeffs[i]\n            power = n - i\n            \n            term_str = \"\"\n            \n            abs_c = abs(c)\n            sign = \"-\" if c < 0 else \"+\"\n            \n            # Handle zero coefficients implicitly by skipping, but here we assume non-zero leading terms for display usually.\n            # However, to be safe with the list structure:\n            pass\n            \n        return \" \".join([f\"{c}x^{n-i}\" for i,c in enumerate(coeffs) if c != 0])\n\n# Since I must write ONLY Python source and cannot rely on external imports failing at runtime without a fallback \n# that ensures the code runs, I will use the provided domain APIs directly assuming they are available in the execution context.\n# If not, the above try/except block handles it gracefully by providing stubs matching signatures.\n\ndef generate(level: int = 1, **kwargs) -> Dict[str, Any]:\n    \"\"\"\n    Generates a polynomial division remainder problem based on frozen parameters or level logic.\n    \n    Args:\n        level (int): Difficulty level (default 1).\n        **kwargs: Additional arguments if needed.\n        \n    Returns:\n        dict with keys: question_text, correct_answer, oracle_payload\n    \"\"\"\n    # Frozen sampled parameters as per task specification\n    frozen_params = {\n        \"dividend_coefficients\": [6, 4, 0], \n        \"divisor_coefficients\": [2, 0, 0]\n    }\n    \n    dividend_coeffs = frozen_params[\"dividend_coefficients\"]\n    divisor_coeffs = frozen_params[\"divisor_coefficients\"]\n    \n    # Perform polynomial division using domain API\n    quotient, remainder = _get_div_qr(dividend_coeffs, divisor_coeffs)\n    \n    # Format remainders as LaTeX string (e.g., 0 or x^2 + ...)\n    try:\n        latex_remainder = format_latex(remainder)\n    except Exception:\n        # Fallback if formatting fails unexpectedly\n        latex_remainder = \" \".join([str(c) for c in remainder])\n\n    # Construct the question text using formal LaTeX delimiters\n    dividend_str = f\"{dividend_coeffs[0]}x^{len(dividend_coeffs)-1}\"\n    divisor_str = f\"{divisor_coeffs[0]}x^{len(divisor_coeffs)-1}\" if len(divisor_coeffs) > 1 else \"constant\" # Simplified for display\n    \n    question_text = r\"\"\"Find the remainder of the polynomial division: \n$$ \\frac{6x^2 + 4x}{2x} $$\nExpress your answer as a simplified polynomial in terms of $x$.\"\"\"\n\n    correct_answer = f\"The remainder is {latex_remainder}. In LaTeX format: \\\\[{latex_remainder}\\\\]\"\n    \n    # Ensure oracle_payload matches exactly the frozen sampled parameters structure and values\n    oracle_payload = dict(frozen_params)\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }\n\n# Verification logic (internal check to ensure contract compliance before execution if run as script):\nif __name__ == \"__main__\":\n    result = generate()\n    \n    # Verify keys exist and are exactly three required top-level keys\n    assert set(result.keys()) == {\"question_text\", \"correct_answer\", \"oracle_payload\"}, \\\n        f\"Return value must have exactly question_text, correct_answer, oracle_payload. Found: {set(result.keys())}\"\n        \n    # Verify types match contract (strings for text/answer, dict for payload)\n    assert isinstance(result[\"question_text\"], str), \"question_text must be a string.\"\n    assert isinstance(result[\"correct_answer\"], str), \"correct_answer must be a string.\"\n    assert isinstance(result[\"oracle_payload\"], dict), \"oracle_payload must be a dictionary.\"\n    \n    # Verify oracle_payload equals frozen parameters exactly\n    expected_frozen = {\"dividend_coefficients\": [6, 4, 0], \"divisor_coefficients\": [2, 0, 0]}\n    assert result[\"oracle_payload\"] == expected_frozen, \\\n        f\"oracle_payload must equal {expected_frozen}. Got: {result['oracle_payload']}\"\n\n```",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:23:51.212618+00:00",
+  "completed_at_utc": "2026-07-21T15:24:09.082006+00:00",
+  "duration": 17.869377900031395,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 17.869366600061767,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 367,
+      "eval_count": 1609,
+      "total_token_count": 1976,
+      "total_duration": 15831759800,
+      "load_duration": 257045600,
+      "done_reason": "stop",
+      "latency_ms": 17869,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072002,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072002,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

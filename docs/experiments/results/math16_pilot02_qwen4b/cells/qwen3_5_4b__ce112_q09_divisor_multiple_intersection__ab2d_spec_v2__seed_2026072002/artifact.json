@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce112_q09_divisor_multiple_intersection__ab2d_spec_v2__seed_2026072002",
+  "task_id": "ce112_q09_divisor_multiple_intersection",
+  "family": "integer",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072002,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072002
+  },
+  "prompt_sha256": "6ab35b719b39c1336e47f8fea3d373ec2482ad3f8d1c6979b192576090228035",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce112_q09_divisor_multiple_intersection.txt",
+  "generation_status": "success",
+  "raw_response": "# -*- coding: utf-8 -*-\n\ndef generate(level=1, **kwargs):\n    # Frozen parameters defined directly as per task specification\n    divisor_of = 216\n    multiple_of = 18\n    \n    # Count positive integers x satisfying both conditions:\n    # 1. x % multiple_of == 0 (x is a multiple of 18)\n    # 2. divisor_of % x == 0 (divisor_of is divisible by x, meaning x divides 216)\n    \n    count = 0\n    \n    # Iterate through positive integers up to the maximum possible value (which is max(divisor_of, multiple_of))\n    limit = max(divisor_of, multiple_of) + 1\n    \n    for x in range(1, limit):\n        if (x % multiple_of == 0) and (divisor_of % x == 0):\n            count += 1\n            \n    correct_answer_dict = {\"count\": int(count)}\n    \n    question_text = r\"\"\"Find the number of positive integers $x$ such that:\n- $x \\equiv 0 \\pmod{\\text{multiple\\_of}}$\n- $\\text{divisor\\_of} \\equiv 0 \\pmod{x}$\n\nGiven parameters: divisor_of=$216$, multiple_of=$18$.\"\"\"\n    \n    oracle_payload = {\"divisor_of\": 216, \"multiple_of\": 18}\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer_dict,\n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:23:09.344123+00:00",
+  "completed_at_utc": "2026-07-21T15:23:15.056378+00:00",
+  "duration": 5.712243999936618,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 5.712232000078075,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 568,
+      "eval_count": 344,
+      "total_token_count": 912,
+      "total_duration": 3674148600,
+      "load_duration": 302740000,
+      "done_reason": "stop",
+      "latency_ms": 5712,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072002,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072002,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

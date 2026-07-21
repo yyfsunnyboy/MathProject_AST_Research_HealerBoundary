@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce115_calc_polynomial_factor_roots_l1__ab2d_spec_v2__seed_2026071301",
+  "task_id": "ce115_calc_polynomial_factor_roots_l1",
+  "family": "polynomial",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026071301,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026071301
+  },
+  "prompt_sha256": "64ff6dc7b8b1fe7e5e14585fdc620a7ed1d9b0c573d08f1674d5cd55f8709943",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce115_calc_polynomial_factor_roots_l1.txt",
+  "generation_status": "success",
+  "raw_response": "```python\n# -*- coding: utf-8 -*-\n\ndef generate(level=1, **kwargs):\n    # Frozen sampled parameters defined directly here as per specification\n    frozen_params = {\"quadratic_coefficients\": [1, 4, -12]}\n    \n    a, b, c = frozen_params[\"quadratic_coefficients\"]\n    \n    # Compute discriminant: D = b^2 - 4ac\n    d = b * b - 4 * a * c\n    \n    # Since coefficients are integers and result in perfect square for this case (16 + 48 = 64)\n    sqrt_d = int(d ** 0.5)\n    \n    # Compute roots using exact arithmetic logic, then convert to float only if necessary \n    # but specification says \"Exact arithmetic; no floats\" implies we should keep them as fractions or integers if possible.\n    # Roots formula: (-b ± sqrt(D)) / (2a)\n    root1_num = -b + sqrt_d\n    root1_den = 2 * a\n    \n    root2_num = -b - sqrt_d\n    root2_den = 2 * a\n    \n    # Determine ascending order. Since denominators are same positive integer, compare numerators.\n    if root1_num < root2_num:\n        r_asc_0 = (root1_num, root1_den)\n        r_asc_1 = (root2_num, root2_den)\n    else:\n        r_asc_0 = (root2_num, root2_den)\n        r_asc_1 = (root1_num, root1_den)\n    \n    # Factorization for ax^2 + bx + c where roots are p/q and r/s. \n    # Factors are a(x - root)(x - other_root).\n    # Here x^2 + 4x - 12 factors to (x+6)(x-2).\n    factor_latex = \"a\" * str(a) + \"(x-\" + str(r_asc_0[0] // r_asc_0[1]) + \")(\" + \"(x+\" + str(-r_asc_1[0] // r_asc_1[1]) + \")\" if all(x % y == 0 for x, (y,) in [(root2_num, root2_den), (root1_num, root1_den)]) else None\n    \n    # Re-evaluating factorization specifically for [1, 4, -12]\n    # Roots are exactly integers: (-6)/(-1) -> wait. \n    # x = (-4 ± 8) / 2 => 2 or -6.\n    # Ascending order: -6, 2.\n    \n    root_minus_6_num, root_minus_6_den = -6, 1\n    root_plus_2_num, root_plus_2_den = 2, 1\n    \n    factor_latex = \"x^2+4x-12=(x+\" + str(root_minus_6) + \")(\" + \"(x-\" + str(root_plus_2) + \")\"\n    \n    # Roots LaTeX list: \\frac{-b-\\sqrt{D}}{2a}, \\frac{-b+\\sqrt{D}}{2a} ordered ascending.\n    roots_latex = \"\\\\left(\\\\frac{\" + str(root_minus_6_num) + \"}{1}\\\\right), \\\\left(\\\\frac{\" + str(root_plus_2_num) + \"} { 1 }\\\\right)\"\n\n    question_text = r\"Find the factorization and roots of the quadratic polynomial defined by coefficients $[a, b, c]$ where $ax^2+bx+c=0$. Given: $\\{ \\text{'quadratic\\_coefficients'}: [1, 4, -12] \\}$.\"\n\n    correct_answer = {\n        \"roots\": [-6.0, 2.0], # Specification says no floats? But roots of integer polynomials often result in integers represented as float for consistency with 'no floats' constraint usually meaning don't use floating point math internally or keep precision high. However, standard interpretation of \"Exact arithmetic; no floats\" implies rational numbers. \n        # Let's re-read: \"correct_answer must include ... and roots_latex\".\n        # If I output integers in the dict for 'roots', that satisfies exactness better than float 2.0 vs integer 2. But Python dicts usually hold mixed types. \n        # Given previous examples often use floats for roots unless specified otherwise, but \"Exact arithmetic; no floats\" suggests avoiding floating point representation entirely if possible.\n        # Let's provide integers in the list to be safe with 'no floats'.\n    }\n\n    correct_answer[\"roots\"] = [-6, 2] \n    factorization_latex = r\"x^2+4x-12=(x-6)(x+2)\"\n    \n    final_correct_ans = {\n        \"roots\": sorted([-6.0, 2.0]), # Wait, if I must avoid floats... let's stick to the instruction: \"Exact arithmetic; no floats\". \n        # Actually, in Python -6 is int, 2 is int. But often these tasks expect float representation for roots unless they are integers.\n        # Let's assume standard JSON serialization where ints stay ints and floats become floats. The constraint likely targets internal calculation precision (e.g., not using `math.sqrt` which returns float). \n        # I will use the integer values directly in the list to strictly adhere to \"no floats\".\n    }\n\n    correct_answer = {\n        \"roots\": [-6, 2],\n        \"factorization_latex\": r\"x^2+4x-12=(x-6)(x+2)\",\n        \"roots_latex\": r\"\\left(-6\\right), \\left(2\\right)\"\n    }\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": frozen_params\n    }\n```",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:05:44.065185+00:00",
+  "completed_at_utc": "2026-07-21T15:05:58.705794+00:00",
+  "duration": 14.64059979992453,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 14.640586500056088,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 597,
+      "eval_count": 1282,
+      "total_token_count": 1879,
+      "total_duration": 12605278700,
+      "load_duration": 265513900,
+      "done_reason": "stop",
+      "latency_ms": 14640,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026071301,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026071301,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

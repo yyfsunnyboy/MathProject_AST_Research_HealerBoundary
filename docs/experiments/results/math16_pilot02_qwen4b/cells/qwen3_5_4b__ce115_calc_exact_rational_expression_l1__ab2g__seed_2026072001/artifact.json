@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce115_calc_exact_rational_expression_l1__ab2g__seed_2026072001",
+  "task_id": "ce115_calc_exact_rational_expression_l1",
+  "family": "fraction",
+  "condition": "ab2g",
+  "seed": 2026072001,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072001
+  },
+  "prompt_sha256": "5f397d56fab2649201b606af7abf51780a93d6d74269fd5f5d216a538aa8b8d9",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    import fractions\n    \n    # Frozen sampled parameters as per task specification\n    frozen_params = {\n        \"products\": [\n            {\"left\": \"2.79\", \"right\": \"89.3\", \"sign\": 1},\n            {\"left\": \"-0.21\", \"right\": \"89.3\", \"sign\": -1}\n        ]\n    }\n\n    # Parse the first product: left = 2.79, right = 89.3, sign = +1\n    p1_left_str = str(frozen_params[\"products\"][0][\"left\"])\n    p1_right_str = str(frozen_params[\"products\"][0][\"right\"])\n    \n    # Convert to fractions for exact arithmetic\n    p1_left_frac = fractions.Fraction(p1_left_str)\n    p1_right_frac = fractions.Fraction(p1_right_str)\n\n    # Parse the second product: left = -0.21, right = 89.3, sign = -1\n    p2_left_str = str(frozen_params[\"products\"][1][\"left\"])\n    p2_right_str = str(frozen_params[\"products\"][1][\"right\"])\n    \n    # Convert to fractions for exact arithmetic (note: the string includes the negative sign)\n    p2_left_frac = fractions.Fraction(p2_left_str)\n    p2_right_frac = fractions.Fraction(p2_right_str)\n\n    # Calculate first term: 2.79 * 89.3\n    term1_val = p1_left_frac * p1_right_frac\n    \n    # Calculate second term: -0.21 * 89.3 (already includes sign in string, but let's be explicit based on spec)\n    # The frozen param says left is \"-0.21\", so the value is negative. \n    # However, looking at typical math problems of this type \"ce115_calc_exact_rational_expression_l1\":\n    # It usually implies an expression like (a * b) + (c * d).\n    # Let's compute both products exactly as defined by the strings provided in frozen_params.\n    \n    term2_val = p2_left_frac * p2_right_frac\n    \n    # The problem likely asks for the sum of these two terms based on \"products\" list structure often implying a summation or difference.\n    # Given standard patterns: Expression = (Term1) + (Term2). \n    # Term 1: 2.79 * 89.3\n    # Term 2: -0.21 * 89.3\n    \n    final_result_val = term1_val + term2_val\n\n    # Format the result as p/q string if not an integer, else just numerator (or handle int case gracefully)\n    def format_fraction(frac):\n        num = frac.numerator\n        den = frac.denominator\n        return f\"{num}/{den}\"\n\n    correct_answer_value_str = format_fraction(final_result_val)\n    \n    # Generate canonical LaTeX for the fraction p/q or integer n\n    if final_result_val.denominator == 1:\n        latex_str = str(int(final_result_val)) + \"\\\\frac{0}{1}\" # Or just \\text{n} depending on strictness, but usually irreducible form. \n        # Actually standard is just the number for integers in some contexts, or n/1. Let's stick to p/q format if requested \"irreducible p/q string\".\n        # If it simplifies to an integer, we can represent as \\frac{n}{1} or just n. The prompt asks for value (irreducible p/q string). \n        # So even integers should be represented as num/1? Or just the number? \"p/q\" implies a fraction structure.\n        # Let's use \\frac{numerator}{denominator}.\n    else:\n        latex_str = f\"\\\\frac{{{final_result_val.numerator}}}{{{final_result_val.denominator}}}\"\n\n    question_text = r\"\"\"Calculate the exact value of the expression formed by summing the products defined below. \nExpression: $(2.79 \\times 89.3) + (-0.21 \\times 89.3)$\nProvide your answer as an irreducible fraction in LaTeX format.\"\"\"\n\n    oracle_payload = frozen_params\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": {\n            \"value\": correct_answer_value_str,\n            \"canonical_latex\": latex_str\n        },\n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:21:32.074286+00:00",
+  "completed_at_utc": "2026-07-21T15:21:43.976301+00:00",
+  "duration": 11.902005900046788,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 11.90199499996379,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 264,
+      "eval_count": 982,
+      "total_token_count": 1246,
+      "total_duration": 9875196300,
+      "load_duration": 254628600,
+      "done_reason": "stop",
+      "latency_ms": 11901,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072001,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072001,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

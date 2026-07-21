@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce111_q02_polynomial_division_remainder__ab1__seed_2026072001",
+  "task_id": "ce111_q02_polynomial_division_remainder",
+  "family": "polynomial",
+  "condition": "ab1",
+  "seed": 2026072001,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072001
+  },
+  "prompt_sha256": "138e8eae8822fb96a655fd1cfb5c14873f5397fb4b5a09ed617defd5fc0e42e5",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    import random\n    \n    # Frozen parameters from task specification\n    dividend_coeffs = [6, 4, 0]\n    divisor_coeffs = [2, 0, 0]\n    \n    # Construct polynomials: P(x) = sum(coeffs[i]*x^i), Q(x) = sum(divisor_coeffs[j]*x^j)\n    # Dividend: 6 + 4x (degree 1) -> coefficients are constant term first? \n    # Standard convention in many coding tasks is highest degree first, but let's check the list length vs degree.\n    # If [6, 4, 0] represents a=2nd deg, b=1st, c=0th: P(x)=x^2+4x+6? Or x^2+4x (if last is constant)?\n    # Usually in these specific math tasks (ce111), the list [a, b, c] often maps to ax^2 + bx + c.\n    # Let's assume standard polynomial representation where index 0 is highest degree or lowest?\n    # Given \"dividend_coefficients\": [6, 4, 0], if it were x^2+4x+6, division by 2 might not yield integer remainder easily without specific setup.\n    # However, looking at the divisor [2, 0, 0] -> likely 2x^2? Or just constant 2? \n    # If divisor is [2, 0, 0], and dividend is [6, 4, 0].\n    # Let's assume the list represents coefficients from highest degree to lowest (standard in many contexts).\n    # Dividend: 6x^2 + 4x + 0 = 6x^2 + 4x. Degree 2.\n    # Divisor: 2x^2 + 0x + 0 = 2x^2. Degree 2.\n    \n    # Perform polynomial division manually to ensure correctness for the oracle payload match logic if needed, \n    # but since parameters are frozen and fixed here, we can hardcode the result of this specific instance \n    # or implement a generic solver that matches these inputs exactly.\n    \n    def poly_divide(dividend_coeffs, divisor_coeffs):\n        \"\"\"Returns (quotient_coefficients, remainder_coefficients)\"\"\"\n        if len(divisor_coeffs) == 0:\n            return [], dividend_coeffs\n        \n        deg_d = len(divisor_coeffs) - 1 # Assuming highest degree first index 0 is max power? \n                                        # Wait, let's re-evaluate the list structure.\n                                        # If [6,4,0] means c_2*x^2 + c_1*x + c_0, then deg=2.\n        if len(dividend_coeffs) < len(divisor_coeffs):\n            return [], dividend_coeffs\n        \n        quotient = []\n        remainder = list(dividend_coeffs)\n        \n        # Align degrees: assume index 0 is highest degree term (e.g., x^n)\n        while True:\n            deg_r = len(remainder) - 1\n            \n            if deg_r < len(divisor_coeffs) - 1:\n                break\n                \n            leading_div_term_coefficient = remainder[deg_r] / divisor_coeffs[len(divisor_coeffs)-1] # Assuming last index is constant? \n                                                    # NO, standard math notation in lists for polynomials often puts highest power first.\n                                                    # Let's assume [a,b,c] -> ax^2 + bx + c.\n            # So leading coeff of remainder at deg_r (which corresponds to index len-1-deg_r) is remainder[deg_r]? \n            # Actually, if list is [c_n, ..., c_0], then term x^n has coefficient list[n]. No, that's wrong.\n            \n        # Let's try the other common convention: List[i] = coeff of x^i (lowest power first).\n        # Dividend [6, 4, 0]: 6 + 4x + 0x^2 -> P(x) = 4x+6? Or 6+4x. Degree 1 if last is highest? \n        # Usually in Python libraries like sympy or numpy:\n        # If we assume [a,b,c] corresponds to a*x^n + b*x^(n-1) ... c (highest first).\n        # Dividend: 6, 4, 0 -> 6x^2 + 4x. \n        # Divisor: 2, 0, 0 -> 2x^2.\n        \n        # Let's implement division based on Highest Degree First convention (Index 0 = Max Power).\n        n_dividend = len(dividend_coeffs) - 1\n        n_divisor = len(divisor_coeffs) - 1\n        \n        if n_divisor == 0: # Divisor is constant? [2,0,0] -> x^2 term exists. So not constant.\n            pass\n            \n        quotient_degree = max(0, n_dividend - n_divisor)\n        \n        q_coefficients = []\n        r_coeffs = list(dividend_coeffs)\n        \n        # We need to subtract multiples of divisor * x^k from dividend until degree < deg(divisor)\n        current_r_deg = len(r_coeffs) - 1\n        \n        while True:\n            if current_r_deg < n_divisor:\n                break\n            \n            leading_coeff_rem = r_coeffs[current_r_deg] # Coeff of highest power in remainder? \n                                                        # Wait, if list is [c_n ... c_0], then index i corresponds to x^(n-i)? No.\n                                                        # If list is [a,b,c] for ax^2+bx+c:\n                                                        # Index 0 -> a (x^2)\n                                                        # Index 1 -> b (x^1)\n                                                        # Index 2 -> c (x^0)\n            \n            leading_coeff_div = divisor_coeffs[n_divisor] # Coeff of x^n in divisor\n            \n            if abs(leading_coeff_rem - leading_coeff_div * q_val) > 1e-9: \n                pass\n                \n        # Simpler approach for this specific frozen case to ensure exact match without complex float logic errors\n        # Dividend P(x): [6, 4, 0] -> 6x^2 + 4x (assuming x^2 is first) or 6+4x? \n        # Let's assume the task implies: List index i corresponds to power n-i where n=len-1.\n        # Dividend: 6*x^2 + 4*x + 0 = 6x^2 + 4x\n        # Divisor: 2*x^2 + 0*x + 0 = 2x^2\n        \n        # Division of (6x^2 + 4x) by (2x^2):\n        # Term x^2 / x^2 -> coeff 3. Quotient term: 3 * 1? No, quotient is polynomial Q(x).\n        # P = D*Q + R\n        # 6x^2 + 4x = (2x^2) * (3) + (-0*x - 4x)? \n        # Let's do it properly.\n        \n        q_coeffs = []\n        r_list = list(dividend_coeffs)\n        \n        # Degree of divisor is n_divisor_idx? If [2,0,0] -> deg=2.\n        # Leading coeff of D is 2 (at index 0).\n        # We iterate from highest possible power in Q down to constant or zero.\n        \n        max_q_deg = len(dividend_coeffs) - 1\n        \n        for i in range(max_q_deg, -1, -1):\n            if len(r_list) <= i: break\n            \n            term_rem_coeff = r_list[i] # Coeff of x^(max_power-i)? \n                                      # If list is [c2, c1, c0], then index 0 is c2 (x^2).\n            \n            leading_div_coeff = divisor_coeffs[0] if len(divisor_coeffs) > 0 else 1\n            \n            q_val = term_rem_coeff / leading_div_coeff\n            \n            if abs(q_val - round(q_val)) < 1e-9: # Integer arithmetic preferred for exactness in these tasks usually\n                q_val = int(round(q_val))\n                \n            quotient_degree = i \n            q_coeffs.append(q_val)\n            \n            # Subtract q(x)*D(x) from current remainder\n            # D(x) shifted by (i - n_divisor_idx)? No.\n            # If we are at power x^k in Q, and leading term of D is x^n_d...\n            # Let's restart the logic with clear indices.\n            \n        # Re-implementation: \n        # P = [p_n, p_{n-1}, ..., p_0] where degree n.\n        # D = [d_m, d_{m-1}, ..., d_0] where degree m.\n        \n        deg_p = len(dividend_coeffs) - 1\n        deg_d = len(divisor_coeffs) - 1\n        \n        if deg_d == 0: \n            return [], dividend_coeffs\n            \n        quotient_degree = max(0, deg_p - deg_d)\n        q_list = [0] * (quotient_degree + 1)\n        \n        # Work backwards from highest degree of Q to lowest\n        for i in range(deg_p - deg_d, -1, -1): \n            if len(dividend_coeffs) <= i: break\n            \n            coeff_to_remove = dividend_coeffs[i] / divisor_coeffs[0] # Leading term division\n            \n            q_list[len(q_list)-1-i] = int(round(coeff_to_remove))\n            \n        return [], []\n\n    # Since the parameters are fixed and simple, let's calculate manually to be safe.\n    # Dividend: [6, 4, 0]. Interpretation: 6x^2 + 4x (if index 0 is x^2). \n    # Or maybe [c_0, c_1, c_2] -> 6 + 4x? \n    # Let's look at the divisor [2, 0, 0]. If it were constant 2, list would be [2].\n    # Since length is 3 and values are non-zero only at start, likely highest power first.\n    # P(x) = 6x^2 + 4x. D(x) = 2x^2.\n    # Q(x) = (6x^2)/2x^2 = 3. Remainder R(x) = 4x - 0? \n    # Wait, if we divide by x^2 term only:\n    # P / D -> Leading terms cancel. Next term in remainder is the lower degree part of dividend which cannot be divided further because divisor has no lower degree terms (only x^2).\n    # So Remainder = 4x + 0? \n    # But wait, if we treat coefficients as [a,b,c] for ax+b+c:\n    # Dividend: 6+4x. Divisor: 2+x? No divisor is [2,0,0].\n    \n    # Let's assume the standard \"highest degree first\" convention used in many coding challenges (e.g., LeetCode polynomial division).\n    # P(x) = 6*x^2 + 4*x + 0. D(x) = 2*x^2 + 0*x + 0.\n    # Division: \n    # Step 1: Multiply D by 3 -> 6x^2. Subtract from P -> Remainder becomes [0, 4, 0] (coeffs of x^2, x, const).\n    # Now remainder degree is 1 (< deg(D)=2). Stop.\n    # Quotient = [3]. Remainder coeffs = [0, 4, 0]? Or just the part that couldn't be divided? \n    # Usually remainder should have same length as dividend or padded with zeros to match alignment? \n    # The task asks for \"remainder\". In polynomial division P=QD+R.\n    # R(x) = 4x + 0. Coefficients [0, 4, 0] if aligned to degree 2? Or just [4]? \n    # Given the input format is a list of length 3, output likely expects same structure or trimmed.\n    \n    # Let's construct the answer string and payload.\n    \n    question_text = r\"Find the remainder when dividing $P(x) = \\sum_{i=0}^{2} c_i x^{\\text{deg}-1-i}$ by $Q(x)$, where coefficients are given as lists.\" \n    # Actually simpler: \"Compute the polynomial division of P(x) with coefficients [6, 4, 0] and Q(x) with coefficients [2, 0, 0]. Provide the remainder in canonical LaTeX format.\"\n    \n    correct_answer = {\n        \"remainder\": \"4x\", \n        \"canonical_latex\": r\"R(x) = 4x\" # Or just $4x$? Task says include only remainder and canonical latex.\n    }\n    \n    oracle_payload = {\"dividend_coefficients\": [6, 4, 0], \"divisor_coefficients\": [2, 0, 0]}\n\n    return {\n        \"question_text\": r\"Given polynomials $P(x)$ with coefficients \\texttt{[6, 4, 0]} and $Q(x)$ with coefficients \\texttt{[2, 0, 0]}, compute the remainder of their division. Express the result in canonical LaTeX format.\",\n        \"correct_answer\": {\n            \"remainder\": \"4x\", \n            \"canonical_latex\": r\"R(x) = 4x\"\n        },\n        \"oracle_payload\": {\"dividend_coefficients\": [6, 4, 0], \"divisor_coefficients\": [2, 0, 0]}\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:12:47.629047+00:00",
+  "completed_at_utc": "2026-07-21T15:13:19.460948+00:00",
+  "duration": 31.831891200039536,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 31.83188020007219,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 174,
+      "eval_count": 3041,
+      "total_token_count": 3215,
+      "total_duration": 29804621200,
+      "load_duration": 377596900,
+      "done_reason": "stop",
+      "latency_ms": 31831,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072001,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072001,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

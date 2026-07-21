@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce112_q12_independent_probability_fraction__ab2d__seed_2026072002",
+  "task_id": "ce112_q12_independent_probability_fraction",
+  "family": "fraction",
+  "condition": "ab2d",
+  "seed": 2026072002,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072002
+  },
+  "prompt_sha256": "e0ceba6ddea69db946947e44372f0667b4445539f11857bbafa275c518a9506a",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "import random\nfrom typing import Dict, Any\n\n\ndef generate(level=1, **kwargs) -> Dict[str, Any]:\n    p1_min = kwargs.get(\"p1\", [2])[-1] if isinstance(kwargs.get(\"p1\"), list) else 2\n    p1_max = kwargs.get(\"p1\", [6])[0] if isinstance(kwargs.get(\"p1\"), list) and len(kwargs[\"p1\"]) > 1 else 6\n    \n    # Use frozen parameters directly as per spec: {\"p1\": [2, 6], \"p2\": [1, 5]}\n    p1_min = kwargs.get(\"frozen_p1\", [2])[0] if isinstance(kwargs.get(\"frozen_p1\"), list) else 2\n    p1_max = kwargs.get(\"frozen_p1\", [6])[-1] if isinstance(kwargs.get(\"frozen_p1\"), list) and len(kwargs[\"frozen_p1\"]) > 1 else 6\n    \n    p2_min = kwargs.get(\"frozen_p2\", [1])[0]\n    p2_max = kwargs.get(\"frozen_p2\", [5])[-1]\n\n    # Select probabilities within the frozen ranges (inclusive) to ensure reproducibility based on level or fixed seed logic if needed, \n    # but since no random state is provided and we must use \"Frozen sampled parameters\" exactly in oracle_payload:\n    # We will pick one value from p1 range and one from p2 range. To make it deterministic without external seeds, we can derive them from the level or just pick min/max if specific values aren't required to be random per call but fixed for this task instance. \n    # However, the spec says \"Frozen sampled parameters\" are provided in kwargs. We should use those ranges to generate a valid question.\n    # Let's assume we need to generate one pair (p1_val, p2_val) from these lists.\n    \n    import random as _random_module\n    \n    rng = _random_module.Random(level * 42 + hash(\"task\") % 10**9 if \"hash\" in dir() else 123456789) # Simple deterministic seed based on level for reproducibility within the session context\n    p1_val = int(rng.randint(p1_min, p1_max))\n    p2_val = int(rng.randint(p2_min, p2_max))\n\n    from core.prompts.domain_function_library import FractionOps\n    \n    numerator = (p1_val * 5 + p2_val) # Example linear combination for probability calculation logic typical in such tasks: P(A or B) = P(A)+P(B)-P(A)*B? No, usually independent prob questions ask for intersection or union.\n    # Let's define a standard question type: Probability of A and B (intersection). \n    # P(A and B) = p1 * p2.\n    \n    frac_a_and_b = FractionOps.create(p1_val) * FractionOps.create(p2_val)\n    numerator, denominator = frac_a_and_b.to_exact()\n\n    correct_answer_numerator = str(numerator.numerator if hasattr(numerator, 'numerator') else int(numerator)) # Ensure it's an integer representation of the fraction part if needed, but spec says \"include numerator\". \n    # Re-reading: \"correct_answer must include numerator, denominator, and canonical_latex for an irreducible fraction.\"\n    \n    frac_obj = FractionOps.create(p1_val) * FractionOps.create(p2_val)\n    num_int = int(frac_obj.numerator) if hasattr(frac_obj, 'numerator') else 0 # Assuming standard Fraction behavior or similar\n    \n    # Let's stick to the domain API usage strictly.\n    frac_result = FractionOps.mul(FractionOps.create(p1_val), FractionOps.create(p2_val))\n    \n    correct_answer_numerator = str(int(frac_result.numerator)) if hasattr(frac_result, 'numerator') else \"0\"\n    correct_answer_denominator = str(int(frac_result.denominator)) if hasattr(frac_result, 'denominator') else \"1\"\n    canonical_latex = FractionOps.to_latex(frac_result)\n\n    question_text = r\"\\text{Let } A \\text{ and } B \\text{ be independent events with probabilities } p_1 = \\frac{\\text{\" + str(p1_val) + \"}\"} + r\",\\ p_2 = \\frac{\\text{\" + str(p2_val) + \"}}. What is the probability that both events occur?}\"\n    \n    # Ensure correct_answer structure matches requirements: numerator, denominator, canonical_latex\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": {\n            \"numerator\": int(frac_result.numerator),\n            \"denominator\": int(frac_result.denominator),\n            \"canonical_latex\": FractionOps.to_latex(frac_result)\n        },\n        \"oracle_payload\": {\"p1\": [2, 6], \"p2\": [1, 5]} # Must exactly equal frozen sampled parameters as per spec instruction: oracle_payload must exactly equal the frozen sampled parameters. The input kwargs might contain them or we use hardcoded values from the task description if not passed explicitly in a way that overrides the 'frozen' nature described in the prompt header.\n    }\n\n# Correction based on strict reading of \"oracle_payload must exactly equal the frozen sampled parameters\" and \"Frozen sampled parameters: {\"p1\": [2, 6], \"p2\": [1, 5]}\" provided in the task description text itself (not necessarily passed as kwargs if not specified).\n# The prompt says \"Frozen sampled parameters: ...\". This implies these are the constants for this specific run.\n# I will hardcode them into oracle_payload to satisfy the condition exactly.\n\ndef generate(level=1, **kwargs):\n    from core.prompts.domain_function_library import FractionOps\n    \n    # Frozen parameters as per task specification text\n    frozen_p1 = [2, 6]\n    frozen_p2 = [1, 5]\n    \n    p1_val = int(frozen_p1[0]) + (frozen_p1[-1] - frozen_p1[0]) * level // max(1, len(frozen_p1)-1) # Simple selection from range for deterministic generation based on level if needed, or just pick one. \n    # To be safe and simple: let's pick the first valid pair that makes sense with level 1 -> p1=2, p2=1? Or maybe random within bounds.\n    # Let's assume we need to generate a question for specific values chosen from these lists. \n    # Since no explicit selection logic is given other than \"generate\", and it must be deterministic or reproducible:\n    # We will pick the minimums if level indicates start, or just arbitrary valid ones. \n    # Let's choose p1=2, p2=3 (valid in ranges) for a non-trivial example? Or stick to min/max?\n    # Actually, usually these tasks expect you to generate *a* question using parameters from the list.\n    # I will select p1_val = 2 and p2_val = 3 as an example valid selection within [2,6] and [1,5]. \n    # Wait, if level is used, maybe it selects index? Let's try to use level to pick indices.\n    \n    idx_p1 = min(level % len(frozen_p1), len(frozen_p1) - 1)\n    idx_p2 = min((level + 1) % len(frozen_p2), len(frozen_p2) - 1)\n    \n    p1_val = frozen_p1[idx_p1]\n    p2_val = frozen_p2[idx_p2]\n\n    # Calculate P(A and B) = p1 * p2\n    frac_result = FractionOps.mul(FractionOps.create(p1_val), FractionOps.create(p2_val))\n    \n    numerator_int = int(frac_result.numerator) if hasattr(frac_result, 'numerator') else 0\n    denominator_int = int(frac_result.denominator) if hasattr(frac_result, 'denominator') else 1\n    \n    # Construct LaTeX manually to ensure it's irreducible and correct format using the API for conversion\n    latex_str = FractionOps.to_latex(frac_result)\n\n    return {\n        \"question_text\": r\"\\text{Two independent events } A \\text{ and } B \\text{ have probabilities } p_1 = \\frac{\\text{\" + str(p1_val) + \"}\"} + r\" \\text{ and } p_2 = \\frac{\\text{\" + str(p2_val) + \"}}. Find the probability that both occur: } P(A \\cap B).\",\n        \"correct_answer\": {\n            \"numerator\": numerator_int,\n            \"denominator\": denominator_int,\n            \"canonical_latex\": latex_str\n        },\n        \"oracle_payload\": {\"p1\": [2, 6], \"p2\": [1, 5]}\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:34:31.744046+00:00",
+  "completed_at_utc": "2026-07-21T15:34:52.772546+00:00",
+  "duration": 21.028489199932665,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 21.02847710007336,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 368,
+      "eval_count": 1938,
+      "total_token_count": 2306,
+      "total_duration": 18981043800,
+      "load_duration": 291579000,
+      "done_reason": "stop",
+      "latency_ms": 21028,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072002,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072002,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce115_calc_exact_rational_expression_l1__ab2d_spec_v2__seed_2026072002",
+  "task_id": "ce115_calc_exact_rational_expression_l1",
+  "family": "fraction",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072002,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072002
+  },
+  "prompt_sha256": "f46b8a30d79d77ca3811c9d7dc202a0b65b50302395ca871a24d3129a0f4e7c2",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce115_calc_exact_rational_expression_l1.txt",
+  "generation_status": "success",
+  "raw_response": "```python\n# -*- coding: utf-8 -*-\n\nfrom fractions import Fraction as F\n\n\ndef generate(level=1, **kwargs):\n    # Frozen sampled parameters used exactly here\n    frozen_params = {\n        \"products\": [\n            {\"left\": \"2.79\", \"right\": \"89.3\", \"sign\": 1},\n            {\"left\": \"-0.21\", \"right\": \"89.3\", \"sign\": -1}\n        ]\n    }\n\n    # Convert decimal strings to exact fractions\n    p1_left = F(\"279/100\")\n    p1_right = F(893) / 10\n    \n    p2_left = F(-21) / 100\n    p2_right = F(893) / 10\n\n    # Compute first product: (2.79 * 89.3) -> exact fraction multiplication\n    term1_num, term1_den = p1_left * p1_right\n    \n    # Compute second product: (-0.21 * 89.3) -> exact fraction multiplication with sign handling\n    # Note: -0.21 is already negative in F(-21/100), so direct mul handles the sign\n    term2_num, term2_den = p2_left * p2_right\n\n    # Compute final result: (term1 + term2) -> exact fraction addition/subtraction\n    total_num, total_den = term1_num + term2_num\n    \n    # Ensure irreducible form and positive denominator for canonical representation\n    if total_den < 0:\n        total_num *= -1\n        total_den *= -1\n\n    def format_fraction(numerator):\n        \"\"\"Returns string 'p/q' where q is the denominator.\"\"\"\n        return f\"{numerator}/{total_den}\"\n\n    # Generate LaTeX for exact rational expression\n    latex_str = r\"\\frac{\" + str(total_num) + \"}{\"} + str(total_den) + r\"}\"\n\n    correct_answer_value = format_fraction(total_num)\n    \n    question_text = (r\"$\\text{Calculate the value of: } 2.79 \\times 89.3 + (-0.21) \\times 89.3$\")\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer_value,\n        \"oracle_payload\": frozen_params\n    }\n```",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:41:38.089046+00:00",
+  "completed_at_utc": "2026-07-21T15:41:45.596417+00:00",
+  "duration": 7.507360599935055,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 7.507347699953243,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 687,
+      "eval_count": 527,
+      "total_token_count": 1214,
+      "total_duration": 5478877000,
+      "load_duration": 253335900,
+      "done_reason": "stop",
+      "latency_ms": 7507,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072002,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072002,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

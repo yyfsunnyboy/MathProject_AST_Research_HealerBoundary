@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce112_q01_negative_integer_power__ab2d__seed_2026072003",
+  "task_id": "ce112_q01_negative_integer_power",
+  "family": "integer",
+  "condition": "ab2d",
+  "seed": 2026072003,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072003
+  },
+  "prompt_sha256": "a03c40a37de8c5652476da0fcd76dfc714ca55c19b0279b0452358c81ccde8d4",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "```python\nimport math\nfrom core.prompts.domain_function_library import IntegerOps.safe_eval, IntegerOps.fmt_num\n\n\ndef generate(level=1, **kwargs):\n    frozen_params = {\"base\": -3, \"exponent\": 3}\n    \n    base = frozen_params[\"base\"]\n    exponent = frozen_params[\"exponent\"]\n    \n    # Calculate the power using safe evaluation to ensure integer result handling\n    try:\n        correct_answer_int = IntegerOps.safe_eval(f\"{base}^{exponent}\")\n    except ValueError as e:\n        raise RuntimeError(\"Failed to evaluate expression\") from e\n    \n    question_text = r\"Calculate $(-3)^{3}$.\"\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer_int,\n        \"oracle_payload\": frozen_params\n    }\n```",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:42:13.688720+00:00",
+  "completed_at_utc": "2026-07-21T15:42:17.871158+00:00",
+  "duration": 4.1824260000139475,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 4.182414300041273,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 317,
+      "eval_count": 182,
+      "total_token_count": 499,
+      "total_duration": 2156167500,
+      "load_duration": 278106300,
+      "done_reason": "stop",
+      "latency_ms": 4182,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072003,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072003,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

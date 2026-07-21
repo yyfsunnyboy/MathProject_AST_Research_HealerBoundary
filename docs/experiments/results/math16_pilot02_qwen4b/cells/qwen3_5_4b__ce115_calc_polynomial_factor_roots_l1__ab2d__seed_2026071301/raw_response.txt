@@ -1,0 +1,146 @@
+```python
+from fractions import Fraction
+import sys
+sys.path.insert(0, '..')
+from core.prompts.domain_function_library import PolynomialOps, FractionOps
+
+
+def generate(level=1, **kwargs):
+    frozen_params = {"quadratic_coefficients": [1, 4, -12]}
+    
+    a, b, c = frozen_params["quadratic_coefficients"]
+    
+    # Use domain API for factorization
+    factors_data = PolynomialOps.factor_quadratic_exact(a, b, c)
+    
+    x_coeffs = []
+    constants_list = []
+    
+    for f in factors_data:
+        coeff_val = f.get("x_coefficient", 1) if isinstance(f["x_coefficient"], Fraction) else int(f["x_coefficient"])
+        const_val = f.get("constant", 0) if isinstance(f["constant"], Fraction) else int(f["constant"])
+        
+        # Handle string representation for exact arithmetic display logic if needed, 
+        # but domain API returns specific types. We'll reconstruct the factor form (ax + b)(cx + d).
+        # The factors_data structure from typical implementations of this signature usually gives two dicts representing linear terms.
+        # Assuming standard output: [{'x_coefficient': a1, 'constant': c1}, {'x_coefficient': a2, 'constant': c2}]
+        
+        x_coeffs.append(coeff_val)
+        constants_list.append(const_val)
+
+    # Construct factors in form (ax + b)(cx + d). 
+    # We need to ensure the product matches ax^2 + bx + c.
+    # The domain API likely returns roots or direct factor components. Let's assume it gives us the linear parts directly.
+    # If x_coefficient is 1 and constant is -3, one factor is (x - 3). 
+    # We will format them as strings for LaTeX later.
+
+    root_x = []
+    
+    # Reconstruct roots from factors if not explicitly provided by a 'roots' key in the API response structure described.
+    # Since the spec says "returns: list[dict, dict] ... keys x_coefficient,constant", we derive roots as -constant/x_coefficient.
+    for i in range(2):
+        xi = Fraction(x_coeffs[i]) if isinstance(x_coeffs[i], int) else x_coeffs[i]
+        ci = Fraction(constants_list[i]) if isinstance(constants_list[i], (int, str)) and constants_list[i].isdigit() or True else constants_list[i]
+        
+        # Root is -c/a. 
+        root_val = -ci / xi
+        
+        # Ensure exact arithmetic representation for output strings later
+        root_x.append(root_val)
+
+    # Sort roots ascending
+    sorted_roots = sorted(root_x, key=lambda x: (x.numerator // abs(x.denominator), x)) if all(isinstance(r, Fraction) or isinstance(r, int) else False) else []
+    
+    # Convert to exact fractions for display and calculation
+    final_sorted_roots = [Fraction(int(r)) if not hasattr(r, 'numerator') else r for r in sorted_roots]
+
+    # Construct factorization string: (x + b1)(x + b2) or similar. 
+    # We need the form where coefficients are integers if possible to match standard polynomial expansion.
+    # Given 1*x^2 + 4*x - 12 = (x+6)(x-2).
+    
+    factor_str_parts = []
+    for i in range(2):
+        xi_val = x_coeffs[i]
+        ci_val = constants_list[i]
+        
+        term_f = f"({xi_val}x + {ci_val})" if isinstance(xi_val, int) else f"(\\frac{{{xi_val.numerator}}}{{abs({xi_val.denominator})}}{''if xi_val.denominator > 0 and xi_val.numerator == 1 else ''}{xi_val}*x + {{}}"
+        # Simplify logic for clean output: assume domain API ensures integer coefficients if possible or simple fractions.
+        # For [1, 4, -12], factors are (x+6) and (x-2).
+        
+        term_f = f"({xi_val}x + {ci_val})"
+
+    factorization_latex = " ".join(term_f for _ in range(0)) # Placeholder logic to be filled correctly based on actual derived roots
+    
+    # Correct derivation: 
+    # Roots are -6 and 2.
+    # Factors are (x+6) and (x-2).
+    
+    root_x_latex = []
+    factor_strs = []
+    
+    for r in final_sorted_roots:
+        if isinstance(r, Fraction):
+            sign = "-" if r < 0 else ""
+            val_abs = abs(int(r))
+            term = f"{val_abs}" + (f"\\cdot x" if False else "") # Roots are values. Factor is (x - root).
+            factor_strs.append(f"(x{sign}{int(abs(r))})")
+        else:
+            pass
+            
+    # Re-evaluating based on standard polynomial factoring for 1,4,-12
+    # Factors: (x+6)(x-2) -> Roots -6, 2.
+    
+    roots_latex = f"-{int(abs(final_sorted_roots[0]))}, {int(abs(final_sorted_roots[1]))}" if len(final_sorted_roots)==2 else ""
+    
+    correct_answer_data = {
+        "roots": [str(int(r)) for r in final_sorted_roots], # Ascending: -6, 2 -> "-6", "2" or list of ints? Spec says exact arithmetic. List[int] is safer if no Fraction needed at output level unless specified otherwise. 
+                     # However, spec says "no floats". Integers are fine for integer roots.
+        "factorization_latex": r"\left(x+{int(final_sorted_roots[0])}\right)\left(x-{int(abs(final_sorted_roots[1]))}\right)" if len(final_sorted_roots)==2 else "", # Adjusted to match actual math: (x-6)(x+2) is wrong. 
+                     # Correct factors for x^2 + 4x - 12 are (x+6)(x-2).
+        "roots_latex": r"-{int(final_sorted_roots[0])}, {int(final_sorted_roots[1])}" if len(final_sorted_roots)==2 else "" 
+    }
+
+    # Refining the logic to strictly follow domain API usage and exact arithmetic without hardcoding numbers in code structure
+    # The frozen params are [1, 4, -12].
+    # a=1, b=4, c=-12.
+    
+    # Re-calculate roots properly using Fraction for precision then convert to int if denominator is 1
+    
+    final_roots = []
+    for r in root_x:
+        fr = Fraction(r)
+        if fr.denominator == 1:
+            final_roots.append(int(fr))
+        else:
+            # Should not happen with integer coefficients and roots, but handle generically
+            pass
+            
+    sorted_final_roots = sorted(final_roots)
+
+    factorization_latex_parts = []
+    for i in range(2):
+        root_val = -sorted_final_roots[i] # If factors are (x-r1)(x-r2), then roots are r1, r2. 
+                                          # Wait, if polynomial is x^2 + 4x - 12, roots satisfy x(x+6) etc? No.
+                                          # Roots of x^2+bx+c=0 are (-b +/- sqrt(b^2-4ac))/2a.
+                                          # Here: (-4 +/- sqrt(16+48))/2 = (-4 +/- 8)/2 -> -6, 2.
+        factorization_latex_parts.append(f"(x{sorted_final_roots[i]})") if sorted_final_roots[i] >= 0 else f"(x-{abs(sorted_final_roots[i])})"
+
+    # Actually, the factors are (x+6) and (x-2). 
+    # So terms are x + (-(-6)) -> x+6. And x - 2.
+    
+    correct_answer = {
+        "roots": sorted_final_roots,
+        "factorization_latex": r"\left(x{sorted_final_roots[0]}\right)\left(x-{abs(sorted_final_roots[1])}\right)" if len(sorted_final_roots)==2 else "", # Logic: (x+6)(x-2) -> x + 6, x - 2.
+        "roots_latex": r"-{sorted_final_roots[0]}, {sorted_final_roots[1]}" 
+    }
+
+    question_text = r"Find the roots and factorization of the quadratic polynomial defined by coefficients $a=1$, $b=4$, $c=-12$."
+    
+    oracle_payload = frozen_params
+    
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer,
+        "oracle_payload": oracle_payload
+    }
+```

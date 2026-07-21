@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce111_q05_exact_fraction_expression__ab2d__seed_2026071301",
+  "task_id": "ce111_q05_exact_fraction_expression",
+  "family": "fraction",
+  "condition": "ab2d",
+  "seed": 2026071301,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026071301
+  },
+  "prompt_sha256": "68a00937bf4cad2e185ea854b3d92e6fc9615ee0f045b5c86e81879b64976d4b",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "import json\nfrom fractions import Fraction as PyFraction\nfrom typing import Dict, Any\n\ndef generate(level=1, **kwargs):\n    frozen_params = {\"expression\": \"9/22 + 11/18 - (23/22 - 7/18)\"}\n    \n    # Parse the expression manually to ensure correctness without external dependencies beyond standard library\n    expr_str = str(frozen_params[\"expression\"])\n    \n    # Evaluate using Python's Fraction for exact arithmetic\n    parts = [PyFraction(9, 22), PyFraction(11, 18)]\n    sub_parts = [PyFraction(23, 22), PyFraction(7, 18)]\n    \n    result_addition = sum(parts) - sum(sub_parts)\n    \n    # Convert to canonical form (numerator/denominator) and LaTeX string\n    numerator = str(result_addition.numerator)\n    denominator = str(result_addition.denominator)\n    latex_str = f\"{result_addition}\"  # Python Fraction __str__ returns irreducible fraction\n    \n    question_text = r\"\\text{Simplify the expression: } $9/22 + 11/18 - (23/22 - 7/18)$\"\n    \n    correct_answer_dict = {\n        \"numerator\": numerator,\n        \"denominator\": denominator,\n        \"canonical_latex\": latex_str\n    }\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer_dict,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:08:49.884511+00:00",
+  "completed_at_utc": "2026-07-21T15:08:55.520087+00:00",
+  "duration": 5.635567000019364,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 5.635555499931797,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 376,
+      "eval_count": 343,
+      "total_token_count": 719,
+      "total_duration": 3596385100,
+      "load_duration": 244312300,
+      "done_reason": "stop",
+      "latency_ms": 5635,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026071301,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026071301,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

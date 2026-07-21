@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce115_calc_exact_rational_expression_l1__ab2d__seed_2026072001",
+  "task_id": "ce115_calc_exact_rational_expression_l1",
+  "family": "fraction",
+  "condition": "ab2d",
+  "seed": 2026072001,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072001
+  },
+  "prompt_sha256": "ccc56c41370e2b807299372da9b9af0d6807abf4dbae441990b16044d5108244",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "import json\nfrom fractions import Fraction as PyFraction\nfrom typing import Dict, Any\n\ndef generate(level=1, **kwargs):\n    frozen_params = {\"products\": [{\"left\": \"2.79\", \"right\": \"89.3\", \"sign\": 1}, {\"left\": \"-0.21\", \"right\": \"89.3\", \"sign\": -1}]}\n\n    # Parse inputs as exact fractions\n    val_1 = PyFraction(\"279\") / PyFraction(100)\n    val_2 = PyFraction(\"893\") / PyFraction(10)\n    \n    term_a = val_1 * val_2\n    \n    val_3 = PyFraction(\"-21\") / PyFraction(100)\n    val_4 = PyFraction(\"893\") / PyFraction(10)\n\n    # Handle sign logic for second product: - (val3 * val4) is equivalent to adding negative result, \n    # but based on typical expression patterns \"a*b + c*d\" where signs are explicit in operands or operators.\n    # The spec says \"sign\": 1 and \"-1\". Let's interpret as term_a = left*right, term_b = sign * (left2 * right2)\n    val_5 = PyFraction(\"893\") / PyFraction(10)\n\n    if frozen_params[\"products\"][1][\"sign\"] == -1:\n        # Subtract the second product or add negative result. \n        # Given \"sign\": -1 usually implies subtraction in these templates, but let's calculate the value first.\n        term_b = val_3 * val_5\n        total = term_a + (-term_b)\n    else:\n        term_b = val_3 * val_5\n        total = term_a + term_b\n\n    # Ensure irreducible fraction representation\n    p, q = total.numerator, total.denominator\n    \n    correct_answer_value = f\"{p}/{q}\"\n    \n    latex_val = r\"\\frac{\" + str(p) + \"}{\"} + str(q) + r\"}\"\n    \n    question_text = (r\"Let $x$ be the result of evaluating the expression: \\n\\n\"\n                     rf\"$\\left(\\frac{279}{100} \\times \\frac{893}{10}\\right)$ plus $\\text{{sign}}_1 \\cdot \\left(-\\frac{21}{100} \\times \\frac{893}{10}\\right)$. \"\n                     r\"Find the exact rational value of $x$ in irreducible form.\")\n\n    oracle_payload = json.dumps(frozen_params, separators=(',', ':'))\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer_value + \"|\" + latex_val,\n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:21:43.982037+00:00",
+  "completed_at_utc": "2026-07-21T15:21:52.214397+00:00",
+  "duration": 8.232350700069219,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 8.232339999987744,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 403,
+      "eval_count": 622,
+      "total_token_count": 1025,
+      "total_duration": 6200190500,
+      "load_duration": 232993500,
+      "done_reason": "stop",
+      "latency_ms": 8232,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072001,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072001,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

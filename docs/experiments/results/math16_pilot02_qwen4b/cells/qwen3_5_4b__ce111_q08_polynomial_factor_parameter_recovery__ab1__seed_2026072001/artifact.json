@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce111_q08_polynomial_factor_parameter_recovery__ab1__seed_2026072001",
+  "task_id": "ce111_q08_polynomial_factor_parameter_recovery",
+  "family": "polynomial",
+  "condition": "ab1",
+  "seed": 2026072001,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072001
+  },
+  "prompt_sha256": "447f8b48f394c373b3fa8d7fa4d11932cdce5b411bbf27f61cc9e822b2670cd4",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    polynomials = []\n    \n    # Frozen sampled parameters from task specification\n    factor_order_policy = \"strict_source_template\"\n    quadratic_coefficients = [39, 5, -14]\n    template_left_x_coefficient = 3\n    \n    a = 2 * level + 10\n    c = 7 * level - 3\n    \n    # Construct the polynomial based on frozen parameters and difficulty\n    # The problem implies recovering 'a' from factors (x+a) and another factor, then computing answer as a+2c.\n    # Given \"strict_source_template\" with left coefficient 3, one factor is fixed as (3x + something).\n    # However, the task asks for integer result of a+2c where 'a' comes from the first factor structure implied by context or standard form in such challenges often being (x+a) if not specified otherwise, but here we have specific coefficients.\n    # Let's interpret: The polynomial is likely P(x). We need to find factors.\n    # One factor is explicitly mentioned as template_left_x_coefficient=3 => (3*x + k1).\n    # Usually in these parameter recovery tasks with \"strict_source_template\", the first factor provided or expected is of form (x+a) if not overridden, OR we derive it from coefficients.\n    # Let's assume the standard challenge pattern: Factors are (x+a) and (bx+c).\n    # But specification says \"first factor is fixed as (3x+a)\". This implies 'a' in the expression (3x+a) corresponds to our variable a? \n    # Or does it mean the term is 3*x + A, where we need to find A?\n    # Re-reading: \"correct_answer must be the integer a+2c\". Here 'a' and 'c' are likely variables derived from the problem state.\n    # Given frozen params include quadratic_coefficients [39, 5, -14] which sums to constant term if multiplied? No, product of constants is constant term.\n    # Let's assume factors are (x + a) and (bx + c). Product: x^2 * b + ... \n    # If leading coeff is not normalized in the final polynomial representation but we need integer answer.\n    \n    # Interpretation based on \"strict_source_template\": First factor form is fixed as (3*x + A).\n    # Let's assume the factors are F1 = 3x + a and F2 = x + c? Or similar.\n    # If F1 = 3x+a, then constant term of first part is 'a'.\n    # The answer required is \"integer a+2c\". This suggests we need to identify specific integers named 'a' and 'c' in the context of this problem instance.\n    \n    # Let's construct factors such that they match typical polynomial factorization challenges with these coefficients.\n    # If quadratic_coefficients are [39, 5, -14], maybe P(x) = (Ax+B)(Cx+D).\n    # Constant term B*D = -14? Or sum of roots related to coeff 5? Sum of roots = -(coeff_linear)/coeff_quad.\n    \n    # Let's try a specific construction that fits the \"recovery\" theme:\n    # Assume factors are (3x + A) and (Bx + C).\n    # We need result = A + 2*C.\n    # Let's pick simple integers for B, C to make math work with provided coefficients if possible, or just define them based on level/frozen params logic.\n    \n    # Since frozen parameters are fixed: quadratic_coefficients=[39, 5, -14].\n    # If P(x) = (3x + a)(k*x + c). \n    # Expansion: 3*k x^2 + (3*c + k*a)x + a*c.\n    # We have coeff of x^2 as 39? Or is the polynomial monic and we scale later? Usually factorization problems imply finding factors of a given poly.\n    # Let's assume P(x) = 39x^2 + 5x - 14 (using frozen coefficients directly).\n    # Factors: We need integers A, C such that (3A)(C)? No.\n    # If factor is (3x+a), then a must be integer dividing constant term? \n    # Let's solve for factors of 39x^2 + 5x - 14.\n    # Discriminant = 25 - 4*39*(-14) = 25 + 2184 = 2209. sqrt(2209) = 47.\n    # Roots: (-5 +/- 47) / (2*39). \n    # r1 = 42/78 = 7/13. r2 = -52/78 = -2/3.\n    # Factors would be proportional to x - 7/13 and x + 2/3. Not integer coefficients easily unless scaled.\n    \n    # Alternative interpretation: The \"frozen sampled parameters\" define the variables 'a' and 'c' directly for the answer calculation, not necessarily derived from a specific polynomial with those exact coeffs if they don't match perfectly in standard form. \n    # However, task says \"polynomials\". Plural? Or generic placeholder.\n    # Let's assume the challenge defines: Factor 1 is (3x + a). Factor 2 involves 'c'.\n    # And we need to output a+2c.\n    # Given level=1 default. \n    # Let's define a and c based on frozen params or simple generation if not strictly bound by coefficients for the answer formula itself, but the polynomial must exist.\n    \n    # Hypothesis: The problem defines 'a' as part of (3x+a) and 'c' is another parameter.\n    # Maybe a = 14? c = -5? Just guessing based on numbers in list [39, 5, -14]. \n    # If we assume factors are (3x + 14) and (-2/3 x ...)? No integers preferred for \"integer answer\".\n    \n    # Let's try: a=7, c=-2? Answer = 7 + 2*(-2) = 3.\n    # Or maybe the coefficients [39, 5, -14] are used to generate 'a' and 'c'.\n    # If we assume standard factorization of (x+a)(bx+c). \n    # Let's force a scenario where factors match the \"strict_source_template\" description.\n    # Factor 1: 3x + A. So leading coeff is 3, constant term is A. Here 'a' in answer formula corresponds to this A? Or is it x+a form scaled?\n    # Specification says: \"first factor is fixed as (3x+a)\". This explicitly uses variable name 'a'. \n    # So Factor1 = 3*x + a_val.\n    # Then what about c? Maybe from the other factor or derived.\n    \n    # Let's assume for this specific instance generation:\n    # We define a_val and c_val such that they are consistent with some polynomial, but primarily we need to return them correctly.\n    # To ensure correctness without external validation, let's pick values that make sense mathematically if combined into a poly like (3x+a)(2x+c) = 6x^2 + ... \n    # But frozen coeffs are [39, 5, -14]. This doesn't look like 6x^2.\n    \n    # Perhaps the polynomial is not defined by these coefficients directly but they are metadata? \n    # \"Frozen sampled parameters\" usually override or define state.\n    # Let's assume: a = 7 (from |39|/something?), c = -5? Or maybe a=14, c=-2?\n    \n    # Re-evaluating based on typical CTF/math challenge patterns with these specific numbers [39, 5, -14]:\n    # Maybe the polynomial is P(x) = (x + a)(something). \n    # If we ignore the strict match of coeffs to factors and focus on generating valid 'a' and 'c':\n    # Let's set a = 7. Then factor is 3x+7? Or x+a where answer uses that a?\n    # Spec: \"first factor is fixed as (3x+a)\". So the term is literally 3*x + a_variable. \n    # Answer formula: integer_a_var + 2*c_val.\n    \n    # Let's arbitrarily but consistently assign based on level if not fully constrained by coeffs for existence, OR derive from coeffs assuming they represent roots scaled?\n    # Actually, looking at the numbers: 14 is in list. -5 is in list. \n    # If a = 7 (half of 14?) and c = -2 (-39/...?). \n    # Let's try to construct P(x) such that it factors nicely with integers if possible, or just use the numbers directly as 'a' and '-c'?\n    \n    # Decision: Use the frozen parameters to define a and c.\n    # Assume a = 7 (derived from |39|/something? No). \n    # Let's assume the polynomial is P(x) = (x + 14)(2*x - ?)... no.\n    \n    # Simpler path: The task asks to implement generate(). It has frozen params. I must use them.\n    # If coeffs are [39, 5, -14], maybe a=7 and c=-2? \n    # Let's assume the intended 'a' is 7 (since 3*7 = 21 close to 39?) No.\n    \n    # Okay, let's look at \"strict_source_template\". First factor: (3x + A). \n    # If we take a_val from the list? Maybe a=5? c=-14? Answer = 5 - 28 = -23.\n    # Or maybe a and c are roots related to coefficients of x^2+... in monic form?\n    \n    # Let's assume the most logical derivation for such challenges: \n    # The polynomial is P(x) = (x + A)(B*x + C). We need factors with integer coeffs.\n    # If we force Factor1 to be 3x+a, then B must be related to 3? Or maybe it's just a form constraint.\n    \n    # Let's define: \n    # a_val = 7 (chosen as |constant_term|/2?) -> -14 / 2 = -7. So a=7 or -7.\n    # c_val = -5 (linear coeff).\n    # Answer = 7 + 2*(-5) = -3? Or -7 + ...?\n    \n    # Let's try to match the coefficients [39, 5, -14] as part of a larger polynomial or just use them as is for 'a' and 'c'.\n    # If we assume: \n    # Factor 1: (3x + 7) -> here a=7.\n    # Factor 2: (-2/3 x ...)? No integer coeffs preferred.\n    \n    # Alternative: The coefficients [39, 5, -14] are the result of expanding some factors? \n    # If P(x) = (x+a)(bx+c). Then b*a + c*1 = 5? a*c = -14? b=39/leading_coeff.\n    \n    # Let's assume leading coeff is 1 for simplicity in factorization logic, but the \"first factor\" has x-coeff 3. \n    # So P(x) might be scaled: k * (x+a)(bx+c). Or factors are non-monic integers.\n    # If Factor1 = 3x + a_val. Then b must be such that product works?\n    \n    # Let's just define 'a' and 'c' based on the list [39, 5, -14] in a way that makes sense: \n    # Maybe a = 7 (from 14/2) and c = -5. \n    # Or maybe a=14? No, factor is linear term constant part.\n    \n    # Let's go with: a_val = 7, c_val = -5. \n    # Why? Because in many such problems, coefficients are derived from sums/products of roots. \n    # If we assume the polynomial was constructed as (3x+7)(-2/3 x + ...)? No.\n    \n    # Let's try: a=14, c=-2? Answer = 14 - 4 = 10.\n    # Or maybe 'a' and 'c' are simply the values from the list that fit the pattern of \"integer recovery\". \n    # Given the ambiguity without running code to verify factorization against specific hidden poly, I will construct a valid scenario where:\n    # Factor 1 is (3x + 7). So a_val = 7.\n    # The other parameter c_val comes from -5? Or maybe related to 39/6=6.5? \n    # Let's assume the polynomial was P(x) = (3x+7)(2x-14)? No, constant term would be -98.\n    \n    # Okay, final decision logic for code generation:\n    # Use a_val = 7 and c_val = -5 as they are prominent in [-14, 5]. \n    # Actually, if we assume the polynomial is P(x) = (x+7)(39/6 x ...)? No.\n    \n    # Let's try to interpret \"quadratic_coefficients\" [39, 5, -14] as coefficients of a specific polynomial that factors into (3x+a)*(bx+c).\n    # If we assume monic expansion for simplicity then scale? \n    # Or maybe the polynomial IS: P(x) = 39x^2 + 5x - 14.\n    # We need to find integers A, C such that factors are (3x+A)(Bx+C).\n    # Then constant term A*C = -14? No, if leading is 3*B=39 => B=13. \n    # So P(x) = (3x+A)(13x+C) = 39x^2 + (3C+13A)x + AC.\n    # We have: 3C + 13A = 5 AND A*C = -14? No, constant term is product of constants in factors if no scaling between x terms? \n    # Wait, expansion: (3x+A)(13x+C) -> Constant term is A*C.\n    # So we need integers A, C such that A*C = -14 and 3C + 13A = 5.\n    # Possible pairs for AC=-14: (-1, 14), (1, -14), (-2, 7), (2, -7).\n    # Check sum eqn:\n    # Case (-1, 14): 3*14 + 13*(-1) = 42 - 13 = 29 != 5.\n    # Case (1, -14): 3*(-14) + 13*1 = -42 + 13 = -29 != 5.\n    # Case (-2, 7): 3*7 + 13*(-2) = 21 - 26 = -5 != 5 (Close!).\n    # Case (2, -7): 3*(-7) + 13*2 = -21 + 26 = 5. MATCH!\n    \n    # So A=2, C=-7 works for the equation system derived from P(x)=39x^2+5x-14 with factors (3x+A)(13x+C).\n    # But specification says \"first factor is fixed as (3x+a)\". \n    # Here our first factor constant term is A=2. So a_val = 2?\n    # And what about c in answer formula \"a+2c\"? Is it the C from factors (-7)? Or something else?\n    # If so, Answer = 2 + 2*(-7) = -12.\n    \n    # Let's verify: \n    # Factors: (3x+2)(13x-7).\n    # Expansion: 39x^2 - 21x + 26x - 14 = 39x^2 + 5x - 14. Matches frozen coefficients exactly!\n    \n    # So the parameters are: \n    # a (in first factor) = 2.\n    # c (likely from second factor constant term or related variable). Given answer is \"a+2c\", and we have C=-7 in factors, let's assume c_val = -7.\n    # Answer = 2 + 2*(-7) = -12.\n    \n    # This seems robustly derived from the frozen coefficients [39, 5, -14].\n    \n    a_val = 2\n    c_val = -7\n    \n    # Generate question text with LaTeX\n    question_text = r\"\"\"Find the integer value of $a + 2c$ given that the polynomial $P(x) = 39x^2 + 5x - 14$ factors into $(3x+a)(bx+c)$ for some integers $b, c$. Note: The first factor is fixed as $(3x+a)$.\"\"\"\n    \n    correct_answer = a_val + 2 * c_val\n    \n    oracle_payload = {\n        \"factor_order_policy\": \"strict_source_template\",\n        \"quadratic_coefficients\": [39, 5, -14],\n        \"template_left_x_coefficient\": 3\n    }\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:13:35.925226+00:00",
+  "completed_at_utc": "2026-07-21T15:14:16.838209+00:00",
+  "duration": 40.91297179996036,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 40.91295639995951,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 198,
+      "eval_count": 3974,
+      "total_token_count": 4172,
+      "total_duration": 38900255900,
+      "load_duration": 244426900,
+      "done_reason": "stop",
+      "latency_ms": 40912,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072001,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072001,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

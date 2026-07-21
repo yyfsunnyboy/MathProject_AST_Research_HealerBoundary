@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce111_q10_ordered_quadratic_roots_radical__ab2g__seed_2026072002",
+  "task_id": "ce111_q10_ordered_quadratic_roots_radical",
+  "family": "radical",
+  "condition": "ab2g",
+  "seed": 2026072002,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072002
+  },
+  "prompt_sha256": "6179a8fb58654189712d53044e6df49b7171ccf57f1b1666d3e735f38758a766",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    import re\n    \n    # Frozen sampled parameters from task specification\n    frozen_params = {\n        \"equation\": \"(x-2)^2=3\", \n        \"order\": \"a>b\", \n        \"target\": \"2a+b\"\n    }\n    \n    # Parse the equation to extract coefficients for ax^2 + bx + c = 0 form\n    # Equation: (x-2)^2 = 3 => x^2 - 4x + 4 = 3 => x^2 - 4x + 1 = 0\n    # a=1, b=-4, c=1\n    \n    equation_str = frozen_params[\"equation\"]\n    \n    # Construct the question text using formal LaTeX delimiters\n    question_text = r\"\\text{Solve for } x \\text{ in the quadratic equation: \" + r\"$(x-2)^2=3$\".replace(\"$\", \"\\\\$\") + r\".\"\n    \n    # Calculate roots manually to ensure correctness and handle signs properly\n    # Equation: x^2 - 4x + 1 = 0\n    a, b_val, c = 1, -4, 1\n    \n    discriminant = b_val**2 - 4*a*c # (-4)^2 - 4*1*1 = 16 - 4 = 12\n    sqrt_discriminant = int(discriminant ** 0.5) # sqrt(12) is not integer, but we need exact form\n    \n    # Since discriminant (12) is positive and a perfect square? No, 12 is not a perfect square.\n    # Wait, the task says \"radical_coefficient\". Usually implies surds like sqrt(k).\n    # Let's re-evaluate: x = [4 +/- sqrt(16-4)] / 2 = [4 +/- sqrt(12)]/2 = [4 +/- 2*sqrt(3)]/2 = 2 +/- sqrt(3)\n    \n    # Roots are 2 + sqrt(3) and 2 - sqrt(3).\n    # The problem asks for \"ordered quadratic roots radical\" with order a > b.\n    # Here, root1 = 2 + sqrt(3), root2 = 2 - sqrt(3).\n    # Since sqrt(3) is positive (~1.732), 2+sqrt(3) > 2-sqrt(3).\n    \n    # Format the roots in terms of rational part, radical coefficient (usually +/-1 for simplest form), and radicand.\n    # Root 1: Rational=2, Coeff=1, Radicand=3 -> \"2 + \\sqrt{3}\"\n    # Root 2: Rational=2, Coeff=-1, Radicand=3 -> \"2 - \\sqrt{3}\" (or coeff is negative)\n    \n    rational_part = 2\n    \n    # We need to format the answer as a list of strings or similar structure that includes these components.\n    # The spec says: correct_answer must include result with rational, radical_coefficient, radicand, and canonical_latex.\n    # Let's construct the latex string for each root.\n    \n    # Root 1 (larger): 2 + sqrt(3) -> coeff is positive (+1 implicitly or explicit), let's use explicit signs if needed by format\n    # Standard form often writes a +/- b*sqrt(c). \n    # Here: x = \\frac{4 \\pm \\sqrt{12}}{2} = 2 \\pm \\sqrt{3}.\n    \n    latex_root_1 = r\"2 + \\sqrt{3}\"\n    latex_root_2 = r\"2 - \\sqrt{3}\"\n    \n    # Construct the full correct answer string containing both roots in ordered form (a > b)\n    correct_answer_str = f\"{latex_root_1} \\\\text{ and } {latex_root_2}\"\n    \n    # Structure for internal verification: \n    # We need to ensure we can parse this back or verify components.\n    # Let's define a helper structure if needed, but the return value is just strings/dicts as per \"dict with exactly...\".\n    # The spec says correct_answer must include result with rational, radical_coefficient (may be +1 or -1), radicand, and canonical_latex.\n    \n    root_data_1 = {\n        \"rational\": 2, \n        \"radical_coefficient\": 1, \n        \"radicand\": 3, \n        \"canonical_latex\": r\"\\\\sqrt{3}\" # Or the whole term? Usually just the radical part or the full expression. Given context of roots, likely full term representation is safer in latex string.\n    }\n    \n    root_data_2 = {\n        \"rational\": 2, \n        \"radical_coefficient\": -1, \n        \"radicand\": 3, \n        \"canonical_latex\": r\"-\\\\sqrt{3}\" # Or just the term subtracted? Let's assume full expression components.\n    }\n    \n    # Re-reading spec: correct_answer must include result with rational, radical_coefficient... and canonical_latex.\n    # It implies a structured object or string that represents these clearly. \n    # Given \"Structured comparison is required\", returning a list of dicts might be better than just one latex string if the grader checks components.\n    # However, usually correct_answer in such tasks is the final answer text (e.g., LaTeX). \n    # But to satisfy \"include result with...\", we can embed metadata or return a structured object representing the solution set.\n    # Let's assume the expected output format for 'correct_answer' is a list of dictionaries describing each root, OR a single string that contains these elements clearly labeled if it's text-based. \n    # Given \"canonical_latex\" is requested as part of the components, returning a structured object per root seems most robust for programmatic checking without relying on regex magic in the grader unless specified otherwise.\n    # But often 'correct_answer' expects the final string representation used in LaTeX rendering.\n    # Let's look at \"oracle_payload must exactly equal\". That is fixed strings/dicts.\n    \n    # To be safe and strictly follow \"include result with...\", I will return a list of dictionaries where each dict has the required fields, alongside or instead of just text? \n    # Actually, standard practice for these specific generated tasks often expects:\n    # correct_answer = [ { ... }, { ... } ] OR a string like \"2 + \\\\sqrt{3}, 2 - \\\\sqrt{3}\".\n    # Let's provide the structured data as it allows verifying rational/coeff/radicand explicitly.\n    \n    solution_set = []\n    \n    # Root 1: 2 + sqrt(3)\n    sol_1 = {\n        \"rational\": 2, \n        \"radical_coefficient\": 1, \n        \"radicand\": 3, \n        \"canonical_latex\": r\"\\\\sqrt{3}\" if we consider the variable part or full term? \n        # Let's assume canonical_latex refers to the radical expression itself: \\\\pm\\\\sqrt{k}\n    }\n    \n    # Actually, looking at similar tasks, 'correct_answer' is often a string. \n    # But \"include result with rational...\" suggests properties of that answer.\n    # I will return a list of dictionaries for clarity and structural comparison capability.\n    \n    solution_set.append({\n        \"rational\": 2, \n        \"radical_coefficient\": 1, \n        \"radicand\": 3, \n        \"canonical_latex\": r\"\\\\sqrt{3}\" # The radical part added to rational? Or the whole term? Let's assume the variable component.\n    })\n    \n    solution_set.append({\n        \"rational\": 2, \n        \"radical_coefficient\": -1, \n        \"radicand\": 3, \n        \"canonical_latex\": r\"-\\\\sqrt{3}\" # The radical part subtracted? Or the whole term.\n    })\n    \n    # Wait, if I return a list of dicts, does it satisfy \"correct_answer must include result with ... canonical_latex\"? Yes.\n    # But maybe 'correct_answer' should be the LaTeX string itself and the fields are just for my internal logic or part of the dict? \n    # The spec says: correct_answer MUST include... AND oracle_payload is separate.\n    \n    # Let's try to make it a single structured object representing the set, or simply ensure the text contains these clearly if it must be string.\n    # Given \"Structured comparison\", returning a list of dicts is safer than parsing LaTeX strings which vary by renderer.\n    \n    correct_answer = solution_set\n    \n    oracle_payload = frozen_params.copy()\n    \n    return {\n        \"question_text\": question_text, \n        \"correct_answer\": correct_answer, \n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:27:26.208716+00:00",
+  "completed_at_utc": "2026-07-21T15:27:46.876638+00:00",
+  "duration": 20.667909200070426,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 20.667896099970676,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 262,
+      "eval_count": 1939,
+      "total_token_count": 2201,
+      "total_duration": 18634535800,
+      "load_duration": 246523500,
+      "done_reason": "stop",
+      "latency_ms": 20667,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072002,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072002,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

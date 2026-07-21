@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce113_q11_rationalize_denominator__ab2d_spec_v2__seed_2026072004",
+  "task_id": "ce113_q11_rationalize_denominator",
+  "family": "radical",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072004,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072004
+  },
+  "prompt_sha256": "4033ab46b2fd824676ffbdde5923011d60dab8b2e0ae8d562ec42a32b75da01a",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce113_q11_rationalize_denominator.txt",
+  "generation_status": "success",
+  "raw_response": "```python\ndef generate(level=1, **kwargs):\n    # Frozen parameters defined directly as per specification\n    denominator_str = \"4-sqrt(7)\"\n    numerator = 9\n    radicand = 7\n    \n    # Rationalize the expression: numerator / (a - b*sqrt(radicand))\n    # Here we have 9 / (4 - sqrt(7)). To rationalize, multiply by conjugate (4 + sqrt(7)).\n    # Result form is A + B * sqrt(R). We need to find integer a and b such that result = a + b*sqrt(radicand)\n    \n    a_base = 4      # The 'a' part in the denominator's real component before conjugation logic affects sign, but let's derive properly.\n    b_base = -1     # Coefficient of sqrt(7) in (4 - sqrt(7)) is -1\n    \n    # Conjugate multiplication: (numerator * ((denom_real + denom_imag*sqrt(r))) / (real^2 - imag^2*radicand))\n    # Denominator term D = 4^2 - (-1)^2 * 7 = 16 - 7 = 9\n    \n    real_part_numerator = numerator * a_base**2\n    imaginary_part_coefficient = numerator * b_base * a_base\n    \n    denominator_value = a_base**2 - (b_base**2) * radicand\n    \n    # Final Real part of the rationalized fraction:\n    final_real_num = real_part_numerator + imaginary_part_coefficient * 0 # Wait, standard formula for A/(B-Cr): \n    # Multiply by (B+Cr)/(B^2 - C^2*r). Numerator becomes A*(B+Cr) = AB + ACr.\n    \n    final_real_num_val = numerator * a_base\n    final_imag_coefficient_val = numerator * b_base\n    \n    denominator_value_calc = a_base**2 - (b_base**2) * radicand\n    \n    # The result is (final_real_num / denom) + (final_imag_coeff / denom)*sqrt(radicand)\n    \n    common_denom = denominator_value_calc\n    \n    final_a_numerator = numerator * a_base\n    final_b_numerator = numerator * b_base\n    \n    # We need the form: X + Y*sqrt(7). The problem asks for integers a and b in result.\n    # Let's re-calculate carefully.\n    # Expression: 9 / (4 - sqrt(7))\n    # Multiply by conjugate: 9 * (4 + sqrt(7)) / ((4)^2 - (-1)^2*7) \n    # Denominator = 16 - 7 = 9\n    \n    # Numerator expansion: 9*(4 + sqrt(7)) = 36 + 9sqrt(7)\n    \n    # So the result is (36/9) + (9/9)sqrt(7) = 4 + 1*sqrt(7).\n    # Thus a = 4, b = 1.\n    \n    final_a_val = numerator * a_base // denominator_value_calc\n    final_b_val = numerator * b_base // denominator_value_calc\n    \n    # The question asks for the integer value of a + b from the form result = a + b*sqrt(radicand)\n    answer_sum = final_a_val + final_b_val\n\n    correct_answer = str(answer_sum)\n    \n    # Construct LaTeX formatted question text using formal delimiters $...$ or \\(...\\) as requested by \"formal LaTeX delimiters\" context usually implying math mode. \n    # The prompt says \"Use formal LaTeX delimiters where math appears\". Standard is \\( ... \\) for inline, $$ ... $$ for display.\n    # Given the structure of a single question text string:\n    \n    question_text = r\"$\\frac{9}{4-\\sqrt{7}}$\"\n\n    oracle_payload = {\n        \"denominator\": denominator_str,\n        \"numerator\": numerator,\n        \"radicand\": radicand\n    }\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }\n```",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T16:08:37.461114+00:00",
+  "completed_at_utc": "2026-07-21T16:08:48.460848+00:00",
+  "duration": 10.999720700085163,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 10.99970739998389,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 598,
+      "eval_count": 906,
+      "total_token_count": 1504,
+      "total_duration": 8972003100,
+      "load_duration": 254100600,
+      "done_reason": "stop",
+      "latency_ms": 10999,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072004,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072004,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

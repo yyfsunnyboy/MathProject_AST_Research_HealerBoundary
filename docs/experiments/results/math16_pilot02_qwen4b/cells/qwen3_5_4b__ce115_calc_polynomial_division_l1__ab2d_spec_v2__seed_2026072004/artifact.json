@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce115_calc_polynomial_division_l1__ab2d_spec_v2__seed_2026072004",
+  "task_id": "ce115_calc_polynomial_division_l1",
+  "family": "polynomial",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072004,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072004
+  },
+  "prompt_sha256": "aac0a64fb450e071435c5a4a1537bb5d9c1725f83c32044002263cfa175d7361",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce115_calc_polynomial_division_l1.txt",
+  "generation_status": "success",
+  "raw_response": "```python\n# -*- coding: utf-8 -*-\n\ndef generate(level=1, **kwargs):\n    # Frozen sampled parameters as per task specification\n    frozen_params = {\n        \"dividend_coefficients\": [6, 0, 6],\n        \"divisor_coefficients\": [1, -4]\n    }\n\n    from core.prompts.domain_function_library import PolynomialOps\n    \n    dividend_coeffs = frozen_params[\"dividend_coefficients\"]\n    divisor_coeffs = frozen_params[\"divisor_coefficients\"]\n    \n    # Perform polynomial division using the provided library\n    quotient, remainder = PolynomialOps.div_qr(dividend_coeffs, divisor_coeffs)\n\n    def format_latex(coeffs):\n        if not coeffs:\n            return \"0\"\n        \n        terms = []\n        for i, c in enumerate(coeffs):\n            power = len(coeffs) - 1 - i\n            \n            # Skip zero coefficients to keep expression clean (except leading zeros logic handled by structure usually)\n            # However, standard representation includes all powers if we are strictly following coefficient lists.\n            # Let's construct the string based on non-zero terms for readability unless strict positional is needed.\n            # Given [6, 0, 6] -> 6x^2 + 0*x + 6 = 6x^2 + 6. \n            # The prompt asks for formal LaTeX delimiters around the expression.\n            \n            if c != 0:\n                term_str = f\"{c}x^{power}\"\n                terms.append(term_str)\n        \n        return \" \".join(terms).replace(\" \", \"\")\n\n    quotient_latex = format_latex(quotient) + \"\\$\"\n    remainder_latex = format_latex(remainder) + \"\\$\" if len(remainder) > 0 else \"$\" # Remainder is constant usually\n    \n    # Constructing the question text with LaTeX delimiters as requested: \\( \\) / \\[ \\]\n    dividend_str = f\"{dividend_coeffs[0]}x^{len(dividend_coeffs)-1}\" + \" + \".join([f\"{c}x^{{{i}}}\" for i, c in enumerate(reversed(dividend_coeffs)) if c != 0])\n    \n    # Reconstructing properly from coefficients [6, 0, 6] -> 6x^2 + 6\n    dividend_terms = []\n    for idx, coeff in enumerate(dividend_coeffs):\n        power = len(dividend_coeffs) - 1 - idx\n        if coeff != 0:\n            term = f\"{coeff}x^{power}\"\n            dividend_terms.append(term)\n    \n    divisor_str_parts = [f\"{c}x^{{{i}}}\" for i, c in enumerate(reversed(divisor_coeffs)) if c != 0]\n\n    question_text = r\"\"\"Perform polynomial division of the following polynomials: \\[ P(x) = \" + \" \".join(dividend_terms) + \" \", Q(x) = \" + \" \".join(divisor_str_parts) + \" \\]. Find the quotient and remainder.\"\"\"\n    \n    correct_answer = {\n        \"quotient_coefficients\": quotient,\n        \"remainder_coefficients\": remainder,\n        \"quotient_latex\": f\"\\\\left( \\\\{format_latex(list(reversed(quotient)))}x^{len(dividend_coeffs)-1-len(quotient)} + ... \\\\right)$\", # Simplified logic for latex generation based on coeffs provided in spec usually implies standard form. \n    }\n    \n    # Let's refine the LaTeX construction to be precise and simple matching the coefficients directly if possible, or reconstructed.\n    # Quotient of (6x^2+6)/(x-4) -> 6x + 24 with remainder -90? \n    # Manual check: (6x^2+6) = (x-4)(6x+24) + R\n    # x(6x+24) = 6x^2 + 24x. Subtract from dividend: -24x + 6.\n    # Next term in quotient? No, degree of remainder must be < divisor (degree 1). \n    # Wait, manual calc: \n    # Dividend: 6x^2 + 0x + 6\n    # Divisor: x - 4\n    \n    # Step 1: Divide leading terms. 6x^2 / x = 6x.\n    # Multiply divisor by 6x: (x-4)*6x = 6x^2 - 24x.\n    # Subtract from dividend: (6x^2 + 0x + 6) - (6x^2 - 24x) = 24x + 6.\n    \n    # Step 2: Divide leading terms of remainder by divisor. 24x / x = 24.\n    # Multiply divisor by 24: (x-4)*24 = 24x - 96.\n    # Subtract from current remainder: (24x + 6) - (24x - 96) = 102.\n    \n    # So Quotient is [6, 24] -> 6x + 24? Wait order in list usually high to low or low to high? \n    # PolynomialOps.div_qr typically returns lists from highest degree to lowest (standard math notation).\n    # If input was [6, 0, 6] (deg 2), output should be deg 1 -> [6, 24]. Remainder constant -> [102]? Or [-90]? \n    # Let's re-calculate: \n    # Dividend = 6x^2 + 6.\n    # Quotient Q(x) = ax+b. (ax+b)(x-4) = ax^2 - 4ax + bx - 4b = ax^2 + (-4a+b)x - 4b.\n    # Match x^2: a=6.\n    # Match constant: -4b = 6 => b=-1.5? No, integer arithmetic expected per \"Exact arithmetic\". \n    # Let's re-read the divisor coefficients: [1, -4] -> x - 4. Correct.\n    # Dividend: [6, 0, 6] -> 6x^2 + 6.\n    \n    # Re-calculation with integers:\n    # (6x^2 + 6) / (x-4). \n    # If Q = 6x+15? (6x)(x-4)=6x^2-24x. Rem=24x+6. Next term 24(x-4)? No, we need to match degree.\n    # Actually: 6x^2 + 0x + 6 divided by x - 4.\n    # Q = 6x -> (x-4)*6x = 6x^2 - 24x. \n    # Rem1 = (6x^2+6) - (6x^2-24x) = 24x + 6.\n    # Next term in Q: 24? -> (x-4)*24 = 24x - 96.\n    # Final Rem = (24x+6) - (24x-96) = 102.\n    # So Quotient coeffs [6, 24], Remainder [102]. \n    # Wait, is there a mistake in my manual math? \n    # Let's try Q=6x+24 again. (6x+24)(x-4) = 6x^2 -24x + 24x -96 = 6x^2 -96.\n    # Dividend is 6x^2 + 6. Difference is 102. Correct. \n    # But usually these problems have cleaner answers like remainder 0 or small integer? \n    # Maybe I misread the divisor sign? [1, -4] -> x-4. Yes.\n    # Maybe dividend coefficients order? [6, 0, 6]. High to low: 6x^2 + 0x + 6. Correct.\n    \n    # Let's assume PolynomialOps handles this correctly with integer arithmetic as requested (\"Exact arithmetic; no floats\"). \n    # The result will be integers if the division is exact or remainder exists.\n    \n    correct_answer = {\n        \"quotient_coefficients\": quotient,\n        \"remainder_coefficients\": remainder,\n        \"quotient_latex\": f\"\\\\left( \\\\{format_latex(list(reversed(quotient)))}x^{len(dividend_coeffs)-1-len(quotient)} + ... \\\\right)$\", \n    }\n\n    # Re-generating the latex strings cleanly for output\n    def get_poly_str(coeffs):\n        if not coeffs: return \"0\"\n        terms = []\n        deg = len(coeffs) - 1\n        for i, c in enumerate(reversed(coeffs)): # Iterate from highest power down? \n            # Actually list is usually [a_n, a_{n-1}, ..., a_0]\n            p = len(coeffs) - 1 - i\n            if c != 0:\n                terms.append(f\"{c}x^{p}\")\n        return \" + \".join(terms).replace(\" + \", \"+\")\n\n    q_str = get_poly_str(quotient)\n    r_str = get_poly_str(remainder)\n    \n    # Constructing the final answer structure exactly as requested\n    correct_answer = {\n        \"quotient_coefficients\": quotient,\n        \"remainder_coefficients\": remainder,\n        \"quotient_latex\": f\"\\\\left({q_str}\\\\right)$\", \n        \"remainder_latex\": r\"$${r_str}$$\" if len(remainder) > 0 else \"$$0$$\" # Adjusting for constant term representation in latex usually just the number.\n    }\n\n    oracle_payload = frozen_params\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload,\n    }\n```",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T16:04:36.592491+00:00",
+  "completed_at_utc": "2026-07-21T16:04:59.741050+00:00",
+  "duration": 23.148551199934445,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 23.14853980008047,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 672,
+      "eval_count": 2208,
+      "total_token_count": 2880,
+      "total_duration": 21108323500,
+      "load_duration": 232804400,
+      "done_reason": "stop",
+      "latency_ms": 23148,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072004,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072004,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce115_calc_exact_rational_expression_l1__ab2d__seed_2026072002",
+  "task_id": "ce115_calc_exact_rational_expression_l1",
+  "family": "fraction",
+  "condition": "ab2d",
+  "seed": 2026072002,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072002
+  },
+  "prompt_sha256": "ccc56c41370e2b807299372da9b9af0d6807abf4dbae441990b16044d5108244",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "from fractions import Fraction as PyFraction\n\ndef generate(level=1, **kwargs):\n    frozen_params = {\"products\": [{\"left\": \"2.79\", \"right\": \"89.3\", \"sign\": 1}, {\"left\": \"-0.21\", \"right\": \"89.3\", \"sign\": -1}]}\n\n    # Parse inputs as Fractions\n    p1 = PyFraction(\"279\") / PyFraction(100)\n    q1 = PyFraction(\"893\") / PyFraction(10)\n    \n    p2 = PyFraction(\"-21\") / PyFraction(100)\n    q2 = PyFraction(\"893\") / PyFraction(10)\n\n    # Perform arithmetic using domain-style logic (simulated via standard Fraction for exactness as per API constraints in this isolated context, ensuring irreducible form)\n    term1 = p1 * q1\n    term2 = p2 * q2\n    \n    result = term1 + term2\n\n    # Format answer\n    num_str = str(result.numerator)\n    den_str = str(result.denominator) if result.denominator != 1 else \"1\"\n    \n    question_text = r\"\\text{Calculate the exact value of: } \\left( \\frac{2.79}{89.3} + (-0.21) \\times \\frac{89.3}{10} \\right)\"\n\n    correct_answer_value = f\"{num_str}/{den_str}\"\n    \n    # Canonical LaTeX representation for the fraction\n    if den_str == \"1\":\n        canonical_latex = r\"\\text{\" + num_str + r\"}\"\n    else:\n        canonical_latex = rf\"\\frac{{{num_str}}}{{ {den_str} }}\"\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer_value,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:41:31.492217+00:00",
+  "completed_at_utc": "2026-07-21T15:41:38.083395+00:00",
+  "duration": 6.591169500024989,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 6.591158200055361,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 403,
+      "eval_count": 421,
+      "total_token_count": 824,
+      "total_duration": 4571127400,
+      "load_duration": 297704900,
+      "done_reason": "stop",
+      "latency_ms": 6591,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072002,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072002,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

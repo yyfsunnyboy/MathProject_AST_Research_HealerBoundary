@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce115_calc_exact_rational_expression_l1__ab2d_spec_v2__seed_2026072001",
+  "task_id": "ce115_calc_exact_rational_expression_l1",
+  "family": "fraction",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072001,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072001
+  },
+  "prompt_sha256": "f46b8a30d79d77ca3811c9d7dc202a0b65b50302395ca871a24d3129a0f4e7c2",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce115_calc_exact_rational_expression_l1.txt",
+  "generation_status": "success",
+  "raw_response": "```python\n# -*- coding: utf-8 -*-\n\nfrom core.prompts.domain_function_library import FractionOps, LaTeXFormatter\n\n\ndef generate(level=1, **kwargs):\n    # Frozen parameters extracted directly from task specification (not kwargs)\n    frozen_params = {\n        \"products\": [\n            {\"left\": \"2.79\", \"right\": \"89.3\", \"sign\": 1},\n            {\"left\": \"-0.21\", \"right\": \"89.3\", \"sign\": -1}\n        ]\n    }\n\n    # Parse decimal strings to Fractions exactly\n    f_279 = FractionOps.create(\"2.79\")\n    f_893 = FractionOps.create(\"89.3\")\n    f_neg021 = FractionOps.create(\"-0.21\")\n\n    # Compute first product: 2.79 * 89.3\n    prod1_num, prod1_den = FractionOps.mul(f_279, f_893)\n\n    # Compute second product: -0.21 * 89.3 (sign is already included in the negative fraction)\n    prod2_num, prod2_den = FractionOps.mul(f_neg021, f_893)\n\n    # Perform subtraction based on sign logic from frozen params\n    # First term has sign +1 -> add to result accumulator? \n    # Actually looking at structure: [ {left:A, right:B, sign:+}, {left:C, right:D, sign:-} ]\n    # Interpretation: (A * B) - (C * D) where C and D are magnitudes from the second dict's values\n    # But wait, 'sign' is part of the product definition. \n    # Let's re-read carefully: \"products\": [{\"left\": \"-0.21\", ...}] -> left already has sign.\n    # The operation implied by typical arithmetic expression generation with these fields:\n    # Term 1: (2.79) * (89.3) [sign +1 means positive term]\n    # Term 2: (-0.21) * (89.3) [sign -1? Or is sign the operator?]\n    \n    # Re-evaluating based on \"math16_exact_rational_expression\" context usually involving sums/diffs of products.\n    # If 'sign' indicates whether to add or subtract from a base, but there's no base...\n    # Most likely interpretation for this specific frozen set pattern in these tasks:\n    # Expression = (left_0 * right_0) - (abs(left_1) * right_1) ? \n    # Or simply sum the signed products? \n    # Given \"sign\": 1 and \"-1\", it often denotes +A - B.\n    \n    # Let's assume standard arithmetic expression construction:\n    # Term A = left0 * right0 (positive contribution due to sign=1)\n    # Term B = abs(left1) * right1 (negative contribution due to sign=-1, or just the product itself if negative)\n    # However, 'left' in second item is \"-0.21\". \n    # If we treat it as: Result = (2.79 * 89.3) + (-0.21 * 89.3)? That would be simple distribution.\n    # Let's look at the signs provided: sign=1 for first, sign=-1 for second. \n    # This likely implies: Term1 - Term2 where Term2 uses magnitude of left/right?\n    \n    # Alternative strict interpretation matching common dataset patterns (e.g., GSM8K/Math datasets):\n    # The 'sign' field dictates the operation between two products or modifies a term.\n    # Let's assume the expression is: P1 * sign1 + P2 * sign2 ? No, that's redundant if left has sign.\n    \n    # Most robust interpretation for \"exact rational\": \n    # Calculate T1 = 2.79 * 89.3\n    # Calculate T2 = |-0.21| * 89.3 (magnitude) because the second item is subtracted?\n    # Or simply: Result = (2.79 * 89.3) - (-0.21 * 89.3)? That would be addition of magnitudes.\n    \n    # Let's try to infer from typical difficulty level 1 math problems involving decimals converted to fractions.\n    # Often it is: A * B + C * D or similar. \n    # If we take the literal values and apply operations based on 'sign':\n    # Term 1 value = 2.79 * 89.3 (positive)\n    # Term 2 value = -0.21 * 89.3 (already negative in left, but sign=-1 might mean subtract this term?)\n    \n    # Let's assume the operation is: \n    # Result = (Fraction(279/100) * Fraction(893/10)) + (-Fraction(21/100) * Fraction(893/10))?\n    # That simplifies to 2.58*... - ...?\n    \n    # Let's go with the most direct arithmetic interpretation of a list of products where sign indicates addition/subtraction from zero:\n    # Sum = (left[0] * right[0]) + (sign[1] * left[1] * right[1]) \n    # But wait, if left[1] is -0.21 and sign[1] is -1... that's double negative?\n    \n    # Let's reconsider the \"products\" list as defining terms in a sum:\n    # Term 1: + (2.79 * 89.3)\n    # Term 2: - (-0.21 * 89.3) -> This would be adding two positives? Unlikely for a subtraction problem.\n    \n    # Hypothesis B: The expression is simply the sum of the products as defined by their signed values, \n    # but 'sign' overrides or indicates direction relative to a positive base?\n    \n    # Let's try this specific logic often found in such generated tasks:\n    # Expression = (left_0 * right_0) - (abs(left_1) * right_1) if sign is negative indicator for subtraction.\n    # But left_1 is already \"-0.21\". \n    # If the task implies \"Calculate A and B, then do op\", but we have a list...\n    \n    # Let's assume the simplest exact arithmetic: \n    # Result = (Fraction(279/100) * Fraction(893/10)) - (Fraction(-21/100) * Fraction(893/10))? \n    # No, that would be A + B.\n    \n    # Let's assume the 'sign' field is the operator between two positive magnitudes derived from left/right?\n    # Magnitude 1: |2.79| * 89.3\n    # Magnitude 2: |-0.21| * 89.3 = 0.21 * 89.3\n    # Operation based on sign[1]: if -1, subtract? \n    # So Result = (2.79 * 89.3) - (0.21 * 89.3)?\n    \n    # Let's calculate:\n    # T1_num, T1_den = mul(279/100, 893/10) -> 249147 / 1000\n    # T2_mag_num, T2_mag_den = mul(21/100, 893/10) -> 18753 / 1000\n    \n    # If we subtract: (249147 - 18753) / 1000 = 230394 / 1000\n    # Simplify by dividing by GCD(230394, 1000). \n    # Both even. -> 115197 / 500.\n    \n    # Let's verify if this makes sense as a \"level 1\" problem. Yes, simple decimal multiplication and subtraction converted to fractions.\n    \n    t2_mag = FractionOps.create(\"0.21\")\n    prod2_num, prod2_den = FractionOps.mul(t2_mag, f_893)\n\n    # Perform subtraction: T1 - T2_magnitude (assuming sign=-1 implies subtraction of the magnitude term formed by abs(left))\n    res_num, res_den = FractionOps.sub(prod1_num, prod2_num)\n\n    # Simplify fraction if needed (Fraction usually handles this internally or we can ensure irreducible via GCD logic in ops)\n    # Assuming FractionOps creates irreducible fractions. If not, reduce manually:\n    from math import gcd\n    common = gcd(res_num, res_den)\n    res_num //= common\n    res_den //= common\n\n    # Format for correct_answer schema: \"p/q\" and LaTeX\n    value_str = f\"{res_num}/{res_den}\"\n    \n    latex_val = LaTeXFormatter.to_latex(frac=res_num, denom=res_den)\n    canonical_latex = r\"\\frac{\" + str(res_num) + \"}{\" + str(res_den) + r\"}\"\n\n    # Construct Question Text with formal LaTeX delimiters\n    term1_latex = f\"{LaTeXFormatter.to_decimal(2.79)} \\\\times {LaTeXFormatter.to_decimal(89.3)}\"\n    term2_latex = f\"|{-0.21}| \\\\times 89.3\" # Using absolute value to handle the negative input as magnitude for subtraction\n    \n    question_text = r\"\\text{Calculate: } \" + latex_val.replace(\" \", \"\") \n    # Wait, need full expression in text\n    q_latex_expr = f\"{LaTeXFormatter.to_decimal(2.79)} \\\\cdot {LaTeXFormatter.to_decimal(89.3)} - |{-0.21}| \\\\cdot 89.3\"\n    \n    question_text = r\"\\text{Compute the exact value of: } \" + q_latex_expr\n\n    correct_answer_obj = {\n        \"value\": value_str,\n        \"canonical_latex\": canonical_latex\n    }\n\n    # Ensure return structure matches spec exactly\n    result_dict = {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer_obj,\n        \"oracle_payload\": frozen_params\n    }\n\n    return result_dict\n```",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:21:52.220697+00:00",
+  "completed_at_utc": "2026-07-21T15:22:16.846502+00:00",
+  "duration": 24.62579399999231,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 24.625779399997555,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 687,
+      "eval_count": 2337,
+      "total_token_count": 3024,
+      "total_duration": 22589183300,
+      "load_duration": 244003500,
+      "done_reason": "stop",
+      "latency_ms": 24625,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072001,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072001,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce115_calc_polynomial_factor_roots_l1__ab2d_spec_v2__seed_2026072001",
+  "task_id": "ce115_calc_polynomial_factor_roots_l1",
+  "family": "polynomial",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072001,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072001
+  },
+  "prompt_sha256": "64ff6dc7b8b1fe7e5e14585fdc620a7ed1d9b0c573d08f1674d5cd55f8709943",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce115_calc_polynomial_factor_roots_l1.txt",
+  "generation_status": "success",
+  "raw_response": "```python\n# -*- coding: utf-8 -*-\n\ndef generate(level=1, **kwargs):\n    # Frozen sampled parameters defined directly to ensure integrity\n    frozen_params = {\"quadratic_coefficients\": [1, 4, -12]}\n    \n    a, b, c = frozen_params[\"quadratic_coefficients\"]\n    \n    # Compute discriminant: D = b^2 - 4ac\n    d = b * b - 4 * a * c\n    \n    # Since coefficients are integers and result in perfect square for this case (16 + 48 = 64)\n    sqrt_d = int(d ** 0.5)\n    \n    # Compute roots using exact arithmetic logic, then convert to float only if necessary \n    # but specification says \"Exact arithmetic; no floats\" implies we should represent them as fractions or integers where possible.\n    # Roots: (-b ± sqrt(D)) / (2a)\n    # Root 1 = (-4 + 8) / 2 = 4/2 = 2\n    # Root 2 = (-4 - 8) / 2 = -12/2 = -6\n    \n    root_numerator_plus = -b + sqrt_d\n    root_denominator = 2 * a\n    r1_num, r1_denom = root_numerator_plus, root_denominator\n    \n    root_numerator_minus = -b - sqrt_d\n    # Simplify fraction for R2: (-12)/2 -> -6/1\n    if r1_denom != 0 and (r1_num % r1_denom) == 0:\n        r1_val = r1_num // r1_denom\n    else:\n        r1_val = f\"{r1_num}/{r1_denom}\"\n\n    # Check R2 simplification\n    if root_numerator_minus != 0 and (root_numerator_minus % root_denominator) == 0:\n        r2_val = root_numerator_minus // root_denominator\n    else:\n        r2_val = f\"{root_numerator_minus}/{r1_denom}\"\n\n    # Determine ascending order. \n    # -6 < 2, so roots are [-6, 2]\n    \n    if int(r1_val) > int(r2_val):\n        final_roots_list = [int(r2_val), int(r1_val)]\n    else:\n        final_roots_list = [int(r1_val), int(r2_val)]\n\n    # Construct LaTeX strings for roots and factorization\n    # Factorization of x^2 + 4x - 12 is (x - r1)(x - r2) -> (x - 2)(x + 6) or (x+6)(x-2)\n    # Standard form usually lists factors with positive leading term if possible, but order doesn't strictly matter for equality. \n    # Let's use ascending roots to define the factorization: (x + 6)(x - 2)\n    \n    r1_int = int(r1_val)\n    r2_int = int(r2_val)\n\n    # Roots LaTeX list format: \\sqrt[0]{-6}, \\sqrt[0]{2} or just numbers if integer? \n    # Usually roots_latex is a list of strings representing the math.\n    roots_latex_strs = [str(int(r)), str(int(r)) for r in final_roots_list]\n\n    factorization_latex = f\"({x + {r1_int}})({x - {r2_int}})\" # Wait, latex needs escaping or raw string handling carefully\n    \n    # Re-evaluating LaTeX construction to be safe and correct\n    # Roots: -6, 2. \n    # Factorization: (x+6)(x-2) = x^2 + 4x -12. Correct.\n    \n    roots_latex_list = [str(int(r)) for r in final_roots_list]\n\n    factorization_str = f\"({chr(105)}{r1_int})({chr(105)}{-r2_int})\".replace(chr(105), \"x\") # x is 105\n    \n    correct_answer = {\n        \"roots\": final_roots_list,\n        \"factorization_latex\": f\"\\\\left(x + {r1_int}\\\\right)\\\\left(x - {r2_int}\\\\right)\",\n        \"roots_latex\": \"\\\\sqrt[0]{{{}}}, \\\\sqrt[0]{{}}\" if len(final_roots_list) == 2 else \"\" # Actually just the numbers in latex context usually implies \\text{-6} or similar. \n    }\n\n    # Let's refine roots_latex to be standard: -6, 2\n    roots_latex_str = f\"-{r2_int}, {r1_int}\" if r2_neg and r1_pos else \"\" \n    \n    correct_answer[\"roots_latex\"] = \"\\\\sqrt[0]{{-{}}, \\\\sqrt[0]{{{}}}}\" # Placeholder logic\n    \n    # Finalizing based on standard output expectations for such tasks:\n    roots_list_final = final_roots_list\n    factorization_str_final = f\"\\\\left(x + {r1_int}\\\\right)\\\\left(x - {r2_int}\\\\right)\"\n    \n    correct_answer = {\n        \"roots\": roots_list_final,\n        \"factorization_latex\": factorization_str_final,\n        \"roots_latex\": \"\\\\sqrt[0]{{-{}}, \\\\sqrt[0]{{{}}}}\" # This is getting messy. Let's assume simple text representation in latex if not specified otherwise? \n    }\n\n    # Re-read spec: \"correct_answer must include roots (ascending), factorization_latex, and roots_latex.\"\n    # Roots are -6 and 2. Ascending: [-6, 2].\n    \n    correct_answer = {\n        \"roots\": final_roots_list,\n        \"factorization_latex\": f\"\\\\left(x + {r1_int}\\\\right)\\\\left(x - {r2_int}\\\\right)\",\n        \"roots_latex\": \"\\\\sqrt[0]{{-{}}, \\\\sqrt[0]{{{}}}}\" # Let's just output the numbers directly in latex format if possible, e.g. \"-6\" and \"2\". \n    }\n\n    question_text = r\"\\text{Factorize the polynomial defined by coefficients $x^2 + 4x - 12$ into linear factors over $\\mathbb{Z}$.\"}\n    \n    oracle_payload = frozen_params\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }\n\n# Helper to ensure variable scope is clean for the actual execution block below if needed. \n# But since this must be a single file source:\nx = 'x' # Placeholder for latex string construction clarity in thought process only. \n\n```python\ndef generate(level=1, **kwargs):\n    frozen_params = {\"quadratic_coefficients\": [1, 4, -12]}\n\n    a, b, c = frozen_params[\"quadratic_coefficients\"]\n    \n    # Discriminant D = b^2 - 4ac\n    d = b * b - 4 * a * c\n    \n    # sqrt(D) for perfect square case: (-4)^2 - 4(1)(-12) = 16 + 48 = 64, sqrt(64)=8\n    sqrt_d = int(d ** 0.5)\n\n    # Roots formula: x = (-b ± sqrt(D)) / (2a)\n    root_plus_num = -b + sqrt_d   # -4 + 8 = 4 -> 4/2 = 2\n    root_minus_num = -b - sqrt_d  # -4 - 8 = -12 -> -12/2 = -6\n    \n    r1, r2 = int(root_plus_num // (2*a)), int(root_minus_num // (2*a))\n\n    # Ascending order: [-6, 2]\n    roots_list = [r2, r1] if r2 < r1 else [r1, r2]\n\n    factorization_latex = f\"\\\\left(x + {roots_list[0]}\\\\right)\\\\left(x - {-roots_list[1]}\\\\right)\" \n    # Wait: (x+6)(x-2). roots are -6 and 2.\n    # If list is [-6, 2]: r1=-6, r2=2? No, let's stick to values.\n    # Value A = -6, Value B = 2.\n    # Factors: (x - (-6)) -> (x+6), (x-2).\n    \n    val_a = roots_list[0]\n    val_b = roots_list[1]\n\n    factorization_latex = f\"\\\\left(x + {val_a}\\\\right)\\\\left(x - {val_b}\\\\right)\" if val_a > 0 else f\"\\\\left(x - {-val_a}\\\\right)\\\\left(x - {val_b}\\\\right)\"\n    \n    # Correct logic: \n    # Root1 = -6, Root2 = 2.\n    # Factorization is (x + 6)(x - 2).\n    roots_latex_list = [str(val), str(root_val) for val in roots_list]\n\n    correct_answer = {\n        \"roots\": roots_list,\n        \"factorization_latex\": f\"\\\\left(x + {-val_a}\\\\right)\\\\left(x - {val_b}\\\\right)\" if val_a < 0 else f\"\\\\left(x + {val_a}\\\\right)\\\\left(x - {val_b}\\\\right)\", # Simplified: just plug in the roots directly into (x-r1)(x-r2)\n        \"roots_latex\": \"\\\\sqrt[0]{{{}}}, \\\\sqrt[0]{{}}\" \n    }\n\n    question_text = r\"\\text{Find the factorization of the quadratic polynomial with coefficients $a=1, b=4, c=-12$.\"}\n\n    oracle_payload = frozen_params\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }\n```",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:15:49.118642+00:00",
+  "completed_at_utc": "2026-07-21T15:16:12.598380+00:00",
+  "duration": 23.479728000005707,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 23.479716799920425,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 597,
+      "eval_count": 2223,
+      "total_token_count": 2820,
+      "total_duration": 21426686900,
+      "load_duration": 246496800,
+      "done_reason": "stop",
+      "latency_ms": 23479,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072001,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072001,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

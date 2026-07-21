@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce115_calc_radical_simplification_l1__ab2d_spec_v2__seed_2026072002",
+  "task_id": "ce115_calc_radical_simplification_l1",
+  "family": "radical",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072002,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072002
+  },
+  "prompt_sha256": "2708207ae203981a2788e092fe304786ba7cfebc62173946b16030a1bf045aee",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce115_calc_radical_simplification_l1.txt",
+  "generation_status": "success",
+  "raw_response": "```python\n# -*- coding: utf-8 -*-\n\ndef generate(level=1, **kwargs):\n    # Frozen sampled parameters used directly without reading from kwargs or external state\n    frozen_params = {\"radicand\": 27}\n    \n    radicand_value = frozen_params[\"radicand\"]\n    \n    import math\n    \n    # Simplify the radical: find largest square factor of radicand\n    n = int(math.sqrt(radicand_value))\n    while n * n <= radicand_value and (n % 2 == 0 or not is_perfect_square(n)):\n        pass\n        \n    coeff, remaining_radicand = simplify_radical(radicand_value)\n    \n    # Construct the answer components\n    coefficient_val = coeff\n    simplified_radicand_val = remaining_radicand\n    \n    correct_answer_str = f\"{coefficient_val}\\\\sqrt{{{simplified_radicand_val}}}\"\n    \n    question_text_latex = r\"\\text{Simplify } \\sqrt{\\text{\" + str(radicand_value) + \"}}\"\n\n    return {\n        \"question_text\": question_text_latex,\n        \"correct_answer\": correct_answer_str,\n        \"oracle_payload\": frozen_params\n    }\n\n\ndef is_perfect_square(n):\n    if n < 0:\n        return False\n    root = int(math.sqrt(n))\n    return root * root == n\n\n\ndef simplify_radical(radicand_value):\n    # Find the largest square factor k such that radicand = k^2 * m where m is not divisible by any perfect square > 1 (other than itself if it's a prime)\n    temp_radicand = radicand_value\n    \n    # Check for factors up to sqrt(temp_radicand)\n    i = 2\n    while i * i <= temp_radicand:\n        count = 0\n        while temp_radicand % (i * i) == 0:\n            count += 1\n            temp_radicand //= (i * i)\n        \n        if count >= 2:\n            # If we found a square factor, pull it out. \n            # We want to maximize the coefficient by pulling all possible squares.\n            pass\n        \n        i += 1\n    \n    # Re-evaluate based on prime factors for correctness with larger numbers or edge cases like 27 (3^3)\n    temp_radicand = radicand_value\n    coeff = 1\n    \n    d = 2\n    while d * d <= temp_radicand:\n        count = 0\n        while temp_radicand % (d * d) == 0:\n            count += 1\n            temp_radicand //= (d * d)\n        \n        if count >= 2:\n            # Pull out as much square factor as possible. \n            # For example, if we have x^4, pull out x^2 to get coefficient x^2 and remaining x^0? No, just pull one pair at a time until no pairs left in the remainder relative to current extraction logic is complex.\n            pass\n            \n        d += 1\n    \n    # Simpler approach for integer simplification:\n    # Factorize radicand into prime factors. Group exponents by 2s.\n    \n    temp = int(radicand_value)\n    coeff_list = []\n    remaining_factors = {}\n    \n    f = 2\n    while f * f <= temp:\n        if temp % f == 0:\n            count = 0\n            while temp % (f ** 2) == 0: # Check square factor directly? No, prime factors.\n                pass\n            \n            cnt_prime = 0\n            while temp % f == 0:\n                cnt_prime += 1\n                temp //= f\n                \n            if cnt_prime >= 2:\n                pairs = cnt_prime // 2\n                coeff_list.append(f ** (pairs * 2)) # Actually we just need the base raised to even power. \n                # Wait, simpler logic: extract floor(cnt/2) copies of f^2? No.\n                # Extract floor(cnt/2) factors of f from coefficient part.\n                pairs = cnt_prime // 2\n                coeff_list.append(f ** (pairs * 1)) # This is wrong. \n                \n            pass\n        \n        f += 1\n    \n    # Correct logic:\n    temp_val = int(radicand_value)\n    final_coeff = 1\n    final_radicand = temp_val\n    \n    d = 2\n    while d * d <= temp_val:\n        if temp_val % (d * d) == 0:\n            count_sq = 0\n            curr_d2 = d * d\n            while temp_val % curr_d2 == 0:\n                count_sq += 1\n                temp_val //= curr_d2\n            \n            # We can pull out one full square factor per iteration? \n            # Actually, we just need to divide by the largest perfect square.\n            pass\n        \n        d += 1\n    \n    # Let's do a robust prime factorization based extraction for simplicity and correctness on small integers like 27.\n    \n    temp_n = int(radicand_value)\n    coeff_res = 1\n    rad_res = temp_n\n    \n    f = 2\n    while f * f <= rad_res:\n        if rad_res % (f * f) == 0:\n            # Found a square factor. Extract it fully? \n            # We want to extract the largest k such that radicand = k^2 * m where m is not divisible by any perfect square > 1.\n            pass\n        \n        f += 1\n    \n    # Re-implementing specifically for extracting max square root:\n    \n    temp_n = int(radicand_value)\n    coeff_res = 1\n    rad_res = temp_n\n    \n    d = 2\n    while d * d <= rad_res:\n        if rad_res % (d * d) == 0:\n            # We found a square factor. \n            # How many times? Let's just divide by the largest possible square we can find iteratively or greedily.\n            # Greedy approach for integers: repeatedly divide out squares until no more exist? No, that might be slow but safe for small inputs like 27.\n            \n            count = 0\n            while rad_res % (d * d) == 0:\n                count += 1\n                rad_res //= (d * d)\n                \n            # If we divided out multiple squares of the same prime, that's fine. \n            # But wait, if n=27, factors are 3^3. Square factor is 3^2 = 9.\n            # 27 / 9 = 3. Coefficient becomes sqrt(9)=3. Radicand becomes 3. Correct.\n            \n            coeff_res *= d\n            \n        d += 1\n        \n    return coeff_res, rad_res\n\n# Specific test for 27: \n# Factors of 27: 3^3.\n# Largest square factor is 3^2 = 9.\n# sqrt(9) = 3. Remaining radicand = 27/9 = 3.\n# Result should be 3*sqrt(3).\n\ncorrect_answer_str = f\"{coeff_res}\\\\sqrt{{{rad_res}}}\"\nquestion_text_latex = r\"\\text{Simplify } \\sqrt{\\text{\" + str(radicand_value) + \"}}\"\n\nreturn {\n    \"question_text\": question_text_latex,\n    \"correct_answer\": correct_answer_str,\n    \"oracle_payload\": frozen_params\n}\n```",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:33:37.480698+00:00",
+  "completed_at_utc": "2026-07-21T15:33:55.280405+00:00",
+  "duration": 17.79969659994822,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 17.799683700082824,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 643,
+      "eval_count": 1635,
+      "total_token_count": 2278,
+      "total_duration": 15773184900,
+      "load_duration": 253346000,
+      "done_reason": "stop",
+      "latency_ms": 17799,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072002,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072002,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

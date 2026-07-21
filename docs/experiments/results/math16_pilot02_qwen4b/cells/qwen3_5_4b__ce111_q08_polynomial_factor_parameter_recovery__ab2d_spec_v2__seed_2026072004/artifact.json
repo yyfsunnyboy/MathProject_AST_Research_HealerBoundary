@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce111_q08_polynomial_factor_parameter_recovery__ab2d_spec_v2__seed_2026072004",
+  "task_id": "ce111_q08_polynomial_factor_parameter_recovery",
+  "family": "polynomial",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072004,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072004
+  },
+  "prompt_sha256": "4e8f345ad99e87317c2bb38ce741268ce4f57d9e2ca98518eea4f37fb36fb477",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce111_q08_polynomial_factor_parameter_recovery.txt",
+  "generation_status": "success",
+  "raw_response": "# -*- coding: utf-8 -*-\n\ndef generate(level=1, **kwargs):\n    # Frozen parameters defined exactly as specified in task specification.\n    factor_order_policy = \"strict_source_template\"\n    quadratic_coefficients = [39, 5, -14]\n    template_left_x_coefficient = 3\n    \n    # Native Python arithmetic to solve for a and c from (3x + a)(bx + c) = 39x^2 + 5x - 14.\n    # Expansion: 3b x^2 + (3c + ab)x + ac = 0\n    # Equations:\n    # 1) 3 * b = 39 => b = 13\n    # 2) a * c = -14\n    # 3) 3*c + 13*a = 5\n    \n    # Calculate b directly from the leading coefficient.\n    b_coefficient = quadratic_coefficients[0] // template_left_x_coefficient\n    \n    # We need integer solutions for a and c such that:\n    # ac = -14\n    # 3c + 13a = 5\n    \n    # Iterate through divisors of -14 to find valid integers.\n    possible_a_values = []\n    \n    # Check all factors of |ac| which is 14.\n    abs_ac = abs(quadratic_coefficients[2])\n    for i in range(1, int(abs_ac**0.5) + 1):\n        if abs_ac % i == 0:\n            divisors = [i, -i]\n            other_divisor = abs_ac // i\n            others = [-other_divisor, other_divisor]\n            \n            for a in divisors:\n                for c in others:\n                    # Verify the middle term condition: 3*c + b*a == quadratic_coefficients[1]\n                    if (template_left_x_coefficient * c) + (b_coefficient * a) == quadratic_coefficients[1]:\n                        possible_a_values.append(a)\n    \n    # The problem implies unique factorization over integers. \n    # Given the constraints and typical polynomial problems, there should be one valid pair.\n    if len(possible_a_values) > 0:\n        selected_a = possible_a_values[0]\n        \n        # Calculate c based on ac = -14 (or re-verify with equation)\n        calculated_c = quadratic_coefficients[2] // selected_a\n        \n        # Verify the second condition again to be absolutely sure.\n        if (template_left_x_coefficient * calculated_c) + (b_coefficient * selected_a) != quadratic_coefficients[1]:\n            raise ValueError(\"No valid integer factors found for given coefficients.\")\n        \n        correct_answer = selected_a + 2 * calculated_c\n        \n    else:\n        # Fallback or error state if logic fails, though math guarantees a solution here.\n        correct_answer = \"error\"\n\n    # Construct the question text using formal LaTeX delimiters as requested.\n    # We construct it manually to avoid external API dependencies per instructions (\"Do not use domain APIs\").\n    latex_left_factor = f\"(\\\\{template_left_x_coefficient}x + {selected_a})\"\n    \n    # Calculate b for display in the expanded form if needed, or just state coefficients.\n    # The task asks for question_text using formal LaTeX delimiters.\n    # We will format it as: Factorize 39x^2 + 5x - 14 into (3x+a)(bx+c).\n    \n    latex_right_factor = f\"({b_coefficient}x + {calculated_c})\"\n    \n    question_text = r\"\\text{Factor the polynomial } $39x^2 + 5x - 14$ \\text{ into two linear factors of the form } $(\\mathbf{\\underline{{}}}\\, x + a)(bx + c)$.\"\n\n    # Prepare oracle_payload exactly as frozen sampled parameters.\n    oracle_payload = {\n        \"factor_order_policy\": factor_order_policy,\n        \"quadratic_coefficients\": quadratic_coefficients,\n        \"template_left_x_coefficient\": template_left_x_coefficient\n    }\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T16:04:10.790388+00:00",
+  "completed_at_utc": "2026-07-21T16:04:22.198099+00:00",
+  "duration": 11.407702500000596,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 11.407691000029445,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 798,
+      "eval_count": 936,
+      "total_token_count": 1734,
+      "total_duration": 9384096500,
+      "load_duration": 258512000,
+      "done_reason": "stop",
+      "latency_ms": 11407,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072004,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072004,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

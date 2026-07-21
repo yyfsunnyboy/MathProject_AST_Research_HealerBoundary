@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce111_q10_ordered_quadratic_roots_radical__ab2g__seed_2026072003",
+  "task_id": "ce111_q10_ordered_quadratic_roots_radical",
+  "family": "radical",
+  "condition": "ab2g",
+  "seed": 2026072003,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072003
+  },
+  "prompt_sha256": "6179a8fb58654189712d53044e6df49b7171ccf57f1b1666d3e735f38758a766",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "import re\nfrom typing import Dict, Any\n\ndef solve_equation(equation: str) -> tuple[float, float]:\n    \"\"\"Solves (x-a)^2 = b for x.\"\"\"\n    # Parse equation in form \"(x-<a>)^2=<b>\"\n    match = re.match(r'\\(\\(x-(\\d+)\\)\\^\\==(\\d+)\\)', equation)\n    if not match:\n        raise ValueError(\"Invalid equation format\")\n    \n    a, b = int(match.group(1)), int(match.group(2))\n    \n    # Roots are +/- sqrt(b) + a\n    root_plus = float(a) + (b ** 0.5)\n    root_minus = float(-a) + (b ** 0.5)\n    return root_plus, root_minus\n\ndef generate(level: int = 1, **kwargs) -> Dict[str, Any]:\n    frozen_params = kwargs.get(\"frozen\", {}) or {}\n    \n    # Extract parameters from frozen data if provided, otherwise use defaults based on task spec\n    equation_str = frozen_params.get(\"equation\", \"(x-2)^2=3\")\n    order_constraint = frozen_params.get(\"order\", \"a>b\")\n    target_expr = frozen_params.get(\"target\", \"2a+b\")\n    \n    # Parse the specific equation structure provided in frozen params\n    match = re.match(r'\\(\\(x-(\\d+)\\)\\^\\==(\\d+)\\)', equation_str)\n    if not match:\n        raise ValueError(f\"Cannot parse equation from frozen parameters: {equation_str}\")\n    \n    a_val, b_val = int(match.group(1)), int(match.group(2))\n    \n    # Calculate roots based on (x-a)^2 = b => x^2 - 2ax + a^2 = b => x^2 - 2ax + (a^2-b) = 0\n    # Roots: [2a +/- sqrt(4b)] / 2 = a +/- sqrt(b)\n    \n    root_plus_val = float(a_val) + (float(b_val)) ** 0.5\n    root_minus_val = -float(a_val) + (float(b_val)) ** 0.5\n    \n    # Determine correct answer based on order constraint \"a>b\" meaning we pick the larger root or specific one?\n    # Usually in these tasks, if a > b is given as an ordering hint for coefficients:\n    # Let's assume it implies selecting the positive branch relative to 'a' or simply returning both formatted.\n    # However, standard quadratic roots problems often ask for \"the\" solution set or specific root.\n    # Given target \"2a+b\", let's see if that matches a sum of something? \n    # Sum = (a+sqrt(b)) + (-a+sqrt(b)) = 2*sqrt(b). Not matching directly unless b is related to a^2-b...\n    \n    # Re-evaluating based on typical math16 patterns:\n    # Equation: x^2 - 2ax + c = 0. Here (x-a)^2=b -> x^2-2ax+a^2=b -> x^2-2ax+(a^2-b)=0.\n    # Roots are a +/- sqrt(b).\n    # If the task implies finding roots where coefficients satisfy an order, \n    # and we need to format them as rational + radical_coefficient * radicand^(1/2) or similar.\n    \n    # Let's construct the answer string based on standard formatting for such problems:\n    # \"a +/- sqrt(b)\" formatted canonically.\n    \n    # Since frozen params are fixed, let's hardcode logic to match expected output structure exactly as per spec constraints.\n    # We need rational part and radical coefficient/radicand.\n    \n    # Rational parts of roots: a_val (for +) and -a_val (for -).\n    # Radical parts: sqrt(b_val). Coefficient is 1, radicand is b_val.\n    \n    # Construct canonical latex for the answer set or specific root? \n    # Usually \"ordered\" implies listing them in order. If a > b constraint exists...\n    # Let's assume we return both roots formatted together if not specified otherwise, but often these tasks want one expression per line or comma separated.\n    # Given target \"2a+b\", let's check: 2*a_val + b_val? \n    # Maybe the question asks for sum of something else? \n    # Let's stick to generating the roots themselves as that is the core math task.\n    \n    # Format: f\"{rational} +/- {coeff}{radicand}^{1/2}\" or similar canonical form.\n    # Canonical latex usually looks like \\frac{...}{...} + ... \n    # Let's use standard LaTeX for roots of (x-a)^2=b\n    \n    rational_plus = a_val\n    radical_coefficient = 1\n    radicand = b_val\n    \n    rational_minus = -a_val\n    \n    # Construct the answer string. If multiple roots, often presented as \"rational +/- ...\" or list.\n    # Let's provide both in canonical form separated by comma if needed, but typically one line with \\pm is standard for quadratic roots unless specified otherwise.\n    \n    latex_plus = f\"{a_val} + {radicand}\\\\sqrt{b_val}\" -> Wait, syntax error above.\n    Correct LaTeX: a \\\\pm \\\\sqrt{b} or similar.\n    \n    # Let's build the string carefully to ensure it matches expected structured comparison keys.\n    answer_str = f\"{{{rational_plus}}, {{{rational_minus}}}}\" \n    # Actually, let's format as \"a +/- sqrt(b)\" in text and LaTeX version for canonical_latex\n    \n    latex_ans = rf\"{int(a_val)} \\\\pm {{\\\\sqrt{{b_val}}}}\" if b_val > 0 else f\"{{{int(a_val)}}} \\cdot {{{-1}}}^{2}\" # Handle perfect square? No, radical implies non-perfect or general form.\n    \n    # Refined Canonical Latex for (x-a)^2=b roots: x = a \\\\pm \\\\sqrt{b}\n    canonical_latex_ans = rf\"{{{int(a_val)}}} \\\\\\\\pm {{\\\\sqrt{{b_val}}}}\" if b_val > 0 else f\"{{{int(a_val)}}}\" # If perfect square, usually just integer. But spec says radical_coefficient may be +/-1 implying non-integer or general form.\n    \n    # Let's assume the question asks for roots in a specific format: rational + coefficient * radicand^(1/2)\n    # We will generate text and latex accordingly.\n    \n    correct_answer = {\n        \"rational\": [int(a_val), int(-a_val)],\n        \"radical_coefficient\": 1,\n        \"radicand\": b_val,\n        \"canonical_latex\": rf\"{{{int(a_val)}}} \\\\\\\\pm {{\\\\sqrt{{b_val}}}}\" if b_val > 0 else f\"{{{int(a_val)}}}\" # Simplified for perfect squares to integer? No, keep radical form as per spec hint.\n    }\n    \n    question_text = r\"\\text{Solve the quadratic equation: $(x-2)^2=3$. Express roots in terms of rational and irrational parts.\"\n    \n    oracle_payload = frozen_params\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:52:14.918047+00:00",
+  "completed_at_utc": "2026-07-21T15:52:32.651372+00:00",
+  "duration": 17.73331619997043,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 17.733303799992427,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 262,
+      "eval_count": 1610,
+      "total_token_count": 1872,
+      "total_duration": 15723435200,
+      "load_duration": 232267700,
+      "done_reason": "stop",
+      "latency_ms": 17733,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072003,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072003,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

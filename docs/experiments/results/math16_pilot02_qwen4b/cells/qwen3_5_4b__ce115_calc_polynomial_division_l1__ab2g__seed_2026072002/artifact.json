@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce115_calc_polynomial_division_l1__ab2g__seed_2026072002",
+  "task_id": "ce115_calc_polynomial_division_l1",
+  "family": "polynomial",
+  "condition": "ab2g",
+  "seed": 2026072002,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072002
+  },
+  "prompt_sha256": "3d60a095612840e6d08496d68f759c891c049481c5af862609bd89ece29121b6",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    frozen_params = {\"dividend_coefficients\": [6, 0, 6], \"divisor_coefficients\": [1, -4]}\n    \n    dividend_coeffs = frozen_params[\"dividend_coefficients\"]\n    divisor_coeffs = frozen_params[\"divisor_coefficients\"]\n    \n    # Perform polynomial division manually to ensure exact arithmetic\n    # Dividend: P(x) = 6x^2 + 0x + 6 (coeffs [6, 0, 6]) -> degree 2\n    # Divisor: Q(x) = x - 4 (coeffs [1, -4]) -> degree 1\n    \n    dividend_degree = len(dividend_coeffs) - 1\n    divisor_degree = len(divisor_coeffs) - 1\n    \n    quotient_degree = dividend_degree - divisor_degree if dividend_degree >= divisor_degree else -1\n    remainder_degree = max(-1, dividend_degree - (divisor_degree + 1)) # Should be less than divisor degree\n    \n    quotient_coefficients = [0] * (quotient_degree + 1)\n    remainder_coefficients = []\n    \n    current_dividend_coeffs = list(dividend_coeffs)\n    \n    if quotient_degree >= 0:\n        for i in range(quotient_degree, -1, -1):\n            # Leading term of divisor is always 1 here based on frozen params [1, -4]\n            lead_term = divisor_coeffs[0]\n            \n            factor = current_dividend_coeffs[i + divisor_degree] // lead_term\n            \n            quotient_coefficients[quotient_degree - i] = factor\n            \n            if len(remainder_coefficients) == 0:\n                remainder_coefficients.append(factor * [lead_term]) # Start with list of lists for consistency? No, spec says coefficients. Let's track current dividend state directly.\n            \n            # Subtract factor * divisor(x + shift) from current_dividend_coeffs\n            # The term being subtracted is at index i in the shifted context\n            \n            # Update current_dividend_coeffs: \n            # new_val = old_val - (factor * lead_term * x^(i+divisor_degree)) ... wait, standard algorithm logic\n            \n            # Let's re-implement strictly using a temporary list for working dividend\n            pass\n        \n        # Re-calculate properly in one go to avoid state confusion\n    \n    # Correct Algorithm Implementation:\n    work_dividend = list(dividend_coeffs)\n    quotient_list = []\n    \n    if len(work_dividend) > 0 and divisor_degree < len(work_dividend):\n        for i in range(len(work_dividend) - divisor_degree, 1, -1): \n            # We iterate from the highest degree possible down to constant term of dividend relative to divisor alignment?\n            # Standard long division: align leading terms.\n            \n            pass\n            \n    # Let's do it step-by-step clearly\n    \n    work = list(dividend_coeffs)\n    q = []\n    \n    if len(work) > 0 and len(divisor_coeffs) <= len(work):\n        for i in range(len(work), -1, -1): \n             # We want to eliminate the term at index j where we align divisor's leading term (index 0) with work[j]\n             \n             pass\n\n    # Refined Algorithm:\n    # Dividend coeffs: [6, 0, 6] -> 6x^2 + 0x + 6. Degree 2.\n    # Divisor coeffs: [1, -4] -> x - 4. Degree 1.\n    \n    dividend = list(dividend_coeffs)\n    divisor = list(divisor_coeffs)\n    \n    quotient_degree = len(dividend) - len(divisor)\n    remainder_degree = max(-1, len(dividend) - (len(divisor))) # Actually degree of rem < deg(divisor). If no division possible or exact, handle.\n    \n    if dividend_degree >= divisor_degree:\n        q_coeffs = [0] * quotient_degree\n        \n        for i in range(quotient_degree):\n            idx_in_dividend = len(dividend) - 1 - (len(divisor) - 1 - i) # Index of the term we are trying to eliminate\n            \n            if idx_in_dividend < 0: break\n            \n            lead_divisor = divisor[0]\n            \n            factor = dividend[idx_in_dividend] // lead_divisor\n            \n            q_coeffs[i] = factor\n            \n            # Subtract factor * (divisor shifted) from current dividend list\n            shift_amount = len(divisor) - i # How many positions to subtract? \n            # Actually, if we are at index `idx`, and divisor has degree 1.\n            # We multiply divisor by x^(deg_rem).\n            \n            # Let's just simulate the subtraction directly on a copy\n            \n        # Simpler loop:\n        \n    final_quotient_coeffs = []\n    current_dividend = list(dividend_coeffs)\n    \n    if len(current_dividend) > 0 and len(divisor_coeffs) <= len(current_dividend):\n        for i in range(len(current_dividend)):\n            pass\n            \n    # Final Correct Logic:\n    dividend_list = [6, 0, 6]\n    divisor_list = [1, -4]\n    \n    quotient_res = []\n    remainder_res = []\n    \n    if len(dividend_list) >= len(divisor_list):\n        for i in range(len(dividend_list)):\n            pass\n            \n    # Let's write the code explicitly to avoid logic errors\n    \n    dividend_coeffs_in = [6, 0, 6]\n    divisor_coeffs_in = [1, -4]\n    \n    n = len(dividend_coeffs_in)\n    m = len(divisor_coeffs_in)\n    \n    if n < m:\n        quotient_latex = \"x^\" + str(-m+n+1) # Not applicable here. \n        remainder_latex = \"\\\\text{remainder}\"\n        \n    else:\n        q_deg = n - m\n        \n        current_dividend = list(dividend_coeffs_in)\n        quot_list = []\n        \n        for i in range(q_deg, -1, -1):\n            # We are looking at the term that aligns with divisor's leading term (index 0)\n            # The index in `current_dividend` to eliminate is: n - m + i? \n            # Let's trace indices.\n            # Divisor degree = m-1. Leading coeff at index 0.\n            # We want to match current_dividend[k] with divisor[0].\n            # k corresponds to the highest power we can still divide by.\n            \n            pass\n            \n        # Correct Iteration:\n        temp_dividend = list(dividend_coeffs_in)\n        \n        for i in range(len(temp_dividend)):\n             if len(quotient_res) == 0 and i < n - m + 1: \n                 pass\n        \n    # Let's just compute it manually since inputs are tiny to ensure correctness.\n    # P(x) = 6x^2 + 6\n    # Q(x) = x - 4\n    \n    # Step 1: (6x^2) / (x) = 6x. Quotient term: 6x.\n    # Multiply: 6x * (x - 4) = 6x^2 - 24x.\n    # Subtract from P(x): (6x^2 + 0x + 6) - (6x^2 - 24x) = 24x + 6.\n    \n    # Step 2: (24x) / (x) = 24. Quotient term: 24.\n    # Multiply: 24 * (x - 4) = 24x - 96.\n    # Subtract from remainder: (24x + 6) - (24x - 96) = 102.\n    \n    quotient_coeffs_manual = [6, 24]\n    remainder_coeff_manual = [102]\n    \n    question_text = r\"\"\"Perform polynomial division of \\( P(x) \\) by \\( Q(x) \\).\n\nGiven:\n\\( P(x) = 6x^2 + 6 \\) (coefficients: $[6, 0, 6]$)\n$Q(x) = x - 4$ (coefficients: $[1, -4]$)\n\nFind the quotient and remainder. Express your answer in terms of coefficients.\"\"\"\n\n    correct_answer_dict = {\n        \"quotient_coefficients\": [6, 24],\n        \"remainder_coefficients\": [102],\n        \"quotient_latex\": r\"\\\\frac{P(x)}{Q(x)} = 6x + 24 \\\\text{ with remainder } 102\",\n        \"remainder_latex\": \"\\\\intertext{} P(x) = (x-4)(6x+24) + 102\"\n    }\n\n    oracle_payload = frozen_params\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer_dict,\n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:25:38.168217+00:00",
+  "completed_at_utc": "2026-07-21T15:25:59.085320+00:00",
+  "duration": 20.917093500029296,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 20.917081300052814,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 248,
+      "eval_count": 1972,
+      "total_token_count": 2220,
+      "total_duration": 18890559600,
+      "load_duration": 242073100,
+      "done_reason": "stop",
+      "latency_ms": 20917,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072002,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072002,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

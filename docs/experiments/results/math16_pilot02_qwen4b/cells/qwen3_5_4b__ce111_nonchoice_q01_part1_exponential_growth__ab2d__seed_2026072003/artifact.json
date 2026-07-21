@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce111_nonchoice_q01_part1_exponential_growth__ab2d__seed_2026072003",
+  "task_id": "ce111_nonchoice_q01_part1_exponential_growth",
+  "family": "integer",
+  "condition": "ab2d",
+  "seed": 2026072003,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072003
+  },
+  "prompt_sha256": "1f1491d3b68e9620550398001b27cd72e2f8b6c08c2debbf346396314a69cb42",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    frozen_params = {\"days\": 15, \"hours_per_generation\": 20, \"initial\": 1, \"split_factor\": 4}\n    \n    from core.prompts.domain_function_library import IntegerOps\n    \n    total_hours = kwargs.get(\"total_hours\", hours_per_generation * level) if 'hours_per_generation' in kwargs else frozen_params[\"hours_per_generation\"] * (frozen_params[\"days\"] // 15 + 1)\n    # Re-evaluating based on standard exponential growth problem structure: \n    # Population P(t) = P0 * r^t. Here, split_factor is the rate per generation step if we consider generations over days?\n    # Given \"hours_per_generation\" and \"days\", let's assume a discrete time model where t represents number of steps or hours scaled to base 2 (binary fission implied by splitting).\n    # Standard interpretation for ce111_nonchoice_q01_part1: P = initial * split_factor ** days.\n    \n    total_days = frozen_params[\"days\"]\n    p0 = IntegerOps.safe_eval(str(frozen_params[\"initial\"]))\n    r = IntegerOps.safe_eval(str(frozen_params[\"split_factor\"]))\n    \n    # Calculate final population after 'total_days' generations/steps assuming binary splitting logic per day as implied by context of exponential growth with split factor 4 (often meaning doubling then more, or direct power). \n    # Given the parameters and typical problem type: P = initial * r^days.\n    result_p = IntegerOps.safe_eval(str(p0) + \"*\" + str(r) + \"**\" + str(total_days))\n    \n    correct_answer_dict = {\"k\": int(result_p)}\n    \n    question_text = f\"What is the final population after {total_days} days given an initial population of 1 and a split factor of 4? The growth follows exponential function $P(t) = P_0 \\\\cdot r^t$.\"\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer_dict,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:47:10.317187+00:00",
+  "completed_at_utc": "2026-07-21T15:47:17.337625+00:00",
+  "duration": 7.020426400005817,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 7.02041450003162,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 344,
+      "eval_count": 456,
+      "total_token_count": 800,
+      "total_duration": 4992020800,
+      "load_duration": 278862500,
+      "done_reason": "stop",
+      "latency_ms": 7020,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072003,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072003,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

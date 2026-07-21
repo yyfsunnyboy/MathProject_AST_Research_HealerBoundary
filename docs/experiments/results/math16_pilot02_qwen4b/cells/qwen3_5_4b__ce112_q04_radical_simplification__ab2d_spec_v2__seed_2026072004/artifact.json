@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce112_q04_radical_simplification__ab2d_spec_v2__seed_2026072004",
+  "task_id": "ce112_q04_radical_simplification",
+  "family": "radical",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072004,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072004
+  },
+  "prompt_sha256": "14468d40af33b62b0c252bc11861baed124b1313d69a77fa4907ba256e91c080",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce112_q04_radical_simplification.txt",
+  "generation_status": "success",
+  "raw_response": "```python\n# -*- coding: utf-8 -*-\n\ndef generate(level=1, **kwargs):\n    # Frozen sampled parameters used for this task instance\n    frozen_params = {\"radicand\": 135}\n    \n    from core.prompts.domain_function_library import RadicalOps\n    \n    radicand_input = frozen_params[\"radicand\"]\n    \n    coeff, simplified_radicand = RadicalOps.simplify_term(0, radicand_input)\n    \n    # Construct the correct answer components\n    coefficient = coeff\n    final_radicand = simplified_radicand\n    \n    # Format canonical LaTeX: a\\sqrt{b} -> \\text{{a}}\\sqrt{\\text{{b}}} or similar standard representation\n    # Assuming standard mathjax/latex rendering where '1' is implied if integer, but here we have coeff=3, radicand=5\n    # The form requested is coefficient * sqrt(radicand)\n    \n    correct_answer = {\n        \"coefficient\": int(coefficient),\n        \"radicand\": int(final_radicand),\n        \"canonical_latex\": f\"\\\\text{{3}}\\\\sqrt{{{final_radicand}}}\"\n    }\n\n    question_text = r\"\\text{Simplify the radical expression: } \\sqrt{\\text{{135}}}.\"\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": frozen_params.copy()\n    }\n```",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T16:07:01.527316+00:00",
+  "completed_at_utc": "2026-07-21T16:07:06.968916+00:00",
+  "duration": 5.441590799950063,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 5.4415798000991344,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 639,
+      "eval_count": 315,
+      "total_token_count": 954,
+      "total_duration": 3420450200,
+      "load_duration": 253376400,
+      "done_reason": "stop",
+      "latency_ms": 5441,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072004,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072004,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

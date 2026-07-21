@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen4b_freeze_v1",
+  "cell_id": "qwen3_5_4b__ce112_q12_independent_probability_fraction__ab2g__seed_2026072001",
+  "task_id": "ce112_q12_independent_probability_fraction",
+  "family": "fraction",
+  "condition": "ab2g",
+  "seed": 2026072001,
+  "model_tag": "qwen3.5:4b",
+  "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+  "runtime_config_fingerprint": "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072001
+  },
+  "prompt_sha256": "d68af74fd5f59ae1178e9835684479397bd58a2b1f31fd9ef7b022e34b96fcf1",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    p1_min = 2\n    p1_max = 6\n    p2_min = 1\n    p2_max = 5\n    \n    import random\n    r1 = random.randint(p1_min, p1_max)\n    r2 = random.randint(p2_min, p2_max)\n    \n    numerator = r1 * r2\n    denominator = (r1 + r2) ** 2\n    \n    gcd_val = math.gcd(numerator, denominator)\n    num_canonical = numerator // gcd_val\n    den_canonical = denominator // gcd_val\n    \n    question_text = r\"Let $P_1$ and $P_2$ be independent events with probabilities $\\frac{r_1}{s}$ and $\\frac{r_2}{t}$. If the probability of both occurring is given as a fraction derived from products, find the irreducible form where numerator equals product and denominator equals sum squared.\"\n    \n    correct_answer = {\n        \"numerator\": num_canonical,\n        \"denominator\": den_canonical,\n        \"canonical_latex\": f\"\\frac{{{num_canonical}}}{{<{len(str(den_canonical))}>}}\" # Placeholder for dynamic latex length check if needed, but spec asks for canonical form. Let's use standard LaTeX format directly.\n    }\n    \n    import math\n    \n    correct_answer[\"canonical_latex\"] = rf\"\\frac{{{num_canonical}}}{{{den_canonical}}}\"\n\n    oracle_payload = {\"p1\": [2, 6], \"p2\": [1, 5]}",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T15:20:22.773533+00:00",
+  "completed_at_utc": "2026-07-21T15:20:28.396765+00:00",
+  "duration": 5.623221499961801,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 5.623209599987604,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 226,
+      "eval_count": 342,
+      "total_token_count": 568,
+      "total_duration": 3581958500,
+      "load_duration": 254140800,
+      "done_reason": "stop",
+      "latency_ms": 5623,
+      "request_payload": {
+        "model": "qwen3.5:4b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072001,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072001,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}
