@@ -20,7 +20,7 @@ from agent_tools.finals_rebuild.math16_pool import build_pool_tasks, frozen_for_
 from agent_tools.finals_rebuild.ce115_clean_incremental_ablation import build_condition_prompt
 
 ALL_TASKS = [
-    # Integer (4 tasks)
+    # Integer (4 tasks: reused Integer tasks)
     {
         "task_id": "ce111_q03_prime_factor_selection",
         "family": "integer",
@@ -29,9 +29,12 @@ ALL_TASKS = [
         "scaffold": "integer_domain_scaffold_compact.py",
         "guardrail_subdir": "integer",
         "is_api": False,
-        "pre_run_difficulty": "low",
-        "discrimination": "medium",
-        "ceiling_risk": "high"
+        "assessment_timing": "POST_RUN_RETROSPECTIVE",
+        "result_known": True,
+        "evidence_basis": "SAME_RUN_EVIDENCE",
+        "difficulty": "LOW",
+        "discrimination": "MEDIUM",
+        "ceiling_risk": "HIGH"
     },
     {
         "task_id": "ce112_q01_negative_integer_power",
@@ -41,9 +44,12 @@ ALL_TASKS = [
         "scaffold": "integer_domain_scaffold_compact.py",
         "guardrail_subdir": "integer",
         "is_api": False,
-        "pre_run_difficulty": "low",
-        "discrimination": "medium",
-        "ceiling_risk": "high"
+        "assessment_timing": "POST_RUN_RETROSPECTIVE",
+        "result_known": True,
+        "evidence_basis": "SAME_RUN_EVIDENCE",
+        "difficulty": "LOW",
+        "discrimination": "MEDIUM",
+        "ceiling_risk": "HIGH"
     },
     {
         "task_id": "ce112_q09_divisor_multiple_intersection",
@@ -53,9 +59,12 @@ ALL_TASKS = [
         "scaffold": "integer_domain_scaffold_compact.py",
         "guardrail_subdir": "integer",
         "is_api": False,
-        "pre_run_difficulty": "medium",
-        "discrimination": "high",
-        "ceiling_risk": "medium"
+        "assessment_timing": "POST_RUN_RETROSPECTIVE",
+        "result_known": True,
+        "evidence_basis": "SAME_RUN_EVIDENCE",
+        "difficulty": "MEDIUM",
+        "discrimination": "HIGH",
+        "ceiling_risk": "MODERATE"
     },
     {
         "task_id": "ce111_nonchoice_q01_part1_exponential_growth",
@@ -65,11 +74,14 @@ ALL_TASKS = [
         "scaffold": "integer_domain_scaffold_compact.py",
         "guardrail_subdir": "integer",
         "is_api": False,
-        "pre_run_difficulty": "medium",
-        "discrimination": "high",
-        "ceiling_risk": "medium"
+        "assessment_timing": "POST_RUN_RETROSPECTIVE",
+        "result_known": True,
+        "evidence_basis": "SAME_RUN_EVIDENCE",
+        "difficulty": "MEDIUM",
+        "discrimination": "HIGH",
+        "ceiling_risk": "MODERATE"
     },
-    # Polynomial (4 tasks)
+    # Polynomial (4 tasks: newly added tasks)
     {
         "task_id": "ce111_q02_polynomial_division_remainder",
         "family": "polynomial",
@@ -78,9 +90,12 @@ ALL_TASKS = [
         "scaffold": "polynomial_domain_scaffold_compact.py",
         "guardrail_subdir": "polynomial",
         "is_api": True,
-        "pre_run_difficulty": "medium",
-        "discrimination": "high",
-        "ceiling_risk": "low"
+        "assessment_timing": "PRE_RUN",
+        "result_known": False,
+        "evidence_basis": "HISTORICAL_FROZEN_ONLY",
+        "difficulty": "MEDIUM",
+        "discrimination": "HIGH",
+        "ceiling_risk": "LOW"
     },
     {
         "task_id": "ce111_q08_polynomial_factor_parameter_recovery",
@@ -90,9 +105,12 @@ ALL_TASKS = [
         "scaffold": "integer_domain_scaffold_compact.py",
         "guardrail_subdir": "polynomial",
         "is_api": False,
-        "pre_run_difficulty": "high",
-        "discrimination": "very_high",
-        "ceiling_risk": "very_low"
+        "assessment_timing": "PRE_RUN",
+        "result_known": False,
+        "evidence_basis": "HISTORICAL_FROZEN_ONLY",
+        "difficulty": "HIGH",
+        "discrimination": "HIGH",
+        "ceiling_risk": "LOW"
     },
     {
         "task_id": "ce115_calc_polynomial_division_l1",
@@ -102,9 +120,12 @@ ALL_TASKS = [
         "scaffold": "polynomial_domain_scaffold_compact.py",
         "guardrail_subdir": "polynomial",
         "is_api": True,
-        "pre_run_difficulty": "medium",
-        "discrimination": "high",
-        "ceiling_risk": "low"
+        "assessment_timing": "PRE_RUN",
+        "result_known": False,
+        "evidence_basis": "HISTORICAL_FROZEN_ONLY",
+        "difficulty": "MEDIUM",
+        "discrimination": "HIGH",
+        "ceiling_risk": "LOW"
     },
     {
         "task_id": "ce115_calc_polynomial_factor_roots_l1",
@@ -114,11 +135,14 @@ ALL_TASKS = [
         "scaffold": "integer_domain_scaffold_compact.py",
         "guardrail_subdir": "polynomial",
         "is_api": False,
-        "pre_run_difficulty": "medium",
-        "discrimination": "high",
-        "ceiling_risk": "medium"
+        "assessment_timing": "PRE_RUN",
+        "result_known": False,
+        "evidence_basis": "HISTORICAL_FROZEN_ONLY",
+        "difficulty": "MEDIUM",
+        "discrimination": "HIGH",
+        "ceiling_risk": "MODERATE"
     },
-    # Radical (4 tasks)
+    # Radical (4 tasks: newly added tasks)
     {
         "task_id": "ce111_q10_ordered_quadratic_roots_radical",
         "family": "radical",
@@ -127,9 +151,12 @@ ALL_TASKS = [
         "scaffold": "radical_domain_scaffold_compact.py",
         "guardrail_subdir": "radical",
         "is_api": True,
-        "pre_run_difficulty": "high",
-        "discrimination": "very_high",
-        "ceiling_risk": "very_low"
+        "assessment_timing": "PRE_RUN",
+        "result_known": False,
+        "evidence_basis": "HISTORICAL_FROZEN_ONLY",
+        "difficulty": "HIGH",
+        "discrimination": "HIGH",
+        "ceiling_risk": "LOW"
     },
     {
         "task_id": "ce112_q04_radical_simplification",
@@ -139,9 +166,12 @@ ALL_TASKS = [
         "scaffold": "radical_domain_scaffold_compact.py",
         "guardrail_subdir": "radical",
         "is_api": True,
-        "pre_run_difficulty": "low",
-        "discrimination": "medium",
-        "ceiling_risk": "high"
+        "assessment_timing": "PRE_RUN",
+        "result_known": False,
+        "evidence_basis": "HISTORICAL_FROZEN_ONLY",
+        "difficulty": "LOW",
+        "discrimination": "MEDIUM",
+        "ceiling_risk": "HIGH"
     },
     {
         "task_id": "ce113_q11_rationalize_denominator",
@@ -151,9 +181,12 @@ ALL_TASKS = [
         "scaffold": "integer_domain_scaffold_compact.py",
         "guardrail_subdir": "radical",
         "is_api": False,
-        "pre_run_difficulty": "high",
-        "discrimination": "very_high",
-        "ceiling_risk": "low"
+        "assessment_timing": "PRE_RUN",
+        "result_known": False,
+        "evidence_basis": "HISTORICAL_FROZEN_ONLY",
+        "difficulty": "HIGH",
+        "discrimination": "HIGH",
+        "ceiling_risk": "LOW"
     },
     {
         "task_id": "ce115_calc_radical_simplification_l1",
@@ -163,11 +196,14 @@ ALL_TASKS = [
         "scaffold": "radical_domain_scaffold_compact.py",
         "guardrail_subdir": "radical",
         "is_api": True,
-        "pre_run_difficulty": "low",
-        "discrimination": "medium",
-        "ceiling_risk": "high"
+        "assessment_timing": "PRE_RUN",
+        "result_known": False,
+        "evidence_basis": "HISTORICAL_FROZEN_ONLY",
+        "difficulty": "LOW",
+        "discrimination": "MEDIUM",
+        "ceiling_risk": "HIGH"
     },
-    # Fraction (4 tasks)
+    # Fraction (4 tasks: newly added tasks)
     {
         "task_id": "ce111_q05_exact_fraction_expression",
         "family": "fraction",
@@ -176,9 +212,12 @@ ALL_TASKS = [
         "scaffold": "fraction_domain_scaffold_compact.py",
         "guardrail_subdir": "fraction",
         "is_api": True,
-        "pre_run_difficulty": "medium",
-        "discrimination": "high",
-        "ceiling_risk": "low"
+        "assessment_timing": "PRE_RUN",
+        "result_known": False,
+        "evidence_basis": "HISTORICAL_FROZEN_ONLY",
+        "difficulty": "MEDIUM",
+        "discrimination": "HIGH",
+        "ceiling_risk": "LOW"
     },
     {
         "task_id": "ce112_q12_independent_probability_fraction",
@@ -188,9 +227,12 @@ ALL_TASKS = [
         "scaffold": "fraction_domain_scaffold_compact.py",
         "guardrail_subdir": "fraction",
         "is_api": True,
-        "pre_run_difficulty": "medium",
-        "discrimination": "medium",
-        "ceiling_risk": "medium"
+        "assessment_timing": "PRE_RUN",
+        "result_known": False,
+        "evidence_basis": "HISTORICAL_FROZEN_ONLY",
+        "difficulty": "MEDIUM",
+        "discrimination": "MEDIUM",
+        "ceiling_risk": "MODERATE"
     },
     {
         "task_id": "ce113_q01_negative_fraction_subtraction",
@@ -200,9 +242,12 @@ ALL_TASKS = [
         "scaffold": "fraction_domain_scaffold_compact.py",
         "guardrail_subdir": "fraction",
         "is_api": True,
-        "pre_run_difficulty": "low",
-        "discrimination": "medium",
-        "ceiling_risk": "high"
+        "assessment_timing": "PRE_RUN",
+        "result_known": False,
+        "evidence_basis": "HISTORICAL_FROZEN_ONLY",
+        "difficulty": "LOW",
+        "discrimination": "MEDIUM",
+        "ceiling_risk": "HIGH"
     },
     {
         "task_id": "ce115_calc_exact_rational_expression_l1",
@@ -212,9 +257,12 @@ ALL_TASKS = [
         "scaffold": "fraction_domain_scaffold_compact.py",
         "guardrail_subdir": "fraction",
         "is_api": True,
-        "pre_run_difficulty": "medium",
-        "discrimination": "high",
-        "ceiling_risk": "low"
+        "assessment_timing": "PRE_RUN",
+        "result_known": False,
+        "evidence_basis": "HISTORICAL_FROZEN_ONLY",
+        "difficulty": "MEDIUM",
+        "discrimination": "HIGH",
+        "ceiling_risk": "LOW"
     }
 ]
 
@@ -324,8 +372,11 @@ def main():
             "family": item["family"],
             "domain": item["domain"],
             "api_policy": item["api_policy"],
-            "pre_run_assessment": {
-                "pre_run_difficulty": item["pre_run_difficulty"],
+            "assessment": {
+                "assessment_timing": item["assessment_timing"],
+                "result_known": item["result_known"],
+                "evidence_basis": item["evidence_basis"],
+                "difficulty": item["difficulty"],
                 "discrimination": item["discrimination"],
                 "ceiling_risk": item["ceiling_risk"]
             },

@@ -29,10 +29,15 @@ def test_manifest_spec_integrity():
         p_path = ROOT / task["prompt_path"]
         assert p_path.exists()
         assert "family" in task
-        assert "pre_run_assessment" in task
-        assert "pre_run_difficulty" in task["pre_run_assessment"]
-        assert "discrimination" in task["pre_run_assessment"]
-        assert "ceiling_risk" in task["pre_run_assessment"]
+        assert "assessment" in task
+
+        ass = task["assessment"]
+        assert ass["assessment_timing"] in {"PRE_RUN", "POST_RUN_RETROSPECTIVE"}
+        assert ass["difficulty"] in {"LOW", "MEDIUM", "HIGH"}
+        assert ass["discrimination"] in {"LOW", "MEDIUM", "HIGH"}
+        assert ass["ceiling_risk"] in {"LOW", "MODERATE", "HIGH"}
+        assert isinstance(ass["result_known"], bool)
+        assert ass["evidence_basis"] in {"HISTORICAL_FROZEN_ONLY", "SAME_RUN_EVIDENCE"}
 
         # Verify SHA, char count, byte count
         content = p_path.read_text(encoding="utf-8").replace("\r\n", "\n")
@@ -104,6 +109,7 @@ def test_api_policy_rules():
             assert "PolynomialOps" not in prompt_text
             assert "RadicalOps" not in prompt_text
             assert "FractionOps" not in prompt_text
+            assert "IntegerOps" not in prompt_text
 
 def test_plans_geometry():
     assert CELL_PLAN_PATH.exists()
