@@ -1,16 +1,19 @@
 # Ab2s Integer Prompt Specification Draft (v1)
 
-This document contains the exact prompt assembly drafts for the 4 pilot integer tasks under the **Ab2s (Skill-style Precise Specification)** condition. 
+This document contains the exact prompt assembly drafts for the 4 pilot integer tasks under the **ab2s_integer_skill** condition.
 
 The prompt assembly structure is:
 $$\text{Ab2s Prompt} = \text{Exact Frozen Ab2g Prompt} + \text{\n\n} + \text{Task-local Ab2s Skill Block}$$
+
+No module import paths are included in the model-visible prompts.
 
 ---
 
 ## 1. ce111_q03_prime_factor_selection
 
 * **Task ID**: `ce111_q03_prime_factor_selection`
-* **Task-local Allowlist APIs**: `IntegerOps.is_divisible`, `IntegerOps.safe_eval`
+* **Structural Tag**: `divisibility-and-prime-factor selection`
+* **Task-local Allowlist APIs**: `IntegerOps.is_divisible`
 * **Ab2s Prompt Draft**:
 
 ```text
@@ -25,14 +28,28 @@ Output complete Python source only. Do not use Markdown fences or explanatory pr
 
 ## Skill-style Precise Specification (Ab2s)
 For integers tasks, you must strictly follow these engineering specifications:
-1. Namespace & Injection: Direct call IntegerOps.method(...) where needed. Do not import IntegerOps; it is pre-injected.
-2. Native Operators First: Prefer native Python syntax (e.g., +, -, *, //, %, **, loops, comparisons) for basic arithmetic. Plain int math is encouraged.
-3. Decouple Logic: Compute the mathematical answer (stored in a JSON-safe int/bool/dict/list) first, then format question_text (LaTeX) and correct_answer separately.
+1. Structural Tag: divisibility-and-prime-factor selection
+2. Namespace & Injection: Direct call IntegerOps.method(...) where needed. Do not import IntegerOps; it is pre-injected.
+3. Native Operators First: Prefer native Python syntax (e.g., +, -, *, //, %, **, loops, comparisons) for basic arithmetic. Plain int math is encouraged.
 4. Forbidden APIs: Do not use IntegerOps.add or IntegerOps.sub (they are not supported by the runtime injection template). Do not use eval() or invent any undocumented helpers.
-5. Task-Local Allowlist (use only these if calling IntegerOps):
-   - `IntegerOps.is_divisible` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | returns: bool
-   - `IntegerOps.safe_eval` | import: `core.prompts.domain_function_library` | signature: `(expr)` | returns: int | float
-6. Quality Gate Self-Check: Verify that generate() exists, returns exactly 3 top-level keys matching the task schema, does not alter frozen parameters, and output contains no markdown fences or explanations.
+5. Task-Local Domain API Allowlist:
+   - IntegerOps.is_divisible(a, b) -> bool
+     Availability: already injected into runtime scope.
+     Call exactly as IntegerOps.is_divisible(a, b).
+     Do not import IntegerOps.
+6. Quality Gate Self-Check: Before outputting, you must verify that:
+   - generate() exists.
+   - The returned dict has exactly the top-level keys: question_text, correct_answer, and oracle_payload.
+   - Frozen parameters are unchanged, and oracle_payload fields, values, and types match the contract.
+   - correct_answer type matches this task's contract.
+   - All names and variables are defined before use.
+   - API calls use the full dotted path.
+   - No APIs outside the allowlist are used.
+   - IntegerOps.add, IntegerOps.sub, and built-in eval() are not used.
+   - No helpers, adapters, or converters are fabricated.
+   - All output values are JSON-serializable.
+   - Exact computation is completed first, and then question_text and LaTeX are constructed.
+   - Output contains no Markdown fences and no explanatory prose.
 ```
 
 ---
@@ -40,7 +57,8 @@ For integers tasks, you must strictly follow these engineering specifications:
 ## 2. ce112_q01_negative_integer_power
 
 * **Task ID**: `ce112_q01_negative_integer_power`
-* **Task-local Allowlist APIs**: `IntegerOps.safe_eval`, `IntegerOps.fmt_num`
+* **Structural Tag**: `signed integer exponentiation`
+* **Task-local Allowlist APIs**: none
 * **Ab2s Prompt Draft**:
 
 ```text
@@ -55,14 +73,26 @@ Output complete Python source only. Do not use Markdown fences or explanatory pr
 
 ## Skill-style Precise Specification (Ab2s)
 For integers tasks, you must strictly follow these engineering specifications:
-1. Namespace & Injection: Direct call IntegerOps.method(...) where needed. Do not import IntegerOps; it is pre-injected.
-2. Native Operators First: Prefer native Python syntax (e.g., +, -, *, //, %, **, loops, comparisons) for basic arithmetic. Plain int math is encouraged.
-3. Decouple Logic: Compute the mathematical answer (stored in a JSON-safe int/bool/dict/list) first, then format question_text (LaTeX) and correct_answer separately.
+1. Structural Tag: signed integer exponentiation
+2. Namespace & Injection: Direct call IntegerOps.method(...) where needed. Do not import IntegerOps; it is pre-injected.
+3. Native Operators First: Prefer native Python syntax (e.g., +, -, *, //, %, **, loops, comparisons) for basic arithmetic. Plain int math is encouraged.
 4. Forbidden APIs: Do not use IntegerOps.add or IntegerOps.sub (they are not supported by the runtime injection template). Do not use eval() or invent any undocumented helpers.
-5. Task-Local Allowlist (use only these if calling IntegerOps):
-   - `IntegerOps.safe_eval` | import: `core.prompts.domain_function_library` | signature: `(expr)` | returns: int | float
-   - `IntegerOps.fmt_num` | import: `core.prompts.domain_function_library` | signature: `(n)` | returns: str
-6. Quality Gate Self-Check: Verify that generate() exists, returns exactly 3 top-level keys matching the task schema, does not alter frozen parameters, and output contains no markdown fences or explanations.
+5. Task-Local Domain API Allowlist: none.
+   Do not call any IntegerOps method for this task.
+   Use native Python integer exponentiation with **.
+6. Quality Gate Self-Check: Before outputting, you must verify that:
+   - generate() exists.
+   - The returned dict has exactly the top-level keys: question_text, correct_answer, and oracle_payload.
+   - Frozen parameters are unchanged, and oracle_payload fields, values, and types match the contract.
+   - correct_answer type matches this task's contract.
+   - All names and variables are defined before use.
+   - API calls use the full dotted path.
+   - No APIs outside the allowlist are used.
+   - IntegerOps.add, IntegerOps.sub, and built-in eval() are not used.
+   - No helpers, adapters, or converters are fabricated.
+   - All output values are JSON-serializable.
+   - Exact computation is completed first, and then question_text and LaTeX are constructed.
+   - Output contains no Markdown fences and no explanatory prose.
 ```
 
 ---
@@ -70,7 +100,8 @@ For integers tasks, you must strictly follow these engineering specifications:
 ## 3. ce112_q09_divisor_multiple_intersection
 
 * **Task ID**: `ce112_q09_divisor_multiple_intersection`
-* **Task-local Allowlist APIs**: `IntegerOps.is_divisible`, `IntegerOps.safe_eval`
+* **Structural Tag**: `divisor-multiple intersection`
+* **Task-local Allowlist APIs**: `IntegerOps.is_divisible`
 * **Ab2s Prompt Draft**:
 
 ```text
@@ -85,14 +116,28 @@ Output complete Python source only. Do not use Markdown fences or explanatory pr
 
 ## Skill-style Precise Specification (Ab2s)
 For integers tasks, you must strictly follow these engineering specifications:
-1. Namespace & Injection: Direct call IntegerOps.method(...) where needed. Do not import IntegerOps; it is pre-injected.
-2. Native Operators First: Prefer native Python syntax (e.g., +, -, *, //, %, **, loops, comparisons) for basic arithmetic. Plain int math is encouraged.
-3. Decouple Logic: Compute the mathematical answer (stored in a JSON-safe int/bool/dict/list) first, then format question_text (LaTeX) and correct_answer separately.
+1. Structural Tag: divisor-multiple intersection
+2. Namespace & Injection: Direct call IntegerOps.method(...) where needed. Do not import IntegerOps; it is pre-injected.
+3. Native Operators First: Prefer native Python syntax (e.g., +, -, *, //, %, **, loops, comparisons) for basic arithmetic. Plain int math is encouraged.
 4. Forbidden APIs: Do not use IntegerOps.add or IntegerOps.sub (they are not supported by the runtime injection template). Do not use eval() or invent any undocumented helpers.
-5. Task-Local Allowlist (use only these if calling IntegerOps):
-   - `IntegerOps.is_divisible` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | returns: bool
-   - `IntegerOps.safe_eval` | import: `core.prompts.domain_function_library` | signature: `(expr)` | returns: int | float
-6. Quality Gate Self-Check: Verify that generate() exists, returns exactly 3 top-level keys matching the task schema, does not alter frozen parameters, and output contains no markdown fences or explanations.
+5. Task-Local Domain API Allowlist:
+   - IntegerOps.is_divisible(a, b) -> bool
+     Availability: already injected into runtime scope.
+     Call exactly as IntegerOps.is_divisible(a, b).
+     Do not import IntegerOps.
+6. Quality Gate Self-Check: Before outputting, you must verify that:
+   - generate() exists.
+   - The returned dict has exactly the top-level keys: question_text, correct_answer, and oracle_payload.
+   - Frozen parameters are unchanged, and oracle_payload fields, values, and types match the contract.
+   - correct_answer type matches this task's contract.
+   - All names and variables are defined before use.
+   - API calls use the full dotted path.
+   - No APIs outside the allowlist are used.
+   - IntegerOps.add, IntegerOps.sub, and built-in eval() are not used.
+   - No helpers, adapters, or converters are fabricated.
+   - All output values are JSON-serializable.
+   - Exact computation is completed first, and then question_text and LaTeX are constructed.
+   - Output contains no Markdown fences and no explanatory prose.
 ```
 
 ---
@@ -100,7 +145,8 @@ For integers tasks, you must strictly follow these engineering specifications:
 ## 4. ce111_nonchoice_q01_part1_exponential_growth
 
 * **Task ID**: `ce111_nonchoice_q01_part1_exponential_growth`
-* **Task-local Allowlist APIs**: `IntegerOps.safe_eval`, `IntegerOps.fmt_num`
+* **Structural Tag**: `discrete exponential growth`
+* **Task-local Allowlist APIs**: none
 * **Ab2s Prompt Draft**:
 
 ```text
@@ -115,12 +161,24 @@ Output complete Python source only. Do not use Markdown fences or explanatory pr
 
 ## Skill-style Precise Specification (Ab2s)
 For integers tasks, you must strictly follow these engineering specifications:
-1. Namespace & Injection: Direct call IntegerOps.method(...) where needed. Do not import IntegerOps; it is pre-injected.
-2. Native Operators First: Prefer native Python syntax (e.g., +, -, *, //, %, **, loops, comparisons) for basic arithmetic. Plain int math is encouraged.
-3. Decouple Logic: Compute the mathematical answer (stored in a JSON-safe int/bool/dict/list) first, then format question_text (LaTeX) and correct_answer separately.
+1. Structural Tag: discrete exponential growth
+2. Namespace & Injection: Direct call IntegerOps.method(...) where needed. Do not import IntegerOps; it is pre-injected.
+3. Native Operators First: Prefer native Python syntax (e.g., +, -, *, //, %, **, loops, comparisons) for basic arithmetic. Plain int math is encouraged.
 4. Forbidden APIs: Do not use IntegerOps.add or IntegerOps.sub (they are not supported by the runtime injection template). Do not use eval() or invent any undocumented helpers.
-5. Task-Local Allowlist (use only these if calling IntegerOps):
-   - `IntegerOps.safe_eval` | import: `core.prompts.domain_function_library` | signature: `(expr)` | returns: int | float
-   - `IntegerOps.fmt_num` | import: `core.prompts.domain_function_library` | signature: `(n)` | returns: str
-6. Quality Gate Self-Check: Verify that generate() exists, returns exactly 3 top-level keys matching the task schema, does not alter frozen parameters, and output contains no markdown fences or explanations.
+5. Task-Local Domain API Allowlist: none.
+   Do not call any IntegerOps method for this task.
+   Use native Python integer arithmetic only.
+6. Quality Gate Self-Check: Before outputting, you must verify that:
+   - generate() exists.
+   - The returned dict has exactly the top-level keys: question_text, correct_answer, and oracle_payload.
+   - Frozen parameters are unchanged, and oracle_payload fields, values, and types match the contract.
+   - correct_answer type matches this task's contract.
+   - All names and variables are defined before use.
+   - API calls use the full dotted path.
+   - No APIs outside the allowlist are used.
+   - IntegerOps.add, IntegerOps.sub, and built-in eval() are not used.
+   - No helpers, adapters, or converters are fabricated.
+   - All output values are JSON-serializable.
+   - Exact computation is completed first, and then question_text and LaTeX are constructed.
+   - Output contains no Markdown fences and no explanatory prose.
 ```
