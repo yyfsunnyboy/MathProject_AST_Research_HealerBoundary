@@ -1,0 +1,95 @@
+{
+  "cell_id": "qwen35_4b__ce111_q03_prime_factor_selection__ab2d_replication__seed_2026071301",
+  "task_id": "ce111_q03_prime_factor_selection",
+  "condition": "ab2d_replication",
+  "model": "qwen3.5:4b",
+  "seed": 2026071301,
+  "prompt_sha256": "8704669323fb45ef6bd34331151b350845425d2d14e19b36c58bd2c2c86bc75f",
+  "prompt_char_length": 1443,
+  "prompt_byte_length": 1443,
+  "raw_first_attempt_output": "from core.prompts.domain_function_library import IntegerOps\n\ndef generate(level=1, **kwargs):\n    candidates = kwargs.get(\"candidates\", [11, 12, 13, 14])\n    n = kwargs.get(\"n\")\n    \n    # Find prime factors of n using the provided domain API for divisibility check\n    # We need to find which candidate divides n exactly. Since we are selecting from candidates \n    # that might be composite or prime, and n=156 (2*2*3*13), let's verify divisibility with IntegerOps.is_divisible\n    \n    target_factor = None\n    for c in candidates:\n        if IntegerOps.is_divisible(n, c):\n            target_factor = int(c)\n            break\n            \n    # If no single candidate divides n completely (which shouldn't happen given the task context \n    # usually implies finding a factor present in candidates), we might need to consider prime factors.\n    # However, based on standard \"prime factor selection\" tasks where one must select from candidates:\n    # 156 = 2 * 78 -> not in [11..14]\n    # 156 / 3 = 52 (not divisible by remaining)\n    # Let's check the specific math: \n    # IntegerOps.is_divisible(156, 11) -> False\n    # IntegerOps.is_divisible(156, 12) -> True? No. 156/12 = 13. So yes it divides evenly. Wait, task says \"prime factor selection\". \n    # But the candidates are [11, 12, 13, 14].\n    # Prime factors of 156: 2, 3, 13.\n    # Only 13 is in the candidate list and is prime. \n    # Let's re-verify divisibility logic with IntegerOps.is_divisible(156, c).\n    \n    if target_factor is None:\n        # Fallback to finding a number from candidates that divides n exactly as per API usage requirement for correctness check\n        for c in candidates:\n            if IntegerOps.is_divisible(n, int(c)):\n                target_factor = int(c)\n                break\n    \n    correct_answer = target_factor\n\n    question_text = r\"\"\"Given the integer $n$, select a value from the list of candidate integers that divides $n$ exactly. \nThe selected value must be an exact factor of $n$. The available candidates are $\\{11, 12, 13, 14\\}$.\nFind: $$ n \\pmod c = 0 $$ for some $c \\in \\text{candidates}$.\"\"\"\n\n    oracle_payload = {\n        \"candidates\": [11, 12, 13, 14], \n        \"n\": 156\n    }\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+  "candidate_extracted": "from core.prompts.domain_function_library import IntegerOps\n\ndef generate(level=1, **kwargs):\n    candidates = kwargs.get(\"candidates\", [11, 12, 13, 14])\n    n = kwargs.get(\"n\")\n    \n    # Find prime factors of n using the provided domain API for divisibility check\n    # We need to find which candidate divides n exactly. Since we are selecting from candidates \n    # that might be composite or prime, and n=156 (2*2*3*13), let's verify divisibility with IntegerOps.is_divisible\n    \n    target_factor = None\n    for c in candidates:\n        if IntegerOps.is_divisible(n, c):\n            target_factor = int(c)\n            break\n            \n    # If no single candidate divides n completely (which shouldn't happen given the task context \n    # usually implies finding a factor present in candidates), we might need to consider prime factors.\n    # However, based on standard \"prime factor selection\" tasks where one must select from candidates:\n    # 156 = 2 * 78 -> not in [11..14]\n    # 156 / 3 = 52 (not divisible by remaining)\n    # Let's check the specific math: \n    # IntegerOps.is_divisible(156, 11) -> False\n    # IntegerOps.is_divisible(156, 12) -> True? No. 156/12 = 13. So yes it divides evenly. Wait, task says \"prime factor selection\". \n    # But the candidates are [11, 12, 13, 14].\n    # Prime factors of 156: 2, 3, 13.\n    # Only 13 is in the candidate list and is prime. \n    # Let's re-verify divisibility logic with IntegerOps.is_divisible(156, c).\n    \n    if target_factor is None:\n        # Fallback to finding a number from candidates that divides n exactly as per API usage requirement for correctness check\n        for c in candidates:\n            if IntegerOps.is_divisible(n, int(c)):\n                target_factor = int(c)\n                break\n    \n    correct_answer = target_factor\n\n    question_text = r\"\"\"Given the integer $n$, select a value from the list of candidate integers that divides $n$ exactly. \nThe selected value must be an exact factor of $n$. The available candidates are $\\{11, 12, 13, 14\\}$.\nFind: $$ n \\pmod c = 0 $$ for some $c \\in \\text{candidates}$.\"\"\"\n\n    oracle_payload = {\n        \"candidates\": [11, 12, 13, 14], \n        \"n\": 156\n    }\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+  "evaluator_status": "EXECUTION_FAILURE",
+  "failure_category": "runtime_failure",
+  "failure_layer": {
+    "primary_failure_layer": null,
+    "outcome_validity": "PENDING_REVIEW",
+    "mechanism_tags": [
+      "needs_human_review"
+    ],
+    "needs_human_review": true,
+    "final_status": "FAILED",
+    "note": "G2 FAIL but exception_source undistinguished",
+    "gates_normalized": {
+      "g1_parse": "PASS",
+      "g2_execution": "FAIL",
+      "g3_contract": "NOT_ASSESSED",
+      "g3a_required_api": "NOT_APPLICABLE",
+      "g3c_canonical_form": "NOT_APPLICABLE",
+      "g4_correctness": "NOT_ASSESSED"
+    }
+  },
+  "wall_clock_seconds": 15.095415199990384,
+  "provider_duration": 15095,
+  "gates": {
+    "g1_evaluability": {
+      "status": "PASS",
+      "reason": "evaluability_passed",
+      "raw_output_present": true,
+      "extraction_succeeded": true,
+      "candidate_nonempty": true,
+      "parse_succeeded": true,
+      "required_entry_point_present": true
+    },
+    "g2_executability": {
+      "status": "FAIL",
+      "reason": "runtime_failure",
+      "load_succeeded": true,
+      "entry_point_called": true,
+      "timeout": false,
+      "exception_type": "TypeError",
+      "exception_message": "unsupported operand type(s) for %: 'NoneType' and 'int'",
+      "return_value_produced": false
+    },
+    "g3_contract_compliance": {
+      "status": "NOT_ASSESSED",
+      "reason": "g2_not_passed"
+    },
+    "g4_semantic_correctness": {
+      "status": "NOT_ASSESSED",
+      "reason": "g2_not_passed"
+    },
+    "g5_problem_presentation": {
+      "status": "NOT_OBSERVED",
+      "reason": "actual_question_text_unavailable",
+      "question_present": false
+    },
+    "g6_math_notation": {
+      "status": "NOT_OBSERVED",
+      "reason": "actual_question_text_unavailable",
+      "uses_latex": false
+    }
+  },
+  "hashes": {
+    "prompt": "8704669323fb45ef6bd34331151b350845425d2d14e19b36c58bd2c2c86bc75f",
+    "raw": "dfb4c8d28fd06c6cae7b46044d82a9e1794af6b2188fee10cc39a8da1d8867c0",
+    "extracted_candidate": "dfb4c8d28fd06c6cae7b46044d82a9e1794af6b2188fee10cc39a8da1d8867c0"
+  },
+  "provenance": {
+    "first_attempt_only": true,
+    "api_retry_same_cell": true,
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 15.095408100052737,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "adapter": "math16_qwen_ollama_adapter",
+    "model_version": "qwen3.5:4b"
+  },
+  "persisted_complete": true
+}

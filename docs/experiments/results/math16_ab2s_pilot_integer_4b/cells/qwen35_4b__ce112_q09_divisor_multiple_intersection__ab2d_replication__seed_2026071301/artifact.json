@@ -1,0 +1,87 @@
+{
+  "cell_id": "qwen35_4b__ce112_q09_divisor_multiple_intersection__ab2d_replication__seed_2026071301",
+  "task_id": "ce112_q09_divisor_multiple_intersection",
+  "condition": "ab2d_replication",
+  "model": "qwen3.5:4b",
+  "seed": 2026071301,
+  "prompt_sha256": "f4d5abe47b1d3dad2095dbc473b4f58b6f1c8cd4f9ece0ba8a1de9f5c68ad5cb",
+  "prompt_char_length": 1478,
+  "prompt_byte_length": 1478,
+  "raw_first_attempt_output": "import json\nfrom typing import Dict, Any\n\ndef generate(level=1, **kwargs) -> Dict[str, Any]:\n    frozen_params = {\n        \"divisor_of\": 216,\n        \"multiple_of\": 18\n    }\n    \n    divisor_val = frozen_params[\"divisor_of\"]\n    multiple_val = frozen_params[\"multiple_of\"]\n    \n    # Calculate LCM using the domain API for safe evaluation of mathematical expression\n    from core.prompts.domain_function_library import IntegerOps\n    \n    lcm_result = IntegerOps.safe_eval(f\"lcm({divisor_val}, {multiple_val})\")\n    \n    question_text = f\"\"\"Find the number of integers $x$ such that:\n1. $x$ is a multiple of $\\{multiple\\_val}$, and\n2. $x$ divides $\\{divisor\\_val}$.\n\nWhat is the count of such positive integers?\"\"\"\n    \n    # The count of numbers dividing N that are multiples of M where M|N is simply gcd(N,M) / M * (M/M)? \n    # Actually: x must be a multiple of m and divisor of d.\n    # So x = k*m for some integer k, and k*m | d => k*18 | 216.\n    # Also we need the set to be non-empty. The problem implies finding how many such numbers exist <= d? \n    # Or is it asking for the count of common divisors/multiples?\n    # \"divisor_of\": means x divides D. \"multiple_of\": means M divides x.\n    # So we need x such that m|x and x|d. This implies m<=x<=d and x is a multiple of m which also divides d.\n    # The values are multiples of 18: 18, 36, ... up to max(x) where x divides 216.\n    # Since x must divide 216 and be divisible by 18, let x = 18*k. \n    # Then (18*k) | 216 => k * 18 <= 216/k? No. a|b means b/a is int.\n    # So 216 / (18k) must be integer.\n    # Also x > 0 usually implied in such count problems unless specified non-negative integers including zero. \n    # Given \"divisor_of\" and \"multiple_of\", typically positive integers are considered for divisibility properties involving counting.\n    # Let's assume positive integers.\n    \n    # Values of k: 18k divides 216 => 216/(18k) is integer => 12/k is integer.\n    # So k must be a divisor of 12.\n    # Divisors of 12 (positive): 1, 2, 3, 4, 6, 12. Count = 6.\n    \n    count_result = IntegerOps.safe_eval(f\"len([k for k in range(1, {divisor_val // multiple_val} + 1) if ({divisor_val} / ({multiple_val} * k)) % 1 == 0])\")\n    \n    correct_answer = {\"count\": int(count_result)}\n    \n    return {\n        \"question_text\": question_text.replace(\" \", r\"\\ \"), # Replace spaces with backslash for LaTeX compatibility as requested by formal delimiters requirement context usually implying standard latex formatting in text. \n                                                              # Actually, the prompt says \"use formal LaTeX delimiters where math appears\".\n                                                              # The template above has $\\{...\\}$. I will ensure proper escaping or just use \\text{} if needed but simple $...$ is fine inside string.\n        # Re-writing question_text to be safe with standard latex rendering in Python strings for the text field:\n    }\n\n# Correction on Question Text generation logic to strictly follow \"formal LaTeX delimiters where math appears\" within the string value provided as a single line or properly escaped.\ndef generate(level=1, **kwargs) -> Dict[str, Any]:\n    frozen_params = {\n        \"divisor_of\": 216,\n        \"multiple_of\": 18\n    }\n    \n    divisor_val = frozen_params[\"divisor_of\"]\n    multiple_val = frozen_params[\"multiple_of\"]\n    \n    from core.prompts.domain_function_library import IntegerOps\n    \n    # Calculate count: x is mult of m and divides d.\n    # x = k*m, 1 <= k*m <= d (implied positive), and d % (k*m) == 0.\n    # This reduces to finding divisors of (d/m). \n    # Here d=216, m=18. d/m = 12. Divisors of 12 are {1, 2, 3, 4, 6, 12}. Count is 6.\n    \n    quotient_val = divisor_val // multiple_val\n    \n    count_result = IntegerOps.safe_eval(f\"sum(1 for k in range(1, {quotient_val} + 1) if {divisor_val} % ({multiple_val} * k) == 0)\")\n    \n    question_text = r\"\"\"Find the number of positive integers $x$ such that:\n- $x$ is a multiple of $\\{ \\text{{\\textbackslash integer}}{ \\text{\\textbackslash integer}{multiple\\_val}}}$.\n- $x$ divides $\\{ \\text{\\textbackslash integer}{divisor_val} }$.\n\nWhat is the count?\"\"\"\n    # Since I cannot dynamically inject raw integers into LaTeX easily without template strings which might break if not handled, \n    # and to ensure \"formal LaTeX delimiters where math appears\", let's construct it carefully.\n    \n    final_q = f\"Find the number of positive integers $x$ such that:\\n- $x$ is a multiple of $\\{multiple\\_val}$.\\n- $x$ divides $\\{divisor\\_val}$.\\n\\nWhat is the count?\"\n    \n    correct_answer = {\"count\": int(count_result)}\n    \n    return {\n        \"question_text\": final_q,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": frozen_params\n    }",
+  "candidate_extracted": "def generate(level=1, **kwargs) -> Dict[str, Any]:\n    frozen_params = {\n        \"divisor_of\": 216,\n        \"multiple_of\": 18\n    }\n    \n    divisor_val = frozen_params[\"divisor_of\"]\n    multiple_val = frozen_params[\"multiple_of\"]\n    \n    # Calculate LCM using the domain API for safe evaluation of mathematical expression\n    from core.prompts.domain_function_library import IntegerOps\n    \n    lcm_result = IntegerOps.safe_eval(f\"lcm({divisor_val}, {multiple_val})\")\n    \n    question_text = f\"\"\"Find the number of integers $x$ such that:\n1. $x$ is a multiple of $\\{multiple\\_val}$, and\n2. $x$ divides $\\{divisor\\_val}$.\n\nWhat is the count of such positive integers?\"\"\"\n    \n    # The count of numbers dividing N that are multiples of M where M|N is simply gcd(N,M) / M * (M/M)? \n    # Actually: x must be a multiple of m and divisor of d.\n    # So x = k*m for some integer k, and k*m | d => k*18 | 216.\n    # Also we need the set to be non-empty. The problem implies finding how many such numbers exist <= d? \n    # Or is it asking for the count of common divisors/multiples?\n    # \"divisor_of\": means x divides D. \"multiple_of\": means M divides x.\n    # So we need x such that m|x and x|d. This implies m<=x<=d and x is a multiple of m which also divides d.\n    # The values are multiples of 18: 18, 36, ... up to max(x) where x divides 216.\n    # Since x must divide 216 and be divisible by 18, let x = 18*k. \n    # Then (18*k) | 216 => k * 18 <= 216/k? No. a|b means b/a is int.\n    # So 216 / (18k) must be integer.\n    # Also x > 0 usually implied in such count problems unless specified non-negative integers including zero. \n    # Given \"divisor_of\" and \"multiple_of\", typically positive integers are considered for divisibility properties involving counting.\n    # Let's assume positive integers.\n    \n    # Values of k: 18k divides 216 => 216/(18k) is integer => 12/k is integer.\n    # So k must be a divisor of 12.\n    # Divisors of 12 (positive): 1, 2, 3, 4, 6, 12. Count = 6.\n    \n    count_result = IntegerOps.safe_eval(f\"len([k for k in range(1, {divisor_val // multiple_val} + 1) if ({divisor_val} / ({multiple_val} * k)) % 1 == 0])\")\n    \n    correct_answer = {\"count\": int(count_result)}\n    \n    return {\n        \"question_text\": question_text.replace(\" \", r\"\\ \"), # Replace spaces with backslash for LaTeX compatibility as requested by formal delimiters requirement context usually implying standard latex formatting in text. \n                                                              # Actually, the prompt says \"use formal LaTeX delimiters where math appears\".\n                                                              # The template above has $\\{...\\}$. I will ensure proper escaping or just use \\text{} if needed but simple $...$ is fine inside string.\n        # Re-writing question_text to be safe with standard latex rendering in Python strings for the text field:\n    }\n\n# Correction on Question Text generation logic to strictly follow \"formal LaTeX delimiters where math appears\" within the string value provided as a single line or properly escaped.\ndef generate(level=1, **kwargs) -> Dict[str, Any]:\n    frozen_params = {\n        \"divisor_of\": 216,\n        \"multiple_of\": 18\n    }\n    \n    divisor_val = frozen_params[\"divisor_of\"]\n    multiple_val = frozen_params[\"multiple_of\"]\n    \n    from core.prompts.domain_function_library import IntegerOps\n    \n    # Calculate count: x is mult of m and divides d.\n    # x = k*m, 1 <= k*m <= d (implied positive), and d % (k*m) == 0.\n    # This reduces to finding divisors of (d/m). \n    # Here d=216, m=18. d/m = 12. Divisors of 12 are {1, 2, 3, 4, 6, 12}. Count is 6.\n    \n    quotient_val = divisor_val // multiple_val\n    \n    count_result = IntegerOps.safe_eval(f\"sum(1 for k in range(1, {quotient_val} + 1) if {divisor_val} % ({multiple_val} * k) == 0)\")\n    \n    question_text = r\"\"\"Find the number of positive integers $x$ such that:\n- $x$ is a multiple of $\\{ \\text{{\\textbackslash integer}}{ \\text{\\textbackslash integer}{multiple\\_val}}}$.\n- $x$ divides $\\{ \\text{\\textbackslash integer}{divisor_val} }$.\n\nWhat is the count?\"\"\"\n    # Since I cannot dynamically inject raw integers into LaTeX easily without template strings which might break if not handled, \n    # and to ensure \"formal LaTeX delimiters where math appears\", let's construct it carefully.\n    \n    final_q = f\"Find the number of positive integers $x$ such that:\\n- $x$ is a multiple of $\\{multiple\\_val}$.\\n- $x$ divides $\\{divisor\\_val}$.\\n\\nWhat is the count?\"\n    \n    correct_answer = {\"count\": int(count_result)}\n    \n    return {\n        \"question_text\": final_q,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": frozen_params\n    }",
+  "evaluator_status": "EXECUTION_FAILURE",
+  "failure_category": "parse_minor",
+  "failure_layer": {
+    "primary_failure_layer": "L1",
+    "outcome_validity": "VALID_MODEL_OUTCOME",
+    "mechanism_tags": [],
+    "needs_human_review": false,
+    "final_status": "FAILED",
+    "note": "G1 FAIL",
+    "gates_normalized": {
+      "g1_parse": "FAIL",
+      "g2_execution": "NOT_ASSESSED",
+      "g3_contract": "NOT_ASSESSED",
+      "g3a_required_api": "NOT_APPLICABLE",
+      "g3c_canonical_form": "NOT_APPLICABLE",
+      "g4_correctness": "NOT_ASSESSED"
+    }
+  },
+  "wall_clock_seconds": 15.060316000017338,
+  "provider_duration": 15060,
+  "gates": {
+    "g1_evaluability": {
+      "status": "FAIL",
+      "reason": "parse_minor",
+      "raw_output_present": true,
+      "extraction_succeeded": true,
+      "candidate_nonempty": true,
+      "parse_succeeded": false,
+      "required_entry_point_present": false
+    },
+    "g2_executability": {
+      "status": "NOT_ASSESSED",
+      "reason": "g1_not_passed"
+    },
+    "g3_contract_compliance": {
+      "status": "NOT_ASSESSED",
+      "reason": "g1_not_passed"
+    },
+    "g4_semantic_correctness": {
+      "status": "NOT_ASSESSED",
+      "reason": "g1_not_passed"
+    },
+    "g5_problem_presentation": {
+      "status": "NOT_OBSERVED",
+      "reason": "actual_question_text_unavailable",
+      "question_present": false
+    },
+    "g6_math_notation": {
+      "status": "NOT_OBSERVED",
+      "reason": "actual_question_text_unavailable",
+      "uses_latex": false
+    }
+  },
+  "hashes": {
+    "prompt": "f4d5abe47b1d3dad2095dbc473b4f58b6f1c8cd4f9ece0ba8a1de9f5c68ad5cb",
+    "raw": "d2f49db9f6667dac40da3547173b4239618a149eb26a43eaa57d500b97ac278e",
+    "extracted_candidate": "fd3ac83513487d8ecd10a491a922ac3aec4ccabf790c9c116198176339544d98"
+  },
+  "provenance": {
+    "first_attempt_only": true,
+    "api_retry_same_cell": true,
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 15.060308300075121,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "adapter": "math16_qwen_ollama_adapter",
+    "model_version": "qwen3.5:4b"
+  },
+  "persisted_complete": true
+}

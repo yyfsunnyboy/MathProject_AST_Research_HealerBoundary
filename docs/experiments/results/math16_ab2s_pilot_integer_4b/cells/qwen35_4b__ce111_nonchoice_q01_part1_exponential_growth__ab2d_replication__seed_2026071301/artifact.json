@@ -1,0 +1,95 @@
+{
+  "cell_id": "qwen35_4b__ce111_nonchoice_q01_part1_exponential_growth__ab2d_replication__seed_2026071301",
+  "task_id": "ce111_nonchoice_q01_part1_exponential_growth",
+  "condition": "ab2d_replication",
+  "model": "qwen3.5:4b",
+  "seed": 2026071301,
+  "prompt_sha256": "1f1491d3b68e9620550398001b27cd72e2f8b6c08c2debbf346396314a69cb42",
+  "prompt_char_length": 1511,
+  "prompt_byte_length": 1511,
+  "raw_first_attempt_output": "import json\nfrom core.prompts.domain_function_library import IntegerOps.safe_eval, IntegerOps.fmt_num\n\n\ndef generate(level=1, **kwargs):\n    frozen_params = {\"days\": 15, \"hours_per_generation\": 20, \"initial\": 1, \"split_factor\": 4}\n\n    # Calculate total generations based on days and hours per generation\n    total_hours = kwargs.get(\"total_hours\", 360) if level == 1 else 720\n    \n    num_generations = safe_eval(total_hours // kwargs[\"hours_per_generation\"])\n    \n    initial_population = frozen_params[\"initial\"]\n    split_factor = frozen_params[\"split_factor\"]\n    \n    # Calculate final population using exponential growth formula: P_n = P_0 * r^n where r is the effective multiplier per generation\n    # Based on context of \"exponential_growth\", assuming standard geometric progression with integer constraints\n    \n    current_population = initial_population\n    for _ in range(num_generations):\n        if split_factor > 1:\n            current_population *= safe_eval(split_factor)\n    \n    correct_answer_k = int(current_population)\n\n    question_text = (r\"An organism starts with \\(\\{initial}\\) individuals. Each generation, the population multiplies by a factor of \\({split\\_factor}\\). After \\({days}\\) days, where each day contains \\({hours_per_generation}\\) hours and one full cycle occurs every \\({total_hours // num_generations} * {hours_per_generation / (360)}\\) generations equivalent to the time scale defined in parameters. What is the final population size?\")\n    \n    # Adjust question text for specific variable substitution based on frozen params logic if needed, but keeping it formal LaTeX\n    q_data = {\"initial\": initial_population}\n    q_data[\"split_factor\"] = split_factor\n    \n    return {\n        \"question_text\": (r\"An organism starts with \\(\\{0}\\) individuals. Each generation, the population multiplies by a factor of \\({1}\\). After 3 days, where each day contains 2 hours and one full cycle occurs every hour equivalent to the time scale defined in parameters. What is the final population size?\".format(\n            **{\"initial\": initial_population, \"split_factor\": split_factor} if level == 0 else {\"initial\": int(current_population // (safe_eval(split_factor) ** num_generations)), \"split_factor\": safe_eval(split_factor)})) or r\"An organism starts with \\(\\{1}\\) individuals. Each generation, the population multiplies by a factor of \\(4\\). After 3 days, where each day contains 2 hours and one full cycle occurs every hour equivalent to the time scale defined in parameters. What is the final population size?\",\n        \"correct_answer\": {\"k\": correct_answer_k},\n        \"oracle_payload\": frozen_params.copy()\n    }",
+  "candidate_extracted": "def generate(level=1, **kwargs):\n    frozen_params = {\"days\": 15, \"hours_per_generation\": 20, \"initial\": 1, \"split_factor\": 4}\n\n    # Calculate total generations based on days and hours per generation\n    total_hours = kwargs.get(\"total_hours\", 360) if level == 1 else 720\n    \n    num_generations = safe_eval(total_hours // kwargs[\"hours_per_generation\"])\n    \n    initial_population = frozen_params[\"initial\"]\n    split_factor = frozen_params[\"split_factor\"]\n    \n    # Calculate final population using exponential growth formula: P_n = P_0 * r^n where r is the effective multiplier per generation\n    # Based on context of \"exponential_growth\", assuming standard geometric progression with integer constraints\n    \n    current_population = initial_population\n    for _ in range(num_generations):\n        if split_factor > 1:\n            current_population *= safe_eval(split_factor)\n    \n    correct_answer_k = int(current_population)\n\n    question_text = (r\"An organism starts with \\(\\{initial}\\) individuals. Each generation, the population multiplies by a factor of \\({split\\_factor}\\). After \\({days}\\) days, where each day contains \\({hours_per_generation}\\) hours and one full cycle occurs every \\({total_hours // num_generations} * {hours_per_generation / (360)}\\) generations equivalent to the time scale defined in parameters. What is the final population size?\")\n    \n    # Adjust question text for specific variable substitution based on frozen params logic if needed, but keeping it formal LaTeX\n    q_data = {\"initial\": initial_population}\n    q_data[\"split_factor\"] = split_factor\n    \n    return {\n        \"question_text\": (r\"An organism starts with \\(\\{0}\\) individuals. Each generation, the population multiplies by a factor of \\({1}\\). After 3 days, where each day contains 2 hours and one full cycle occurs every hour equivalent to the time scale defined in parameters. What is the final population size?\".format(\n            **{\"initial\": initial_population, \"split_factor\": split_factor} if level == 0 else {\"initial\": int(current_population // (safe_eval(split_factor) ** num_generations)), \"split_factor\": safe_eval(split_factor)})) or r\"An organism starts with \\(\\{1}\\) individuals. Each generation, the population multiplies by a factor of \\(4\\). After 3 days, where each day contains 2 hours and one full cycle occurs every hour equivalent to the time scale defined in parameters. What is the final population size?\",\n        \"correct_answer\": {\"k\": correct_answer_k},\n        \"oracle_payload\": frozen_params.copy()\n    }",
+  "evaluator_status": "EXECUTION_FAILURE",
+  "failure_category": "runtime_failure",
+  "failure_layer": {
+    "primary_failure_layer": null,
+    "outcome_validity": "PENDING_REVIEW",
+    "mechanism_tags": [
+      "needs_human_review"
+    ],
+    "needs_human_review": true,
+    "final_status": "FAILED",
+    "note": "G2 FAIL but exception_source undistinguished",
+    "gates_normalized": {
+      "g1_parse": "PASS",
+      "g2_execution": "FAIL",
+      "g3_contract": "NOT_ASSESSED",
+      "g3a_required_api": "NOT_APPLICABLE",
+      "g3c_canonical_form": "NOT_APPLICABLE",
+      "g4_correctness": "NOT_ASSESSED"
+    }
+  },
+  "wall_clock_seconds": 8.185667600017041,
+  "provider_duration": 8185,
+  "gates": {
+    "g1_evaluability": {
+      "status": "PASS",
+      "reason": "evaluability_passed",
+      "raw_output_present": true,
+      "extraction_succeeded": true,
+      "candidate_nonempty": true,
+      "parse_succeeded": true,
+      "required_entry_point_present": true
+    },
+    "g2_executability": {
+      "status": "FAIL",
+      "reason": "runtime_failure",
+      "load_succeeded": true,
+      "entry_point_called": true,
+      "timeout": false,
+      "exception_type": "NameError",
+      "exception_message": "name 'safe_eval' is not defined",
+      "return_value_produced": false
+    },
+    "g3_contract_compliance": {
+      "status": "NOT_ASSESSED",
+      "reason": "g2_not_passed"
+    },
+    "g4_semantic_correctness": {
+      "status": "NOT_ASSESSED",
+      "reason": "g2_not_passed"
+    },
+    "g5_problem_presentation": {
+      "status": "NOT_OBSERVED",
+      "reason": "actual_question_text_unavailable",
+      "question_present": false
+    },
+    "g6_math_notation": {
+      "status": "NOT_OBSERVED",
+      "reason": "actual_question_text_unavailable",
+      "uses_latex": false
+    }
+  },
+  "hashes": {
+    "prompt": "1f1491d3b68e9620550398001b27cd72e2f8b6c08c2debbf346396314a69cb42",
+    "raw": "91c53b3b2b2279a7195e48096c4b7f1dd4b7bfff1908c1a3f4b0a34858dd951f",
+    "extracted_candidate": "2a1c33ecd3c8f01f0fa8ce2b3894de0fd0cce5d9cdc1d2b8c51c4aaaa68e78c0"
+  },
+  "provenance": {
+    "first_attempt_only": true,
+    "api_retry_same_cell": true,
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 8.185660200077109,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "adapter": "math16_qwen_ollama_adapter",
+    "model_version": "qwen3.5:4b"
+  },
+  "persisted_complete": true
+}

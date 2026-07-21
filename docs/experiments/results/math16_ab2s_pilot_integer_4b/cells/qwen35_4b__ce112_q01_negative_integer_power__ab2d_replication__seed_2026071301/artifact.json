@@ -1,0 +1,113 @@
+{
+  "cell_id": "qwen35_4b__ce112_q01_negative_integer_power__ab2d_replication__seed_2026071301",
+  "task_id": "ce112_q01_negative_integer_power",
+  "condition": "ab2d_replication",
+  "model": "qwen3.5:4b",
+  "seed": 2026071301,
+  "prompt_sha256": "a03c40a37de8c5652476da0fcd76dfc714ca55c19b0279b0452358c81ccde8d4",
+  "prompt_char_length": 1419,
+  "prompt_byte_length": 1419,
+  "raw_first_attempt_output": "import sys\nsys.path.insert(0, '.')\nfrom core.prompts.domain_function_library import IntegerOps\n\ndef generate(level=1, **kwargs):\n    frozen_params = {\"base\": -3, \"exponent\": 3}\n    \n    base = frozen_params[\"base\"]\n    exponent = frozen_params[\"exponent\"]\n    \n    result = IntegerOps.safe_eval(f\"{base}^{int(exponent)}\")\n    \n    question_text = r\"Calculate $(-3)^{3}$.\"\n    correct_answer = int(result)\n    oracle_payload = json.dumps(frozen_params, separators=(',', ':')) if False else str(frozen_params) # Placeholder for JSON logic not allowed per strict instruction\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": frozen_params\n    }",
+  "candidate_extracted": "import sys\nsys.path.insert(0, '.')\nfrom core.prompts.domain_function_library import IntegerOps\n\ndef generate(level=1, **kwargs):\n    frozen_params = {\"base\": -3, \"exponent\": 3}\n    \n    base = frozen_params[\"base\"]\n    exponent = frozen_params[\"exponent\"]\n    \n    result = IntegerOps.safe_eval(f\"{base}^{int(exponent)}\")\n    \n    question_text = r\"Calculate $(-3)^{3}$.\"\n    correct_answer = int(result)\n    oracle_payload = json.dumps(frozen_params, separators=(',', ':')) if False else str(frozen_params) # Placeholder for JSON logic not allowed per strict instruction\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": frozen_params\n    }",
+  "evaluator_status": "ANSWER_INCORRECT",
+  "failure_category": "answer_incorrect",
+  "failure_layer": {
+    "primary_failure_layer": "L5",
+    "outcome_validity": "VALID_MODEL_OUTCOME",
+    "mechanism_tags": [],
+    "needs_human_review": false,
+    "final_status": "FAILED",
+    "note": "G4 FAIL confirmed model-semantic",
+    "gates_normalized": {
+      "g1_parse": "PASS",
+      "g2_execution": "PASS",
+      "g3_contract": "PASS",
+      "g3a_required_api": "NOT_APPLICABLE",
+      "g3c_canonical_form": "NOT_APPLICABLE",
+      "g4_correctness": "FAIL"
+    }
+  },
+  "wall_clock_seconds": 4.2948870999971405,
+  "provider_duration": 4294,
+  "gates": {
+    "g1_evaluability": {
+      "status": "PASS",
+      "reason": "evaluability_passed",
+      "raw_output_present": true,
+      "extraction_succeeded": true,
+      "candidate_nonempty": true,
+      "parse_succeeded": true,
+      "required_entry_point_present": true
+    },
+    "g2_executability": {
+      "status": "PASS",
+      "reason": "execution_passed",
+      "load_succeeded": true,
+      "entry_point_called": true,
+      "timeout": false,
+      "exception_type": null,
+      "exception_message": null,
+      "return_value_produced": true
+    },
+    "g3_contract_compliance": {
+      "status": "PASS",
+      "reason": "contract_observed",
+      "schema_valid": true,
+      "missing_keys": [],
+      "unexpected_keys": [],
+      "field_types_valid": true,
+      "frozen_parameters_valid": true,
+      "entry_point_signature_valid": null
+    },
+    "g4_semantic_correctness": {
+      "status": "FAIL",
+      "reason": "answer_incorrect",
+      "oracle_executed": true,
+      "oracle_match": false,
+      "invariant_checks": null,
+      "mismatch_reason": "answer_incorrect"
+    },
+    "g5_problem_presentation": {
+      "status": "PASS",
+      "reason": "presentation_checks_passed",
+      "question_present": true,
+      "placeholder_leak": false,
+      "prompt_leak": false,
+      "code_leak": false,
+      "answer_leak": false,
+      "truncation_signal": false,
+      "frozen_parameters_available": true
+    },
+    "g6_math_notation": {
+      "status": "PASS",
+      "reason": "notation_checks_passed",
+      "uses_latex": true,
+      "delimiter_balance": true,
+      "brace_balance": true,
+      "malformed_command": false,
+      "unclosed_math_region": false
+    }
+  },
+  "hashes": {
+    "prompt": "a03c40a37de8c5652476da0fcd76dfc714ca55c19b0279b0452358c81ccde8d4",
+    "raw": "4ad1a283b96cc2f5f7bf90595f19b7aaacfd2bd01c46f94c72cb35509b398fd9",
+    "extracted_candidate": "4ad1a283b96cc2f5f7bf90595f19b7aaacfd2bd01c46f94c72cb35509b398fd9"
+  },
+  "provenance": {
+    "first_attempt_only": true,
+    "api_retry_same_cell": true,
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 4.294880100060254,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "adapter": "math16_qwen_ollama_adapter",
+    "model_version": "qwen3.5:4b"
+  },
+  "persisted_complete": true
+}
