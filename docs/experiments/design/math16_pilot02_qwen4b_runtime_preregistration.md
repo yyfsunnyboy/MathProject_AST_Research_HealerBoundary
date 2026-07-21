@@ -49,7 +49,7 @@ Cross-model Math16 Pilot-02 geometry for **Qwen 3.5 4B** only: 16 tasks × 4 con
 - **transport**: `http://localhost:11434/api/chat`
 - **endpoint**: `POST /api/chat`
 - **thinking_mode**: `False`
-- **temperature**: `0.7`
+- **temperature**: `0.2`
 - **top_k**: `20`
 - **top_p**: `0.8`
 - **repeat_penalty**: `ollama_default_unset`
@@ -102,7 +102,15 @@ provider, model tag/digest, architecture/parameters/quantization, runtime/versio
 
 ## 5. Runtime fingerprint
 
-- **Qwen fingerprint**: `7efdbbaf6f6cc72af2a4d51fcd574bd82e92a654e20a0d685ee1275f11e24bfe`
+> **Preregistration revision 2026-07-21**: temperature revised from `0.7` to `0.2` prior to any generation.
+> Model calls at revision = 0. Not result-informed.
+>
+> | | Fingerprint |
+> | :--- | :--- |
+> | Original (temperature=0.7) | `7efdbbaf6f6cc72af2a4d51fcd574bd82e92a654e20a0d685ee1275f11e24bfe` |
+> | **Revised (temperature=0.2)** | `33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7` |
+
+- **Qwen fingerprint (current)**: `33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7`
 - **Gemini full fingerprint (reference)**: `8bcb0d7177bc35216410108bda88b014848181a95b12bc09bf171866749f3057`
 
 Fingerprints share a research schema intent but **must not** differ only by `model_tag`: Qwen fingerprint includes digest, architecture, parameter_count, quantization, repeat_penalty, seed_transport_supported, context_window, prompt_manifest_hash, evaluator/taxonomy/healer hashes.

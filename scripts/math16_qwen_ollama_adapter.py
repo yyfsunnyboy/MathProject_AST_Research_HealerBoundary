@@ -9,10 +9,15 @@ Call convention matches Gemini Math16 runners:
     }
 
 Runtime mode: non-thinking (`think: false` at /api/chat top-level).
-Sampling frozen for both 4B/9B from Qwen official instruct/non-thinking
-recommendations: temperature=0.7, top_p=0.8, top_k=20. presence_penalty is
-omitted (Ollama default). `ollama show` Parameters still list thinking-mode
-defaults (1.0 / 0.95 / presence_penalty=1.5) and are intentionally not used.
+Sampling frozen for both 4B/9B cohort: temperature=0.2, top_p=0.8, top_k=20.
+Presence_penalty omitted (Ollama default). `ollama show` Parameters still list
+thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and
+are intentionally not used.
+
+Preregistration revision (2026-07-21): temperature revised from 0.7 to 0.2
+to reduce sampling noise in constrained math program generation while
+retaining minimal seed variation. Qwen 4B and Qwen 9B use identical
+temperature=0.2 and think=false to form the primary model-size comparison.
 
 Does not build Math16 prompts, evaluate answers, or write formal run artifacts.
 """
@@ -44,12 +49,17 @@ MAX_ATTEMPTS = 3
 BACKOFF_SECONDS = (5, 20, 60)
 
 # Non-thinking instruct sampling (same freeze for qwen3.5:4b and :9b).
-TEMPERATURE = 0.7
+# Preregistration revision 2026-07-21: temperature revised 0.7 -> 0.2.
+# Rationale: lower sampling noise in constrained math program generation
+# while retaining minimal seed variation; identical freeze for 4B/9B enables
+# the primary model-size comparison (temperature=0.2, think=false).
+TEMPERATURE = 0.2
 TOP_P = 0.8
 TOP_K = 20
 VENDOR_SAMPLING_SOURCE = (
-    "Qwen official instruct/non-thinking recommendations "
-    "(temperature=0.7, top_p=0.8, top_k=20); "
+    "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: "
+    "revised from 0.7 to 0.2 to reduce sampling noise in constrained math "
+    "program generation while retaining minimal seed variation); "
     "presence_penalty omitted (Ollama default); "
     "ollama show Parameters remain thinking-mode defaults "
     "(temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; "

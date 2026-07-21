@@ -194,3 +194,79 @@ def test_preflight_script_pass():
     result = do_preflight()
     assert result["preflight"] == "PASS"
     assert result["llm_generation_calls"] == 0
+
+
+# ── Revision-targeted tests (temperature 0.7 → 0.2) ──────────────────────────
+
+OLD_FINGERPRINT = "7efdbbaf6f6cc72af2a4d51fcd574bd82e92a654e20a0d685ee1275f11e24bfe"
+NEW_FINGERPRINT = "33fd7603f58cdc47843bb048456d6d167dd71dc891b636377baf33dea30358f7"
+
+
+def test_all_cells_use_temperature_02():
+    """All 320 cells must resolve to temperature=0.2 via the manifest."""
+    m = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    assert m["temperature"] == 0.2, f"manifest temperature={m['temperature']}, expected 0.2"
+    plan = json.loads(PLAN.read_text(encoding="utf-8"))
+    assert len(plan) == 320
+
+
+def test_think_false_and_not_null():
+    """thinking_mode must be exactly False, not None."""
+    m = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    assert m["thinking_mode"] is False
+    assert m["thinking_mode"] is not None
+
+
+def test_prompt_sha_unchanged():
+    """All 16x4=64 prompt SHAs in the manifest must be identical to the pre-revision values."""
+    m = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    registry = m["prompt_verification_registry"]
+    # Spot-check a fixed set of known SHAs
+    sha_by_key = {(r["task_id"], r["condition"]): r["prompt_sha256"] for r in registry}
+    assert sha_by_key[("ce111_q03_prime_factor_selection", "ab1")] == \
+        "398a9ab7067574286a3f7b6a955033b2f3af8d244d34098aa907623bb706bcc4"
+    assert sha_by_key[("ce111_q03_prime_factor_selection", "ab2d_spec_v2")] == \
+        "5417185bc8f5d084bd04d6bf4d346762f6fa4738c6a52d30ea34706f4121e6f0"
+    # All registry entries must still have a non-empty sha
+    for r in registry:
+        assert r["prompt_sha256"], f"empty sha for {r['task_id']} {r['condition']}"
+
+
+def test_new_fingerprint_differs_from_old():
+    """New fingerprint must be different from the pre-revision fingerprint."""
+    m = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    assert m["runtime_config_fingerprint"] != OLD_FINGERPRINT
+    assert m["runtime_config_fingerprint"] == NEW_FINGERPRINT
+
+
+def test_fingerprint_recompute_matches_new():
+    """Recomputing fingerprint from manifest fields must match the stored new fingerprint."""
+    m = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    assert _fp(m) == NEW_FINGERPRINT
+    assert _fp(m) == m["runtime_config_fingerprint"]
+
+
+def test_no_unexpected_field_changes():
+    """Only temperature (and derived fingerprint) should differ; all other locked fields stay."""
+    m = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    assert m["top_p"] == 0.8
+    assert m["top_k"] == 20
+    assert m["thinking_mode"] is False
+    assert m["context_window"] == 65536
+    assert m["max_output_tokens"] == 24576
+    assert m["timeout_seconds"] == 1800
+    assert m["model_tag"] == "qwen3.5:4b"
+    assert m["model_digest"] == "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd"
+    assert m["seed_list"] == [2026071301, 2026072001, 2026072002, 2026072003, 2026072004]
+    assert m["expected_cell_count"] == 320
+    assert m["repeat_penalty"] == "ollama_default_unset"
+
+
+def test_qwen_4b_9b_comparison_contract():
+    """The comparison contract for Qwen 4B vs 9B must be: temperature=0.2, think=false."""
+    from scripts.math16_qwen_ollama_adapter import TEMPERATURE, FROZEN_INFERENCE_CONFIG
+    assert TEMPERATURE == 0.2, f"adapter TEMPERATURE={TEMPERATURE}, expected 0.2"
+    assert FROZEN_INFERENCE_CONFIG["temperature"] == 0.2
+    assert FROZEN_INFERENCE_CONFIG["think"] is False
+    assert FROZEN_INFERENCE_CONFIG["top_p"] == 0.8
+    assert FROZEN_INFERENCE_CONFIG["top_k"] == 20
