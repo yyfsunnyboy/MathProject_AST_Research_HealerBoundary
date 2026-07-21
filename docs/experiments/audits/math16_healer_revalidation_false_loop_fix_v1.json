@@ -1,0 +1,68 @@
+{
+  "fix_id": "math16_healer_revalidation_false_loop_fix_v1",
+  "nature": "posthoc_implementation_consistency",
+  "not_a_capability_upgrade": true,
+  "not_a_rescue_claim": true,
+  "primary_ledger_path": "docs/experiments/results/math16_pilot02_qwen4b_healer_v4_r001/",
+  "primary_baseline_pass_fraction": "78/320",
+  "primary_post_healer_pass_fraction": "83/320",
+  "primary_rescued": 5,
+  "primary_no_op": 2,
+  "primary_ledger_unchanged": true,
+  "old_healer_runner_sha256": "b89e6059ce67efb622aa2e085e365b909d0d4f7df1a6814c1dc83df029ce81e1",
+  "new_healer_runner_sha256": "38453d1294382f061efe149484f5a3059a47d085d2aeef358874a954e37adebf",
+  "protocol_sha256": "bdb4121ee266f91bfa116019a334cf4a528da0d71629b96540a5f763826aff39",
+  "protocol_unchanged": true,
+  "root_cause": "Math16 Healer _maybe_reevaluate used pilot classify_response; Phase B treated identical coarse outcome strings as loop and rolled back scoring-valid repairs",
+  "fix_sites": [
+    "agent_tools/finals_rebuild/ce115_research_healer_runner.py::_is_math16_task",
+    "agent_tools/finals_rebuild/ce115_research_healer_runner.py::_maybe_reevaluate",
+    "agent_tools/finals_rebuild/ce115_research_healer_runner.py::_failure_signature",
+    "agent_tools/finals_rebuild/ce115_research_healer_runner.py::_is_phase_b_evaluator_loop",
+    "agent_tools/finals_rebuild/ce115_research_healer_runner.py::run_research_healer Phase B loop / revalidator_error fail-closed"
+  ],
+  "cell_a": {
+    "cell_id": "qwen3_5_4b__ce115_calc_radical_simplification_l1__ab2d__seed_2026071301",
+    "role": "implementation_gap",
+    "rule": "L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP",
+    "expected_final_status": "changed",
+    "expected_formal_math16_after": "passed",
+    "must_not_rewrite_primary_ledger": true
+  },
+  "cell_b": {
+    "cell_id": "qwen3_5_4b__ce112_q09_divisor_multiple_intersection__ab2d__seed_2026072001",
+    "role": "out_of_scope_control",
+    "rule": "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP",
+    "root_cause": "safe_eval NameError",
+    "expected_formal_math16_after": "runtime_failure",
+    "must_remain_non_rescue": true
+  },
+  "loop_guard": {
+    "outcome_string_alone_insufficient": true,
+    "requires_same_failure_signature": true,
+    "requires_rule_would_still_change": true,
+    "revalidator_error_fail_closed": true,
+    "phase_a_compiler_loop_unchanged": true
+  },
+  "explicit_non_changes": [
+    "repair_rules",
+    "eligibility",
+    "allowlist",
+    "priority",
+    "max_passes",
+    "oracle",
+    "taxonomy",
+    "formal_math16_evaluator",
+    "primary_healer_v4_r001_ledger"
+  ],
+  "llm_calls": 0,
+  "full_qwen4b_healer_replay": false,
+  "gemini_replay": false,
+  "qwen9b": false,
+  "verdicts": [
+    "MATH16_HEALER_REVALIDATION_FALSE_LOOP_FIXED",
+    "MATH16_HEALER_TRUE_LOOP_GUARD_PRESERVED",
+    "MATH16_HEALER_RUNNER_SHA_REFROZEN",
+    "QWEN4B_POSTHOC_HEALER_REPLAY_READY"
+  ]
+}

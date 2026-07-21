@@ -21,7 +21,14 @@ TAXONOMY = ROOT / "docs/決賽文件/20260720_AI 生成程式共同失敗分類�
 EXPECTED_CLOSURE = "7dd3ba5f7e7a38e7ad20142e8c5c5b2e84c20df1b7f5abcf5701c23d24172a22"
 EXPECTED_EVAL = "2cca19f2258d4ba6134ff10d4e9bcff925e2441c32820fcbc151cb6b1dd740bc"
 EXPECTED_TAX = "7df8f4472ce048569967436cbc73ede8fd4bd117ad67d0028ddd95af2055a304"
-EXPECTED_RUNNER = "b89e6059ce67efb622aa2e085e365b909d0d4f7df1a6814c1dc83df029ce81e1"
+# Historical pin recorded in primary healer_v4_r001 ledger (must not be rewritten).
+EXPECTED_RUNNER_PRIMARY_LEDGER = (
+    "b89e6059ce67efb622aa2e085e365b909d0d4f7df1a6814c1dc83df029ce81e1"
+)
+# Current runner after Math16 revalidation false-loop fix (post-hoc refreeze).
+EXPECTED_RUNNER_CURRENT = (
+    "38453d1294382f061efe149484f5a3059a47d085d2aeef358874a954e37adebf"
+)
 EXPECTED_PROTO = "bdb4121ee266f91bfa116019a334cf4a528da0d71629b96540a5f763826aff39"
 
 
@@ -40,12 +47,12 @@ def _load_jsonl(path: Path) -> list[dict]:
 def test_pins_unchanged():
     assert sha(EVALUATOR) == EXPECTED_EVAL
     assert sha(TAXONOMY) == EXPECTED_TAX
-    assert sha(HEALER_RUNNER) == EXPECTED_RUNNER
+    assert sha(HEALER_RUNNER) == EXPECTED_RUNNER_CURRENT
     assert sha(PROTOCOL) == EXPECTED_PROTO
     man = json.loads((OUT / "execution_manifest.json").read_text(encoding="utf-8"))
     assert man["corpus_sha_closure"] == EXPECTED_CLOSURE
     assert man["evaluator_hash"] == EXPECTED_EVAL
-    assert man["healer_runner_sha256"] == EXPECTED_RUNNER
+    assert man["healer_runner_sha256"] == EXPECTED_RUNNER_PRIMARY_LEDGER
     assert man["healer_protocol_sha256"] == EXPECTED_PROTO
     assert man["external_eligibility_prefilter"] is True
     assert man["noneligible_direct_run"] is False

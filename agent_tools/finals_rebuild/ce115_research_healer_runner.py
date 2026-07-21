@@ -246,24 +246,121 @@ def select_allowlisted_rules(
     return selected
 
 
+def _is_math16_task(task: Mapping[str, Any]) -> bool:
+    """Route Math16 Pilot tasks to classify_math16_response; keep CE115 pilot on classify_response."""
+    oracle_type = task.get("oracle_type")
+    return isinstance(oracle_type, str) and oracle_type.startswith("math16_")
+
+
+def _failure_signature(outcome: str | None, details: Mapping[str, Any]) -> str:
+    """Stable fingerprint for loop detection beyond coarse outcome labels."""
+    if not outcome:
+        return "missing_outcome"
+    if outcome == "passed":
+        return "passed"
+    for key in (
+        "exception_message",
+        "runtime_error",
+        "error",
+        "message",
+        "exception_type",
+    ):
+        val = details.get(key)
+        if val:
+            return f"{outcome}|{key}|{val}"
+    gates = details.get("evaluation_gates") or details.get("gates")
+    if isinstance(gates, Mapping):
+        return f"{outcome}|gates|{json.dumps(gates, sort_keys=True, default=str)}"
+    return f"{outcome}|detail_keys|{','.join(sorted(str(k) for k in details.keys()))}"
+
+
 def _maybe_reevaluate(source: str, context: Mapping[str, Any]) -> dict[str, Any]:
-    """Re-run existing evaluator when task+frozen are present; never mutate evaluator."""
+    """Re-run the scoring-equivalent evaluator when task+frozen are present.
+
+    Math16 tasks (oracle_type ``math16_*``) use ``classify_math16_response``.
+    CE115 pilot / other tasks keep ``math_boundary_pilot.classify_response``.
+    Explicit ``context['reevaluator']`` in {``math16``, ``pilot``} overrides auto-route.
+    Failures are returned as ``evaluator_error`` (fail-closed); never mutate evaluators.
+    """
     task = context.get("task")
     frozen = context.get("frozen")
     if not isinstance(task, Mapping) or not isinstance(frozen, Mapping):
         return {"evaluator_rerun": False}
-    from agent_tools.finals_rebuild.math_boundary_pilot import classify_response
-
-    outcome, _code, details = classify_response(
-        source,
-        {"oracle_payload": dict(frozen)},
-        dict(task),
+    override = context.get("reevaluator")
+    use_math16 = override == "math16" or (
+        override != "pilot" and _is_math16_task(task)
     )
+    try:
+        if use_math16:
+            from scripts.run_math16_latex_v1_gemini_live import classify_math16_response
+
+            audit_payload = task.get("oracle_payload")
+            if not isinstance(audit_payload, Mapping):
+                audit_payload = dict(frozen)
+            outcome, _code, details = classify_math16_response(
+                source,
+                frozen_params=dict(frozen),
+                audit_oracle_payload=dict(audit_payload),
+                task=dict(task),
+            )
+            backend = "classify_math16_response"
+        else:
+            from agent_tools.finals_rebuild.math_boundary_pilot import classify_response
+
+            outcome, _code, details = classify_response(
+                source,
+                {"oracle_payload": dict(frozen)},
+                dict(task),
+            )
+            backend = "classify_response"
+    except Exception as exc:  # noqa: BLE001 — fail-closed to caller
+        return {
+            "evaluator_rerun": False,
+            "evaluator_error": True,
+            "evaluator_error_type": type(exc).__name__,
+            "evaluator_error_message": str(exc),
+            "evaluator_backend": "math16" if use_math16 else "pilot",
+        }
+    if not isinstance(details, Mapping):
+        details = {}
     return {
         "evaluator_rerun": True,
+        "evaluator_error": False,
         "evaluator_outcome": outcome,
         "evaluator_details_keys": sorted(details.keys()),
+        "failure_signature": _failure_signature(str(outcome), details),
+        "evaluator_backend": backend,
     }
+
+
+def _is_phase_b_evaluator_loop(
+    *,
+    before_eval: Mapping[str, Any],
+    after_eval: Mapping[str, Any],
+    rule: _RegisteredRule,
+    new_source: str,
+    context: Mapping[str, Any],
+) -> tuple[bool, str]:
+    """True loop only when coarse outcome, failure signature, and rule churn agree.
+
+    Same ``evaluator_outcome`` string alone is NOT sufficient (Math16 false-positive guard).
+    """
+    before_out = before_eval.get("evaluator_outcome")
+    after_out = after_eval.get("evaluator_outcome")
+    if before_out is None or after_out is None:
+        return False, ""
+    if before_out != after_out:
+        return False, ""
+    if before_out == "passed":
+        return False, ""
+    before_sig = before_eval.get("failure_signature")
+    after_sig = after_eval.get("failure_signature")
+    if before_sig is None or after_sig is None or before_sig != after_sig:
+        return False, ""
+    # True repair churn: the same allowlisted rule would still change the source.
+    if not _rule_would_change(new_source, rule, context):
+        return False, ""
+    return True, f"evaluator_loop_with_verdict_{after_out}"
 
 
 def _rule_would_change(
@@ -518,7 +615,6 @@ def run_research_healer(
 
         # Get evaluator state of before (Phase B re-run support)
         before_eval = _maybe_reevaluate(before, ctx)
-        before_outcome = before_eval.get("evaluator_outcome") if before_eval.get("evaluator_rerun") else None
 
         for rule in rules:
             # Phase A only runs L1 rules. Phase B only runs L2 rules.
@@ -584,7 +680,8 @@ def run_research_healer(
             validation["repair_attempted"] = did_change
             
             if did_change:
-                validation.update(_maybe_reevaluate(new_source, ctx))
+                after_eval = _maybe_reevaluate(new_source, ctx)
+                validation.update(after_eval)
                 validation["reparsed_after_change"] = True
             else:
                 validation["reparsed_after_change"] = False
@@ -593,6 +690,17 @@ def run_research_healer(
                 # Deadlock / Loop Check (Conditions for fallback)
                 loop_detected = False
                 loop_reason = ""
+
+                # Fail-closed: required revalidator errored → do not accept change.
+                if (
+                    isinstance(ctx.get("task"), Mapping)
+                    and isinstance(ctx.get("frozen"), Mapping)
+                    and after_eval.get("evaluator_error")
+                ):
+                    loop_detected = True
+                    loop_reason = (
+                        f"revalidator_error_{after_eval.get('evaluator_error_type')}"
+                    )
                 
                 # Check for compile loop (Phase A)
                 new_err_msg = ""
@@ -603,17 +711,26 @@ def run_research_healer(
                     new_err_msg = str(e_syntax)
                     new_err_lineno = e_syntax.lineno
 
-                if current_phase == "Phase_A":
+                if (not loop_detected) and current_phase == "Phase_A":
                     if new_err_lineno is not None and new_err_lineno == before_err_lineno and new_err_msg == before_err_msg:
                         loop_detected = True
                         loop_reason = f"compiler_loop_at_line_{new_err_lineno}"
                 
-                # Check for runtime/contract loop (Phase B)
-                if current_phase == "Phase_B" and before_outcome is not None:
-                    new_outcome = validation.get("evaluator_outcome")
-                    if new_outcome == before_outcome:
-                        loop_detected = True
-                        loop_reason = f"evaluator_loop_with_verdict_{new_outcome}"
+                # Check for runtime/contract loop (Phase B) — not outcome-string alone.
+                if (
+                    (not loop_detected)
+                    and current_phase == "Phase_B"
+                    and before_eval.get("evaluator_rerun")
+                    and after_eval.get("evaluator_rerun")
+                ):
+                    is_loop, loop_reason = _is_phase_b_evaluator_loop(
+                        before_eval=before_eval,
+                        after_eval=after_eval,
+                        rule=rule,
+                        new_source=new_source,
+                        context=ctx,
+                    )
+                    loop_detected = is_loop
 
                 if loop_detected:
                     notes.append(f"pass_{pass_index}_loop_detected_fallback_to_prev_pass: {loop_reason}")
