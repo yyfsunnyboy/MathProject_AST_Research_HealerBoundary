@@ -87,10 +87,11 @@ The prompt sources are defined to guarantee deterministic reproducibility:
   - `prompt.txt`: exact prompt text sent to the API.
   - `raw_response.txt`: raw unaltered string returned by the API.
   - `extracted_candidate.py`: the python code snippet parsed from raw response (if any).
-  - `artifact.json`: complete execution metadata including latency, API attempts list, and `"persisted_complete": true`.
+  - `artifact.json`: complete execution metadata including latency, API attempts list, `"persisted_complete": true`, and `"runtime_config_fingerprint": "de65d34f265dbfab10d54b7c3c7f2cc1e8248977058a0b0aa27e3753feaaa93b"`.
 * **Atomic Write**: Saves to a temporary file in the target directory and executes an atomic replacement `os.replace` to prevent corrupted records on premature process termination.
-* **Resume Policy**: The runner queries `artifact.json`. If it exists, contains `"persisted_complete": true`, and its recorded `prompt_sha256` matches the cell plan, the cell is safely skipped without triggering any new API requests.
-* **Overwrite Policy**: If the runner detects the output directory already exists and contains incompatible plans, it will abort. Under no circumstances will completed, valid cells be overwritten.
+* **Resume Policy**: The runner queries `artifact.json`. If it exists, contains `"persisted_complete": true`, and its recorded `prompt_sha256`, `experiment_id`, `cell_id`, `task_id`, `condition`, `seed`, `model_tag`, and `runtime_config_fingerprint` match the cell plan and current runtime environment, the cell is skipped.
+* **Mismatch Fail-Closed Policy**: If any mismatching metadata field is detected in `artifact.json`, the execution is immediately halted with an error (`INCOMPATIBLE_EXISTING_CELL`). No file deletion or overwrites will occur.
+* **Incomplete Quarantine Policy**: If the cell directory exists but the cell is incomplete (e.g. missing `raw_response.txt` or lacking `persisted_complete` status in `artifact.json`), all directory contents are moved to `<output_root>/_quarantine/<cell_id>/<timestamp>/` via atomic rename before re-executing.
 
 ---
 

@@ -182,8 +182,43 @@ def run_cell_with_retries(prompt: str, cell_id: str, execute_fn) -> dict[str, an
 
     raise RuntimeError(f"API calls exhausted for cell {cell_id} after 3 attempts: {last_exc}")
 
+def compute_runtime_fingerprint(manifest: dict[str, any]) -> str:
+    keys = [
+        "experiment_id", "model_provider", "model_tag", "model_version",
+        "runtime", "runtime_version", "thinking_mode", "temperature",
+        "top_p", "top_k", "max_output_tokens", "timeout_seconds",
+        "retry_policy", "seed_list", "source_commit"
+    ]
+    sub = {k: manifest[k] for k in keys}
+    serialized = json.dumps(sub, sort_keys=True, ensure_ascii=False)
+    return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
+
+def quarantine_cell(cell_id: str, cell_dir: Path, output_root: Path) -> None:
+    if not cell_dir.exists():
+        return
+    if not any(cell_dir.iterdir()):
+        return
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    quarantine_dir = output_root / "_quarantine" / cell_id / timestamp
+    quarantine_dir.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        cell_dir.rename(quarantine_dir)
+        print(f"Quarantined incomplete cell directory for {cell_id} to: {quarantine_dir}")
+    except Exception as e:
+        # Fallback to file-by-file move
+        try:
+            quarantine_dir.mkdir(parents=True, exist_ok=True)
+            for item in list(cell_dir.iterdir()):
+                item.rename(quarantine_dir / item.name)
+            if cell_dir.exists():
+                cell_dir.rmdir()
+            print(f"Quarantined incomplete cell files for {cell_id} to: {quarantine_dir}")
+        except Exception as e2:
+            raise RuntimeError(f"QUARANTINE_FAILED: Could not quarantine {cell_dir}: {e} / {e2}")
+
 def execute_generations(manifest: dict[str, any], cell_plan: list[dict[str, any]]) -> None:
     output_root = ROOT / manifest["output_root"]
+    expected_fingerprint = compute_runtime_fingerprint(manifest)
 
     # Overwrite & Incompatible directory validation
     if output_root.exists():
@@ -219,25 +254,63 @@ def execute_generations(manifest: dict[str, any], cell_plan: list[dict[str, any]
         cell_id = cell["cell_id"]
         cell_dir = output_root / cell["output_relative_path"]
 
-        # 1. Resume validation
-        artifact_path = cell_dir / "artifact.json"
-        raw_response_path = cell_dir / "raw_response.txt"
+        # Expected parameters for mismatch check
+        expected_experiment_id = manifest["experiment_id"]
+        expected_task_id = cell["task_id"]
+        expected_condition = cell["condition"]
+        expected_seed = cell["seed"]
+        expected_prompt_sha256 = cell["prompt_sha256"]
+        expected_model_tag = cell["model_tag"]
 
-        if artifact_path.exists() and raw_response_path.exists():
-            try:
-                art = json.loads(artifact_path.read_text(encoding="utf-8"))
-                if (
-                    art.get("persisted_complete") is True and
-                    art.get("cell_id") == cell_id and
-                    art.get("prompt_sha256") == cell["prompt_sha256"] and
-                    art.get("model_tag") == cell["model_tag"]
-                ):
-                    print(f"[{idx+1}/80] Resuming completed cell: {cell_id}")
-                    continue
-                else:
-                    print(f"[{idx+1}/80] Cell directory exists but is incomplete or mismatch. Will overwrite/re-run: {cell_id}")
-            except Exception:
-                print(f"[{idx+1}/80] Cell files exist but are corrupted. Will re-run: {cell_id}")
+        status = "run"
+        if cell_dir.exists() and any(cell_dir.iterdir()):
+            artifact_path = cell_dir / "artifact.json"
+            raw_response_path = cell_dir / "raw_response.txt"
+
+            if artifact_path.exists():
+                try:
+                    art = json.loads(artifact_path.read_text(encoding="utf-8"))
+                except Exception:
+                    # corrupted json is incomplete
+                    status = "incomplete"
+                    art = None
+
+                if art is not None:
+                    # Verify mismatch
+                    mismatch = False
+                    for key, expected_val in [
+                        ("experiment_id", expected_experiment_id),
+                        ("cell_id", cell_id),
+                        ("task_id", expected_task_id),
+                        ("condition", expected_condition),
+                        ("seed", expected_seed),
+                        ("prompt_sha256", expected_prompt_sha256),
+                        ("model_tag", expected_model_tag),
+                        ("runtime_config_fingerprint", expected_fingerprint)
+                    ]:
+                        if key not in art or art[key] != expected_val:
+                            mismatch = True
+                            print(f"Mismatch detected for key '{key}': expected {expected_val}, got {art.get(key)}")
+                            break
+
+                    if mismatch:
+                        raise RuntimeError(f"INCOMPATIBLE_EXISTING_CELL: cell {cell_id} has mismatched metadata")
+
+                    if art.get("persisted_complete") is True and raw_response_path.exists():
+                        status = "skip"
+                    else:
+                        status = "incomplete"
+            else:
+                # No artifact.json but directory is not empty
+                status = "incomplete"
+
+        if status == "skip":
+            print(f"[{idx+1}/80] Resuming completed cell: {cell_id}")
+            continue
+
+        if status == "incomplete":
+            print(f"[{idx+1}/80] Incomplete compatible cell detected: {cell_id}. Quarantining...")
+            quarantine_cell(cell_id, cell_dir, output_root)
 
         # 2. Get prompt
         cond = cell["condition"]
@@ -267,11 +340,13 @@ def execute_generations(manifest: dict[str, any], cell_plan: list[dict[str, any]
 
         # 4. Save results using atomic write
         cell_data = {
+            "experiment_id": expected_experiment_id,
             "cell_id": cell_id,
             "task_id": tid,
             "condition": cond,
             "seed": cell["seed"],
             "model_tag": cell["model_tag"],
+            "runtime_config_fingerprint": expected_fingerprint,
             "runtime_parameters": cell["runtime_parameters"],
             "prompt_sha256": cell["prompt_sha256"],
             "request_metadata": {
@@ -306,6 +381,8 @@ def main() -> int:
 
     try:
         checks = do_preflight()
+        fingerprint = compute_runtime_fingerprint(checks["manifest"])
+        print(f"Runtime config fingerprint: {fingerprint}")
         if args.preflight_only:
             print("Zero-model preflight checks completed successfully. No execution requested.")
             return 0
