@@ -15,6 +15,9 @@ from agent_tools.finals_rebuild.math_task_oracles import (
 
 # Display-latex revision: structural fields judge math correctness; latex is presentation.
 EVALUATOR_LATEX_SEMANTIC_REVISION = "math16_latex_semantic_v2"
+# Schema-normalization revision (post ORACLE_SCHEMA_AUDIT_V1_PRE_FIX): accept
+# semantically equivalent packaging / types before compare.
+EVALUATOR_SCHEMA_NORMALIZE_REVISION = "math16_oracle_schema_normalize_v1"
 
 
 def _result(oracle_type: str, expected: Any, submitted: Any, error: str | None = None) -> dict[str, Any]:
@@ -118,10 +121,24 @@ def _as_fraction(value: Any) -> Fraction:
 
 
 def normalize_compound_radical(value: Any) -> tuple[int, int, int]:
-    """Extract (rational, radical_coefficient, radicand); latex is display-only."""
+    """Extract (rational, radical_coefficient, radicand); latex is display-only.
+
+    When ``result`` is a str (display latex), it must NOT shadow correct flat
+    structural fields on the same dict (ORACLE_SCHEMA_AUDIT_V1 GAP_CONFIRMED q10).
+    """
     if not isinstance(value, dict):
         raise ValueError("compound radical must be a dict")
-    payload = value.get("result", value)
+    if "result" in value:
+        nested = value["result"]
+        if isinstance(nested, dict):
+            payload = nested
+        elif isinstance(nested, str):
+            # Display-only result string: fall back to flat structural fields.
+            payload = value
+        else:
+            raise ValueError("compound radical payload must be a dict")
+    else:
+        payload = value
     if not isinstance(payload, dict):
         raise ValueError("compound radical payload must be a dict")
     rational = coerce_exact_int(payload["rational"], "rational")
@@ -132,6 +149,94 @@ def normalize_compound_radical(value: Any) -> tuple[int, int, int]:
     if coeff == 0:
         raise ValueError("radical_coefficient must be nonzero for compound form")
     return rational, coeff, radicand
+
+
+def _coerce_answer_int(value: Any) -> int | None:
+    """Normalize bare int or digit string (e.g. '-12') to int; else None."""
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, int):
+        return value
+    if isinstance(value, str):
+        text = value.strip()
+        if re.fullmatch(r"-?\d+", text):
+            return int(text)
+    return None
+
+
+def normalize_remainder_poly_latex(value: Any) -> str | None:
+    """Normalize remainder as API coeff list or latex/string to display-canonical form."""
+    from core.prompts.domain_function_library import PolynomialOps
+
+    if isinstance(value, str):
+        return normalize_math16_display_latex(value)
+    if isinstance(value, (list, tuple)):
+        try:
+            return normalize_math16_display_latex(PolynomialOps.format_latex(list(value)))
+        except (TypeError, ValueError, ZeroDivisionError):
+            return None
+    return None
+
+
+def _parse_ordered_int_roots_from_text(text: str) -> list[int] | None:
+    """Extract an ordered integer root pair from packaging prose or short lists."""
+    if not isinstance(text, str):
+        return None
+    section = re.search(
+        r"Roots(?:\s*\([^)]*\))?\s*:\s*([^\n;]+)",
+        text,
+        flags=re.IGNORECASE,
+    )
+    if section:
+        nums = [int(m) for m in re.findall(r"-?\d+", section.group(1))]
+        if len(nums) >= 2:
+            return nums[:2]
+    nums = [int(m) for m in re.findall(r"-?\d+", text)]
+    if len(nums) == 2:
+        return nums
+    return None
+
+
+def normalize_factor_roots_list(submitted_answer: Any) -> list[int] | None:
+    """Accept dict roots / bare list / digit strings / prose packaging with Roots:."""
+    if isinstance(submitted_answer, list):
+        out: list[int] = []
+        for item in submitted_answer:
+            coerced = _coerce_answer_int(item)
+            if coerced is None:
+                return None
+            out.append(coerced)
+        return out
+    if isinstance(submitted_answer, dict):
+        roots = submitted_answer.get("roots")
+        if isinstance(roots, list):
+            return normalize_factor_roots_list(roots)
+        if isinstance(roots, str):
+            return _parse_ordered_int_roots_from_text(roots)
+        return None
+    if isinstance(submitted_answer, str):
+        return _parse_ordered_int_roots_from_text(submitted_answer)
+    return None
+
+
+def _as_rational_value(value: Any) -> Fraction | None:
+    """Accept 'p/q' string, Fraction, or {numerator, denominator}."""
+    try:
+        if isinstance(value, Fraction):
+            return value
+        if isinstance(value, str):
+            return Fraction(value.strip())
+        if isinstance(value, dict):
+            if "numerator" in value and "denominator" in value:
+                return Fraction(
+                    _integer(value["numerator"], "numerator"),
+                    _integer(value["denominator"], "denominator"),
+                )
+            if "value" in value:
+                return _as_rational_value(value["value"])
+        return None
+    except (ValueError, TypeError, ZeroDivisionError, KeyError):
+        return None
 
 
 def compound_radicals_equal(left: Any, right: Any) -> bool:
@@ -201,15 +306,16 @@ def evaluate_math16_polynomial_factor_roots(
     }
     if structural.get("roots") != [-6, 2]:
         return _result(oracle_type, None, submitted_answer, "math16 identity drift")
-    if not isinstance(submitted_answer, dict):
-        return _result(oracle_type, expected, submitted_answer)
-    structural_ok = submitted_answer.get("roots") == structural["roots"]
-    latex_ok = _factorization_latex_equivalent(
-        submitted_answer.get("factorization_latex"), expected["factorization_latex"]
-    ) and _roots_latex_equivalent(
-        submitted_answer.get("roots_latex"), list(structural["roots"])
-    )
-    # Roots list is the semantic judge; latex fields are presentation-only.
+    got_roots = normalize_factor_roots_list(submitted_answer)
+    structural_ok = got_roots == list(structural["roots"])
+    latex_ok = False
+    if isinstance(submitted_answer, dict):
+        latex_ok = _factorization_latex_equivalent(
+            submitted_answer.get("factorization_latex"), expected["factorization_latex"]
+        ) and _roots_latex_equivalent(
+            submitted_answer.get("roots_latex"), list(structural["roots"])
+        )
+    # Roots list is the semantic judge; latex / packaging are presentation-only.
     return {
         "oracle_type": oracle_type,
         "is_correct": structural_ok,
@@ -219,7 +325,8 @@ def evaluate_math16_polynomial_factor_roots(
         "structural_ok": structural_ok,
         "latex_ok": latex_ok,
         "latex_presentation_ok": latex_ok,
-        "evaluator_revision": EVALUATOR_LATEX_SEMANTIC_REVISION,
+        "normalized_roots": got_roots,
+        "evaluator_revision": EVALUATOR_SCHEMA_NORMALIZE_REVISION,
     }
 
 
@@ -234,18 +341,29 @@ def evaluate_math16_exact_rational_expression(
     expected = {**structural, "canonical_latex": r"\frac{2679}{10}"}
     if structural.get("value") != "2679/10":
         return _result(oracle_type, None, submitted_answer, "math16 identity drift")
-    if not isinstance(submitted_answer, dict):
-        return _result(oracle_type, expected, submitted_answer)
-    structural_ok = submitted_answer.get("value") == structural["value"]
-    latex_ok = submitted_answer.get("canonical_latex") == expected["canonical_latex"]
+    expected_frac = Fraction(structural["value"])
+    submitted_value: Any = submitted_answer
+    latex: Any = None
+    if isinstance(submitted_answer, dict):
+        if "value" in submitted_answer:
+            submitted_value = submitted_answer.get("value")
+        elif "numerator" in submitted_answer and "denominator" in submitted_answer:
+            submitted_value = submitted_answer
+        latex = submitted_answer.get("canonical_latex")
+    got = _as_rational_value(submitted_value)
+    structural_ok = got is not None and got == expected_frac
+    latex_ok = latex is None or display_latex_equivalent(latex, expected["canonical_latex"])
+    # Numeric value is semantic judge; latex is presentation-only (GAP_SUSPECTED).
     return {
         "oracle_type": oracle_type,
-        "is_correct": structural_ok and latex_ok,
+        "is_correct": structural_ok,
         "expected_answer": expected,
         "submitted_answer": submitted_answer,
-        "error": None if structural_ok and latex_ok else "structural_or_latex_mismatch",
+        "error": None if structural_ok else "structural_mismatch",
         "structural_ok": structural_ok,
         "latex_ok": latex_ok,
+        "latex_presentation_ok": latex_ok,
+        "evaluator_revision": EVALUATOR_SCHEMA_NORMALIZE_REVISION,
     }
 
 
@@ -265,15 +383,19 @@ def evaluate_math16_radical_simplification(
     structural_ok = (
         submitted_answer.get("coefficient") == 3 and submitted_answer.get("radicand") == 3
     )
-    latex_ok = submitted_answer.get("canonical_latex") == expected["canonical_latex"]
+    latex = submitted_answer.get("canonical_latex")
+    latex_ok = latex is None or display_latex_equivalent(latex, expected["canonical_latex"])
+    # Structure is semantic judge; latex presentation-only (GAP_SUSPECTED).
     return {
         "oracle_type": oracle_type,
-        "is_correct": structural_ok and latex_ok,
+        "is_correct": structural_ok,
         "expected_answer": expected,
         "submitted_answer": submitted_answer,
-        "error": None if structural_ok and latex_ok else "structural_or_latex_mismatch",
+        "error": None if structural_ok else "structural_mismatch",
         "structural_ok": structural_ok,
         "latex_ok": latex_ok,
+        "latex_presentation_ok": latex_ok,
+        "evaluator_revision": EVALUATOR_SCHEMA_NORMALIZE_REVISION,
     }
 
 
@@ -282,17 +404,38 @@ def evaluate_polynomial_division_remainder_only(
 ) -> dict[str, Any]:
     oracle_type = "polynomial_division_remainder_only"
     expected = {"remainder": "4x", "canonical_latex": "4x"}
+    expected_norm = normalize_math16_display_latex("4x")
     # Quotient is audit-only in oracle_payload and must not be required for scoring.
     if oracle_payload.get("remainder") not in ("4x", expected["remainder"]):
         # Still allow payload without remainder key if frozen params are coefficients.
         pass
-    if not isinstance(submitted_answer, dict):
+
+    rem_norm: str | None = None
+    latex_norm: str | None = None
+    if isinstance(submitted_answer, str):
+        rem_norm = normalize_remainder_poly_latex(submitted_answer)
+    elif isinstance(submitted_answer, dict):
+        # Reject scoring on quotient alone.
+        if "quotient" in submitted_answer and set(submitted_answer) <= {"quotient"}:
+            return {
+                "oracle_type": oracle_type,
+                "is_correct": False,
+                "expected_answer": expected,
+                "submitted_answer": submitted_answer,
+                "error": "remainder_mismatch",
+                "evaluator_revision": EVALUATOR_SCHEMA_NORMALIZE_REVISION,
+            }
+        rem_norm = normalize_remainder_poly_latex(submitted_answer.get("remainder"))
+        latex_norm = normalize_remainder_poly_latex(submitted_answer.get("canonical_latex"))
+    else:
         return _result(oracle_type, expected, submitted_answer)
-    remainder = submitted_answer.get("remainder")
-    latex = submitted_answer.get("canonical_latex")
-    ok = remainder in ("4x", r"4x") and latex in ("4x", r"4x")
-    # Reject scoring on quotient alone.
-    if "quotient" in submitted_answer and set(submitted_answer) <= {"quotient"}:
+
+    # Prefer remainder field; latex alone may carry the same math when remainder absent.
+    if rem_norm is not None:
+        ok = rem_norm == expected_norm
+    elif latex_norm is not None:
+        ok = latex_norm == expected_norm
+    else:
         ok = False
     return {
         "oracle_type": oracle_type,
@@ -300,6 +443,8 @@ def evaluate_polynomial_division_remainder_only(
         "expected_answer": expected,
         "submitted_answer": submitted_answer,
         "error": None if ok else "remainder_mismatch",
+        "normalized_remainder": rem_norm if rem_norm is not None else latex_norm,
+        "evaluator_revision": EVALUATOR_SCHEMA_NORMALIZE_REVISION,
     }
 
 
@@ -323,12 +468,14 @@ def evaluate_polynomial_factor_parameter_recovery(
     if isinstance(submitted_answer, dict):
         if submitted_answer.get("a") == -2 or submitted_answer.get("c") == 7:
             return _result(oracle_type, expected, submitted_answer, "legacy_wrong_factor_order")
-        if submitted_answer.get("answer") == 12:
+        if submitted_answer.get("answer") == 12 or submitted_answer.get("answer") == "12":
             return _result(oracle_type, expected, submitted_answer, "legacy_wrong_answer")
         value = submitted_answer.get("answer", submitted_answer.get("value"))
-        ok = value == expected
+        coerced = _coerce_answer_int(value)
+        ok = coerced == expected
     else:
-        ok = submitted_answer == expected
+        coerced = _coerce_answer_int(submitted_answer)
+        ok = coerced == expected
     return {
         "oracle_type": oracle_type,
         "is_correct": ok,
@@ -336,6 +483,7 @@ def evaluate_polynomial_factor_parameter_recovery(
         "submitted_answer": submitted_answer,
         "error": None if ok else "answer_mismatch",
         "factor_order_policy": "strict_source_template",
+        "evaluator_revision": EVALUATOR_SCHEMA_NORMALIZE_REVISION,
     }
 
 
@@ -415,15 +563,18 @@ def evaluate_exact_fraction_canonical(
         return _result(oracle_type, expected, submitted_answer, "fraction fields invalid")
     structural_ok = submitted_frac == value
     latex = submitted_answer.get("canonical_latex")
-    latex_ok = latex == expected["canonical_latex"]
+    latex_ok = latex is None or display_latex_equivalent(latex, expected["canonical_latex"])
+    # Numeric fraction is semantic judge; latex presentation-only (GAP_SUSPECTED).
     return {
         "oracle_type": oracle_type,
-        "is_correct": structural_ok and latex_ok,
+        "is_correct": structural_ok,
         "expected_answer": expected,
         "submitted_answer": submitted_answer,
-        "error": None if structural_ok and latex_ok else "fraction_mismatch",
+        "error": None if structural_ok else "fraction_mismatch",
         "structural_ok": structural_ok,
         "latex_ok": latex_ok,
+        "latex_presentation_ok": latex_ok,
+        "evaluator_revision": EVALUATOR_SCHEMA_NORMALIZE_REVISION,
     }
 
 
@@ -454,15 +605,19 @@ def evaluate_radical_simplification_canonical(
         submitted_answer.get("coefficient") == expected["coefficient"]
         and submitted_answer.get("radicand") == expected["radicand"]
     )
-    latex_ok = submitted_answer.get("canonical_latex") == expected["canonical_latex"]
+    latex = submitted_answer.get("canonical_latex")
+    latex_ok = latex is None or display_latex_equivalent(latex, expected["canonical_latex"])
+    # Structure is semantic judge; latex presentation-only (GAP_SUSPECTED).
     return {
         "oracle_type": oracle_type,
-        "is_correct": structural_ok and latex_ok,
+        "is_correct": structural_ok,
         "expected_answer": expected,
         "submitted_answer": submitted_answer,
-        "error": None if structural_ok and latex_ok else "radical_mismatch",
+        "error": None if structural_ok else "radical_mismatch",
         "structural_ok": structural_ok,
         "latex_ok": latex_ok,
+        "latex_presentation_ok": latex_ok,
+        "evaluator_revision": EVALUATOR_SCHEMA_NORMALIZE_REVISION,
     }
 
 
@@ -522,7 +677,7 @@ def evaluate_compound_radical_result(
         "latex_ok": latex_ok,
         "latex_presentation_ok": latex_ok,
         "normalized": {"expected": expected_tuple, "submitted": got},
-        "evaluator_revision": EVALUATOR_LATEX_SEMANTIC_REVISION,
+        "evaluator_revision": EVALUATOR_SCHEMA_NORMALIZE_REVISION,
     }
 
 

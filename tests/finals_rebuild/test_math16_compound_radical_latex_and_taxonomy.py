@@ -69,8 +69,8 @@ def test_wrong_radicand_and_coefficient_still_fail():
     assert evaluate_compound_radical_result(Q10_PAYLOAD, bad_coeff)["is_correct"] is False
 
 
-def test_tuple_like_wrong_radical_latex_still_fails_q04_style():
-    # q04-style wrong presentation must remain rejected when structure is scored with latex AND.
+def test_tuple_like_wrong_radical_latex_is_presentation_only_q04_style():
+    # After schema normalize: structure judges is_correct; wrong latex is presentation-only.
     payload = {"radicand": 135}
     submitted = {
         "coefficient": 3,
@@ -80,8 +80,8 @@ def test_tuple_like_wrong_radical_latex_still_fails_q04_style():
     v = evaluate_math_task_oracle("radical_simplification_canonical", payload, submitted)
     assert v["structural_ok"] is True
     assert v["latex_ok"] is False
-    assert v["is_correct"] is False
-    assert classify_math16_oracle_failure(v) == "latex_mismatch"
+    assert v["is_correct"] is True
+    assert classify_math16_oracle_failure(v) == "passed"
 
 
 def test_positive_negative_coefficient_and_json_roundtrip():

@@ -79,7 +79,7 @@ def test_factor_roots_rejects_different_roots():
     assert verdict["structural_ok"] is False
 
 
-def test_q04_wrong_radical_latex_still_rejected():
+def test_q04_wrong_radical_latex_no_longer_vetoes_structure():
     payload = {"radicand": 135}
     submitted = {
         "coefficient": 3,
@@ -91,10 +91,10 @@ def test_q04_wrong_radical_latex_still_rejected():
     )
     assert verdict["structural_ok"] is True
     assert verdict["latex_ok"] is False
-    assert verdict["is_correct"] is False
+    assert verdict["is_correct"] is True
 
 
-def test_q02_bare_string_remainder_still_rejected():
+def test_q02_bare_string_remainder_accepted_after_schema_normalize():
     payload = {
         "dividend_coefficients": [6, 4, 0],
         "divisor_coefficients": [2, 0, 0],
@@ -104,13 +104,21 @@ def test_q02_bare_string_remainder_still_rejected():
     verdict = evaluate_math_task_oracle(
         "polynomial_division_remainder_only", payload, "4x"
     )
-    assert verdict["is_correct"] is False
+    assert verdict["is_correct"] is True
     ok = evaluate_math_task_oracle(
         "polynomial_division_remainder_only",
         payload,
         {"remainder": "4x", "canonical_latex": "4x"},
     )
     assert ok["is_correct"] is True
+    assert evaluate_math_task_oracle(
+        "polynomial_division_remainder_only",
+        payload,
+        {"remainder": [4, 0], "canonical_latex": "4x"},
+    )["is_correct"] is True
+    assert evaluate_math_task_oracle(
+        "polynomial_division_remainder_only", payload, "3x"
+    )["is_correct"] is False
 
 
 def test_q10_compound_radical_signed_coeffs_no_regression():
