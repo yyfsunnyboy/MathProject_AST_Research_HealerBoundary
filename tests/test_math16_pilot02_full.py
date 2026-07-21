@@ -28,6 +28,11 @@ def test_manifest_spec_integrity():
     for task in manifest["tasks"]:
         p_path = ROOT / task["prompt_path"]
         assert p_path.exists()
+        assert "family" in task
+        assert "pre_run_assessment" in task
+        assert "pre_run_difficulty" in task["pre_run_assessment"]
+        assert "discrimination" in task["pre_run_assessment"]
+        assert "ceiling_risk" in task["pre_run_assessment"]
 
         # Verify SHA, char count, byte count
         content = p_path.read_text(encoding="utf-8").replace("\r\n", "\n")

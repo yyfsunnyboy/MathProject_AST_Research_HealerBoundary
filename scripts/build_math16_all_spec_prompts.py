@@ -23,134 +23,198 @@ ALL_TASKS = [
     # Integer (4 tasks)
     {
         "task_id": "ce111_q03_prime_factor_selection",
+        "family": "integer",
         "domain": "IntegerOps",
         "api_policy": "native-only",
         "scaffold": "integer_domain_scaffold_compact.py",
         "guardrail_subdir": "integer",
-        "is_api": False
+        "is_api": False,
+        "pre_run_difficulty": "low",
+        "discrimination": "medium",
+        "ceiling_risk": "high"
     },
     {
         "task_id": "ce112_q01_negative_integer_power",
+        "family": "integer",
         "domain": "IntegerOps",
         "api_policy": "native-only",
         "scaffold": "integer_domain_scaffold_compact.py",
         "guardrail_subdir": "integer",
-        "is_api": False
+        "is_api": False,
+        "pre_run_difficulty": "low",
+        "discrimination": "medium",
+        "ceiling_risk": "high"
     },
     {
         "task_id": "ce112_q09_divisor_multiple_intersection",
+        "family": "integer",
         "domain": "IntegerOps",
         "api_policy": "native-only",
         "scaffold": "integer_domain_scaffold_compact.py",
         "guardrail_subdir": "integer",
-        "is_api": False
+        "is_api": False,
+        "pre_run_difficulty": "medium",
+        "discrimination": "high",
+        "ceiling_risk": "medium"
     },
     {
         "task_id": "ce111_nonchoice_q01_part1_exponential_growth",
+        "family": "integer",
         "domain": "IntegerOps",
         "api_policy": "native-only",
         "scaffold": "integer_domain_scaffold_compact.py",
         "guardrail_subdir": "integer",
-        "is_api": False
+        "is_api": False,
+        "pre_run_difficulty": "medium",
+        "discrimination": "high",
+        "ceiling_risk": "medium"
     },
     # Polynomial (4 tasks)
     {
         "task_id": "ce111_q02_polynomial_division_remainder",
+        "family": "polynomial",
         "domain": "PolynomialOps",
         "api_policy": "API-only",
         "scaffold": "polynomial_domain_scaffold_compact.py",
         "guardrail_subdir": "polynomial",
-        "is_api": True
+        "is_api": True,
+        "pre_run_difficulty": "medium",
+        "discrimination": "high",
+        "ceiling_risk": "low"
     },
     {
         "task_id": "ce111_q08_polynomial_factor_parameter_recovery",
+        "family": "polynomial",
         "domain": "PolynomialOps",
         "api_policy": "native-only",
         "scaffold": "integer_domain_scaffold_compact.py",
         "guardrail_subdir": "polynomial",
-        "is_api": False
+        "is_api": False,
+        "pre_run_difficulty": "high",
+        "discrimination": "very_high",
+        "ceiling_risk": "very_low"
     },
     {
         "task_id": "ce115_calc_polynomial_division_l1",
+        "family": "polynomial",
         "domain": "PolynomialOps",
         "api_policy": "API-only",
         "scaffold": "polynomial_domain_scaffold_compact.py",
         "guardrail_subdir": "polynomial",
-        "is_api": True
+        "is_api": True,
+        "pre_run_difficulty": "medium",
+        "discrimination": "high",
+        "ceiling_risk": "low"
     },
     {
         "task_id": "ce115_calc_polynomial_factor_roots_l1",
+        "family": "polynomial",
         "domain": "PolynomialOps",
         "api_policy": "native-only",
         "scaffold": "integer_domain_scaffold_compact.py",
         "guardrail_subdir": "polynomial",
-        "is_api": False
+        "is_api": False,
+        "pre_run_difficulty": "medium",
+        "discrimination": "high",
+        "ceiling_risk": "medium"
     },
     # Radical (4 tasks)
     {
         "task_id": "ce111_q10_ordered_quadratic_roots_radical",
+        "family": "radical",
         "domain": "RadicalOps",
         "api_policy": "mixed",
         "scaffold": "radical_domain_scaffold_compact.py",
         "guardrail_subdir": "radical",
-        "is_api": True
+        "is_api": True,
+        "pre_run_difficulty": "high",
+        "discrimination": "very_high",
+        "ceiling_risk": "very_low"
     },
     {
         "task_id": "ce112_q04_radical_simplification",
+        "family": "radical",
         "domain": "RadicalOps",
         "api_policy": "API-only",
         "scaffold": "radical_domain_scaffold_compact.py",
         "guardrail_subdir": "radical",
-        "is_api": True
+        "is_api": True,
+        "pre_run_difficulty": "low",
+        "discrimination": "medium",
+        "ceiling_risk": "high"
     },
     {
         "task_id": "ce113_q11_rationalize_denominator",
+        "family": "radical",
         "domain": "RadicalOps",
         "api_policy": "native-only",
         "scaffold": "integer_domain_scaffold_compact.py",
         "guardrail_subdir": "radical",
-        "is_api": False
+        "is_api": False,
+        "pre_run_difficulty": "high",
+        "discrimination": "very_high",
+        "ceiling_risk": "low"
     },
     {
         "task_id": "ce115_calc_radical_simplification_l1",
+        "family": "radical",
         "domain": "RadicalOps",
         "api_policy": "API-only",
         "scaffold": "radical_domain_scaffold_compact.py",
         "guardrail_subdir": "radical",
-        "is_api": True
+        "is_api": True,
+        "pre_run_difficulty": "low",
+        "discrimination": "medium",
+        "ceiling_risk": "high"
     },
     # Fraction (4 tasks)
     {
         "task_id": "ce111_q05_exact_fraction_expression",
+        "family": "fraction",
         "domain": "FractionOps",
         "api_policy": "API-only",
         "scaffold": "fraction_domain_scaffold_compact.py",
         "guardrail_subdir": "fraction",
-        "is_api": True
+        "is_api": True,
+        "pre_run_difficulty": "medium",
+        "discrimination": "high",
+        "ceiling_risk": "low"
     },
     {
         "task_id": "ce112_q12_independent_probability_fraction",
+        "family": "fraction",
         "domain": "FractionOps",
         "api_policy": "API-only",
         "scaffold": "fraction_domain_scaffold_compact.py",
         "guardrail_subdir": "fraction",
-        "is_api": True
+        "is_api": True,
+        "pre_run_difficulty": "medium",
+        "discrimination": "medium",
+        "ceiling_risk": "medium"
     },
     {
         "task_id": "ce113_q01_negative_fraction_subtraction",
+        "family": "fraction",
         "domain": "FractionOps",
         "api_policy": "API-only",
         "scaffold": "fraction_domain_scaffold_compact.py",
         "guardrail_subdir": "fraction",
-        "is_api": True
+        "is_api": True,
+        "pre_run_difficulty": "low",
+        "discrimination": "medium",
+        "ceiling_risk": "high"
     },
     {
         "task_id": "ce115_calc_exact_rational_expression_l1",
+        "family": "fraction",
         "domain": "FractionOps",
         "api_policy": "API-only",
         "scaffold": "fraction_domain_scaffold_compact.py",
         "guardrail_subdir": "fraction",
-        "is_api": True
+        "is_api": True,
+        "pre_run_difficulty": "medium",
+        "discrimination": "high",
+        "ceiling_risk": "low"
     }
 ]
 
@@ -257,8 +321,14 @@ def main():
         manifest_records.append({
             "condition": "ab2d_spec",
             "task_id": tid,
+            "family": item["family"],
             "domain": item["domain"],
             "api_policy": item["api_policy"],
+            "pre_run_assessment": {
+                "pre_run_difficulty": item["pre_run_difficulty"],
+                "discrimination": item["discrimination"],
+                "ceiling_risk": item["ceiling_risk"]
+            },
             "prompt_revision": "ab2d_spec_v1",
             "task_contract_source": get_rel_path_str(pool_manifest_path),
             "task_contract_sha256": pool_manifest_sha,
