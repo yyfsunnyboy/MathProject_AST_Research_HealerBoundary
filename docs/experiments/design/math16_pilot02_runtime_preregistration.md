@@ -91,3 +91,25 @@ The prompt sources are defined to guarantee deterministic reproducibility:
 * **Atomic Write**: Saves to a temporary file in the target directory and executes an atomic replacement `os.replace` to prevent corrupted records on premature process termination.
 * **Resume Policy**: The runner queries `artifact.json`. If it exists, contains `"persisted_complete": true`, and its recorded `prompt_sha256` matches the cell plan, the cell is safely skipped without triggering any new API requests.
 * **Overwrite Policy**: If the runner detects the output directory already exists and contains incompatible plans, it will abort. Under no circumstances will completed, valid cells be overwritten.
+
+---
+
+## 6. Prompt Freeze Supersession Lineage
+
+```text
+Initial prompt freeze:
+e9a716eb
+
+Zero-model audit:
+Segment 2A found IntegerOps literals.
+No Pilot-02 model call or result inspection occurred.
+
+Authoritative final prompt freeze:
+dae588d9
+
+Runtime preregistration:
+1ee8573c
+```
+
+`e9a716eb` is superseded.
+`dae588d9` is the only authoritative Pilot-02 Ab2d+spec prompt freeze.
