@@ -27,7 +27,7 @@ generate() must return a dict with exactly question_text, correct_answer, and or
 Output complete Python source only. Do not use Markdown fences or explanatory prose. Preserve frozen parameters exactly. Verify that generate() exists. Verify that the return value has exactly the three required top-level keys. Verify field types match the stated contract and that oracle_payload equals the frozen parameters.
 
 ## Skill-style Precise Specification (Ab2s)
-For integers tasks, you must strictly follow these engineering specifications:
+For integer tasks, you must strictly follow these engineering specifications:
 1. Structural Tag: divisibility-and-prime-factor selection
 2. Namespace & Injection: Direct call IntegerOps.method(...) where needed. Do not import IntegerOps; it is pre-injected.
 3. Native Operators First: Prefer native Python syntax (e.g., +, -, *, //, %, **, loops, comparisons) for basic arithmetic. Plain int math is encouraged.
@@ -72,9 +72,9 @@ generate() must return a dict with exactly question_text, correct_answer, and or
 Output complete Python source only. Do not use Markdown fences or explanatory prose. Preserve frozen parameters exactly. Verify that generate() exists. Verify that the return value has exactly the three required top-level keys. Verify field types match the stated contract and that oracle_payload equals the frozen parameters.
 
 ## Skill-style Precise Specification (Ab2s)
-For integers tasks, you must strictly follow these engineering specifications:
+For integer tasks, you must strictly follow these engineering specifications:
 1. Structural Tag: signed integer exponentiation
-2. Namespace & Injection: Direct call IntegerOps.method(...) where needed. Do not import IntegerOps; it is pre-injected.
+2. Domain API Use: No IntegerOps API is allowed or needed for this task. Do not import or call IntegerOps.
 3. Native Operators First: Prefer native Python syntax (e.g., +, -, *, //, %, **, loops, comparisons) for basic arithmetic. Plain int math is encouraged.
 4. Forbidden APIs: Do not use IntegerOps.add or IntegerOps.sub (they are not supported by the runtime injection template). Do not use eval() or invent any undocumented helpers.
 5. Task-Local Domain API Allowlist: none.
@@ -115,7 +115,7 @@ generate() must return a dict with exactly question_text, correct_answer, and or
 Output complete Python source only. Do not use Markdown fences or explanatory prose. Preserve frozen parameters exactly. Verify that generate() exists. Verify that the return value has exactly the three required top-level keys. Verify field types match the stated contract and that oracle_payload equals the frozen parameters.
 
 ## Skill-style Precise Specification (Ab2s)
-For integers tasks, you must strictly follow these engineering specifications:
+For integer tasks, you must strictly follow these engineering specifications:
 1. Structural Tag: divisor-multiple intersection
 2. Namespace & Injection: Direct call IntegerOps.method(...) where needed. Do not import IntegerOps; it is pre-injected.
 3. Native Operators First: Prefer native Python syntax (e.g., +, -, *, //, %, **, loops, comparisons) for basic arithmetic. Plain int math is encouraged.
@@ -160,9 +160,9 @@ generate() must return a dict with exactly question_text, correct_answer, and or
 Output complete Python source only. Do not use Markdown fences or explanatory prose. Preserve frozen parameters exactly. Verify that generate() exists. Verify that the return value has exactly the three required top-level keys. Verify field types match the stated contract and that oracle_payload equals the frozen parameters.
 
 ## Skill-style Precise Specification (Ab2s)
-For integers tasks, you must strictly follow these engineering specifications:
+For integer tasks, you must strictly follow these engineering specifications:
 1. Structural Tag: discrete exponential growth
-2. Namespace & Injection: Direct call IntegerOps.method(...) where needed. Do not import IntegerOps; it is pre-injected.
+2. Domain API Use: No IntegerOps API is allowed or needed for this task. Do not import or call IntegerOps.
 3. Native Operators First: Prefer native Python syntax (e.g., +, -, *, //, %, **, loops, comparisons) for basic arithmetic. Plain int math is encouraged.
 4. Forbidden APIs: Do not use IntegerOps.add or IntegerOps.sub (they are not supported by the runtime injection template). Do not use eval() or invent any undocumented helpers.
 5. Task-Local Domain API Allowlist: none.
