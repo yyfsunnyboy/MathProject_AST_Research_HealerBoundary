@@ -3,7 +3,7 @@
 def generate(level=1, **kwargs):
     # Rules:
     # - Do not read frozen parameters from kwargs or external state.
-    # - Do not import, reference, or call IntegerOps.
+    # - Do not import, reference, or call any domain APIs.
     # - Use native Python arithmetic, %, **, //, loops, and comparisons.
     # - Do not use eval, exec, safe_eval, files, network, or fabricated helpers.
     # - Return exactly question_text, correct_answer, and oracle_payload.

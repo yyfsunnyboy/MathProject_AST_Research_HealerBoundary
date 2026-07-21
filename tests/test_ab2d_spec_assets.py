@@ -54,7 +54,7 @@ def test_compact_has_only_one_generate_and_no_imports_or_banned_terms():
     generate_defs = re.findall(r'def\s+generate\s*\(', content_no_comments)
     assert len(generate_defs) == 1
     assert "import " not in content_no_comments
-    assert "IntegerOps" not in content_no_comments
+    assert "IntegerOps" not in content
     assert "eval" not in content_no_comments
     assert "exec" not in content_no_comments
     assert "safe_eval" not in content_no_comments
@@ -164,18 +164,14 @@ def test_prompts_do_not_contain_legacy_api_exposure():
         content = prompt_path.read_text(encoding="utf-8")
         assert "## Clean-incremental DOMAIN" not in content
         assert "IntegerOps.is_divisible" not in content
+        assert "domain_function_library" not in content
+        assert "Ab2d+api" not in content
 
-def test_prompts_do_not_contain_integerops_calls_except_final_check():
+def test_prompts_do_not_contain_integerops_entirely():
     for tid in TARGET_TASKS:
         prompt_path = PROMPTS_DIR / f"{tid}.txt"
         content = prompt_path.read_text(encoding="utf-8")
-        final_check_marker = "- Do not use IntegerOps or invented APIs."
-        content_no_final_check = content.replace(final_check_marker, "")
-
-        scaffold_comment = "# - Do not import, reference, or call IntegerOps."
-        content_no_scaffold_comment = content_no_final_check.replace(scaffold_comment, "")
-
-        assert "IntegerOps" not in content_no_scaffold_comment
+        assert "IntegerOps" not in content
 
 def test_prompts_do_not_contain_eval_exec_calls():
     for tid in TARGET_TASKS:

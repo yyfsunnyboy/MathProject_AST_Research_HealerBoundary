@@ -55,7 +55,7 @@ def main():
         "- Define the required generate() entry point.\n"
         "- Use the frozen parameters exactly.\n"
         "- Return the exact required keys and answer schema.\n"
-        "- Do not use IntegerOps or invented APIs."
+        "- Do not use domain APIs or invented APIs."
     )
 
     tasks = {t["task_id"]: t for t in build_pool_tasks()}
