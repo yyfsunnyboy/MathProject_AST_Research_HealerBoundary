@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import hashlib
+import os
 from pathlib import Path
 import pytest
 import subprocess
@@ -126,8 +127,10 @@ def test_plans_geometry():
     assert len(reused) == 80
     assert len(new_cells) == 240
 
-def test_runner_execute_disallowed():
-    # Calling python runner with --execute must fail with RuntimeError
-    res = subprocess.run([sys.executable, "scripts/run_math16_pilot02_full_generation.py", "--execute"], capture_output=True, text=True)
+def test_runner_execute_requires_api_key():
+    # Calling python runner with --execute must fail if GEMINI_API_KEY is not set or empty
+    env = os.environ.copy()
+    env["GEMINI_API_KEY"] = ""
+    res = subprocess.run([sys.executable, "scripts/run_math16_pilot02_full_generation.py", "--execute"], env=env, capture_output=True, text=True)
     assert res.returncode != 0
-    assert "EXECUTE_DISALLOWED" in res.stderr or "EXECUTE_DISALLOWED" in res.stdout
+    assert "GEMINI_API_KEY" in res.stdout or "GEMINI_API_KEY" in res.stderr
