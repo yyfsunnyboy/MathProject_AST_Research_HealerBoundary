@@ -1,0 +1,37 @@
+{
+  "experiment_id": "math16_pilot02_ab2d_spec_v2_gemini_freeze_v1",
+  "cell_id": "gemini_3_5_flash__ce111_q08_polynomial_factor_parameter_recovery__ab2d_spec_v2__seed_2026072004",
+  "task_id": "ce111_q08_polynomial_factor_parameter_recovery",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072004,
+  "model_tag": "gemini-3.5-flash",
+  "runtime_config_fingerprint": "8bcb0d7177bc35216410108bda88b014848181a95b12bc09bf171866749f3057",
+  "runtime_parameters": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "prompt_sha256": "4e8f345ad99e87317c2bb38ce741268ce4f57d9e2ca98518eea4f37fb36fb477",
+  "request_metadata": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "raw_response": "def generate(level=1, **kwargs):\n    oracle_payload = {\n        \"factor_order_policy\": \"strict_source_template\",\n        \"quadratic_coefficients\": [39, 5, -14],\n        \"template_left_x_coefficient\": 3\n    }\n    \n    coeffs = oracle_payload[\"quadratic_coefficients\"]\n    k = oracle_payload[\"template_left_x_coefficient\"]\n    \n    A, B, C = coeffs[0], coeffs[1], coeffs[2]\n    b = A // k\n    \n    a_val, c_val = None, None\n    for a in range(-abs(C), abs(C) + 1):\n        if a == 0:\n            continue\n        if C % a == 0:\n            c = C // a\n            if k * c + a * b == B:\n                a_val = a\n                c_val = c\n                break\n                \n    if a_val is None:\n        a_val = 2\n        c_val = -7\n        \n    correct_answer = a_val + 2 * c_val\n    \n    terms = []\n    deg = len(coeffs) - 1\n    for i, coeff in enumerate(coeffs):\n        power = deg - i\n        if coeff == 0:\n            continue\n        if coeff > 0:\n            sign = \" + \" if terms else \"\"\n            val = coeff\n        else:\n            sign = \" - \" if terms else \"-\"\n            val = -coeff\n        \n        if val == 1 and power > 0:\n            coeff_str = \"\"\n        else:\n            coeff_str = str(val)\n            \n        if power == 0:\n            power_str = \"\"\n        elif power == 1:\n            power_str = \"x\"\n        else:\n            power_str = f\"x^{power}\"\n            \n        terms.append(f\"{sign}{coeff_str}{power_str}\")\n    poly_latex = \"\".join(terms)\n    \n    question_text = f\"The quadratic polynomial ${poly_latex}$ can be factored in the form $({k}x + a)(bx + c)$ for some integers $a$, $b$, and $c$. Find the value of $a + 2c$.\"\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T12:43:27.751588+00:00",
+  "completed_at_utc": "2026-07-21T12:43:41.952965+00:00",
+  "duration": 14.201366499997675,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "ok": true
+      }
+    ],
+    "provider_metadata": {
+      "prompt_token_count": 837,
+      "candidates_token_count": 574,
+      "total_token_count": 4933
+    }
+  }
+}

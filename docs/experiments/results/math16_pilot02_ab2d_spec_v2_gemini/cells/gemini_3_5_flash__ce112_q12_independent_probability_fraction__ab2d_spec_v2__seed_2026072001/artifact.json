@@ -1,0 +1,37 @@
+{
+  "experiment_id": "math16_pilot02_ab2d_spec_v2_gemini_freeze_v1",
+  "cell_id": "gemini_3_5_flash__ce112_q12_independent_probability_fraction__ab2d_spec_v2__seed_2026072001",
+  "task_id": "ce112_q12_independent_probability_fraction",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072001,
+  "model_tag": "gemini-3.5-flash",
+  "runtime_config_fingerprint": "8bcb0d7177bc35216410108bda88b014848181a95b12bc09bf171866749f3057",
+  "runtime_parameters": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "prompt_sha256": "183c3a708e2a1361e9ccd41de1cb33c51bb169b1f6b7cd99d874f98aa23ada51",
+  "request_metadata": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "raw_response": "# -*- coding: utf-8 -*-\n\ndef generate(level=1, **kwargs):\n    # 1. Import FractionOps\n    from core.prompts.domain_function_library import FractionOps\n\n    # 2. Define frozen parameters directly\n    p1 = [2, 6]\n    p2 = [1, 5]\n\n    # 3. Compute the exact result using FractionOps\n    f1 = FractionOps.from_parts(p1[0], p1[1])\n    f2 = FractionOps.from_parts(p2[0], p2[1])\n    res = FractionOps.mul(f1, f2)\n\n    num = res.numerator\n    den = res.denominator\n    canonical_latex = f\"\\\\frac{{{num}}}{{{den}}}\"\n\n    p1_latex = f\"\\\\frac{{{p1[0]}}}{{{p1[1]}}}\"\n    p2_latex = f\"\\\\frac{{{p2[0]}}}{{{p2[1]}}}\"\n\n    question_text = (\n        f\"Two independent events $A$ and $B$ have probabilities \"\n        f\"$P(A) = {p1_latex}$ and $P(B) = {p2_latex}$. \"\n        f\"What is the probability that both events occur? \"\n        f\"Express your answer as an irreducible fraction.\"\n    )\n\n    correct_answer = {\n        \"numerator\": num,\n        \"denominator\": den,\n        \"canonical_latex\": canonical_latex,\n    }\n\n    oracle_payload = {\n        \"p1\": p1,\n        \"p2\": p2,\n    }\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload,\n    }",
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T12:41:16.016385+00:00",
+  "completed_at_utc": "2026-07-21T12:41:24.712578+00:00",
+  "duration": 8.696181199979037,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "ok": true
+      }
+    ],
+    "provider_metadata": {
+      "prompt_token_count": 983,
+      "candidates_token_count": 416,
+      "total_token_count": 2776
+    }
+  }
+}

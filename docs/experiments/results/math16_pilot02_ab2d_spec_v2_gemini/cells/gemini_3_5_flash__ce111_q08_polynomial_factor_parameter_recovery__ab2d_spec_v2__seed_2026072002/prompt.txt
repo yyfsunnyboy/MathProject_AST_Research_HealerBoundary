@@ -1,0 +1,63 @@
+Write only Python source. Implement def generate(level=1, **kwargs).
+Task: ce111_q08_polynomial_factor_parameter_recovery (polynomials, difficulty level 1).
+Task specification: math16_polynomial_factor_parameter_recovery.
+Frozen sampled parameters: {"factor_order_policy": "strict_source_template", "quadratic_coefficients": [39, 5, -14], "template_left_x_coefficient": 3}
+generate() must return a dict with exactly question_text, correct_answer, and oracle_payload. question_text must use formal LaTeX delimiters. factor_order_policy is strict_source_template: first factor is fixed as (3x+a). correct_answer must be the integer a+2c. Do not redefine parameters after swapping factors. oracle_payload must exactly equal the frozen sampled parameters. Do not use input, files, network, subprocess, Markdown fences, or explanations.
+
+## Clean-incremental GENERIC
+Output complete Python source only. Do not use Markdown fences or explanatory prose. Preserve frozen parameters exactly. Verify that generate() exists. Verify that the return value has exactly the three required top-level keys. Verify field types match the stated contract and that oracle_payload equals the frozen parameters.
+
+## Compact Domain Scaffold
+# -*- coding: utf-8 -*-
+
+def generate(level=1, **kwargs):
+    # Rules:
+    # - Do not read frozen parameters from kwargs or external state.
+    # - Do not import, reference, or call any domain APIs.
+    # - Use native Python arithmetic, %, **, //, loops, and comparisons.
+    # - Do not use eval, exec, safe_eval, files, network, or fabricated helpers.
+    # - Return exactly question_text, correct_answer, and oracle_payload.
+    # - All returned values must be JSON-serializable.
+
+    # Define all frozen parameters directly. Do not read kwargs.
+    pass
+
+    # Compute the exact result using native Python.
+    pass
+
+    correct_answer = "correct_answer"
+    question_text = "question_text"
+    oracle_payload = "oracle_payload"
+
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer,
+        "oracle_payload": oracle_payload,
+    }
+
+## API Signature Cards
+# API Signature Cards (ab2d_spec_v2 patch)
+# Use ONLY the signatures below. Do not invent alternate helpers.
+
+- `PolynomialOps.format_latex` | import: `core.prompts.domain_function_library` | signature: `(coeffs, var='x')` | returns: str
+  - `coeffs` is a descending-power coefficient list (e.g. `[4, 0]` → `"4x"`).
+  - Example: `PolynomialOps.format_latex([4, 0], var='x')`.
+  - There is NO `PolynomialOps.to_latex`. Do not call `to_latex`.
+
+## Task Guardrails
+Task Guardrails
+
+- Use native Python only; do not use a Domain API.
+- Solve quadratic factoring using native integer arithmetic.
+- Match factors to the template (3x + a)(bx + c) to recover integers a, b, c.
+- Return the integer value of a + 2c.
+- Do not leak the final correct coefficients.
+
+## Final Check
+Final check before output:
+- Output one complete Python source only.
+- Define the required generate() entry point.
+- Use the frozen parameters exactly.
+- Return the exact required keys and answer schema.
+- Do not use domain APIs or invented APIs.
+- If any polynomial latex helper name is referenced, the only valid name is PolynomialOps.format_latex (never to_latex).

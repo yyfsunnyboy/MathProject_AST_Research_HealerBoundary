@@ -1,0 +1,37 @@
+{
+  "experiment_id": "math16_pilot02_ab2d_spec_v2_gemini_freeze_v1",
+  "cell_id": "gemini_3_5_flash__ce111_q05_exact_fraction_expression__ab2d_spec_v2__seed_2026072004",
+  "task_id": "ce111_q05_exact_fraction_expression",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072004,
+  "model_tag": "gemini-3.5-flash",
+  "runtime_config_fingerprint": "8bcb0d7177bc35216410108bda88b014848181a95b12bc09bf171866749f3057",
+  "runtime_parameters": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "prompt_sha256": "927977168ad6a72c644641fed7ef653495e55279689dc0beb06253033242926d",
+  "request_metadata": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "raw_response": "# -*- coding: utf-8 -*-\nfrom core.prompts.domain_function_library import FractionOps\n\ndef generate(level=1, **kwargs):\n    # Frozen parameters\n    expression = \"9/22 + 11/18 - (23/22 - 7/18)\"\n    oracle_payload = {\"expression\": expression}\n\n    # Compute using FractionOps\n    f1 = FractionOps.create(\"9/22\")\n    f2 = FractionOps.create(\"11/18\")\n    f3 = FractionOps.create(\"23/22\")\n    f4 = FractionOps.create(\"7/18\")\n\n    inner = FractionOps.sub(f3, f4)\n    outer1 = FractionOps.add(f1, f2)\n    res = FractionOps.sub(outer1, inner)\n\n    num = res.numerator\n    den = res.denominator\n\n    if den == 1:\n        canonical_latex = str(num)\n    else:\n        if num < 0:\n            canonical_latex = f\"-\\\\frac{{{-num}}}{{{den}}}\"\n        else:\n            canonical_latex = f\"\\\\frac{{{num}}}{{{den}}}\"\n\n    correct_answer = {\n        \"numerator\": num,\n        \"denominator\": den,\n        \"canonical_latex\": canonical_latex\n    }\n\n    question_text = \"Evaluate the following expression:\\n\\\\[ \\\\frac{9}{22} + \\\\frac{11}{18} - \\\\left(\\\\frac{23}{22} - \\\\frac{7}{18}\\\\right) \\\\]\"\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload,\n    }",
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T12:40:58.546386+00:00",
+  "completed_at_utc": "2026-07-21T12:41:09.316170+00:00",
+  "duration": 10.769772900035605,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "ok": true
+      }
+    ],
+    "provider_metadata": {
+      "prompt_token_count": 1018,
+      "candidates_token_count": 409,
+      "total_token_count": 3667
+    }
+  }
+}

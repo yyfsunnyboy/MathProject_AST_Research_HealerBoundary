@@ -1,0 +1,37 @@
+{
+  "experiment_id": "math16_pilot02_ab2d_spec_v2_gemini_freeze_v1",
+  "cell_id": "gemini_3_5_flash__ce113_q01_negative_fraction_subtraction__ab2d_spec_v2__seed_2026072002",
+  "task_id": "ce113_q01_negative_fraction_subtraction",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072002,
+  "model_tag": "gemini-3.5-flash",
+  "runtime_config_fingerprint": "8bcb0d7177bc35216410108bda88b014848181a95b12bc09bf171866749f3057",
+  "runtime_parameters": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "prompt_sha256": "319926943ccbc9ca260979e04cf024cc1d896f00bc3e6be23e7b9632170ca54a",
+  "request_metadata": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "raw_response": "from core.prompts.domain_function_library import FractionOps\n\ndef generate(level=1, **kwargs):\n    oracle_payload = {\"expression\": \"3/7 - (-1/4)\"}\n    \n    op1 = FractionOps.create(\"3/7\")\n    op2 = FractionOps.create(\"-1/4\")\n    res = FractionOps.sub(op1, op2)\n    \n    num = res.numerator\n    den = res.denominator\n    \n    if num < 0:\n        canonical_latex = f\"-\\\\frac{{{-num}}}{{{den}}}\"\n    else:\n        canonical_latex = f\"\\\\frac{{{num}}}{{{den}}}\"\n        \n    correct_answer = {\n        \"numerator\": num,\n        \"denominator\": den,\n        \"canonical_latex\": canonical_latex\n    }\n    \n    question_text = \"Evaluate the expression:\\n\\\\[ \\\\frac{3}{7} - \\\\left(-\\\\frac{1}{4}\\\\right) \\\\]\"\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T12:42:03.506825+00:00",
+  "completed_at_utc": "2026-07-21T12:42:12.197963+00:00",
+  "duration": 8.69112660002429,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "ok": true
+      }
+    ],
+    "provider_metadata": {
+      "prompt_token_count": 983,
+      "candidates_token_count": 270,
+      "total_token_count": 2953
+    }
+  }
+}

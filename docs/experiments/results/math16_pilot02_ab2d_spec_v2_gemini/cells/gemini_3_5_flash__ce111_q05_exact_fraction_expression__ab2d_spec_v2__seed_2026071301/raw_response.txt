@@ -1,0 +1,42 @@
+# -*- coding: utf-8 -*-
+from core.prompts.domain_function_library import FractionOps
+
+def generate(level=1, **kwargs):
+    # Frozen parameters
+    expression = "9/22 + 11/18 - (23/22 - 7/18)"
+    oracle_payload = {"expression": expression}
+
+    # Compute using FractionOps
+    f1 = FractionOps.create("9/22")
+    f2 = FractionOps.create("11/18")
+    f3 = FractionOps.create("23/22")
+    f4 = FractionOps.create("7/18")
+
+    inner = FractionOps.sub(f3, f4)
+    outer1 = FractionOps.add(f1, f2)
+    res = FractionOps.sub(outer1, inner)
+
+    num = res.numerator
+    den = res.denominator
+
+    if den == 1:
+        canonical_latex = str(num)
+    else:
+        if num < 0:
+            canonical_latex = f"-\\frac{{{-num}}}{{{den}}}"
+        else:
+            canonical_latex = f"\\frac{{{num}}}{{{den}}}"
+
+    correct_answer = {
+        "numerator": num,
+        "denominator": den,
+        "canonical_latex": canonical_latex
+    }
+
+    question_text = "Evaluate the following expression:\n\\[ \\frac{9}{22} + \\frac{11}{18} - \\left(\\frac{23}{22} - \\frac{7}{18}\\right) \\]"
+
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer,
+        "oracle_payload": oracle_payload,
+    }

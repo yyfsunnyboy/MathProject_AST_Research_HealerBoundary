@@ -1,0 +1,65 @@
+def generate(level=1, **kwargs):
+    oracle_payload = {
+        "factor_order_policy": "strict_source_template",
+        "quadratic_coefficients": [39, 5, -14],
+        "template_left_x_coefficient": 3
+    }
+    
+    coeffs = oracle_payload["quadratic_coefficients"]
+    k = oracle_payload["template_left_x_coefficient"]
+    
+    A, B, C = coeffs[0], coeffs[1], coeffs[2]
+    b = A // k
+    
+    a_val, c_val = None, None
+    for a in range(-abs(C), abs(C) + 1):
+        if a == 0:
+            continue
+        if C % a == 0:
+            c = C // a
+            if k * c + a * b == B:
+                a_val = a
+                c_val = c
+                break
+                
+    if a_val is None:
+        a_val = 2
+        c_val = -7
+        
+    correct_answer = a_val + 2 * c_val
+    
+    terms = []
+    deg = len(coeffs) - 1
+    for i, coeff in enumerate(coeffs):
+        power = deg - i
+        if coeff == 0:
+            continue
+        if coeff > 0:
+            sign = " + " if terms else ""
+            val = coeff
+        else:
+            sign = " - " if terms else "-"
+            val = -coeff
+        
+        if val == 1 and power > 0:
+            coeff_str = ""
+        else:
+            coeff_str = str(val)
+            
+        if power == 0:
+            power_str = ""
+        elif power == 1:
+            power_str = "x"
+        else:
+            power_str = f"x^{power}"
+            
+        terms.append(f"{sign}{coeff_str}{power_str}")
+    poly_latex = "".join(terms)
+    
+    question_text = f"The quadratic polynomial ${poly_latex}$ can be factored in the form $({k}x + a)(bx + c)$ for some integers $a$, $b$, and $c$. Find the value of $a + 2c$."
+    
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer,
+        "oracle_payload": oracle_payload
+    }

@@ -1,0 +1,45 @@
+# -*- coding: utf-8 -*-
+
+def generate(level=1, **kwargs):
+    # 1. Import FractionOps
+    from core.prompts.domain_function_library import FractionOps
+
+    # 2. Define frozen parameters directly
+    p1 = [2, 6]
+    p2 = [1, 5]
+
+    # 3. Compute the exact result using FractionOps
+    f1 = FractionOps.from_parts(p1[0], p1[1])
+    f2 = FractionOps.from_parts(p2[0], p2[1])
+    res = FractionOps.mul(f1, f2)
+
+    num = res.numerator
+    den = res.denominator
+    canonical_latex = f"\\frac{{{num}}}{{{den}}}"
+
+    p1_latex = f"\\frac{{{p1[0]}}}{{{p1[1]}}}"
+    p2_latex = f"\\frac{{{p2[0]}}}{{{p2[1]}}}"
+
+    question_text = (
+        f"Two independent events $A$ and $B$ have probabilities "
+        f"$P(A) = {p1_latex}$ and $P(B) = {p2_latex}$. "
+        f"What is the probability that both events occur? "
+        f"Express your answer as an irreducible fraction."
+    )
+
+    correct_answer = {
+        "numerator": num,
+        "denominator": den,
+        "canonical_latex": canonical_latex,
+    }
+
+    oracle_payload = {
+        "p1": p1,
+        "p2": p2,
+    }
+
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer,
+        "oracle_payload": oracle_payload,
+    }
