@@ -1,0 +1,113 @@
+{
+  "taxonomy_id": "math16_posthoc_shared_taxonomy_v1",
+  "taxonomy_version": "1.0",
+  "frozen_at_utc": "2026-07-22T00:00:00Z",
+  "source_doc": "docs/experiments/design/math16_posthoc_shared_taxonomy_v1.md",
+  "source_doc_sha256": "36f27cc6e6534af916c865a82e11ba280324bed93c0e00e75bc0d70d30561a54",
+  "mutation_policy": "IMMUTABLE — no additions or renames permitted during per-cell annotation",
+  "layer_A_original_failure_layer": {
+    "description": "Deepest error layer causing Baseline FAIL. Assign one value per cell from the frozen Baseline evaluation artifact.",
+    "values": [
+      {
+        "code": "L1_PARSE_SYNTAX",
+        "meaning": "Python SyntaxError — code does not parse; AST cannot be built."
+      },
+      {
+        "code": "L2_CONTRACT_SCHEMA_ENTRYPOINT",
+        "meaning": "Code parses but violates output-schema or entrypoint contract required by the Evaluator."
+      },
+      {
+        "code": "L3_DOMAIN_API",
+        "meaning": "Correct schema structure but domain API used incorrectly (wrong function, wrong args, missing import)."
+      },
+      {
+        "code": "L4_RUNTIME_EXECUTION",
+        "meaning": "Schema correct and API correct but a runtime exception prevents completion."
+      },
+      {
+        "code": "L5_SEMANTIC_ANSWER",
+        "meaning": "Code runs but mathematical answer is wrong (semantic / reasoning error)."
+      }
+    ]
+  },
+  "layer_B_healer_disposition_result": {
+    "description": "What the Healer did and the outcome. One value per cell per run (Primary and Post-hoc).",
+    "mapping_from_artifact_fields": {
+      "NO_OP": "healer_outcome == 'no_op'",
+      "MODIFIED_RESCUED": "healer_outcome == 'rescue_to_pass' AND post_healer_status == 'PASSED'",
+      "MODIFIED_STILL_FAIL": "healer_outcome == 'changed_partial_progress' AND post_healer_status == 'FAILED'",
+      "MODIFIED_NEW_FAILURE": "regressed == true",
+      "ABSTAIN_NO_RULE": "healer did not attempt any rule (no match)",
+      "ABSTAIN_AMBIGUOUS": "multiple competing rules; intervention not unique",
+      "MODIFIED_UNEVALUABLE": "healer transformed but evaluator could not run to completion"
+    },
+    "values": [
+      {
+        "code": "NO_OP",
+        "meaning": "Healer ran but applied zero transformations. Code is byte-identical to input."
+      },
+      {
+        "code": "ABSTAIN_NO_RULE",
+        "meaning": "Healer determined no frozen rule matches this cell."
+      },
+      {
+        "code": "ABSTAIN_AMBIGUOUS",
+        "meaning": "Healer matched multiple competing rules; deliberately abstains."
+      },
+      {
+        "code": "MODIFIED_RESCUED",
+        "meaning": "Healer applied a rule; post-healer Evaluator returned PASS."
+      },
+      {
+        "code": "MODIFIED_STILL_FAIL",
+        "meaning": "Healer applied a rule; post-healer Evaluator still returned FAIL."
+      },
+      {
+        "code": "MODIFIED_NEW_FAILURE",
+        "meaning": "Healer applied a rule; post-healer Evaluator returned a new distinct failure (regression indicator)."
+      },
+      {
+        "code": "MODIFIED_UNEVALUABLE",
+        "meaning": "Healer applied a rule but post-healer Evaluator could not run to completion."
+      }
+    ]
+  },
+  "layer_C_repair_signature_match": {
+    "description": "Whether applied repairs fall within the frozen repair signature. Cross-reference frozen_rule_allowlist in math16_ab3_freeze_manifest.json.",
+    "values": [
+      {
+        "code": "WITHIN_FROZEN_REPAIR_SIGNATURE",
+        "meaning": "All applied rules are in frozen allowlist and change pattern is consistent with rule specification."
+      },
+      {
+        "code": "OUTSIDE_FROZEN_REPAIR_SIGNATURE",
+        "meaning": "At least one applied rule is not in frozen allowlist, or application pattern deviates materially from spec."
+      },
+      {
+        "code": "AMBIGUOUS_SIGNATURE_MATCH",
+        "meaning": "Applied rules are in allowlist but analyst cannot determine from available artifacts if change pattern is fully consistent (e.g., source span not recovered)."
+      }
+    ]
+  },
+  "valid_conditions": {
+    "Ab1": "Native (no scaffold)",
+    "Ab2g": "Generic Scaffold",
+    "Ab2d+api": "Domain Scaffold + API",
+    "Ab2d+spec": "Domain Scaffold + Standard Spec (v2 for Qwen 4B)"
+  },
+  "valid_families": {
+    "integer": "Integer arithmetic",
+    "polynomial": "Polynomial operations",
+    "radical": "Radical / surd operations",
+    "fraction": "Fraction / rational arithmetic"
+  },
+  "frozen_rule_allowlist_source": "docs/experiments/manifests/math16_ab3_freeze_manifest.json",
+  "frozen_rule_ids": [
+    "L1_CLOSE_UNBALANCED_PARENTHESIS",
+    "L1_CLOSE_UNBALANCED_DELIMITER_EXTENDED",
+    "L1_PROSE_RESIDUE_NARROW",
+    "L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP",
+    "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
+    "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP"
+  ]
+}
