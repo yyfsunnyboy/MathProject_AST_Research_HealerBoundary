@@ -186,6 +186,15 @@ FINAL_REPORT_GAPS_IDENTIFIED
 - Qwen 9B 在 Integer (+12 格) 與 Fraction (+14 格) 觀察到高於 4B 的通過數。
 - **Qwen 9B Polynomial 異常 (9/80)**：9B 在多項式通過數少於 4B 7 格。經診斷，此現象具高度局部性，**不可解讀為 9B 全域失控或純數學能力較差**（詳見第 12 節）。
 
+### 7.1 Fraction Family 9B 獨勝 (NINE_B_ONLY_PASS) 機制分布診斷
+
+依據專屬診斷產物 [Fraction 9B-Only Pass Audit](file:///c:/Projects/MathProject_AST_Research_HealerBoundary/docs/experiments/results/math16_pilot02_fraction_9b_only_pass_mechanism_audit_v1/audit_report.md)：
+- **配對不一致矩陣**：Fraction 家族 9B 獨勝 $c = 21$ 格 (`NINE_B_ONLY_PASS`)，4B 獨勝 $b = 7$ 格 (`FOUR_B_ONLY_PASS`)，淨增加 $c - b =$ **+14 格** (Paired RD = $+17.50\%$, Exact McNemar $p = 0.0001$).
+- **4B Failure Layer 分布**：在 21 格 4B 失敗/9B 成功案例中，4B 失敗層級分別為 **L1 (Syntax/Parse)** 10 格 (47.62%)、**L5 (Algorithmic)** 6 格 (28.57%)、**L2 (Contract)** 2 格 (9.52%)、**L4 (Runtime)** 2 格 (9.52%)、**L3 (API Misuse)** 1 格 (4.76%)。格式與執行層級 (L1~L4) 合計占 **71.43%** (`FRACTION_GAP_MAINLY_FORMAT_EXECUTION_RELATED`).
+- **Condition 分布**：差距分散於 `Ab2g` (7格, 33.33%)、`Ab2d+spec-v2` (7格, 33.33%)、`Ab1` (4格, 19.05%) 與 `Ab2d+api` (3格, 14.29%)，**非由 Ab2d+api 條件主導** (僅占 14.29%)。
+- **Task 分布**：差距分散於 `ce113_q01` (9格)、`ce111_q05` (5格)、`ce112_q12` (4格)、`ce115` (3格)，無單一 Task 超過 50%。
+- **與舊 Ab2d 診斷交集**：僅 2 格重疊於舊 Ab2d 27格異常集合，**嚴禁將舊 27格的 77.8% 格式污染外推至全 21 格**。
+
 ---
 
 ## 8. Failure Layer 與 Mechanism 分布 (Failure Analysis)
@@ -400,19 +409,22 @@ Qwen 3.5 9B 在 Polynomial 家族的通過率為 **9/80 (11.3%)**，少於 Qwen 
 ### Q18: Polynomial 題目的局部異常是否污染了整體的模型比較？
 **答**：Polynomial 異常確實影響 9B 總分，但已被分層揭露，因此沒有被隱藏；整體比較必須連同此限制一起解讀。
 
+### Q19: 為什麼 Fraction family 的 9B 優勢最明顯 (淨增加 14 格)？
+**答**：在配對分析中，Fraction 家族 9B 獨勝 $c = 21$ 格，4B 獨勝 $b = 7$ 格，淨增加 14 格 ($p = 0.0001$). 對 21 格 4B 失敗/9B 成功案例的機制分布顯示：4B 的失敗有 71.43% 落在 L1~L4 格式與執行層級（L1 語法無法解析 47.62%），L5 演算法錯誤占 28.57%。差距分散於多個 Prompt 條件（`Ab2g` 與 `Ab2d+spec-v2` 各佔 33.33%，`Ab2d+api` 僅佔 14.29%）與多個分數題型，顯示 9B 展現了跨條件與跨題型的累積優勢。此分析屬描述性分布，未做因果驗證，不可簡單解讀為純數學能力差異。
+
 ---
 
 ## 17. 正式成果缺口盤點 (Gap Inventory - Audit Only)
 
 本章節將未來分析缺口重新分類劃分如下（**本輪僅作盤點標記，不執行任何實驗修改或數據重新評估**）：
 
-### 17.1 分類 A：研究證據必做 (`REQUIRED_BEFORE_FINAL`)
+### 17.1 分類 A：研究證據必做 (`REQUIRED_BEFORE_FINAL`) — ✅ `COMPLETED_WITH_INTERPRETATION_LIMITATIONS`
 1. **Qwen 4B vs 9B Cell-level Paired Comparison**：✅ **已完成**。[320-Cell Paired Ledger](file:///c:/Projects/MathProject_AST_Research_HealerBoundary/docs/experiments/results/math16_pilot02_qwen4b_vs_qwen9b_tier1_paired_analysis_v1/paired_cell_ledger.jsonl)
 2. **主要 Condition Pairs 之 Exact McNemar 檢定**：✅ **已完成**。[Condition Paired Summary](file:///c:/Projects/MathProject_AST_Research_HealerBoundary/docs/experiments/results/math16_pilot02_qwen4b_vs_qwen9b_tier1_paired_analysis_v1/condition_paired_summary.json) ($p=0.0106$ Overall, 4 conditions 探索性 $p$-values 已計算).
 3. **Discordant Pairs 與 Paired Risk Difference 計算**：✅ **已完成** ($b=26, c=49, \Delta=+7.19\%$, OR=1.88).
 4. **Task-clustered Bootstrap 95% CI**：✅ **已完成**。[Bootstrap Summary](file:///c:/Projects/MathProject_AST_Research_HealerBoundary/docs/experiments/results/math16_pilot02_qwen4b_vs_qwen9b_tier1_paired_analysis_v1/bootstrap_summary.json) (10,000 resamples: Overall 95% CI `[-0.94%, +14.38%]`).
 5. **Seed 穩定性基本摘要**：✅ **已完成**。[Seed Stability Summary](file:///c:/Projects/MathProject_AST_Research_HealerBoundary/docs/experiments/results/math16_pilot02_qwen4b_vs_qwen9b_tier1_paired_analysis_v1/seed_stability_summary.json) (5 個 Seed 全數 $+1$ 至 $+7$ 格淨勝).
-6. **完成報告措辭與方法學修正**：✅ **已完成** (全報告過度主張與「顯著」皆已完成修訂).
+6. **完成報告措辭與方法學修正與 Fraction 機制分布補充**：✅ **已完成**。[Fraction 9B-Only Pass Audit](file:///c:/Projects/MathProject_AST_Research_HealerBoundary/docs/experiments/results/math16_pilot02_fraction_9b_only_pass_mechanism_audit_v1/audit_report.md) (21 格描述性分布解析已納入).
 
 ### 17.2 分類 B：最終呈現必做 (`REQUIRED_FOR_PRESENTATION`)
 1. **正式展板向量圖表 (High-res Vector Charts)**：繪製展板專用之分頁柱狀圖與結構圖。
