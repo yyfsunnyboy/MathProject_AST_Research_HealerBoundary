@@ -469,12 +469,15 @@ Qwen 3.5 9B 在 Polynomial 家族的通過率為 **9/80 (11.3%)**，少於 Qwen 
 5. **評審 Q&A 定稿**：✅ **已完成**。[Jury Defense Q&A Final v1](file:///c:/Projects/MathProject_AST_Research_HealerBoundary/docs/experiments/reports/math16_pilot02_jury_qa_final_v1.md) (19 題雙版本定稿)。
 6. **Primary / Post-hoc 圖像分帳規範**：✅ **已完成**。[Primary/Post-hoc Visual Governance](file:///c:/Projects/MathProject_AST_Research_HealerBoundary/docs/experiments/visualization/math16_pilot02_core_figure_spec_v1/primary_posthoc_visual_governance.md) (視覺分層與禁止過度宣稱規範已凍結)。
 
-### 17.3 分類 C：可選拓寬 (`OPTIONAL`)
+### 17.3 里程碑凍結狀態 (`MILESTONE_STATUS`)
+* **Evidence Complete Milestone v1**：✅ **已凍結**。[Evidence Complete Milestone v1](file:///c:/Projects/MathProject_AST_Research_HealerBoundary/docs/experiments/milestones/math16_pilot02_evidence_complete_v1/) (正式數據、配對統計、Q&A、圖表規格、SHA 密碼學 Closure 與 10 項方法學限制全數鎖定；開開啟 presentation-only 製作階段)。
+
+### 17.4 分類 C：可選拓寬 (`OPTIONAL`)
 1. **Logistic Mixed-effects 模型**：包含 Task/Seed 隨機效應之三向交互作用迴歸。
 2. **Token / Wall-clock 分析**：整理 Prompt Token、Output Token 與 Healer CPU 毫秒級執行開銷。
 3. **空集合 Healer Manifest**：為 Gemini 與 9B 產出標準格式之 `eligible=0` 執行空清冊 JSON。
 4. **Polynomial Anomaly 獨立附錄**：將 9B Polynomial 異常診斷獨立匯出為 Audit 簡報。
-5. **補充附錄與 SHA-256 Hash Closure 彙整**：建立全實驗產物之 Hash 密碼學關聯驗證清冊。
+5. **補充附錄與 SHA-256 Hash Closure 彙整**：✅ **已包含於 Milestone v1**。[SHA256 Closure](file:///c:/Projects/MathProject_AST_Research_HealerBoundary/docs/experiments/milestones/math16_pilot02_evidence_complete_v1/source_sha_closure.json)。
 
 ---
 
