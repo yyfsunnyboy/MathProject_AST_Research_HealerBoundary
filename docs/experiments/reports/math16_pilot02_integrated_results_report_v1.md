@@ -122,9 +122,30 @@ FINAL_REPORT_GAPS_IDENTIFIED
 | **Qwen 3.5 4B** (Tier 1 對照) | **78** | 242 | **24.38%** (78/320) | [overall_summary.json](file:///c:/Projects/MathProject_AST_Research_HealerBoundary/docs/experiments/results/math16_pilot02_qwen4b_evaluation_v4_r001/overall_summary.json) |
 | **Qwen 3.5 9B** (Tier 1 對照) | **101** | 219 | **31.56%** (101/320) | [overall_summary.json](file:///c:/Projects/MathProject_AST_Research_HealerBoundary/docs/experiments/results/math16_pilot02_qwen9b_evaluation_v4_r001/overall_summary.json) |
 
-**關鍵觀察**：
-- 在同一 Qwen 系列與相同主要 sampling 設定下，9B 比 4B 多通過 23 格，基線通過率提高 7.18 個百分點。
+**關鍵觀察與 Tier 1 配對統計**：
+- 在同一 Qwen 系列與相同主要 sampling 設定下，9B 比 4B 多通過 23 格，基線通過率提高 7.18 個百分點 (78/320 vs 101/320)。
 - Gemini 3.5 Flash 作為雲端強模型參照，通過率為 90.31% (289/320)。
+
+### 5.1 Tier 1 (Qwen 4B vs Qwen 9B) 正式 320-Cell 配對列聯表與統計檢定
+
+依據獨立腳本 `scripts/analyze_math16_pilot02_qwen4b_vs_qwen9b_tier1_paired.py` 從凍結數據庫進行 100% 完整匹配 (320 matched pairs)：
+
+| 2×2 列聯表 | Qwen 3.5 9B PASS | Qwen 3.5 9B FAIL | 合計 (Qwen 4B) |
+| :--- | ---: | ---: | ---: |
+| **Qwen 3.5 4B PASS** | **52** (`BOTH_PASS`) | **26** (`FOUR_B_ONLY_PASS`, $b$) | **78** (24.38%) |
+| **Qwen 3.5 4B FAIL** | **49** (`NINE_B_ONLY_PASS`, $c$) | **193** (`BOTH_FAIL`) | **242** (75.62%) |
+| **合計 (Qwen 3.5 9B)** | **101** (31.56%) | **219** (68.44%) | **320** |
+
+#### 正式統計指標與雙重信賴區間：
+- **不一致配對 (Discordant Pairs)**：$b = 26$ (`4B_ONLY`), $c = 49$ (`9B_ONLY`)，淨增加 $+23$ 格程式生成成功案例。
+- **Paired Risk Difference ($\Delta$)**：$\Delta = +7.1875\%$ ($+0.0719$)。
+- **Exact Two-Sided McNemar Test $p$-value**：$p = \mathbf{0.0106}$ ($p < 0.05$，具統計顯著之配對差異）。
+- **Matched-Pairs Odds Ratio (OR)**：$\text{OR} = 49 / 26 = \mathbf{1.88}$。
+- **95% 雙重信賴區間**：
+  - Wald 95% CI: `[+0.0194, +0.1243]` (+1.94% 至 +12.43%)
+  - **Task-Clustered Bootstrap 95% CI** (10,000 resamples): `[-0.0094, +0.1438]` (-0.94% 至 +14.38%)
+- **跨 Seed 穩定度**：所有 5 個隨機種子上 9B 均穩定高於 4B（淨增加範圍 $+1$ 至 $+7$ 格/seed，平均 $+4.6 \pm 2.41$ 格）。
+- **完整證明產物**：[Tier 1 Paired Analysis Dir](file:///c:/Projects/MathProject_AST_Research_HealerBoundary/docs/experiments/results/math16_pilot02_qwen4b_vs_qwen9b_tier1_paired_analysis_v1/overall_paired_summary.json)
 
 ---
 
@@ -386,12 +407,12 @@ Qwen 3.5 9B 在 Polynomial 家族的通過率為 **9/80 (11.3%)**，少於 Qwen 
 本章節將未來分析缺口重新分類劃分如下（**本輪僅作盤點標記，不執行任何實驗修改或數據重新評估**）：
 
 ### 17.1 分類 A：研究證據必做 (`REQUIRED_BEFORE_FINAL`)
-1. **Qwen 4B vs 9B Cell-level Paired Comparison**：於 Tier 1 正式配對比較中繪製 paired differences。
-2. **主要 Condition Pairs 之 Exact McNemar 檢定**：針對 Ab1 vs Ab2g, Ab2g vs Ab2d+api, Ab2g vs Ab2d+spec-v2, Ab2d+api vs spec-v2 進行 exact McNemar 檢定。
-3. **Discordant Pairs 與 Paired Risk Difference 計算**：列出成對勝敗矩陣 (Discordant Pairs) 並計算配對風險差與 p-value。
-4. **Task-clustered Bootstrap 95% CI**：採用以 Task 為 Cluster 的 Bootstrap 抽樣，計算通過率與差異之 95% 信心區間。
-5. **Seed 穩定性基本摘要**：彙整 5 個 Seed 間的通過數極差與標準差。
-6. **完成上述報告措辭修正**：將所有未經統計檢定之「顯著」與因果過度主張替換為描述性用語（本報告已完成第一版修正）。
+1. **Qwen 4B vs 9B Cell-level Paired Comparison**：✅ **已完成**。[320-Cell Paired Ledger](file:///c:/Projects/MathProject_AST_Research_HealerBoundary/docs/experiments/results/math16_pilot02_qwen4b_vs_qwen9b_tier1_paired_analysis_v1/paired_cell_ledger.jsonl)
+2. **主要 Condition Pairs 之 Exact McNemar 檢定**：✅ **已完成**。[Condition Paired Summary](file:///c:/Projects/MathProject_AST_Research_HealerBoundary/docs/experiments/results/math16_pilot02_qwen4b_vs_qwen9b_tier1_paired_analysis_v1/condition_paired_summary.json) ($p=0.0106$ Overall, 4 conditions 探索性 $p$-values 已計算).
+3. **Discordant Pairs 與 Paired Risk Difference 計算**：✅ **已完成** ($b=26, c=49, \Delta=+7.19\%$, OR=1.88).
+4. **Task-clustered Bootstrap 95% CI**：✅ **已完成**。[Bootstrap Summary](file:///c:/Projects/MathProject_AST_Research_HealerBoundary/docs/experiments/results/math16_pilot02_qwen4b_vs_qwen9b_tier1_paired_analysis_v1/bootstrap_summary.json) (10,000 resamples: Overall 95% CI `[-0.94%, +14.38%]`).
+5. **Seed 穩定性基本摘要**：✅ **已完成**。[Seed Stability Summary](file:///c:/Projects/MathProject_AST_Research_HealerBoundary/docs/experiments/results/math16_pilot02_qwen4b_vs_qwen9b_tier1_paired_analysis_v1/seed_stability_summary.json) (5 個 Seed 全數 $+1$ 至 $+7$ 格淨勝).
+6. **完成報告措辭與方法學修正**：✅ **已完成** (全報告過度主張與「顯著」皆已完成修訂).
 
 ### 17.2 分類 B：最終呈現必做 (`REQUIRED_FOR_PRESENTATION`)
 1. **正式展板向量圖表 (High-res Vector Charts)**：繪製展板專用之分頁柱狀圖與結構圖。
