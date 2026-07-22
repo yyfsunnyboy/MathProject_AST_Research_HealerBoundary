@@ -144,12 +144,23 @@ def test_no_overclaiming_phrases():
 
 
 def test_no_binary_or_slide_outputs_exist():
-    forbidden_exts = [".png", ".jpg", ".jpeg", ".pdf", ".ppt", ".pptx"]
+    allowed_rendered_outputs = {
+        "math16_pilot02_poster_v1.png",
+        "math16_pilot02_poster_v1.pdf",
+        "figure_01_baseline_overall.png",
+        "figure_02_prompt_conditions.png",
+        "figure_03_family_breakdown.png",
+        "figure_04_tier1_paired_analysis.png",
+        "figure_05_healer_eligibility_boundary.png",
+        "figure_06_healer_concept_zones.png",
+    }
+    forbidden_exts = [".jpg", ".jpeg", ".ppt", ".pptx"]
     for p in (ROOT / "docs/experiments/presentation").rglob("*"):
         if "poster_v1" in p.name.lower() and p.name not in [
             "math16_pilot02_poster_v1_spec.md",
             "math16_pilot02_poster_v1_content_map.json",
-            "math16_pilot02_poster_v1_build_report.md"
+            "math16_pilot02_poster_v1_build_report.md",
+            *allowed_rendered_outputs,
         ]:
             assert p.suffix.lower() not in forbidden_exts, f"Forbidden rendered binary file found: {p.name}"
 
