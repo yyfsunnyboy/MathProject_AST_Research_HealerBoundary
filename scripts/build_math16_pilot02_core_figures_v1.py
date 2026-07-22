@@ -7,7 +7,11 @@ Reads ground-truth numbers strictly from Evidence Complete Milestone v1 JSON:
 Outputs 300 DPI PNG and SVG vector files to:
 - docs/experiments/visualization/math16_pilot02_core_figures_v1/
 
-Renders Figures 2 and 6 while preserving SHA256 hashes of Figures 1, 3, 4, 5.
+Figure 2 Post-hoc Presentation Clarification:
+- Gemini 4th group (Ab2d+spec) shows Post-hoc 80/80 as a HATCHED hollow bar (visually distinct).
+- Gemini Primary spec-v1 = 63/80 is annotated on the hatched bar and in the footnote.
+- Qwen 4B and 9B spec-v2 primary bars remain solid/normal.
+- Evidence Complete frozen values are NOT modified.
 """
 from __future__ import annotations
 
@@ -133,59 +137,153 @@ def render_figure_1(claims: dict, out_dir: Path):
 
 
 def render_figure_2(claims: dict, out_dir: Path):
-    """Figure 2: Four Prompt Conditions across Three Models."""
-    fig, ax = plt.subplots(figsize=(10, 5.8), dpi=300)
+    """Figure 2: Four Prompt Conditions across Three Models.
+
+    Post-hoc Presentation Clarification (v2):
+    - Groups 1-3: Gemini Primary solid bars (Ab1/Ab2g/Ab2d+api).
+    - Group 4 Gemini: Post-hoc 80/80 shown as HATCHED hollow bar (visually distinct from Primary).
+      Primary spec-v1 = 63/80 annotated directly on bar.
+    - Qwen 4B / 9B: spec-v2 solid bars (primary official data) throughout.
+    - Evidence Complete frozen values NOT modified.
+    """
+    fig, ax = plt.subplots(figsize=(10.5, 6.0), dpi=300)
     fig.patch.set_facecolor("#FFFFFF")
     ax.set_facecolor("#FFFFFF")
 
-    # Prompt Conditions: Ab1, Ab2g, Ab2d+api, Ab2d+spec
-    conditions = ["Ab1\n(Native 8B)", "Ab2g\n(Scaffold)", "Ab2d+api\n(API Spec)", "Ab2d+spec\n(Family Spec)"]
-
     # Scores (out of 80 per cell)
-    gemini_scores = [72, 76, 78, 63]  # Ab2d+spec for Gemini is spec-v1
-    qwen4b_scores = [15, 19, 8, 36]   # Ab2d+spec for 4B is spec-v2
-    qwen9b_scores = [18, 27, 16, 40]  # Ab2d+spec for 9B is spec-v2
+    # Gemini: groups 1-3 are Primary solid; group 4 uses Post-hoc value 80 for display height
+    gemini_primary_scores  = [72, 76, 78, 63]   # spec-v1 primary (group 4 = 63)
+    gemini_posthoc_g4      = 80                  # Post-hoc value shown for group 4 only
+    qwen4b_scores          = [15, 19, 8, 36]     # spec-v2 primary throughout
+    qwen9b_scores          = [18, 27, 16, 40]    # spec-v2 primary throughout
 
-    x = range(len(conditions))
+    x = list(range(4))
     width = 0.24
 
-    rects1 = ax.bar([i - width for i in x], gemini_scores, width, label="Gemini 3.5 Flash (Cloud)", color=COLORS["gemini"], edgecolor="#1F2937", linewidth=1.0, zorder=3)
-    rects2 = ax.bar([i for i in x], qwen4b_scores, width, label="Qwen 3.5 4B (spec-v2)", color=COLORS["qwen4b"], edgecolor="#1F2937", linewidth=1.0, zorder=3)
-    rects3 = ax.bar([i + width for i in x], qwen9b_scores, width, label="Qwen 3.5 9B (spec-v2)", color=COLORS["qwen9b"], edgecolor="#1F2937", linewidth=1.0, zorder=3)
+    # --- Groups 1-3: Gemini solid Primary bars (indices 0,1,2) ---
+    # Draw first 3 groups of Gemini as solid primary bars
+    rects1_solid = ax.bar(
+        [i - width for i in x[:3]],
+        gemini_primary_scores[:3],
+        width,
+        color=COLORS["gemini"],
+        edgecolor="#1F2937",
+        linewidth=1.0,
+        zorder=3,
+        label="Gemini 3.5 Flash — Primary (spec-v1)",
+    )
 
-    # Post-hoc annotation box on Gemini Ab2d+spec showing spec-v1 vs Post-hoc 80/80
-    ax.annotate("Gemini (spec-v1): 63/80\n[Post-hoc spec-v2: 80/80]",
-                xy=(3 - width, 63), xytext=(2.4, 75),
-                arrowprops=dict(arrowstyle="->", color="#3B82F6", lw=1.2),
-                fontsize=8.5, fontweight="bold", color="#1D4ED8",
-                bbox=dict(boxstyle="round,pad=0.25", facecolor="#EFF6FF", edgecolor="#93C5FD", lw=1.0))
+    # --- Group 4: Gemini Post-hoc 80/80 hatched hollow bar ---
+    rect_posthoc = ax.bar(
+        [3 - width],
+        [gemini_posthoc_g4],
+        width,
+        color="#FFFFFF",            # White fill (hollow)
+        edgecolor=COLORS["gemini"],
+        linewidth=2.2,
+        hatch="///",                # Diagonal hatching = visually distinct
+        zorder=3,
+        label="Gemini 3.5 Flash — Post-hoc spec-v2 (80/80)",
+    )
+
+    # --- Qwen 4B & 9B: solid primary bars throughout all 4 groups ---
+    rects2 = ax.bar(
+        [i for i in x],
+        qwen4b_scores,
+        width,
+        label="Qwen 3.5 4B — Primary (spec-v2)",
+        color=COLORS["qwen4b"],
+        edgecolor="#1F2937",
+        linewidth=1.0,
+        zorder=3,
+    )
+    rects3 = ax.bar(
+        [i + width for i in x],
+        qwen9b_scores,
+        width,
+        label="Qwen 3.5 9B — Primary (spec-v2)",
+        color=COLORS["qwen9b"],
+        edgecolor="#1F2937",
+        linewidth=1.0,
+        zorder=3,
+    )
 
     ax.set_ylabel("PASS 通過數 (Out of 80)", fontsize=12, fontweight="bold")
-    ax.set_title("四 Prompt 條件 × 三模型通過數比較", fontsize=15, fontweight="bold", pad=15)
+    ax.set_title(
+        "四種 Prompt 條件與 Spec 文件補齊後的通過數",
+        fontsize=14, fontweight="bold", pad=15
+    )
     ax.set_xticks(x)
-    ax.set_xticklabels(["Ab1", "Ab2g", "Ab2d+api", "Ab2d+spec\n(spec-v1 / spec-v2)"], fontsize=11, fontweight="bold")
-    ax.set_ylim(0, 92)
+    ax.set_xticklabels(
+        ["Ab1", "Ab2g", "Ab2d+api", "Ab2d+spec"],
+        fontsize=11, fontweight="bold"
+    )
+    ax.set_ylim(0, 96)
     ax.grid(axis="y", linestyle="--", alpha=0.5, zorder=0)
 
-    # External legend to avoid overlapping
-    ax.legend(fontsize=9.5, loc="upper left", bbox_to_anchor=(1.02, 1.0), frameon=True, facecolor="#F9FAFB", edgecolor="#D1D5DB")
+    # External legend
+    ax.legend(
+        fontsize=9.0,
+        loc="upper left",
+        bbox_to_anchor=(1.02, 1.0),
+        frameon=True,
+        facecolor="#F9FAFB",
+        edgecolor="#D1D5DB",
+    )
 
-    # Bar labels
-    for rect in rects1:
+    # Bar labels: Groups 1-3 Gemini solid
+    for rect in rects1_solid:
         h = rect.get_height()
-        ax.text(rect.get_x() + rect.get_width()/2., h + 1.2, f"{int(h)}/80", ha='center', va='bottom', fontsize=8.5, fontweight='bold', color="#1F2937")
+        ax.text(
+            rect.get_x() + rect.get_width() / 2., h + 1.5,
+            f"{int(h)}/80", ha='center', va='bottom',
+            fontsize=8.5, fontweight='bold', color="#1F2937"
+        )
+
+    # Bar label: Group 4 Gemini Post-hoc hatched bar — two lines: 80/80 Post-hoc + Primary 63
+    ph_rect = rect_posthoc.patches[0] if hasattr(rect_posthoc, 'patches') else list(rect_posthoc)[0]
+    ax.text(
+        ph_rect.get_x() + ph_rect.get_width() / 2., ph_rect.get_height() + 1.5,
+        "80/80 Post-hoc",
+        ha='center', va='bottom', fontsize=8.5, fontweight='bold', color=COLORS["gemini"]
+    )
+    # Annotate Primary 63/80 inside the hatched bar area
+    ax.text(
+        ph_rect.get_x() + ph_rect.get_width() / 2., 32,
+        "Primary\nspec-v1\n= 63/80",
+        ha='center', va='center', fontsize=7.5, fontweight='bold', color="#1E40AF",
+        bbox=dict(boxstyle="round,pad=0.2", facecolor="#EFF6FF", edgecolor="#93C5FD", lw=1.0, alpha=0.85)
+    )
+
+    # Bar labels Qwen
     for rect in rects2:
         h = rect.get_height()
-        ax.text(rect.get_x() + rect.get_width()/2., h + 1.2, f"{int(h)}/80", ha='center', va='bottom', fontsize=8.5, fontweight='bold', color="#1F2937")
+        ax.text(
+            rect.get_x() + rect.get_width() / 2., h + 1.5,
+            f"{int(h)}/80", ha='center', va='bottom',
+            fontsize=8.5, fontweight='bold', color="#1F2937"
+        )
     for rect in rects3:
         h = rect.get_height()
-        ax.text(rect.get_x() + rect.get_width()/2., h + 1.2, f"{int(h)}/80", ha='center', va='bottom', fontsize=8.5, fontweight='bold', color="#1F2937")
+        ax.text(
+            rect.get_x() + rect.get_width() / 2., h + 1.5,
+            f"{int(h)}/80", ha='center', va='bottom',
+            fontsize=8.5, fontweight='bold', color="#1F2937"
+        )
 
-    # Mandatory Footnote
-    footnote = "註：Gemini 正式生成採 spec-v1 (63/80)；Qwen 採 spec-v2 (36/80與40/80)。Gemini Post-hoc 80/80 為事後機制驗證，不列入 Primary 正式 Bar。\n沒有跨模型普遍最佳 Prompt，差異不可宣稱由模型大小造成。"
-    fig.text(0.42, 0.02, footnote, ha="center", fontsize=8.5, color=COLORS["text_muted"], style="italic")
+    # Mandatory Footnote (two lines)
+    footnote = (
+        "Gemini的80/80為Post-hoc機制驗證（///斜線柱）；Primary正式值 spec-v1 = 63/80 已標於柱中。"
+        "Qwen 4B與9B為spec-v2正式生成結果。\n"
+        "本圖為版本修正後的描述性呈現，不作完全同條件Primary推論。"
+        "沒有跨模型普遍最佳Prompt，差異不可宣稱由模型大小造成。"
+    )
+    fig.text(
+        0.40, 0.01, footnote,
+        ha="center", fontsize=8.0, color=COLORS["text_muted"], style="italic"
+    )
 
-    fig.subplots_adjust(left=0.08, right=0.72, top=0.88, bottom=0.14)
+    fig.subplots_adjust(left=0.08, right=0.68, top=0.88, bottom=0.16)
 
     png_path = out_dir / "figure_02_prompt_conditions.png"
     svg_path = out_dir / "figure_02_prompt_conditions.svg"
@@ -505,11 +603,12 @@ def main():
     print("Loading frozen milestone claims...")
     claims = load_and_verify_milestone_claims()
 
-    # SHA Protection: Figures 1, 3, 4, 5 rendering is skipped if files already exist
+    # SHA Protection: Figures 1, 3, 4, 5, 6 rendering is skipped if files already exist
     fig1_png = OUT_DIR / "figure_01_baseline_overall.png"
     fig3_png = OUT_DIR / "figure_03_family_breakdown.png"
     fig4_png = OUT_DIR / "figure_04_tier1_paired_analysis.png"
     fig5_png = OUT_DIR / "figure_05_healer_eligibility_boundary.png"
+    fig6_png = OUT_DIR / "figure_06_healer_concept_zones.png"
 
     if not fig1_png.exists():
         print("Rendering Figure 1: Baseline Overall...")
@@ -535,12 +634,15 @@ def main():
     else:
         print("Skipping Figure 5 rendering (SHA Preserved).")
 
-    # Render Figures 2 and 6
-    print("Rendering Figure 2: Four Prompt Conditions across Three Models...")
-    render_figure_2(claims, OUT_DIR)
+    if not fig6_png.exists():
+        print("Rendering Figure 6: Healer Boundary 3-Zone Conceptual Model...")
+        render_figure_6(claims, OUT_DIR)
+    else:
+        print("Skipping Figure 6 rendering (SHA Preserved).")
 
-    print("Rendering Figure 6: Healer Boundary 3-Zone Conceptual Model...")
-    render_figure_6(claims, OUT_DIR)
+    # Figure 2 is ALWAYS re-rendered (Post-hoc Presentation Clarification updates)
+    print("Re-rendering Figure 2: Post-hoc Presentation Clarification (Gemini 80/80 hatched bar)...")
+    render_figure_2(claims, OUT_DIR)
 
     # Compute output SHA256 hashes for all 6 core figures
     figures_info = [
@@ -574,13 +676,19 @@ def main():
     # Generate Complete Build Manifest (All 6 Core Figures)
     build_manifest = {
         "manifest_id": "math16_pilot02_core_figures_v1_manifest",
-        "version": "2.0.0",
+        "version": "2.1.0",
         "batch": "all_six_core_figures_complete",
         "project": "Ivan旺宏科學展 HealerBoundary",
         "generated_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "rendered_figures_count": 6,
-        "newly_rendered_figures": ["fig2_prompt_conditions", "fig6_healer_concept_zones"],
-        "preserved_figures": ["fig1_baseline_overall", "fig3_family_breakdown", "fig4_tier1_paired_analysis", "fig5_healer_eligibility_boundary"],
+        "figure2_posthoc_clarification": {
+            "gemini_primary_spec_v1": 63,
+            "gemini_posthoc_spec_v2": 80,
+            "display_note": "Figure 2 group 4 displays Gemini Post-hoc 80/80 as hatched hollow bar for readability.",
+            "primary_accounting": "Gemini Primary spec-v1 = 63/80 annotated on bar; Evidence Complete NOT modified.",
+            "posthoc_label": "80/80 is Post-hoc mechanism validation, NOT a formal re-run Primary result."
+        },
+        "preserved_figures": ["fig1_baseline_overall", "fig3_family_breakdown", "fig4_tier1_paired_analysis", "fig5_healer_eligibility_boundary", "fig6_healer_concept_zones"],
         "python_version": sys.version,
         "matplotlib_version": matplotlib.__version__,
         "font_family_used": "Microsoft JhengHei",

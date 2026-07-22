@@ -23,7 +23,7 @@ PRESENTATION_ASSET_LAYER_READY
 | 圖表 ID | 中文名稱 | PNG 檔名 | PNG SHA-256 | SVG SHA-256 |
 | :- | :--- | :--- | :--- | :--- |
 | **Figure 1** | 三模型 Baseline 總覽 | `figure_01_baseline_overall.png` | `5bc0c714769c9877...` | `8a3cc1c8c9bbc407...` |
-| **Figure 2** | 四 Prompt 條件 × 三模型 | `figure_02_prompt_conditions.png` | `73f66ce6a84200ab...` | `958b848df03c0bc0...` |
+| **Figure 2** | 四 Prompt 條件 × 三模型 | `figure_02_prompt_conditions.png` | `7df829db88a30c34...` | `76211c220a8eb304...` |
 | **Figure 3** | 四 Family × Qwen 4B/9B | `figure_03_family_breakdown.png` | `f164edc807659c45...` | `8daf1901ca83b8f9...` |
 | **Figure 4** | Tier 1 配對分析 | `figure_04_tier1_paired_analysis.png` | `f18bbb774e9a75c5...` | `b1d19764e6f16079...` |
 | **Figure 5** | Healer Eligibility/Rescue | `figure_05_healer_eligibility_boundary.png` | `5887f0b829797ab6...` | `45126972a0373fca...` |
