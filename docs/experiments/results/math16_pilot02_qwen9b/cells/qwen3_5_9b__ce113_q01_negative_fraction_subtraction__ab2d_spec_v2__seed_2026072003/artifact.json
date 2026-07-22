@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce113_q01_negative_fraction_subtraction__ab2d_spec_v2__seed_2026072003",
+  "task_id": "ce113_q01_negative_fraction_subtraction",
+  "family": "fraction",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072003,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072003
+  },
+  "prompt_sha256": "319926943ccbc9ca260979e04cf024cc1d896f00bc3e6be23e7b9632170ca54a",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce113_q01_negative_fraction_subtraction.txt",
+  "generation_status": "success",
+  "raw_response": "# -*- coding: utf-8 -*-\nfrom core.prompts.domain_function_library import FractionOps\n\n\ndef generate(level=1, **kwargs):\n    # Frozen sampled parameters defined directly as per task specification\n    frozen_params = {\"expression\": \"3/7 - (-1/4)\"}\n\n    # Parse the first fraction from the expression string manually to avoid eval/exec on full expr if needed,\n    # but since we have specific logic for this exact case: 3/7 - (-1/4), let's parse components.\n    # The task is specifically \"math16_negative_fraction_subtraction\" with expression \"3/7 - (-1/4)\".\n    \n    # We need to compute 3/7 - (-1/4) which equals 3/7 + 1/4.\n    # However, the instruction says: Use FractionOps.sub for computation.\n    # Let's parse the operands based on the frozen expression string provided in kwargs or hardcoded?\n    # Rule: \"Do not read frozen parameters from kwargs\". So we use the hardcoded value defined above.\n    \n    expr = frozen_params[\"expression\"]  # \"3/7 - (-1/4)\"\n    \n    # We must implement parsing logic to extract operands for FractionOps without using eval/exec on arbitrary strings if possible, \n    # but given the strict constraint and specific expression, we can hardcode the extraction or use a safe parser.\n    # Since this is a generated task with fixed frozen params in this context:\n    \n    # Extracting numbers from \"3/7 - (-1/4)\" safely for FractionOps usage.\n    import re\n    \n    # Pattern to match fractions like 3/7 and -1/4 (including negative sign before parenthesis)\n    parts = re.findall(r'(-?\\d+)/(\\d+)', expr.replace(' ', '')) \n    # This regex might miss the second fraction if it's inside parens or has a minus.\n    # Let's try to split by ' - ' and handle signs carefully.\n    \n    # Better approach for this specific known expression:\n    # Expression is \"3/7 - (-1/4)\". \n    # Operand 1: 3/7 -> num=3, den=7\n    # Operator: subtraction '-'\n    # Operand 2: inside parens \"-(-1/4)\"? No, it's minus negative one fourth.\n    # The string is \"3/7 - (-1/4)\". \n    # We need to extract the second fraction which is effectively +1/4 mathematically but represented as subtracting a negative.\n    \n    # Let's use a robust regex split or manual parsing for this specific format: num/den op (num/den)\n    match = re.search(r'(-?\\d+)/(\\d+)\\s*-\\s*\\((-?\\d+)/(\\d+)\\)', expr)\n    \n    if not match:\n        raise ValueError(\"Expression format mismatch\")\n\n    n1, d1 = int(match.group(1)), int(match.group(2))\n    n2, d2 = int(match.group(3)), int(match.group(4)) # This captures -1 from (-1/4)\n    \n    # The operation is subtraction: FractionOps.sub(frac1, frac2) where frac2 includes the negative sign.\n    f1 = FractionOps.from_parts(n1, d1)\n    f2 = FractionOps.from_parts(n2, d2)\n    \n    result_frac = FractionOps.sub(f1, f2)\n    \n    # Construct correct_answer dict with numerator, denominator, canonical_latex\n    num_ans = result_frac.numerator\n    den_ans = result_frac.denominator\n    \n    # Canonical LaTeX for fraction: \\frac{num}{den}\n    import math\n    if den_ans < 0:\n        num_ans = -num_ans\n        den_ans = -den_ans\n        \n    canonical_latex = f\"\\\\frac{{{num_ans}}}{{{den_ans}}}\"\n    \n    correct_answer_dict = {\n        \"numerator\": num_ans,\n        \"denominator\": den_ans,\n        \"canonical_latex\": canonical_latex\n    }\n\n    # Construct question_text using formal LaTeX delimiters\n    q_tex_n1 = f\"\\\\frac{{{n1}}}{{{d1}}}\"\n    q_tex_op = \"-\"\n    q_tex_paren2_start = \"(\"\n    q_tex_neg_num2 = str(n2) if n2 < 0 else \"\" # If negative, include sign. Note: regex captured -1 as string \"-1\" usually? \n    # Let's reconstruct the second fraction LaTeX carefully.\n    \n    # Re-extracting to ensure correct signs for display\n    s_expr = expr.replace(' ', '')\n    parts_list = re.findall(r'(-?\\d+)/(\\d+)', s_expr)\n    if len(parts_list) < 2:\n        raise ValueError(\"Could not parse two fractions\")\n    \n    # The regex above might have missed the second one due to parens. \n    # Let's rely on the match object groups which worked for \"3/7 - (-1/4)\"?\n    # Wait, re.search with that pattern expects exactly: num/den op (num/den)\n    # If n2 is negative, it matches \"-1\".\n    \n    q_tex_n2 = f\"\\\\frac{{{n2}}}{{{d2}}}\" if d2 != 0 else \"undefined\" \n    # Actually for display we want the LaTeX of -1/4 as \\frac{-1}{4} or (-\\frac{1}{4})? Usually standard is \\frac{-1}{4}.\n    \n    question_text = f\"{q_tex_n1} {q_tex_op} ({q_tex_n2})\"\n\n    oracle_payload = frozen_params\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer_dict,\n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T19:59:02.434750+00:00",
+  "completed_at_utc": "2026-07-21T19:59:23.514046+00:00",
+  "duration": 21.079283999977633,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 21.07927240000572,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 929,
+      "eval_count": 1270,
+      "total_token_count": 2199,
+      "total_duration": 19056193100,
+      "load_duration": 248421000,
+      "done_reason": "stop",
+      "latency_ms": 21079,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072003,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072003,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce115_calc_polynomial_factor_roots_l1__ab2g__seed_2026072002",
+  "task_id": "ce115_calc_polynomial_factor_roots_l1",
+  "family": "polynomial",
+  "condition": "ab2g",
+  "seed": 2026072002,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072002
+  },
+  "prompt_sha256": "9aa875c3c2de0b79cb0cf0bb5ec18ef9a02ead452db9d4d044500f175a8f485f",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    quadratic_coefficients = [1, 4, -12]\n    \n    # Calculate roots using exact arithmetic (fractions) to avoid floats\n    from fractions import Fraction\n    \n    a = quadratic_coefficients[0]\n    b = quadratic_coefficients[1]\n    c = quadratic_coefficients[2]\n    \n    discriminant = b * b - 4 * a * c\n    \n    # Calculate roots exactly using the quadratic formula: (-b ± sqrt(d)) / (2a)\n    import math\n    delta_sqrt = int(math.isqrt(abs(int(discriminant)))) if discriminant >= 0 else None\n    \n    # Since coefficients are integers and we need exact arithmetic, \n    # let's factorize c to find integer roots first as it's level 1.\n    # x^2 + bx + c = (x - r1)(x - r2) => sum of roots = -b, product = c\n    \n    if discriminant < 0:\n        raise ValueError(\"No real roots for this polynomial.\")\n    \n    delta_sqrt_val = int(math.sqrt(discriminant))\n    \n    # Check if perfect square to ensure exact rational/integer representation\n    is_perfect_square = (delta_sqrt_val * delta_sqrt_val == discriminant)\n    \n    root1_num = -b + delta_sqrt_val\n    root2_num = -b - delta_sqrt_val\n    \n    denom = 2 * a\n    \n    # Simplify fractions for roots\n    from math import gcd\n    \n    def simplify_fraction(n, d):\n        common = abs(gcd(n, d))\n        return (n // common, d // common) if n != 0 else (0, 1)\n    \n    r1_num, r1_den = simplify_fraction(root1_num, denom)\n    r2_num, r2_den = simplify_fraction(root2_num, denom)\n    \n    # Determine order: ascending means smaller value first. \n    # Compare float values of the two roots to sort them for \"ascending\" list requirement\n    val1 = root1_num / root1_den if root1_den != 0 else float('inf')\n    val2 = root2_num / r2_den if r2_den != 0 else float('-inf')\n    \n    # Construct sorted tuple of roots as strings or fractions for exactness\n    # The requirement says \"roots (ascending)\". We will represent them as simplified fractions.\n    def fraction_to_str(n, d):\n        return f\"{n}/{d}\" if d != 1 else str(n)\n        \n    root_list = []\n    \n    # Sort based on value\n    roots_values = [(val1, r1_num/r1_den), (val2, r2_num/r2_den)]\n    sorted_roots = sorted(roots_values, key=lambda x: float(x[0])) if discriminant != 0 else [r1_num/r1_den] * 2\n    \n    # Actually simpler logic for sorting the two roots derived above\n    root_a_val = Fraction(root1_num, root1_den)\n    root_b_val = Fraction(root2_num, r2_den)\n    \n    sorted_roots_list = []\n    if root_a_val <= root_b_val:\n        sorted_roots_list.append((root_a_val.numerator, root_a_val.denominator))\n        sorted_roots_list.append((root_b_val.numerator, root_b_val.denominator))\n    else:\n        sorted_roots_list.append((root_b_val.numerator, root_b_val.denominator))\n        sorted_roots_list.append((root_a_val.numerator, root_a_val.denominator))\n\n    # Format roots_latex and correct_answer['roots']\n    def format_root(n, d):\n        if d == 1:\n            return str(n)\n        else:\n            return f\"\\\\frac{{{n}}}{{-{d}}}\" if n < 0 else f\"-\\\\frac{{{-n}}}{{{d}}}\" # Wait, standard latex for negative fraction is usually \\frac{n}{-d} or -\\frac{|n|}{d}. Let's stick to simple canonical form.\n            return f\"\\\\frac{{{n}}}{{{d}}}\"\n\n    roots_latex_parts = []\n    correct_roots_list = [] # List of strings\n    \n    for n, d in sorted_roots_list:\n        if d == 1:\n            s_val = str(n)\n        else:\n            s_val = f\"\\\\frac{{{n}}}{{{d}}}\"\n        \n        roots_latex_parts.append(s_val)\n        correct_roots_list.append(f\"{s_val}\")\n\n    # Factorization latex: (x - r1)(x - r2) or similar. \n    # If root is integer k, factor is (x - k). If fraction n/d, factor is (dx - n).\n    \n    def get_factor_str(n, d):\n        if d == 1:\n            return f\"(x - {n})\"\n        else:\n            # Factor corresponding to root n/d is (d*x - n) = 0 -> x = n/d. \n            # Wait, standard form for polynomial with integer coeffs factoring over rationals usually keeps monic if possible or uses leading coeff.\n            # Given a=1 here. Roots are r1, r2. Factors: (x-r1)(x-r2).\n            return f\"(dx - n)\" is not quite right because we want the polynomial to match coefficients [1, 4, -12].\n            # Let's reconstruct factors from roots directly for latex display of factorization over Q.\n            pass\n            \n    # Re-evaluating factorization string construction:\n    # Polynomial P(x) = (x - r1)(x - r2). \n    # If r is integer, write (x - r).\n    # If r is fraction n/d in lowest terms, usually written as d*(x - n/d) or just keep it factored over Q.\n    # Standard math notation for factorization of monic polynomial with rational roots: product of linear factors.\n    \n    def make_factor_latex(numerator, denominator):\n        if denominator == 1:\n            return f\"(x - {numerator})\"\n        else:\n            # To keep coefficients integer in the visual representation often we write d(x - n/d) but here leading coeff is 1.\n            # So strictly (x - n/d). \n            return f\"(x - \\\\frac{{{numerator}}}{{-{denominator}}})\" if numerator < 0 else f\"(x + \\\\frac{{{-numerator}}}{{{denominator}}})\" \\\n                   if denominator != 1 and numerator > 0 else f\"(x - \\\\frac{{{abs(numerator)}}}{{{denominator}}})\" # Simplified logic\n    \n    # Better approach for factorization latex: \n    # Just substitute the roots into (x - root).\n    \n    factors_latex_parts = []\n    for n, d in sorted_roots_list:\n        if d == 1:\n            term = f\"(x - {n})\"\n        else:\n             sign_str = \"+\" if n < 0 and d > 0 or (n > 0 and d < 0) else \"-\" # Actually handle signs carefully. \n             val_sign = \"minus\" if n * d >= 0 else \"plus\" # No, root is n/d. Factor is x - n/d.\n             num_str = abs(n)\n             den_str = abs(d)\n             \n             if n < 0:\n                 term = f\"(x + \\\\frac{{{num_str}}}{{-{den_str}}})\" # Wait, standard latex for negative fraction in subtraction? \n                 # x - (-3/2) -> x + 3/2.\n                 term = f\"(x + \\\\frac{{{abs(n)}}}{{{d}}})\" if d > 0 else f\"(x + \\\\frac{{{-n}}}{{{den_str}}})\"\n             elif n > 0:\n                 term = f\"(x - \\\\frac{{{num_str}}}{{{den_str}}})\"\n             \n        factors_latex_parts.append(term)\n\n    factorization_latex = \" * \".join(factors_latex_parts) if len(factors_latex_parts) == 2 else \"(No real roots)\" # Should be 2 for quadratic\n    \n    question_text = f\"Solve the polynomial equation $x^2 + {b}x + {c} = 0$ by factoring. Provide the factorization and the roots in ascending order.\"\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": {\n            \"roots\": correct_roots_list, # List of strings representing fractions or integers\n            \"factorization_latex\": factorization_latex,\n            \"roots_latex\": \", \".join(roots_latex_parts) if len(sorted_roots_list) == 2 else \"\" \n        },\n        \"oracle_payload\": {\"quadratic_coefficients\": [1, 4, -12]}\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T18:59:07.998755+00:00",
+  "completed_at_utc": "2026-07-21T18:59:38.820189+00:00",
+  "duration": 30.821423099958338,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 30.82140870008152,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 228,
+      "eval_count": 1945,
+      "total_token_count": 2173,
+      "total_duration": 28796605800,
+      "load_duration": 435182300,
+      "done_reason": "stop",
+      "latency_ms": 30821,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072002,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072002,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

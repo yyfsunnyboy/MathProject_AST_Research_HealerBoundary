@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce115_calc_exact_rational_expression_l1__ab2d_spec_v2__seed_2026072003",
+  "task_id": "ce115_calc_exact_rational_expression_l1",
+  "family": "fraction",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072003,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072003
+  },
+  "prompt_sha256": "f46b8a30d79d77ca3811c9d7dc202a0b65b50302395ca871a24d3129a0f4e7c2",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce115_calc_exact_rational_expression_l1.txt",
+  "generation_status": "success",
+  "raw_response": "# -*- coding: utf-8 -*-\n\nfrom fractions import Fraction\n\n\ndef generate(level=1, **kwargs):\n    # Frozen sampled parameters as defined in the task specification\n    frozen_params = {\n        \"products\": [\n            {\"left\": \"2.79\", \"right\": \"89.3\", \"sign\": 1},\n            {\"left\": \"-0.21\", \"right\": \"89.3\", \"sign\": -1}\n        ]\n    }\n\n    # Helper to convert decimal string to Fraction exactly\n    def str_to_frac(s):\n        return Fraction(int(float(s) * 100), 100).limit_denominator() if '.' in s else int(s) / 1\n    \n    # Actually, for exact arithmetic with decimals like \"2.79\", we must treat them as fractions of integers directly to avoid float precision loss before conversion.\n    # Better approach: parse string manually or use Fraction from decimal representation logic.\n    def precise_str_to_frac(s):\n        if '.' in s:\n            int_part, frac_part = s.split('.')\n            num = int(int_part) * (10 ** len(frac_part)) + int(frac_part)\n            den = 10 ** len(frac_part)\n            return Fraction(num, den).limit_denominator() # limit_denominator is safe here as numbers are small\n        else:\n            return Fraction(s)\n\n    # Process the first product term\n    left1_str = frozen_params[\"products\"][0][\"left\"]\n    right1_str = frozen_params[\"products\"][0][\"right\"]\n    sign1 = frozen_params[\"products\"][0][\"sign\"]\n    \n    val_left_1 = precise_str_to_frac(left1_str)\n    val_right_1 = precise_str_to_frac(right1_str)\n    \n    term1_val = Fraction(val_left_1 * sign1, 1).limit_denominator() # Actually just multiply by integer sign\n    \n    # Process the second product term\n    left2_str = frozen_params[\"products\"][1][\"left\"]\n    right2_str = frozen_params[\"products\"][1][\"right\"]\n    sign2 = frozen_params[\"products\"][1][\"sign\"]\n    \n    val_left_2 = precise_str_to_frac(left2_str)\n    val_right_2 = precise_str_to_frac(right2_str)\n    \n    term2_val = Fraction(val_left_2 * sign2, 1).limit_denominator()\n\n    # The task implies an expression. Based on \"products\" and signs, it looks like: (left1 * right1) + (sign2 * left2 * right2)? \n    # Or simply sum of terms? Let's assume the structure is a linear combination based on the list order.\n    # Usually in these tasks, if given a list of products with signs, it implies Sum(sign_i * product_i).\n    \n    total_numerator = term1_val.numerator + (term2_val.numerator) \n    total_denominator = 1\n    \n    # Wait, let's re-evaluate the math.\n    # Term 1: sign=1 -> left=\"2.79\", right=\"89.3\". Value = 2.79 * 89.3? Or is it just a term in an expression like A + B?\n    # Given \"products\" list, usually implies multiplication within the item if not specified otherwise, but often these tasks are about evaluating expressions like (A op B) ... \n    # However, looking at similar patterns: \"left\", \"right\", \"sign\". It likely means `term = sign * left * right`.\n    \n    term1_val_exact = precise_str_to_frac(left1_str) * precise_str_to_frac(right1_str)\n    term2_val_exact = -precise_str_to_frac(left2_str) * precise_str_to_frac(right2_str) # sign is -1\n    \n    exact_result = term1_val_exact + term2_val_exact\n    exact_result_simplified = exact_result.limit_denominator()\n\n    numerator = str(exact_result_simplified.numerator)\n    denominator = str(exact_result_simplified.denominator)\n    \n    canonical_latex = f\"\\\\frac{{{numerator}}}{{{denominator}}}\"\n    \n    question_text = (f\"Evaluate the expression: \" + \n                     f\"{precise_str_to_frac(left1_str)} \\\\times {precise_str_to_frac(right1_str)} \" +\n                     f\"+ ({sign2}){precise_str_to_frac(left2_str)} \\\\times {precise_str_to_frac(right2_str)}.\")\n\n    correct_answer = {\"value\": f\"\\\\frac{{{numerator}}}{{{denominator}}}\", \"canonical_latex\": canonical_latex}\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T20:02:55.295978+00:00",
+  "completed_at_utc": "2026-07-21T20:03:12.994603+00:00",
+  "duration": 17.69861399999354,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 17.69860229990445,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 687,
+      "eval_count": 1041,
+      "total_token_count": 1728,
+      "total_duration": 15656312300,
+      "load_duration": 250285500,
+      "done_reason": "stop",
+      "latency_ms": 17698,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072003,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072003,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

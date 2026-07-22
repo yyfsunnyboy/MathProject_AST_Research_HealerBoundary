@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce113_q01_negative_fraction_subtraction__ab2g__seed_2026072001",
+  "task_id": "ce113_q01_negative_fraction_subtraction",
+  "family": "fraction",
+  "condition": "ab2g",
+  "seed": 2026072001,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072001
+  },
+  "prompt_sha256": "b0fe97bca3b7957bb481e88060e49681e6c7ccd67ff19c2eaf13d3ec47559a0b",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    expression = kwargs.get(\"expression\", \"3/7 - (-1/4)\")\n    \n    # Parse components: 3/7 - (-1/4) -> a/b - (c/d) where c is negative in the string representation logic or handled as subtraction of negative.\n    # The task specifies math16_negative_fraction_subtraction with expression \"3/7 - (-1/4)\".\n    # This implies: 3/7 minus negative one-fourth, which equals 3/7 + 1/4.\n    \n    numerator_a = 3\n    denominator_a = 7\n    \n    # The second term is given as \"-(-1/4)\" in the expression string logic for subtraction tasks usually meaning subtracting a fraction that has a negative sign or simply adding its absolute value if the operator and operand signs align to addition.\n    # However, strictly following \"3/7 - (-1/4)\": \n    # Term 2 numerator = -1 (from \"-(-1/4)\" context implies we are dealing with the number -1/4)\n    # But wait, standard format for these tasks usually provides two fractions and an operator.\n    # If expression is \"3/7 - (-1/4)\", it means Fraction(3, 7) - Fraction(-1, 4).\n    \n    numerator_b = -1\n    denominator_b = 4\n    \n    # Operation: a/b - (c/d) where c=-1. So we compute (numerator_a * denominator_b - numerator_b * denominator_a) / (denominator_a * denominator_b)\n    # Wait, standard subtraction of fractions x/y - z/w = (x*w - y*z) / (y*w).\n    # Here second fraction is (-1)/4. So we subtract (-1/4).\n    \n    common_denominator = denominator_a * denominator_b\n    \n    new_numerator = numerator_a * denominator_b - numerator_b * denominator_a\n    \n    gcd_val = 0\n    if new_numerator != 0:\n        import math\n        abs_num = abs(new_numerator)\n        abs_den = abs(common_denominator)\n        \n        # Compute GCD manually to avoid float issues or dependency on specific library versions if restricted, though math.gcd is standard.\n        def gcd(x, y):\n            while y:\n                x, y = y, x % y\n            return x\n        \n        g = gcd(abs_num, abs_den)\n        \n        final_numerator = new_numerator // g\n        final_denominator = common_denominator // g\n        \n        # Ensure canonical form (denominator positive)\n        if final_denominator < 0:\n            final_numerator *= -1\n            final_denominator *= -1\n            \n    else:\n        final_numerator = 0\n        final_denominator = 1\n\n    correct_answer_str = f\"{final_numerator}/{final_denominator}\"\n    \n    return {\n        \"question_text\": r\"Compute the result of $\\\\frac{3}{7} - \\\\left(-\\\\frac{1}{4}\\\\right)$.\",\n        \"correct_answer\": {\n            \"numerator\": final_numerator,\n            \"denominator\": final_denominator,\n            \"canonical_latex\": f\"$\\\\\\\\frac{{{final_numerator}}}{{{final_denominator}}}$\" if abs(final_denominator) != 1 else f\"${final_numerator}$$\", # Handle integer case for canonical latex usually just number but fraction format requested. Let's stick to strict fraction unless denom is 1 or -1? Usually irreducible fractions keep denominator even if 1 in LaTeX context, but standard math often writes integers as such. However, prompt asks for \"irreducible fraction\". If result is integer, it can be written as x/1.\n            # Re-evaluating canonical_latex: usually $\\\\frac{n}{d}$. Even if d=1.\n        },\n        \"oracle_payload\": {\"expression\": \"3/7 - (-1/4)\"}\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T18:37:38.270887+00:00",
+  "completed_at_utc": "2026-07-21T18:37:53.098727+00:00",
+  "duration": 14.82782959996257,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 14.82781749998685,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 220,
+      "eval_count": 863,
+      "total_token_count": 1083,
+      "total_duration": 12794971900,
+      "load_duration": 246527800,
+      "done_reason": "stop",
+      "latency_ms": 14827,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072001,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072001,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

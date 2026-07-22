@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce111_q10_ordered_quadratic_roots_radical__ab1__seed_2026072003",
+  "task_id": "ce111_q10_ordered_quadratic_roots_radical",
+  "family": "radical",
+  "condition": "ab1",
+  "seed": 2026072003,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072003
+  },
+  "prompt_sha256": "8371aff72b11bd70ea327920302233f5b7d60c0e6e594daa5ce635ef386d56fb",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    import json\n    \n    # Frozen sampled parameters from task specification\n    params = {\n        \"equation\": \"(x-2)^2=3\",\n        \"order\": \"a>b\",\n        \"target\": \"2a+b\"\n    }\n    \n    # Parse the equation to find roots in form (sqrt(a) + b) or (-sqrt(a) + b)\n    # Equation: (x - 2)^2 = 3 => x - 2 = +/- sqrt(3) => x = 2 +/- sqrt(3)\n    # Roots are a1 = 2 + sqrt(3), a2 = 2 - sqrt(3)\n    \n    # Identify coefficients for canonical form: b + c*sqrt(d) or similar structure\n    # Here, root format is integer_part + radical_coefficient * sqrt(radicand)\n    # Root 1: 2 + 1*sqrt(3) -> a = 2+sqrt(3), coeff=1, radicand=3\n    # Root 2: 2 - 1*sqrt(3) -> b = 2-sqrt(3), coeff=-1, radicand=3\n    \n    radical_coefficient_1 = 1\n    radical_coefficient_2 = -1\n    radicand = 3\n    integer_part = 2\n    \n    # Construct canonical LaTeX for the roots based on order \"a>b\"\n    # a corresponds to larger value: 2 + sqrt(3)\n    # b corresponds to smaller value: 2 - sqrt(3)\n    \n    latex_a = f\"{integer_part}+{radical_coefficient_1}\\\\sqrt{{{radicand}}}\"\n    latex_b = f\"{integer_part}{'' if radical_coefficient_2 == 0 else '+' + str(radical_coefficient_2)}\\\\sqrt{{{radicand}}}\".replace(\"+ -\", \"-\").replace(\"- \", \"\")\n    \n    # Refine LaTeX for b to ensure canonical form (no double signs)\n    if radical_coefficient_1 > 0:\n        latex_a = f\"{integer_part}+{radical_coefficient_1}\\\\sqrt{{{radicand}}}\"\n    else:\n        latex_a = f\"{integer_part}{radical_coefficient_1}\\\\sqrt{{{radicand}}}\".replace(\"+ -\", \"-\").replace(\"- \", \"\")\n\n    if radical_coefficient_2 > 0:\n        latex_b = f\"{integer_part}+{radical_coefficient_2}\\\\sqrt{{{radicand}}}\"\n    else:\n        # Handle negative coefficient carefully for LaTeX canonical form\n        sign_str = \"+\" + str(radical_coefficient_2) if radical_coefficient_2 > 0 else \"\"\n        latex_b = f\"{integer_part}{sign_str}{{-1}}}\\\\sqrt{{{radicand}}}\"\n\n    # Correct logic to build strings properly without markdown or complex parsing errors in thought trace:\n    # Root A (larger): 2 + sqrt(3) -> \"2+\\\\sqrt{3}\"\n    # Root B (smaller): 2 - sqrt(3) -> \"2-\\\\sqrt{3}\"\n    \n    latex_a = f\"{integer_part}+{radical_coefficient_1}\\\\sqrt{{{radicand}}}\".replace(\"+\", \"+\").replace(\"-\", \"-\") if radical_coefficient_1 > 0 else f\"{integer_part}{'' + str(radical_coefficient_1)}\\\\sqrt{{{radicand}}}\"\n    # Simpler approach for this specific case:\n    \n    term_a = f\"+{radical_coefficient_1}\\\\sqrt{{{radicand}}}\".replace(\"+\", \"+\") if radical_coefficient_1 > 0 else \"\"\n    latex_a_str = str(integer_part) + (term_a.lstrip('+') or '') # Remove leading plus for canonical math\n    \n    term_b_sign = \"+\" if radical_coefficient_2 > 0 else \"-\"\n    term_b_val = abs(radical_coefficient_2) * \"\\\\sqrt{{{radicand}}}\"\n    latex_b_str = str(integer_part) + (term_b_sign + term_b_val).replace(\"+\", \"+\") # Ensure single sign\n    \n    # Re-evaluating strictly for canonical LaTeX: \"a>b\" means a is the larger root.\n    # Root 1: 2 + sqrt(3), Root 2: 2 - sqrt(3)\n    # Canonical A: 2+\\\\sqrt{3}\n    # Canonical B: 2-\\\\sqrt{3}\n    \n    canonical_latex_a = f\"{integer_part}+{radical_coefficient_1}\\\\sqrt{{{radicand}}}\".replace(\"+\", \"+\") if radical_coefficient_1 > 0 else str(integer_part) + (\"-\" if radical_coefficient_1 < 0 else \"\") + \"\\\\sqrt{\" + str(-radical_coefficient_1*radical_coefficient_1 * radicand // (integer_part**2)) # This is getting too complex for mental scratchpad.\n    \n    # Let's just construct the strings directly based on known values:\n    val_a = 2 + 3**0.5\n    val_b = 2 - 3**0.5\n    \n    latex_a_str = \"2+\\\\sqrt{3}\"\n    latex_b_str = \"2-\\\\sqrt{3}\"\n    \n    # Calculate target expression value: 2a + b where a is the larger root, b is the smaller root? \n    # Or does 'target' refer to variables in the answer string? Usually it's evaluating the algebraic sum.\n    # If question asks for \"2a+b\", and roots are r1, r2 with r1 > r2 (since order a>b), then:\n    # Let root_set = {r1, r2} where r1 = 2+sqrt(3), r2 = 2-sqrt(3).\n    # Order constraint \"a>b\" implies we assign a=r1, b=r2.\n    # Target value = 2*r1 + r2 = 2*(2+sqrt(3)) + (2-sqrt(3)) = 4 + 2*sqrt(3) + 2 - sqrt(3) = 6 + sqrt(3).\n    \n    target_value_numeric = 6 + 3**0.5\n    \n    # Construct correct_answer dict structure\n    answer_dict = {\n        \"rational\": 6,\n        \"radical_coefficient\": 1,\n        \"radicand\": 3,\n        \"canonical_latex\": f\"{answer_dict['rational']}+{answer_dict['radical_coefficient']}\\\\sqrt{{{answer_dict['radicand']}}}\"\n    }\n    \n    # Format question_text with LaTeX delimiters\n    equation_display = r\"\\((x-2)^2=3\\)\"\n    order_desc = \"a>b\"\n    target_expr = \"2a+b\"\n    \n    q_text = f\"Solve the quadratic equation {equation_display} for x. Let $a$ and $b$ be the roots satisfying the condition that ${order_desc}. Calculate the value of ${target_expr}$.\"\n    \n    # Oracle payload must exactly equal frozen sampled parameters\n    oracle_payload = params\n    \n    return {\n        \"question_text\": q_text,\n        \"correct_answer\": answer_dict,\n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T19:40:30.650219+00:00",
+  "completed_at_utc": "2026-07-21T19:40:56.311551+00:00",
+  "duration": 25.661321399966255,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 25.661301300046034,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 198,
+      "eval_count": 1600,
+      "total_token_count": 1798,
+      "total_duration": 23641422100,
+      "load_duration": 278249800,
+      "done_reason": "stop",
+      "latency_ms": 25661,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072003,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072003,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

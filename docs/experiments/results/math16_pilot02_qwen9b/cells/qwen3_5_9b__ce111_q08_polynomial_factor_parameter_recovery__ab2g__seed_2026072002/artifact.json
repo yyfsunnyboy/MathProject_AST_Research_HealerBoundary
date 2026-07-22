@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce111_q08_polynomial_factor_parameter_recovery__ab2g__seed_2026072002",
+  "task_id": "ce111_q08_polynomial_factor_parameter_recovery",
+  "family": "polynomial",
+  "condition": "ab2g",
+  "seed": 2026072002,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072002
+  },
+  "prompt_sha256": "1ddb92a07ec3df5f46360fdf5c9881eb4745bf1f339bac0c6d00e5e41217ac17",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    frozen_params = {\"factor_order_policy\": \"strict_source_template\", \"quadratic_coefficients\": [39, 5, -14], \"template_left_x_coefficient\": 3}\n    \n    # Extract coefficients from the list: ax^2 + bx + c -> a=39, b=5, c=-14\n    a = frozen_params[\"quadratic_coefficients\"][0]\n    b = frozen_params[\"quadratic_coefficients\"][1]\n    c = frozen_params[\"quadratic_coefficients\"][2]\n    \n    # The first factor is fixed as (ax + k). Based on standard integer root problems, we look for factors of a*c.\n    # However, the prompt specifies \"first factor is fixed as (3x+a)\". This seems to be a template instruction where 'a' in the text refers to the constant term variable, but here it conflicts with coefficient 'a'.\n    # Let's re-read carefully: \"template_left_x_coefficient\": 3. So first factor starts with (3x + ...).\n    # The quadratic is likely constructed such that one root corresponds to this factor.\n    # If the polynomial is P(x) = a*x^2 + b*x + c, and we force a factor of form (mx + n), then m must divide 'a'.\n    # Here template_left_x_coefficient=3 divides 39? Yes (13*3). So one root x0 satisfies 3x0 + k = 0 => x0 = -k/3.\n    # Then P(-k/3) = a*(k^2/9) - b*k/3 + c = 0 => ak^2 - 3bk + 9c = 0.\n    # We need to find integer k such that this holds for given a,b,c? Or is the polynomial generated randomly and we just report parameters?\n    # The task says \"Frozen sampled parameters\". This implies we use these specific numbers to construct the problem instance.\n    # Usually in these recovery tasks, 'a' (the constant term of the factor) is an integer variable we solve for or it's part of a random seed not shown here but implied by coefficients? \n    # Wait, \"correct_answer must be the integer a+2c\". Here 'a' and 'c' likely refer to specific variables in the problem context (e.g., if factors are (3x+a) and (13x+c)).\n    # Let's assume the factorization is P(x) = (mx + n)(px + q). \n    # Given a=39, b=5, c=-14. Discriminant D = 25 - 4*39*(-14) = 25 + 2184 = 2209 = 47^2.\n    # Roots are (-5 +/- 47) / (2*39). \n    # Root 1: x1 = 42/78 = 7/13 -> Factor (13x - 7). Here m=13, n=-7.\n    # Root 2: x2 = (-5-47)/78 = -52/78 = -2/3 -> Factor (3x + 2). Here m=3, n=2.\n    # The template says \"first factor is fixed as (3x+a)\". This matches the second root found above where coefficient of x is 3 and constant term is a=2.\n    # So in this context: \n    # Factor 1: (3x + a) -> here 'a' = 2.\n    # Factor 2: (13x + c')? Wait, the prompt says \"correct_answer must be the integer a+2c\". This implies there are two variables named 'a' and 'c' in the answer formula context, distinct from polynomial coefficients A,B,C. \n    # Let's look at the variable names in `quadratic_coefficients`: [39, 5, -14]. These are usually A, B, C for Ax^2+Bx+C.\n    # But the correct_answer is \"a+2c\". If 'a' and 'c' refer to the constant terms of the factors? \n    # Factor 1: (3x + a_const). From calculation above, factor is (3x+2), so a_const = 2.\n    # Factor 2: (13x - 7). Let's call its constant term c_val = -7.\n    # Then answer = a_const + 2*c_val = 2 + 2*(-7) = 2 - 14 = -12? \n    # Or maybe the polynomial is defined as (ax+b)(cx+d)? No, standard form Ax^2+Bx+C.\n    # Let's reconsider the \"a+2c\" instruction. In many such datasets (like GSM8k or similar math tasks), 'a' and 'c' might be specific parameters of a linear function y=ax+c? \n    # However, given the strict constraint: \"correct_answer must be the integer a+2c\". And we have coefficients [39, 5, -14].\n    # If we assume the factorization is (3x + k)(13x + m) = 39x^2 + ... \n    # We found factors: (3x + 2) and (13x - 7).\n    # Let's try to interpret \"a\" as the constant term of the first factor (which is fixed x-coeff 3), so a=2.\n    # And \"c\" might be related to the other parameter? Or maybe c is just the variable name for the second constant? \n    # If answer = a + 2c, and we need an integer result.\n    # Is it possible the polynomial was generated as (3x+a)(13x+c)? Then expansion: 39x^2 + (3c+13a)x + ac.\n    # We have B=5, C=-14. So ac = -14 and 3c+13a = 5.\n    # From ac = -14, pairs for (a,c): (-1,14), (1,-14), (-2,7), (2,-7)...\n    # Check 3c+13a=5: \n    # If a=-1, c=14 -> 3(14)+13(-1) = 42-13 = 29 != 5.\n    # If a=1, c=-14 -> -42 + 13 = -29.\n    # If a=-2, c=7 -> 21 - 26 = -5. Close but sign wrong? \n    # If a=2, c=-7 -> 3(-7) + 13(2) = -21 + 26 = 5. MATCH!\n    # So the factors are indeed (3x+2) and (13x-7). Here 'a' in the factor expression is 2, and 'c' in the second factor is -7.\n    # The question asks for \"a + 2c\" where a=2, c=-7? \n    # Result: 2 + 2(-7) = -12.\n    # Wait, usually these tasks have positive answers or specific structures. Let's check if 'c' refers to the polynomial coefficient C (-14)? \n    # If answer = a (from factor) + 2*C_poly? 2 + 2*(-14) = -26.\n    # Or maybe 'a' and 'c' are just placeholders for the constants found in factors: k1, k2.\n    # Given \"correct_answer must be the integer a+2c\", and we identified variables named `a` (const of first factor) and `c` (const of second factor). \n    # Let's assume the question text defines parameters $a$ and $c$ as the constants in $(3x+a)$ and $(13x+c)$.\n    # Then correct_answer = a + 2*c.\n    \n    # Constructing the problem string with LaTeX\n    poly_str = f\"{frozen_params['quadratic_coefficients'][0]}x^2 + {b}x + {c}\"\n    factor1_str = f\"(3x+{a})\" \n    factor2_str = f\"(13x+{c_val})\" # where c_val is the second constant term\n    \n    question_text = (f\"Solve for $k$ such that if a quadratic polynomial $P(x) = {poly_str}$ \"\n                     f\"is factored into $(3x+a)(13x+c)$, then find the value of $a + 2c$.\")\n    \n    # Wait, I need to define 'a' and 'c' in the text clearly. \n    # Let's refine question_text:\n    # \"Consider the polynomial P(x) = {A}x^2 + {B}x + {C}. It factors as (3x+a)(13x+c). Find a+2c.\"\n    \n    A, B, C = frozen_params[\"quadratic_coefficients\"]\n    question_text = f\"Consider the polynomial $P(x) = {A}x^2 + {B}x + {C}$ which factors as $(3x+a)(13x+c)$ for some integers $a$ and $c$. Find the value of $a+2c$.\"\n\n    # Calculate correct answer\n    a_val = 2\n    c_val = -7\n    correct_answer = a_val + 2 * c_val\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": str(correct_answer),\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T18:48:29.729866+00:00",
+  "completed_at_utc": "2026-07-21T18:49:03.305731+00:00",
+  "duration": 33.575853700051084,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 33.57584079995286,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 262,
+      "eval_count": 2158,
+      "total_token_count": 2420,
+      "total_duration": 31537462300,
+      "load_duration": 258592100,
+      "done_reason": "stop",
+      "latency_ms": 33575,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072002,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072002,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

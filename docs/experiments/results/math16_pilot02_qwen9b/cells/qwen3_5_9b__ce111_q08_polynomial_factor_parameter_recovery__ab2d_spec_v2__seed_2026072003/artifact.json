@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce111_q08_polynomial_factor_parameter_recovery__ab2d_spec_v2__seed_2026072003",
+  "task_id": "ce111_q08_polynomial_factor_parameter_recovery",
+  "family": "polynomial",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072003,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072003
+  },
+  "prompt_sha256": "4e8f345ad99e87317c2bb38ce741268ce4f57d9e2ca98518eea4f37fb36fb477",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce111_q08_polynomial_factor_parameter_recovery.txt",
+  "generation_status": "success",
+  "raw_response": "# -*- coding: utf-8 -*-\n\ndef generate(level=1, **kwargs):\n    # Frozen sampled parameters as per specification\n    frozen_params = {\n        \"factor_order_policy\": \"strict_source_template\",\n        \"quadratic_coefficients\": [39, 5, -14],\n        \"template_left_x_coefficient\": 3\n    }\n\n    coeffs = frozen_params[\"quadratic_coefficients\"]\n    # Polynomial is: 39x^2 + 5x - 14\n    \n    A = coeffs[0]  # 39\n    B = coeffs[1]  # 5\n    C = coeffs[2]  # -14\n\n    # We need to factor Ax^2 + Bx + C into (mx + n)(px + q) such that mp=A, mq+np=B, nq=C.\n    # The template requires the first factor to be fixed as (3x + a).\n    # So m = 3. Then p must be A / m = 39 / 3 = 13.\n    \n    left_x_coefficient = frozen_params[\"template_left_x_coefficient\"]  # 3\n    \n    if A % left_x_coefficient != 0:\n        raise ValueError(\"Template coefficient does not divide leading term.\")\n\n    p = A // left_x_coefficient\n    \n    # Now we have factors (left_x_coefficient * x + a) and (p * x + c).\n    # Expansion: (3x + a)(13x + c) = 39x^2 + (3c + 13a)x + ac.\n    # We know B = 5, C = -14.\n    \n    # System of equations for integers a and c:\n    # 1) ac = C => ac = -14\n    # 2) 3c + 13a = B => 3c + 13a = 5\n    \n    # From (1), possible integer pairs (a, c): divisors of -14.\n    # Divisors: +/-1, +/-2, +/-7, +/-14.\n    \n    solutions = []\n    for a in range(-abs(C) - 10, abs(C) + 10): # Broad search around zero to be safe with bounds logic if needed, though divisors are small\n        if C % a == 0:\n            c = C // a\n            if 3 * c + 13 * a == B:\n                solutions.append((a, c))\n\n    if not solutions:\n        # Fallback or error handling for unexpected cases in strict template logic\n        raise ValueError(\"No integer solution found matching the quadratic coefficients and template.\")\n    \n    # The problem implies a unique recovery based on \"strict_source_template\". \n    # Usually there is only one valid pair satisfying both conditions.\n    if len(solutions) > 1:\n        # In standard math problems of this type, uniqueness is guaranteed by constraints not shown here or implicit domain limits.\n        # We take the first found solution which should be unique for well-formed inputs.\n        a_val, c_val = solutions[0]\n    else:\n        raise ValueError(\"Ambiguous or no solution.\")\n\n    # Correct answer definition from spec: integer value of a + 2c\n    correct_answer_int = a_val + 2 * c_val\n    \n    # Construct LaTeX question text using native string formatting (no external API calls)\n    # Format: \"Factor the polynomial {poly} into two linear factors. The first factor is fixed as ({left_x_coefficient}x + a). Find the value of a + 2c.\"\n    \n    poly_str = f\"{A}x^2 + {B}x{'' if C >= 0 else ''}{C}\" # Simple formatting, handle sign manually for clean LaTeX\n    \n    # Constructing proper LaTeX string with delimiters\n    term1_sign = '+' if B >= 0 else '-'\n    abs_B = -B if B < 0 else B\n    poly_latex_str = f\"{A}x^2 {term1_sign}{abs_B}x{'' if C == 0 else ''}\"\n    \n    # Handling constant term sign for LaTeX cleanliness\n    const_term_part = \"\"\n    if C > 0:\n        const_term_part += f\" + {C}\"\n    elif C < 0:\n        abs_C = -C\n        const_term_part += f\" - {abs_C}\"\n    \n    poly_latex_str += const_term_part\n    \n    question_text = (f\"Solve for the polynomial $\\\\left({left_x_coefficient}x + a\\\\right)\\\\left({p}x + c\\\\right)$ \"\n                     f\"given that it expands to ${poly_latex_str}. Find the integer value of $a + 2c$.\")\n\n    # Oracle payload must exactly equal frozen sampled parameters\n    oracle_payload = frozen_params\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer_int,\n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T19:18:33.950215+00:00",
+  "completed_at_utc": "2026-07-21T19:18:52.652264+00:00",
+  "duration": 18.70203919999767,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 18.702026700018905,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 798,
+      "eval_count": 1104,
+      "total_token_count": 1902,
+      "total_duration": 16661972200,
+      "load_duration": 277363400,
+      "done_reason": "stop",
+      "latency_ms": 18702,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072003,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072003,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce115_calc_polynomial_division_l1__ab2g__seed_2026072001",
+  "task_id": "ce115_calc_polynomial_division_l1",
+  "family": "polynomial",
+  "condition": "ab2g",
+  "seed": 2026072001,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072001
+  },
+  "prompt_sha256": "3d60a095612840e6d08496d68f759c891c049481c5af862609bd89ece29121b6",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    import copy\n    \n    # Frozen sampled parameters from task specification\n    frozen_params = {\n        \"dividend_coefficients\": [6, 0, 6],\n        \"divisor_coefficients\": [1, -4]\n    }\n    \n    # Perform polynomial division: (6x^2 + 0x + 6) / (x - 4)\n    # Dividend: P(x) = 6x^2 + 6\n    # Divisor: D(x) = x - 4\n    \n    dividend_coeffs = frozen_params[\"dividend_coefficients\"]\n    divisor_coeffs = frozen_params[\"divisor_coefficients\"]\n    \n    n_dividend = len(dividend_coeffs) - 1\n    n_divisor = len(divisor_coeffs) - 1\n    \n    # Initialize quotient and remainder coefficients arrays\n    deg_quotient = n_dividend - n_divisor\n    quotient_coeffs = [0] * (deg_quotient + 1)\n    \n    # Synthetic division / Long division logic for exact arithmetic\n    current_remainder_coefficients = list(dividend_coeffs)\n    \n    leading_divisor_term = divisor_coeffs[0]  # Should be non-zero\n    \n    if n_dividend < n_divisor:\n        quotient_coeffs = [0]\n        remainder_coeffs = list(current_remainder_coefficients)\n    else:\n        for i in range(deg_quotient + 1):\n            current_degree = deg_quotient - i\n            \n            # Calculate term to subtract from dividend/remainder\n            if leading_divisor_term != 0:\n                quotient_val = int(float(current_remainder_coefficients[current_degree]) / float(leading_divisor_term))\n                \n                # Ensure exact integer arithmetic by scaling if necessary, \n                # but here inputs are integers and divisor is monic (or simple), so direct division works.\n                # However, to be safe with \"Exact arithmetic; no floats\", we assume the problem guarantees divisibility or rational results that map back cleanly?\n                # The prompt says \"Exact arithmetic\". Let's implement integer-based logic assuming standard polynomial division where coefficients might become fractions if not monic divisor.\n                # But looking at inputs: [6, 0, 6] / [1, -4]. Divisor is x-4 (monic). Division will yield integers or simple rationals? \n                # Let's trace: \n                # Step 1: 6x^2 / x = 6x. Quotient term index 0 gets 6.\n                # Multiply divisor by 6x -> [6, -24]. Subtract from dividend [6, 0, 6] -> [0, 24, 6].\n                # Step 2: Bring down next terms effectively. Current remainder poly is 24x + 6.\n                # Divide 24x by x = 24. Quotient term index 1 gets 24.\n                # Multiply divisor by 24 -> [24, -96]. Subtract from [0, 24, 6] (aligned) -> \n                # Actually alignment: Remainder is degree 1 now? No, we process highest degree first.\n                \n                # Let's do it strictly with integer arithmetic since divisor leading coeff is 1.\n                quotient_coeffs[i] = current_remainder_coefficients[current_degree] // leading_divisor_term\n                \n                # Create the product of (quotient_term * x^i) and divisor to subtract\n                shift_amount = n_divisor - i + deg_quotient - current_degree \n                # Actually simpler: The term we just found is for degree 'current_degree' in quotient.\n                # We need to multiply this scalar by the whole divisor polynomial shifted appropriately.\n                \n                product_coeffs = [0] * (n_dividend) # Max size needed\n                prod_val = quotient_coeffs[i]\n                \n                # Fill product coeffs starting at appropriate index\n                start_idx = n_divisor - i + deg_quotient  # Wait, let's re-index carefully\n                \n                # Easier approach: Standard long division array manipulation\n                pass\n        \n        # Re-implementing cleanly with integer arithmetic for monic divisor case (leading coeff 1)\n        remainder_coeffs = list(dividend_coeffs)\n        \n        current_deg_divisor = n_divisor\n        quotient_degree = deg_quotient\n        \n        for q_idx in range(quotient_degree + 1):\n            # We are determining the coefficient for x^(current_target_power - q_offset)? \n            # Let's just iterate from highest degree down to lowest possible remainder.\n            \n            target_deg = n_dividend - (n_divisor - current_remainder_len_adjustment) \n            \n        # Correct Algorithm:\n        # Current working polynomial is in `remainder_coeffs` of length L+1 representing deg L.\n        # We want to eliminate the highest term if degree >= divisor_degree.\n        \n        work_poly = list(dividend_coeffs)\n        rem_deg = len(work_poly) - 1\n        \n        quotient_list = []\n        \n        while len(work_poly) > n_divisor:\n            current_lead_idx = len(work_poly) - 1 # Highest index in current remainder poly\n            \n            if current_lead_idx < n_divisor + (len(quotient_list)): \n                break\n                \n            term_val = work_poly[current_lead_idx] // divisor_coeffs[0]\n            \n            quotient_list.append(term_val)\n            \n            # Subtract term_val * x^(current_lead_idx - n_divisor) from the polynomial?\n            # No, we subtract (term_val * Divisor(x)) shifted to align with current_lead_idx.\n            shift = current_lead_idx - n_divisor\n            \n            for k in range(len(divisor_coeffs)):\n                work_poly[current_lead_idx - k] -= term_val * divisor_coeffs[k]\n            \n            # Remove leading zeros if any (though integer division by monic usually keeps it clean until end)\n            while len(work_poly) > 0 and work_poly[-1] == 0:\n                work_poly.pop()\n        \n        remainder_coeffs = work_poly\n        \n    else:\n         quotient_list = [0] * (deg_quotient + 1) # Should not happen given logic above but safe fallback\n\n    if len(quotient_list) > deg_quotient + 1 and sum(quotient_list[:-1]) == 0:\n        # Trim leading zeros in quotient? Usually polynomial division keeps degree. \n        # But standard representation drops leading zero coefficients unless it's the constant term of a non-zero poly.\n        pass\n\n    final_quotient_coeffs = [c for c in quotient_list]\n    \n    # Handle case where result is 0 or empty list from trimming logic above if needed, but loop handles it naturally.\n    # If work_poly became empty (exact division), remainder should be [] or [0]? \n    # Convention: Remainder coefficients usually include the constant term even if zero? Or just non-zero terms?\n    # Standard math notation P(x) = Q(x)D(x) + R(x). If R=0, coeffs=[].\n    \n    final_remainder_coeffs = work_poly\n    \n    # Construct LaTeX strings\n    def format_latex(coeffs):\n        if not coeffs:\n            return \"0\"\n        \n        terms = []\n        for i, c in enumerate(reversed(coeffs)):\n            power = len(coeffs) - 1 - i\n            \n            sign_str = \"\"\n            abs_c = int(c) # Ensure integer representation\n            \n            if abs_c == 1 and power > 0:\n                coeff_part = \"x\" + (\"^{\"+str(power)+\"}\" if power != 1 else \"\")\n            elif c < 0:\n                terms.append(\"-\") \n                sign_str = \"-\"\n            \n            # Re-eval logic for clean LaTeX generation\n            \n        # Simpler generator\n        latex_parts = []\n        \n        def get_term(c, p):\n            s = \"\"\n            if abs(c) == 1 and c > 0:\n                 coef_s = \"\"\n            elif abs(c) != 1 or c < 0:\n                sign = \"-\" if c < 0 else \"+\"\n                val_str = str(abs(c)) + \"x\" if p==1 else (str(abs(c))+\"x^{\"+str(p)+\"}\" if p!=1 else \"\") # Wait, x is variable. \n                \n            # Let's restart the latex builder properly\n            \n        terms = []\n        \n        for i in range(len(coeffs)):\n            c = coeffs[i]\n            power = len(coeffs) - 1 - i\n            \n            term_str = \"\"\n            \n            if abs(c) == 0:\n                continue\n                \n            sign = \"-\" if (i > 0 and c < 0) else (\"+\" if (i > 0 and c > 0) else \"\")\n            \n            coef_part = str(abs(c)) if abs(c) != 1 or power == 0 else \"\"\n            \n            var_part = \"x\" + (\"^{\"+str(power)+\"}\" if power != 1 else \"\")\n            \n            term_str = sign + coef_part + var_part\n            \n            terms.append(term_str)\n        \n        return \"\".join(terms).replace(\"+-\", \"-\").replace(\"-+\", \"+\") or \"0\"\n\n    quotient_latex = format_latex(final_quotient_coeffs) if final_quotient_coeffs else \"0\"\n    \n    # Re-do latex generation carefully to ensure signs are correct and no spaces issues for strict matching usually expected.\n    def build_poly_str(coeffs):\n        if not coeffs: return \"0\"\n        \n        parts = []\n        leading_sign = True\n        \n        for i, c in enumerate(reversed(coeffs)): # Iterate from highest power down? No, list is [high to low] or [low to high]? \n            # Input format usually [c_n, ..., c_0]. My logic above assumed that.\n            pass\n            \n    # Let's assume standard input: coeffs[0] is highest degree term.\n    \n    def make_latex(coeffs):\n        if not coeffs: return \"0\"\n        \n        res = \"\"\n        for i in range(len(coeffs)):\n            c = coeffs[i]\n            deg = len(coeffs) - 1 - i\n            \n            # Determine sign and coefficient string\n            is_negative = (c < 0)\n            \n            term_sign = \"-\" if (i > 0 and is_negative) else (\"+\" if (i > 0 and not is_negative) else \"\")\n            \n            abs_c = int(c)\n            \n            coef_str = \"\"\n            x_part = \"x\" + (\"^{\"+str(deg)+\"}\" if deg != 1 else \"\") # Wait, if deg=0? \n            if deg == 0:\n                x_part = \"\"\n                \n            if is_negative and i==0: term_sign = \"-\"\n            \n            final_coef_str = str(abs_c) if abs_c != 1 or (deg > 0 and deg!=1) else \"\" # If coeff is 1, omit. \n            # Exception: constant term with coefficient 1 -> \"1\" not omitted usually? Or just number.\n            # Standard polynomial form: -x^2 + x + 5\n            \n            if abs_c == 1 and deg > 0:\n                coef_str = \"\"\n            else:\n                coef_str = str(abs_c)\n            \n            term = f\"{term_sign}{coef_str}{'x'*(deg!=0)}\" # Simplified logic for single x. \n            # Better explicit construction\n            \n    # Robust LaTeX builder\n    def latex_poly(coeffs):\n        if not coeffs: return \"0\"\n        \n        terms = []\n        first_term = True\n        \n        for i, c in enumerate(reversed(coeffs)): # Wait, my list was [high..low]. Let's stick to that.\n            pass\n            \n        # Re-verify input order assumption from example: [6, 0, 6] -> 6x^2 + 0x + 6. Yes, high to low.\n        \n        terms = []\n        for i in range(len(coeffs)):\n            c = coeffs[i]\n            deg = len(coeffs) - 1 - i\n            \n            if c == 0: continue\n            \n            sign = \"-\" if (i > 0 and c < 0) else (\"+\" if (i > 0 and c > 0) else \"\")\n            \n            abs_c = int(c)\n            \n            # Coefficient part\n            coef_part = \"\"\n            if deg == 0:\n                coef_part = str(abs_c)\n            elif abs_c != 1 or deg == 0: \n                 coef_part = str(abs_c)\n            else:\n                 coef_part = \"\"\n                 \n            x_part = \"x\" + (\"^{\"+str(deg)+\"}\" if deg > 1 else \"\") # If deg=1, just x. If deg=0 handled above.\n            \n            term_str = sign + coef_part + x_part\n            \n            terms.append(term_str)\n        \n        return \"\".join(terms).replace(\"+-\", \"-\").replace(\"-+\", \"+\") or \"0\"\n\n    quotient_latex = latex_poly(final_quotient_coeffs) if final_quotient_coeffs else \"0\"\n    \n    # Fix remainder LaTeX logic similarly. \n    # If exact division, remainder is 0? Or empty list representing zero polynomial?\n    # Usually represented as \"0\".\n    \n    rem_str = \"\"\n    if len(final_remainder_coeffs) > 0:\n        rem_latex_val = latex_poly(final_remainder_coeffs)\n        # Check for leading zeros in remainder that might have been introduced by logic (unlikely with integer div monic)\n        while len(rem_latex_val) == 1 and rem_latex_val[0] != 'x' or ('+' not in rem_latex_val): \n             pass\n        \n    else:\n         # If work_poly was empty, it means exact division. Remainder is 0.\n         rem_str = \"0\"\n\n    if len(final_remainder_coeffs) > 1 and final_remainder_coeffs[0] == 0:\n        # Trim leading zeros for remainder representation? \n        pass\n        \n    return {\n        \"question_text\": f\"Determine the quotient and remainder when dividing $\\\\left( \\\\sum_{i=0}^{2} a_i x^i \\\\right)$ by $\\\\left( \\\\sum_{j=0}^{1} b_j x^j \\\\right)$. Specifically, divide \\({{6}}x^{{2}} + {{0}}x + {{{6}}}\\\\) by \\( {1}x - 4 \\).\",\n        \"correct_answer\": {\n            \"quotient_coefficients\": final_quotient_coeffs if len(final_quotient_coeffs)>0 else [0], # Ensure non-empty list for consistency? Or allow empty? \n            \"remainder_coefficients\": final_remainder_coeffs,\n            \"quotient_latex\": quotient_latex,\n            \"remainder_latex\": latex_poly(final_remainder_coeffs) if final_remainder_coeffs and len(final_remainder_coeffs)>1 else (\"0\" if not final_remainder_coeffs or all(c==0 for c in final_remainder_coeffs) else \"\") # Simplified check\n        }, \n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T18:08:05.056356+00:00",
+  "completed_at_utc": "2026-07-21T18:08:55.128336+00:00",
+  "duration": 50.07196860003751,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 50.07195689994842,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 248,
+      "eval_count": 3280,
+      "total_token_count": 3528,
+      "total_duration": 48054763200,
+      "load_duration": 239076800,
+      "done_reason": "stop",
+      "latency_ms": 50071,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072001,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072001,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce111_q02_polynomial_division_remainder__ab2g__seed_2026072004",
+  "task_id": "ce111_q02_polynomial_division_remainder",
+  "family": "polynomial",
+  "condition": "ab2g",
+  "seed": 2026072004,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072004
+  },
+  "prompt_sha256": "1cb912077ad2776904919f36b8947a00c6986c58c24c9311c1d8872dbc447e31",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    frozen_params = {\"dividend_coefficients\": [6, 4, 0], \"divisor_coefficients\": [2, 0, 0]}\n    \n    # Polynomial: P(x) = 6x^2 + 4x (from coefficients [6, 4, 0])\n    # Divisor: D(x) = 2x^2 (from coefficients [2, 0, 0])\n    # Division: (6x^2 + 4x) / (2x^2) -> Quotient is not scored. Remainder calculation logic below.\n    \n    # Since divisor degree equals dividend degree here:\n    # Leading term division: 6/2 = 3, so quotient starts with x^0? \n    # Actually, standard polynomial long division for P(x)/D(x):\n    # (6x^2 + 4x) / (2x^2) = 3 + (4x)/(2x^2) = 3 + 2/x. Since we are in polynomials over a field usually implying integer/rational coeffs, \n    # strictly speaking if divisor degree >= dividend degree and leading coeff doesn't divide perfectly to eliminate lower terms without fractions or negative powers:\n    # However, the task implies finding remainder R(x) such that P = Q*D + R where deg(R) < deg(D).\n    \n    # Let's compute manually for correctness verification before generating text.\n    # Dividend: 6x^2 + 4x (deg 2)\n    # Divisor: 2x^2 (deg 2)\n    # Step 1: Divide leading terms: 6x^2 / 2x^2 = 3. \n    # Multiply divisor by 3: 3 * (2x^2) = 6x^2.\n    # Subtract from dividend: (6x^2 + 4x) - 6x^2 = 4x.\n    # New remainder candidate is 4x. Degree of 4x is 1, which is < degree of divisor (2).\n    # So Quotient Q(x) = 3, Remainder R(x) = 4x.\n    \n    quotient_val = \"3\"\n    remainder_coefficients = [0, 4] # Represents 4x\n    \n    question_text = r\"\"\"Find the remainder when $P(x) = 6x^2 + 4x$ is divided by $D(x) = 2x^2$. Express your answer as a polynomial in standard form.\"\"\"\n    \n    correct_answer_latex = \"4x\"\n    canonical_latex = f\"${correct_answer_latex}$\"\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": canonical_latex,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T20:05:10.594640+00:00",
+  "completed_at_utc": "2026-07-21T20:05:22.029680+00:00",
+  "duration": 11.43502799991984,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 11.435013399925083,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 238,
+      "eval_count": 623,
+      "total_token_count": 861,
+      "total_duration": 9397324400,
+      "load_duration": 246424400,
+      "done_reason": "stop",
+      "latency_ms": 11434,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072004,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072004,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

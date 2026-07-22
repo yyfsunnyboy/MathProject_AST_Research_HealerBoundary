@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce115_calc_exact_rational_expression_l1__ab2g__seed_2026072002",
+  "task_id": "ce115_calc_exact_rational_expression_l1",
+  "family": "fraction",
+  "condition": "ab2g",
+  "seed": 2026072002,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072002
+  },
+  "prompt_sha256": "5f397d56fab2649201b606af7abf51780a93d6d74269fd5f5d216a538aa8b8d9",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    frozen_params = {\"products\": [{\"left\": \"2.79\", \"right\": \"89.3\", \"sign\": 1}, {\"left\": \"-0.21\", \"right\": \"89.3\", \"sign\": -1}]}\n    \n    # Parse first product: 2.79 * 89.3\n    left1_num, left1_den = int(279), 100\n    right1_num, right1_den = int(893), 10\n    \n    prod1_sign = frozen_params[\"products\"][0][\"sign\"]\n    \n    # Parse second product: -0.21 * 89.3\n    left2_num, left2_den = int(-21), 100\n    right2_num, right2_den = int(893), 10\n    \n    prod2_sign = frozen_params[\"products\"][1][\"sign\"]\n    \n    # Calculate Product 1: (279/100) * (893/10)\n    p1_numerator = left1_num * right1_num\n    p1_denominator = left1_den * right1_den\n    \n    # Calculate Product 2: (-21/100) * (893/10)\n    p2_numerator = left2_num * right2_num\n    p2_denominator = left2_den * right2_den\n    \n    # Combine products based on signs and structure implied by \"products\" list in context of expression evaluation.\n    # Assuming the task is to compute sum or difference? The spec says \"rational_arithmetic\". \n    # Given two product terms with specific signs, likely it's a summation: Term1 + Term2 OR Term1 - |Term2| depending on sign field interpretation.\n    # Let's assume standard algebraic expansion where 'sign' applies to the term itself relative to zero or previous context.\n    # However, looking at typical \"products\" lists in such tasks, it often implies a sum of products: (A*B) + (C*D). \n    # But here signs are explicit fields. Let's treat them as signed terms added together.\n    \n    total_numerator = prod1_sign * p1_numerator + prod2_sign * p2_numerator\n    total_denominator = p1_denominator  # Denominators might differ, need common denominator\n    \n    if p1_denominator != p2_denominator:\n        lcm_denom = (p1_denominator * p2_denominator) // gcd(p1_denominator, p2_denominator)\n        \n        term1_adj_numerator = prod1_sign * p1_numerator * (lcm_denom // p1_denominator)\n        term2_adj_numerator = prod2_sign * p2_numerator * (lcm_denom // p2_denominator)\n        \n        total_numerator = term1_adj_numerator + term2_adj_numerator\n        total_denominator = lcm_denominator\n    \n    # Simplify fraction\n    common_divisor = gcd(abs(total_numerator), abs(total_denominator))\n    \n    simplified_num = total_numerator // common_divisor\n    simplified_denom = total_denominator // common_divisor\n    \n    if simplified_denom < 0:\n        simplified_num *= -1\n        simplified_denom *= -1\n        \n    # Construct LaTeX string for the answer value (irreducible p/q)\n    correct_answer_value_str = f\"{simplified_num}/{simplified_denom}\"\n    \n    # Reconstruct original expression text from frozen params to build question_text\n    term1_left = frozen_params[\"products\"][0][\"left\"]\n    term1_right = frozen_params[\"products\"][0][\"right\"]\n    sign1_str = \"+\" if frozen_params[\"products\"][0][\"sign\"] == 1 else \"-\"\n    \n    term2_left = frozen_params[\"products\"][1][\"left\"]\n    term2_right = frozen_params[\"products\"][1][\"right\"]\n    # The second sign in the list is -1. If it's a sum of terms, we write + (-0.21 * 89.3) or just use the value directly? \n    # Usually questions ask to evaluate an expression like \"Evaluate: (2.79)(89.3) + (-0.21)(89.3)\"\n    \n    question_text = f\"Evaluate the following rational arithmetic expression:\\n\\n$$({term1_left}) \\\\cdot ({term1_right}) {sign1_str} ({term2_left}) \\\\cdot ({term2_right})$$\"\n    \n    # Canonical LaTeX for answer usually just the simplified fraction or mixed number if integer. Here it's a fraction.\n    canonical_latex = f\"${correct_answer_value_str}$\"\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": {\"value\": correct_answer_value_str, \"canonical_latex\": canonical_latex},\n        \"oracle_payload\": frozen_params\n    }\n\ndef gcd(a, b):\n    while b:\n        a, b = b, a % b\n    return abs(a)",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T19:11:06.560555+00:00",
+  "completed_at_utc": "2026-07-21T19:11:24.807028+00:00",
+  "duration": 18.246461700065993,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 18.246448599966243,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 264,
+      "eval_count": 1104,
+      "total_token_count": 1368,
+      "total_duration": 16227045000,
+      "load_duration": 244411700,
+      "done_reason": "stop",
+      "latency_ms": 18246,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072002,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072002,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

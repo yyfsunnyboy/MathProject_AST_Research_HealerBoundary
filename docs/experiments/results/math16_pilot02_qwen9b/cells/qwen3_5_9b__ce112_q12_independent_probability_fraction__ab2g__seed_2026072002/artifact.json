@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce112_q12_independent_probability_fraction__ab2g__seed_2026072002",
+  "task_id": "ce112_q12_independent_probability_fraction",
+  "family": "fraction",
+  "condition": "ab2g",
+  "seed": 2026072002,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072002
+  },
+  "prompt_sha256": "d68af74fd5f59ae1178e9835684479397bd58a2b1f31fd9ef7b022e34b96fcf1",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    frozen_params = {\"p1\": [2, 6], \"p2\": [1, 5]}\n    \n    # Simplify p1: 2/6 -> 1/3\n    num_p1, den_p1 = frozen_params[\"p1\"][0] // (frozen_params[\"p1\"][1] // gcd(frozen_params[\"p1\"][0], frozen_params[\"p1\"][1])), frozen_params[\"p1\"][1] // gcd(frozen_params[\"p1\"][0], frozen_params[\"p1\"][1])\n    # Actually, let's just simplify correctly: 2/6 = (2/gcd(2,6)) / (6/gcd(2,6)) = (2/2)/(6/2) = 1/3.\n    \n    def gcd(a, b):\n        while b:\n            a, b = b, a % b\n        return a\n    \n    num_p1_simp, den_p1_simp = frozen_params[\"p1\"][0] // gcd(frozen_params[\"p1\"][0], frozen_params[\"p1\"][1]), frozen_params[\"p1\"][1] // gcd(frozen_params[\"p1\"][0], frozen_params[\"p1\"][1])\n    num_p2, den_p2 = frozen_params[\"p2\"][0], frozen_params[\"p2\"][1] # 1/5 is already simplified\n    \n    # Independent probability: P(A and B) = P(A) * P(B)\n    numerator = num_p1_simp * num_p2\n    denominator = den_p1_simp * den_p2\n    \n    final_gcd = gcd(numerator, denominator)\n    canonical_num = numerator // final_gcd\n    canonical_den = denominator // final_gcd\n    \n    question_text = r\"Given two independent events $A$ and $B$, where the probability of event $A$ is $\\frac{\" + str(frozen_params[\"p1\"][0]) + \"}{\\\\\" + str(frozen_params[\"p1\"][1]) + \"\\}$ and the probability of event $B$ is $\\frac{\" + str(frozen_params[\"p2\"][0]) + \"}{\\\\\" + str(frozen_params[\"p2\"][1]) + \"\\}$, what is the probability that both events occur?\"\n    \n    canonical_latex = r\"\\frac{\" + str(canonical_num) + \"}{\\\\\" + str(canonical_den) + \"\\}\"\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": {\n            \"numerator\": canonical_num,\n            \"denominator\": canonical_den,\n            \"canonical_latex\": canonical_latex\n        },\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T19:09:10.644337+00:00",
+  "completed_at_utc": "2026-07-21T19:09:21.542781+00:00",
+  "duration": 10.898434100090526,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 10.898421799996868,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 226,
+      "eval_count": 592,
+      "total_token_count": 818,
+      "total_duration": 8866650200,
+      "load_duration": 239043300,
+      "done_reason": "stop",
+      "latency_ms": 10898,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072002,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072002,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce115_calc_polynomial_factor_roots_l1__ab2d_spec_v2__seed_2026072001",
+  "task_id": "ce115_calc_polynomial_factor_roots_l1",
+  "family": "polynomial",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072001,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072001
+  },
+  "prompt_sha256": "64ff6dc7b8b1fe7e5e14585fdc620a7ed1d9b0c573d08f1674d5cd55f8709943",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce115_calc_polynomial_factor_roots_l1.txt",
+  "generation_status": "success",
+  "raw_response": "# -*- coding: utf-8 -*-\n\ndef generate(level=1, **kwargs):\n    # Frozen sampled parameters defined directly as per specification\n    frozen_params = {\"quadratic_coefficients\": [1, 4, -12]}\n    \n    a = frozen_params[\"quadratic_coefficients\"][0]\n    b = frozen_params[\"quadratic_coefficients\"][1]\n    c = frozen_params[\"quadratic_coefficients\"][2]\n    \n    # Compute discriminant using native Python arithmetic\n    delta = (b ** 2) - (4 * a * c)\n    \n    # Since coefficients are integers and delta is perfect square for this specific case:\n    sqrt_delta = int(delta ** 0.5) if delta >= 0 else None\n    \n    # Compute roots using quadratic formula: (-b +/- sqrt(delta)) / (2*a)\n    root1_num = -b + sqrt_delta\n    root2_num = -b - sqrt_delta\n    \n    # Determine ascending order of roots\n    if root1_num < root2_num:\n        sorted_roots_tuple = (root1_num, root2_num)\n    else:\n        sorted_roots_tuple = (root2_num, root1_num)\n    \n    r1, r2 = sorted_roots_tuple\n    \n    # Construct factorization LaTeX string manually without external libraries\n    # Factor form: a(x - r1)(x - r2) -> 1*(x - (-3))*(x - 4) -> (x + 3)(x - 4)\n    term1_str = f\"x {r1:+d}\" if r1 != 0 else \"x\" # Handle sign correctly for LaTeX\n    term2_str = f\"x {r2:+d}\" if r2 != 0 else \"x\"\n    \n    # Adjust signs for standard polynomial factorization notation (x - root)\n    # If root is negative, it becomes +abs(root). If positive, -(root).\n    sign1 = \"+\" if r1 < 0 else \"-\"\n    val1 = abs(r1) if r1 != 0 else \"\"\n    \n    sign2 = \"+\" if r2 < 0 else \"-\"\n    val2 = abs(r2) if r2 != 0 else \"\"\n    \n    factorization_latex_str = f\"(x {sign1} {val1})(x {sign2} {val2})\"\n    \n    # Construct roots LaTeX list: \\\\{r_1, r_2\\\\} with proper formatting for integers/rationals\n    root1_tex = rf\"\\frac{{{root1_num}}}{{2*{a}}}}\" if a != 0 else str(root1_num)\n    root2_tex = rf\"\\frac{{{root2_num}}}{{2*{a}}}}\" if a != 0 else str(root2_num)\n    \n    # Simplify fractions for LaTeX display (since we know exact integer roots here, simplify manually or use raw fraction)\n    # For x^2 + 4x - 12 = 0, roots are integers: -6 and 2. \n    # Let's ensure the latex reflects simplified forms if they are integers.\n    \n    def format_root_latex(numerator):\n        denom = 2 * a\n        if numerator % denom == 0:\n            val = numerator // denom\n            return rf\"\\left( {val} \\right)\"\n        else:\n            # Use fraction notation for non-integers (though not expected here with these specific params)\n            return rf\"\\frac{{{numerator}}}{{2*{a}}}\"\n\n    root1_latex_str = format_root_latex(root1_num)\n    root2_latex_str = format_root_latex(root2_num)\n    \n    roots_latex_list_str = f\"\\\\left( {root1_latex_str}, {root2_latex_str} \\\\right)\"\n    \n    # Construct question text with formal LaTeX delimiters\n    question_text = rf\"The quadratic equation $x^2 + 4x - 12 = 0$ can be factored into $(x{sign1}{val1})(x{sign2}{val2})$. Find the roots of this polynomial.\"\n\n    correct_answer_dict = {\n        \"roots\": sorted_roots_tuple, # Tuple of integers/rationals in ascending order\n        \"factorization_latex\": factorization_latex_str,\n        \"roots_latex\": roots_latex_list_str\n    }\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer_dict,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T18:24:22.265701+00:00",
+  "completed_at_utc": "2026-07-21T18:24:38.995455+00:00",
+  "duration": 16.7297438000096,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 16.729731900035404,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 597,
+      "eval_count": 983,
+      "total_token_count": 1580,
+      "total_duration": 14696100500,
+      "load_duration": 238822300,
+      "done_reason": "stop",
+      "latency_ms": 16729,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072001,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072001,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

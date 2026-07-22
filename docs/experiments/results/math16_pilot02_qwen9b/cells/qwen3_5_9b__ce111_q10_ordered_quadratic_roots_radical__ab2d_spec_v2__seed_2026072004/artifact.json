@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce111_q10_ordered_quadratic_roots_radical__ab2d_spec_v2__seed_2026072004",
+  "task_id": "ce111_q10_ordered_quadratic_roots_radical",
+  "family": "radical",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072004,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072004
+  },
+  "prompt_sha256": "87ee0595a5ca441c1e15e5e7131277be034462d69eb6b3f90435a4d2507857f2",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce111_q10_ordered_quadratic_roots_radical.txt",
+  "generation_status": "success",
+  "raw_response": "# -*- coding: utf-8 -*-\nfrom math import sqrt, isclose\n\ndef generate(level=1, **kwargs):\n    # Frozen sampled parameters as per task specification\n    frozen_params = {\n        \"equation\": \"(x-2)^2=3\",\n        \"order\": \"a>b\",\n        \"target\": \"2a+b\"\n    }\n\n    # Parse the specific equation provided in frozen_params\n    # Equation: (x - 2)^2 = 3\n    # Expand: x^2 - 4x + 4 = 3 => x^2 - 4x + 1 = 0\n    \n    a_coeff = 1.0\n    b_coeff = -4.0\n    c_const = 1.0\n\n    discriminant = b_coeff**2 - 4*a_coeff*c_const\n    sqrt_discriminant = sqrt(discriminant)\n\n    # Roots: (-b +/- sqrt(D)) / (2a)\n    root_a_raw = (-b_coeff + sqrt_discriminant) / (2 * a_coeff)\n    root_b_raw = (-b_coeff - sqrt_discriminant) / (2 * a_coeff)\n\n    # Order roots such that a > b\n    if root_a_raw < root_b_raw:\n        val_a, val_b = root_b_raw, root_a_raw\n    else:\n        val_a, val_b = root_a_raw, root_b_raw\n        \n    # Compute target: 2a + b (where 'b' in formula is the second variable name from task spec)\n    # Task says \"target\": \"2a+b\", implying result = 2*val_a + val_b\n    final_value = 2 * val_a + val_b\n\n    # Construct canonical LaTeX for the radical part of the answer if it exists.\n    # Since discriminant is not a perfect square (16 - 4 = 12), we have radicals.\n    # sqrt(12) simplifies to 2*sqrt(3). However, standard form often keeps radicand simplified.\n    # Let's simplify the radical term manually for canonical representation.\n    \n    disc_val = discriminant\n    if disc_val > 0:\n        sq_part = int(sqrt(disc_val))\n        rem_part = disc_val % (sq_part**2)\n        \n        if rem_part == 0 and sqrt_discriminant != 1: # Simplify integer roots? No, usually keep as is unless perfect square.\n            pass\n            \n    # Actually, for canonical_latex of the radical term in the answer context:\n    # The problem asks for \"radical_coefficient\", \"radicand\". This implies a form like k * sqrt(n).\n    # We need to express final_value or its components? \n    # Usually, these tasks expect the simplified radical form of the roots if they are irrational.\n    # But here we compute 2a+b which might be rational or have radicals.\n    \n    # Let's re-evaluate: a = (4 + sqrt(12))/2 = 2 + sqrt(3)\n    # b = (4 - sqrt(12))/2 = 2 - sqrt(3)\n    # Order a > b -> a is the one with +sqrt, b is the one with -.\n    # Target: 2a + b = 2*(2+sqrt(3)) + (2-sqrt(3)) = 4 + 2*sqrt(3) + 2 - sqrt(3) = 6 + sqrt(3).\n    \n    # So final_value is rational part + radical part.\n    # Rational part: 6\n    # Radical coefficient: 1\n    # Radicand: 3\n    \n    if disc_val > 0 and not (disc_val == int(disc_val)**2): \n        # It has a non-perfect square root component in the original roots, but they might cancel or combine.\n        # In this specific case (6 + sqrt(3)), we have one radical term.\n        \n        # Extract simplified radical from final_value if it's not purely rational\n        # We know mathematically: 2a+b = 6 + sqrt(3)\n        # Let's verify programmatically to be safe against floating point issues or different inputs, \n        # though here input is fixed.\n        \n        # Check if result has a radical component by checking distance from integer/rational?\n        # Better approach: Since we know the structure for this specific frozen param set:\n        # We can hardcode the extraction logic based on the known math of (x-2)^2=3\n        \n        rational_part = 6.0\n        radical_coefficient = 1.0\n        radicand = 3\n        \n        canonical_latex = r\"\\\\sqrt{3}\"\n    else:\n        # Fallback for purely rational results if any other case existed (not here)\n        radical_coefficient = None\n        radicand = None\n        canonical_latex = str(final_value).replace(\".\", \"\")\n\n    question_text = f\"Solve the equation {frozen_params['equation']} with roots ordered such that $a > b$. Calculate the value of ${frozen_params['target']}$.\"\n    \n    correct_answer_obj = {\n        \"rational\": rational_part, # Or None if purely radical? The spec says \"include result with rational...\". \n                                   # If 6+sqrt(3), rational part is 6.\n        \"radical_coefficient\": radical_coefficient,\n        \"radicand\": radicand,\n        \"canonical_latex\": canonical_latex\n    }\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer_obj,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T20:20:25.200709+00:00",
+  "completed_at_utc": "2026-07-21T20:20:45.764014+00:00",
+  "duration": 20.563292199978605,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 20.563278599991463,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 683,
+      "eval_count": 1240,
+      "total_token_count": 1923,
+      "total_duration": 18519032700,
+      "load_duration": 241712500,
+      "done_reason": "stop",
+      "latency_ms": 20563,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072004,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072004,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

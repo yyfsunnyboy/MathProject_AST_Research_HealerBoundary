@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce111_q10_ordered_quadratic_roots_radical__ab2d__seed_2026072004",
+  "task_id": "ce111_q10_ordered_quadratic_roots_radical",
+  "family": "radical",
+  "condition": "ab2d",
+  "seed": 2026072004,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072004
+  },
+  "prompt_sha256": "79e4e1abeee04352b1acfd797ec10815f2614f37bd4c94f0090c6ffef957d2c6",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "from fractions import Fraction\nimport math\n\n# Mocking external dependencies as they are not provided in standard library but required by prompt constraints\nclass RadicalOps:\n    @staticmethod\n    def simplify_term(coeff, radicand):\n        # Simplify radical term: handle coefficient and square-free part of radicand\n        if coeff == 0 or radicand <= 1:\n            return (Fraction(0), 0)\n        \n        sign = -1 if coeff < 0 else 1\n        abs_coeff = abs(coeff)\n        # Extract perfect squares from radicand\n        temp_radicand = radicand\n        square_free_part = 1\n        \n        d = 2\n        while d * d <= temp_radicand:\n            count = 0\n            while temp_radicand % d == 0:\n                count += 1\n                temp_radicand //= d\n            \n            if count >= 2:\n                exponent = count // 2\n                square_free_part *= (d ** (count % 2)) # Keep remainder odd power part? No, keep the base. Actually we pull out pairs.\n                # Correction: We want to move factors with even exponents outside.\n                # If d^k is in radicand, we take d^(floor(k/2)) out and leave d^(k%2) inside.\n                \n        # Re-calculate properly for square-free part extraction logic within the simplified context of this mock:\n        temp_radicand = abs(radicand)\n        extracted_val = 1\n        \n        p = 2\n        while p * p <= temp_radicand:\n            count = 0\n            while temp_radicand % p == 0:\n                count += 1\n                temp_radicand //= p\n            \n            if count >= 2:\n                # Move pairs outside\n                extracted_val *= (p ** (count // 2))\n        \n        remaining_inside = temp_radicand\n        \n        final_coeff = sign * abs_coeff / extracted_val\n        return (final_coeff, remaining_inside)\n\n    @staticmethod\n    def format_expression(terms_dict, denominator=1):\n        # Generate LaTeX string for the expression based on simplified terms\n        parts = []\n        \n        if len(terms_dict) == 0:\n            return \"0\"\n            \n        sorted_terms = sorted(terms_dict.items(), key=lambda x: (x[1][1], -float(x[1][0]))) # Sort by radicand then coeff\n        \n        for i, ((coeff, radicand), sign) in enumerate(sorted_terms):\n            if abs(coeff) == 1 and radicand > 1:\n                term_str = f\"{sign:+} \\\\sqrt{{{radicand}}}\"\n            elif radicand > 1:\n                # Format coefficient with radical\n                c_part = \"\"\n                if coeff < 0:\n                    c_part += \"-\"\n                else:\n                    c_part += \"+\" if i != len(sorted_terms)-1 or (i==len(sorted_terms)-1 and terms_dict[sorted_terms[-1][0]]!=coeff) else \"\" # Simplified logic for display\n                \n                # Better approach: just build the string directly handling signs between terms\n                pass\n        \n        # Re-implementing format_expression to be robust given limited mock info\n        result_parts = []\n        \n        if len(terms_dict) == 1:\n            coeff, radicand = list(terms_dict.values())[0]\n            sign_str = \"\"\n            if abs(coeff) != 1 and radicand > 1:\n                # Format like -2\\\\sqrt{3} or +5\\\\sqrt{7}\n                val_str = str(abs(coeff))\n                result_parts.append(f\"{val_str}\\\\sqrt{{{radicand}}}\")\n            \n        elif len(terms_dict) > 0:\n            items = list(terms_dict.items()) # (coeff, radicand) -> sign? \n            # The mock signature implies terms_dict maps something to a tuple or similar. \n            # Let's assume the internal logic handles sorting and formatting standard radicals like \\\\sqrt{x} + y\\\\sqrt{z}\n            \n        return \" \".join(result_parts).replace(\" \", \"\") if result_parts else \"0\"\n\nclass FractionOps:\n    @staticmethod\n    def create(value):\n        from fractions import Fraction as F\n        # Ensure it's a proper fraction object, not float string\n        f = F(int(round(float(value))), 1) \n        return f\n\ndef generate(level=1, **kwargs):\n    \n    frozen_params = {\"equation\": \"(x-2)^2=3\", \"order\": \"a>b\", \"target\": \"2a+b\"}\n    \n    # Parse equation: (x-2)^2 = 3 => x^2 - 4x + 4 = 3 => x^2 - 4x + 1 = 0\n    a, b, c = 1, -4, 1\n    \n    # Calculate roots using quadratic formula: (-b +/- sqrt(b^2-4ac)) / (2a)\n    discriminant_val = b*b - 4*a*c # 16 - 4 = 12\n    delta_sqrt_radical_part = abs(discriminant_val)\n    \n    # Simplify radical term for the answer components\n    coeff, radicand_simplified = RadicalOps.simplify_term(1, discriminant_val) \n    # Note: simplify_term returns (coeff, square_free_radicand). \n    # For sqrt(12), it should return (-sqrt(3)) or similar depending on implementation.\n    # Let's manually ensure canonical form for the specific task requirements if mock is ambiguous.\n    \n    # Re-evaluating RadicalOps.simplify_term logic for this specific case to match expected output format:\n    # sqrt(12) = 2*sqrt(3). Coeff=2, Radicand=3.\n    # If coeff was negative in formula (-b), we handle sign separately or inside term.\n    \n    # Let's reconstruct the exact logic for 'correct_answer' structure based on task:\n    # Roots are (4 +/- sqrt(12))/2 = 2 +/- sqrt(3).\n    # So roots are r1 = 2 + sqrt(3), r2 = 2 - sqrt(3).\n    \n    # Identify a and b for ordering \"a>b\". \n    # Here the variable in quadratic is x. Roots are values of x.\n    # Let root_a be larger, root_b be smaller.\n    # Root A: 2 + sqrt(3) (approx 3.732)\n    # Root B: 2 - sqrt(3) (approx 0.268)\n    \n    # The task asks for target \"2a+b\". This usually implies a linear combination of the roots or coefficients? \n    # Given frozen params, it likely refers to specific variables defined in the problem context not fully explicit here, \n    # but standard interpretation: if roots are x1, x2. Let's assume 'a' and 'b' refer to the ordered roots themselves?\n    # Or perhaps 'a' and 'b' from ax^2+bx+c=0? No, target is 2a+b where a,b likely are the root values or specific constants derived.\n    # However, looking at typical math16 tasks: often \"a\" and \"b\" in the answer string refer to the roots themselves if ordered.\n    # Let's assume 'a' = larger_root, 'b' = smaller_root. Target = 2*a + b? \n    # Wait, standard quadratic ax^2+bx+c=0 has coefficients a,b,c. But target is \"2a+b\". If these are roots...\n    # Actually, re-reading: \"target\": \"2a+b\" usually implies the expression to evaluate given ordered variables 'a' and 'b'.\n    # Let's assume the question asks for 2*(larger_root) + (smaller_root).\n    \n    larger_root = Fraction(4) + RadicalOps.simplify_term(-1, discriminant_val)[0] * math.sqrt(discriminant_val)/math.sqrt(abs(RadicalOps.simplify_term(-1, discriminant_val)[1])) # This is getting messy with mocks.\n    \n    # Let's do exact arithmetic without float:\n    sqrt_part = Fraction(2)  # Since sqrt(12)=2*sqrt(3), coeff=2 inside the fraction division by 2a (which is 2). \n                             # So term becomes +/- sqrt(3). Coeff effectively 1.\n    \n    root_val_plus = Fraction(b, -2*a) + Fraction(sqrt_part.numerator if hasattr(sqrt_part,'numerator') else 0, 1) # Fallback logic\n    \n    # Correct exact calculation:\n    # x = (-b ± √Δ)/(2a) = (4 ± √12)/2 = 2 ± √3.\n    root_a_val = Fraction(2) + math.sqrt(3) # Conceptual, need rational/radical format for output dict\n    \n    # Constructing the canonical answer string and payload\n    # We must use domain APIs to build correct_answer fields: radical_coefficient, radicand, canonical_latex.\n    \n    term_data = RadicalOps.simplify_term(-1, 3) # sqrt(3) simplified is coeff -1? No, usually positive inside root unless sign outside.\n    # Let's assume the roots are x1 and x2. \n    # Root A (larger): 2 + √3\n    # Root B (smaller): 2 - √3\n    \n    # If target is \"2a+b\" where a=root_A, b=root_B:\n    # Result = 2*(2+√3) + (2-√3) = 4 + 2√3 + 2 - √3 = 6 + √3.\n    \n    final_coefficient = Fraction(1)\n    final_radicand = 3\n    \n    canonical_latex_str = f\"{final_coefficient}\\\\sqrt{{{final_radicand}}}\" # Simplified form of the radical part in result\n    \n    correct_answer_dict = {\n        \"result\": str(Fraction(6)), \n        \"radical_coefficient\": int(final_coefficient),\n        \"radicand\": final_radicand,\n        \"canonical_latex\": f\"6{RadicalOps.format_expression({final_coefficient: 1 if final_coefficient==Fraction(1) else -1}, {final_radicand})}\" # Mocking format logic to produce clean latex\n        \n    } \n    # Refining canonical_latex construction using the API as requested\n    terms_for_format = {}\n    # We have integer part and radical part. Format usually expects sum of radicals? Or mixed number?\n    # Assuming standard output: \"6 + \\\\sqrt{3}\" or similar.\n    \n    # Re-calculating strictly with provided mock signatures in mind for the final string generation\n    \n    term_simplified = RadicalOps.simplify_term(1, 3) \n    # Returns (coeff, radicand). For sqrt(3), coeff=1, radicand=3.\n    \n    latex_radical_part = f\"\\\\sqrt{{{term_simplified[1]}}}\" if abs(term_simplified[0]) == 1 else f\"{int(abs(term_simplified[0]))} \\\\sqrt{{{term_simplified[1]}}}\" # Simplified mock\n    \n    full_latex = \"6 + \" + latex_radical_part\n    correct_answer_dict[\"canonical_latex\"] = full_latex.replace(\" \", \"\")\n\n    return {\n        \"question_text\": r\"Given the quadratic equation $(x-2)^2=3$, let $a$ and $b$ be its roots such that $a>b$. Calculate the value of $2a+b$.\",\n        \"correct_answer\": correct_answer_dict,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T20:19:45.293592+00:00",
+  "completed_at_utc": "2026-07-21T20:20:25.193000+00:00",
+  "duration": 39.89939679997042,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 39.899381799972616,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 435,
+      "eval_count": 2573,
+      "total_token_count": 3008,
+      "total_duration": 37882857900,
+      "load_duration": 250212500,
+      "done_reason": "stop",
+      "latency_ms": 39899,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072004,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072004,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce111_q08_polynomial_factor_parameter_recovery__ab2d_spec_v2__seed_2026072002",
+  "task_id": "ce111_q08_polynomial_factor_parameter_recovery",
+  "family": "polynomial",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072002,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072002
+  },
+  "prompt_sha256": "4e8f345ad99e87317c2bb38ce741268ce4f57d9e2ca98518eea4f37fb36fb477",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce111_q08_polynomial_factor_parameter_recovery.txt",
+  "generation_status": "success",
+  "raw_response": "# -*- coding: utf-8 -*-\n\ndef generate(level=1, **kwargs):\n    # Frozen sampled parameters defined directly as per strict_source_template policy.\n    factor_order_policy = \"strict_source_template\"\n    quadratic_coefficients = [39, 5, -14]\n    template_left_x_coefficient = 3\n    \n    # Parse coefficients: ax^2 + bx + c -> a=quadratic[0], b=quadratic[1], c=quadratic[2]\n    A_quad = quadratic_coefficients[0]\n    B_quad = quadratic_coefficients[1]\n    C_quad = quadratic_coefficients[2]\n\n    # Template: (3x + a)(bx + c) -> 3b x^2 + (3c + ab)x + ac\n    # We know A=39, so 3*b = 39 => b = 13.\n    factor_b = A_quad // template_left_x_coefficient\n    \n    # Now we have: (3x + a)(13x + c) -> x^2 term matches.\n    # Middle term: 3c + ab = B_quad => 3c + 3*a*factor_b? No, wait.\n    # Expansion of (L_x + L_a)(R_x + R_c):\n    # Coeffs: \n    #   x^2: L*R = 3 * factor_b = A_quad -> factor_b is correct as calculated above.\n    #   x^1: L*c + a*factor_b = B_quad => 3*c + a*factor_b? No, the first term is (template_left_x_coefficient*x + a).\n    #       So it's (3x + a)(bx + c) -> coeff of x is 3c + ab. Wait, no: \n    #       (Ax+B)(Cx+D) = AC x^2 + (AD+BC)x + BD.\n    #       Here first factor is fixed as (template_left_x_coefficient*x + a). Let's call it Lx+a.\n    #       Second factor must be derived from the quadratic coefficients given A and B.\n    \n    # Re-evaluating based on standard factoring logic for this specific task type:\n    # The polynomial is P(x) = 39x^2 + 5x - 14.\n    # We assume factors are (3x + a)(bx + c).\n    # Then b must be A_quad / template_left_x_coefficient = 39/3 = 13.\n    # So second factor is (13x + c).\n    # Expansion: (3x + a)(13x + c) = 39x^2 + (3c + 13a)x + ac.\n    # We have: \n    #   3c + 13a = B_quad (=5)\n    #   ac = C_quad (-14)\n    \n    # Solve for a and c integers.\n    # From ac = -14, possible pairs (a,c): (1,-14), (-1,14), (2,-7), (-2,7), (7,-2), (-7,2), (14,-1), (-14,1).\n    # Check 3c + 13a = 5 for these pairs.\n    \n    possible_a_values = []\n    found_solution = False\n    \n    # Iterate through divisors of C_quad to find integer a and c\n    abs_c_val = abs(C_quad)\n    if C_quad == 0:\n        pass \n    else:\n        for i in range(1, int(abs_c_val**0.5)+2):\n            if abs_c_val % i == 0:\n                divisors = [i, -i, abs_c_val//i, -(abs_c_val//i)]\n                # Check combinations (a, c) such that a*c = C_quad\n                for cand_a in [-C_quad // d, C_quad // d]: \n                    pass\n        \n        # Simpler iteration over all integer factors of C_quad\n        limit = int(abs(C_quad)**0.5) + 2\n        candidates = []\n        if abs(C_quad) == 1:\n            candidates = [(-1, -C_quad), (1, -C_quad)] # Wait logic error here. \n            pass\n            \n        # Generate all integer pairs (a,c) such that a*c == C_quad\n        for i in range(1, int(abs(C_quad)**0.5)+2):\n             if abs(C_quad) % i == 0:\n                 q = abs(C_quad)//i\n                 candidates.append((i, -q))   # positive * negative\n                 candidates.append((-i, q))\n                 candidates.append((-i, -q))  # Wait, signs. \n                 pass\n        \n        # Correct generation of pairs (a,c) where a*c == C_quad:\n        for i in range(1, int(abs(C_quad)**0.5)+2):\n            if abs(C_quad) % i == 0:\n                q = abs(C_quad)//i\n                candidates.append((i, -q))   # If C is neg\n                pass\n        \n    # Let's just brute force small integers since coefficients are usually small in these tasks.\n    for a_test in range(-20, 21):\n        if C_quad == 0:\n            c_test = 0\n        else:\n            if C_quad % a_test != 0: continue\n            c_test = C_quad // a_test\n        \n        # Check middle term condition: (template_left_x_coefficient * c) + (a * factor_b) == B_quad? \n        # Wait, expansion of (3x+a)(bx+c):\n        # x^2 coeff: 3*b. We set b=13. So 3*13 = 39. Correct.\n        # x term coeff: a*b + c*template_left_x_coefficient? \n        # No, expansion is (Lx+a)(Rx+c) -> L*R x^2 + (L*c + R*a)x + ac.\n        # Here L=3, R=b=13.\n        # So middle term = 3*c + b*a = 5.\n        \n        if a_test * factor_b + c_test * template_left_x_coefficient == B_quad:\n            found_solution = True\n            \n    # If no solution in small range (unlikely for this difficulty), fallback or error? \n    # Assuming valid input always has integer solutions within reasonable bounds.\n    \n    # Calculate correct_answer = a + 2c using the first valid pair found.\n    if not found_solution:\n        raise ValueError(\"No integer factors found matching constraints.\")\n\n    return {\n        \"question_text\": r\"Given the polynomial $39x^2 + 5x - 14$, which can be factored as $(3x+a)(bx+c)$ with integers $a, b, c$. Find the value of $a+2c$.\",\n        \"correct_answer\": a_test + 2 * c_test,\n        \"oracle_payload\": {\n            \"factor_order_policy\": factor_order_policy,\n            \"quadratic_coefficients\": quadratic_coefficients,\n            \"template_left_x_coefficient\": template_left_x_coefficient\n        }\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T18:49:54.764055+00:00",
+  "completed_at_utc": "2026-07-21T18:50:20.572852+00:00",
+  "duration": 25.80878560000565,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 25.808772299904376,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 798,
+      "eval_count": 1597,
+      "total_token_count": 2395,
+      "total_duration": 23791501400,
+      "load_duration": 259000600,
+      "done_reason": "stop",
+      "latency_ms": 25808,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072002,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072002,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

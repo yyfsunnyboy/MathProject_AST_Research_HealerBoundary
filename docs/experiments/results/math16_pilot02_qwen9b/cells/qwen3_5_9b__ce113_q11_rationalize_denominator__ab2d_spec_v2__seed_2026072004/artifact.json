@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce113_q11_rationalize_denominator__ab2d_spec_v2__seed_2026072004",
+  "task_id": "ce113_q11_rationalize_denominator",
+  "family": "radical",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072004,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072004
+  },
+  "prompt_sha256": "4033ab46b2fd824676ffbdde5923011d60dab8b2e0ae8d562ec42a32b75da01a",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce113_q11_rationalize_denominator.txt",
+  "generation_status": "success",
+  "raw_response": "# -*- coding: utf-8 -*-\n\ndef generate(level=1, **kwargs):\n    # Frozen sampled parameters defined directly as per specification\n    denominator_str = \"4-sqrt(7)\"\n    numerator_int = 9\n    radicand_int = 7\n    \n    # Rationalize the denominator of (numerator) / (a - sqrt(b))\n    # Formula: n / (A - S) = n * (A + S) / ((A)^2 - b) where A=4, S=sqrt(7), b=7\n    a_const = 4\n    b_val = radicand_int\n    \n    # Calculate the new denominator value: A^2 - b\n    denom_value = (a_const ** 2) - b_val\n    \n    # The numerator becomes n * (A + sqrt(b))\n    # We need to extract coefficients for form x + y*sqrt(7)\n    # Numerator part without root: n * A\n    num_part_a = numerator_int * a_const\n    \n    # Coefficient of the radical part in the new numerator: n * 1 (since S=sqrt(b))\n    num_part_b_coeff = numerator_int\n    \n    # The expression is now: [num_part_a + num_part_b_coeff*sqrt(7)] / denom_value\n    # We need to divide both parts by denom_value to get final coefficients.\n    # However, the task asks for integers a and b in result a + b*sqrt(radicand).\n    # Let's check if it simplifies to integers or fractions.\n    \n    # Current fraction: (num_part_a / denom_value) + (num_part_b_coeff / denom_value)*sqrt(7)\n    # If the problem implies integer coefficients, we might need to re-evaluate \n    # whether the division results in exact integers or if 'a' and 'b' refer to \n    # the unsimplified numerator components before dividing by a common factor?\n    \n    # Re-reading typical \"rationalize denominator\" tasks: usually they want the simplified form.\n    # Let's calculate values first.\n    \n    val_a = num_part_a / denom_value\n    val_b = num_part_b_coeff / denom_value\n    \n    # Check if these are integers (they might be fractions, but let's see)\n    # 4^2 - 7 = 16 - 7 = 9\n    # Numerator part a: 9 * 4 = 36 -> 36/9 = 4\n    # Numerator part b coeff: 9 * 1 = 9 -> 9/9 = 1\n    \n    final_a = int(val_a) if val_a == int(val_a) else None\n    final_b = int(val_b) if val_b == int(val_b) else None\n    \n    # Construct the question text with LaTeX delimiters\n    latex_denom = r\"4-\\sqrt{7}\"\n    \n    question_text = f\"Simplify \\\\frac{{{numerator_int}}}{{{latex_denom}}} by rationalizing the denominator. Express your answer in the form a + b\\\\sqrt{{r}} where {b_val} is under the radical, and find the integer value of a + b.\"\n    \n    # Correct answer is sum of coefficients a + b\n    correct_answer = final_a + final_b\n    \n    oracle_payload = {\"denominator\": denominator_str, \"numerator\": numerator_int, \"radicand\": radicand_int}\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T20:22:55.155796+00:00",
+  "completed_at_utc": "2026-07-21T20:23:08.831849+00:00",
+  "duration": 13.67604399996344,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 13.676029599970207,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 598,
+      "eval_count": 768,
+      "total_token_count": 1366,
+      "total_duration": 11631899400,
+      "load_duration": 247583500,
+      "done_reason": "stop",
+      "latency_ms": 13676,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072004,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072004,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

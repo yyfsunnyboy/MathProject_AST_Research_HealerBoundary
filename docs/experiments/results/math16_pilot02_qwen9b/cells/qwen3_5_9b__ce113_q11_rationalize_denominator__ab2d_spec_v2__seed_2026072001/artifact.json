@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce113_q11_rationalize_denominator__ab2d_spec_v2__seed_2026072001",
+  "task_id": "ce113_q11_rationalize_denominator",
+  "family": "radical",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072001,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072001
+  },
+  "prompt_sha256": "4033ab46b2fd824676ffbdde5923011d60dab8b2e0ae8d562ec42a32b75da01a",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce113_q11_rationalize_denominator.txt",
+  "generation_status": "success",
+  "raw_response": "# -*- coding: utf-8 -*-\n\ndef generate(level=1, **kwargs):\n    # Frozen sampled parameters defined directly as per contract\n    frozen_params = {\n        \"denominator\": \"4-sqrt(7)\",\n        \"numerator\": 9,\n        \"radicand\": 7\n    }\n\n    # Task: Rationalize denominator of numerator / (a - sqrt(r))\n    # Expression: N / (A - sqrt(R)) = N * (A + sqrt(R)) / (A^2 - R)\n    # Result form: [N*A/(A^2-R)] + [N*sqrt(R)/(A^2-R)] -> Coefficients for 1 and sqrt(R)\n    \n    numerator_val = frozen_params[\"numerator\"]      # N = 9\n    a_denom_part = int(frozen_params[\"denominator\"].split(\"-\")[0])   # A = 4\n    radicand_val = frozen_params[\"radicand\"]        # R = 7\n    \n    # Calculate denominator rationalization factor (A^2 - R)\n    denom_sq_minus_r = a_denom_part ** 2 - radicand_val  # 16 - 7 = 9\n    \n    # Coefficient for the integer part: N * A / (A^2 - R)\n    coeff_a = numerator_val * a_denom_part // denom_sq_minus_r\n    \n    # Coefficient for the sqrt(R) part: N / (A^2 - R)\n    coeff_b = numerator_val // denom_sq_minus_r\n    \n    # The result is in form a + b*sqrt(7). We need to return integer sum a+b.\n    correct_answer = coeff_a + coeff_b\n\n    question_text = r\"Rationalize the denominator of $\\frac{9}{4-\\sqrt{7}}$ and express it as $a+b\\sqrt{7}$ where $a,b \\in \\mathbb{Z}$. What is the value of $a+b$?\"\n    \n    oracle_payload = frozen_params\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T18:28:38.846513+00:00",
+  "completed_at_utc": "2026-07-21T18:28:48.199986+00:00",
+  "duration": 9.353460400016047,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 9.353447400033474,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 598,
+      "eval_count": 469,
+      "total_token_count": 1067,
+      "total_duration": 7315004500,
+      "load_duration": 246921200,
+      "done_reason": "stop",
+      "latency_ms": 9353,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072001,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072001,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

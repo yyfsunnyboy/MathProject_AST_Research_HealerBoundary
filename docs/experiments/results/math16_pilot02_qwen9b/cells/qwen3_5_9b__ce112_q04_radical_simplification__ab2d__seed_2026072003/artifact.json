@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce112_q04_radical_simplification__ab2d__seed_2026072003",
+  "task_id": "ce112_q04_radical_simplification",
+  "family": "radical",
+  "condition": "ab2d",
+  "seed": 2026072003,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072003
+  },
+  "prompt_sha256": "f4766019ab80cfea7d15b358786ad841f542d8cd57b9dd61f4e7098712dba731",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "from fractions import Fraction\nimport random\nfrom math import gcd\n\n# Mocking the required imports as they are not available in standard Python environments without specific package installation.\n# In a real environment with `core.prompts.domain_function_library`, these would be actual function calls.\nclass RadicalOps:\n    @staticmethod\n    def simplify_term(coeff, radicand):\n        # Simplify sqrt(n * k^2) -> k * sqrt(n)\n        if coeff == 0 or radicand <= 0:\n            return (coeff, radicand)\n        \n        temp_radicand = abs(radicand)\n        simplified_coeff = 1\n        \n        while temp_radicand > 1:\n            for i in range(2, int(temp_radicand**0.5) + 1):\n                if temp_radicand % (i * i) == 0:\n                    factor_sq = i * i\n                    simplified_coeff *= i\n                    temp_radicand //= factor_sq\n        \n        # Handle sign of original radicand in coefficient\n        if radicand < 0 and coeff > 0:\n            simplified_coeff = -simplified_coeff\n            \n        return (simplified_coeff, temp_radicand)\n\n    @staticmethod\n    def format_term(coeff, radicand, is_first=True):\n        # Format LaTeX term\n        sign_str = \"-\" if coeff == -1 else \"\"\n        \n        # Coefficient formatting\n        if abs(coeff) != 1:\n            coef_part = f\"{coeff}\"\n        elif coeff > 0 and not is_first:\n            coef_part = \"+\"\n        elif coeff < 0:\n            coef_part = \"-\"\n        else:\n            coef_part = \"\" # +1 or -1 handled by sign logic above, but need to be careful with first term\n            \n        if abs(coeff) == 1 and (is_first or not is_first): \n             # Re-evaluating simple case for latex generation inside format_term context usually implies full string construction\n             pass\n\n        # Let's reconstruct the standard LaTeX representation based on simplified values\n        c_val = coeff\n        r_val = radicand\n        \n        if abs(c_val) == 1:\n            coef_str = \"\"\n        else:\n            coef_str = f\"{c_val}\"\n            \n        sign_prefix = \"-\" if (coef_str.startswith(\"-\") or (abs(coef_str)==0)) else (\"+\" if not is_first and c_val > 0 else \"\")\n        \n        # Correction for the specific logic of format_term usually expected in these tasks:\n        final_coeff = coef_str.lstrip(\"+\").lstrip(\"-\") if abs(c_val) != 1 else \"\"\n        \n        term_parts = []\n        if sign_prefix == \"-\":\n            term_parts.append(\"-\")\n            \n        # Handle coefficient display\n        if c_val > 0 and not is_first:\n             term_parts.append(f\"+{c_val}\")\n        elif abs(c_val) != 1:\n             term_parts.append(str(abs(c_val)))\n             \n        radicand_str = f\"{r_val}\" if r_val == 1 else (f\"\\\\sqrt{{{r_val}}}\" if r_val > 0 else \"i\") # Assuming real domain mostly\n        \n        return \"\".join(term_parts) + (\"+\" if not is_first and c_val > 0 else \"\")\n\ndef generate(level=1, **kwargs):\n    frozen_params = kwargs.get('frozen_sampled_parameters', {\"radicand\": 135})\n    \n    # Extract radicand from frozen parameters or default\n    raw_radicand = frozen_params.get(\"radicand\", 1)\n    \n    # Simplify the radical term: sqrt(raw_radicand) -> coeff * sqrt(square_free_part)\n    simplified_coeff, square_free_rad = RadicalOps.simplify_term(1, raw_radicand)\n    \n    # Construct correct_answer string manually to ensure canonical LaTeX format as per domain constraints logic\n    if abs(simplified_coeff) == 0:\n        answer_str = \"0\"\n    else:\n        term_parts = []\n        \n        # Sign handling for the first (and only in this specific task context usually, but let's be robust)\n        sign_needed = False\n        \n        # Coefficient part\n        if abs(simplified_coeff) != 1:\n            coef_str = str(abs(simplified_coeff))\n            term_parts.append(coef_str)\n        else:\n            coef_str = \"\"\n            \n        # Radicand part\n        radicand_val = square_free_rad\n        \n        # Construct LaTeX\n        latex_term = f\"\\\\sqrt{{{radicand_val}}}\" if abs(simplified_coeff) == 1 and (simplified_coeff > 0 or raw_radicand < 0 else \"\") \n        \n        final_answer_parts = []\n        \n        # Re-implementing format logic strictly for the output string construction to match expected canonical form\n        c = simplified_coeff\n        r = square_free_rad\n        \n        if abs(c) == 1:\n            coef_latex = \"\"\n        elif c > 0 and not (r==1): # If it's just a number, usually we don't write coefficient unless necessary or specific format required. \n             # However, standard simplification of sqrt(135) is 9sqrt(3). Coefficient must be shown if != 1.\n            coef_latex = str(c)\n        else:\n            coef_latex = \"\"\n\n        sign_latex = \"-\" if c < 0 and r > 0 else (\"+\" if (c > 0 and not is_first_term_logic(r==1)) else \"\") # Simplified logic\n        \n        # Let's build the string directly for correctness based on math rules:\n        latex_str = f\"{coef_latex}\\\\sqrt{{{r}}}\" if abs(c) != 1 or r!=1 else (f\"\\\\sqrt{{{r}}}\" if c > 0 else \"-\\\\sqrt{{{r}}}\")\n        \n        # Refining the string construction to be canonical:\n        term_parts = []\n        \n        # Determine sign and coefficient display\n        has_coeff_display = abs(c) != 1\n        \n        if c < 0:\n            term_parts.append(\"-\")\n            \n        if not (c == -1): \n             term_parts.append(str(abs(c)))\n             \n        radicand_str = f\"{r}\" if r==1 else str(r) # Just the number inside sqrt usually, unless it's a product. Here single radical.\n        \n        final_latex = \"\".join(term_parts) + (f\"\\\\sqrt{{{radicand_val}}}\" if abs(c)==1 or not has_coeff_display else f\"{coef_latex}\\\\sqrt{{{radicand_val}}}\")\n\n    # Re-evaluating the specific requirement: \"correct_answer must include coefficient, radicand, and canonical_latex.\"\n    # This implies a structured dict inside correct_answer? Or just the string representation containing these elements.\n    # Given typical task formats for this prompt style (ce112), correct_answer is often the full LaTeX string or a specific object.\n    # Let's assume it wants the final simplified expression as a string, but also explicitly ensuring components are present if parsed.\n    \n    # Actually, looking at \"canonical_latex\" requirement in keys suggests:\n    # Maybe correct_answer should be an object? \n    # Re-reading: \"correct_answer must include coefficient, radicand, and canonical_latex.\"\n    # This likely means the string itself represents these, OR it's a dict. \n    # But usually `generate` returns question_text (str), correct_answer (str or latex), oracle_payload (dict).\n    \n    # Let's construct the final LaTeX string properly:\n    if raw_radicand == 0:\n        ans_str = \"0\"\n    else:\n        c, r = RadicalOps.simplify_term(1, raw_radicand)\n        \n        parts = []\n        sign = \"\"\n        coef_part = \"\"\n        \n        if abs(c) != 1:\n            coef_part = str(abs(c))\n            \n        if c < 0 and (abs(coef_part) == 0 or True): # If negative, start with minus\n             sign = \"-\"\n             \n        term_str = f\"{sign}{coef_part}\\\\sqrt{{{r}}}\" if abs(c) != 1 else (f\"\\\\sqrt{{{r}}}\" if c > 0 else \"-\\\\sqrt{{{r}}}\")\n        \n        # Handle the case where coefficient is implicit +1 or -1\n        final_latex_str = term_str\n        \n    question_text = f\"Simplify \\\\sqrt{{{raw_radicand}}}\"\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": final_latex_str,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T19:48:42.489459+00:00",
+  "completed_at_utc": "2026-07-21T19:49:12.047303+00:00",
+  "duration": 29.557830600067973,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 29.557817799970508,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 350,
+      "eval_count": 1871,
+      "total_token_count": 2221,
+      "total_duration": 27543895700,
+      "load_duration": 244846500,
+      "done_reason": "stop",
+      "latency_ms": 29557,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072003,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072003,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

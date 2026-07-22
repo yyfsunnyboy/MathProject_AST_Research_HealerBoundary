@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce111_q08_polynomial_factor_parameter_recovery__ab2d_spec_v2__seed_2026072001",
+  "task_id": "ce111_q08_polynomial_factor_parameter_recovery",
+  "family": "polynomial",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072001,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072001
+  },
+  "prompt_sha256": "4e8f345ad99e87317c2bb38ce741268ce4f57d9e2ca98518eea4f37fb36fb477",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce111_q08_polynomial_factor_parameter_recovery.txt",
+  "generation_status": "success",
+  "raw_response": "# -*- coding: utf-8 -*-\n\ndef generate(level=1, **kwargs):\n    # Frozen sampled parameters defined directly as per specification.\n    frozen_params = {\n        \"factor_order_policy\": \"strict_source_template\",\n        \"quadratic_coefficients\": [39, 5, -14],\n        \"template_left_x_coefficient\": 3\n    }\n\n    # Extract coefficients: ax^2 + bx + c -> coeffs[0]=a, coeffs[1]=b, coeffs[2]=c\n    a_quad = frozen_params[\"quadratic_coefficients\"][0]  # 39\n    b_quad = frozen_params[\"quadratic_coefficients\"][1]  # 5\n    c_quad = frozen_params[\"quadratic_coefficients\"][2]  # -14\n\n    # Template: (template_left_x_coefficient * x + a) * (b_factor * x + c)\n    left_x_coef = frozen_params[\"template_left_x_coefficient\"]  # 3\n    \n    # We need to find integers 'a' and 'c' such that:\n    # (left_x_coef * x + a) * (b_factor * x + c) expands to the quadratic.\n    # Expansion: left_x_coef*b_factor*x^2 + (left_x_coef*c + b_factor*a)*x + a*c\n    \n    # Let L = left_x_coef, B = unknown integer factor for second term's x coefficient? \n    # Wait, standard factoring of Ax^2+Bx+C into (Lx+a)(Mx+c) where LM=A.\n    # Here A=39. Factors of 39: (1,39), (3,13).\n    # Template says first factor is fixed as (3x + a). So L=3.\n    # Therefore M must be 39/3 = 13.\n    \n    left_x_coef_val = frozen_params[\"template_left_x_coefficient\"]\n    right_x_coef_val = a_quad // left_x_coef_val\n    \n    # Now solve for 'a' and 'c':\n    # Constant term: a * c = C (which is -14)\n    # Linear term coefficient: left_x_coef*c + right_x_coef*a = B (which is 5)\n    \n    # System of equations:\n    # 3c + 13a = 5\n    # ac = -14\n    \n    # From first eq: c = (5 - 13a) / 3\n    # Substitute into second: a * ((5 - 13a)/3) = -14\n    # => a(5 - 13a) = -42\n    # => 5a - 13a^2 = -42\n    # => 13a^2 - 5a - 42 = 0\n    \n    import math\n\n    A_eq = 13\n    B_eq = -5\n    C_eq = -42\n    \n    discriminant = (B_eq**2) - 4*A_eq*C_eq\n    sqrt_discriminant = int(math.isqrt(discriminant))\n    \n    if sqrt_discriminant * sqrt_discriminant != discriminant:\n        # Should not happen with valid inputs, but safety check\n        raise ValueError(\"Discriminant is not a perfect square\")\n\n    solutions_a = []\n    for sign in [1, -1]:\n        num = (-B_eq + (sign * sqrt_discriminant)) / 2.0\n        if abs(num % A_eq) < 1e-9: # Check divisibility roughly or exact int check later\n             val_a = int(round(num / A_eq)) \n             solutions_a.append(val_a)\n\n    valid_as = []\n    for candidate_a in set(solutions_a):\n        c_val = (5 - 13 * candidate_a) // 3\n        if left_x_coef_val * c_val + right_x_coef_val * candidate_a == b_quad:\n            # Verify product ac equals constant term just to be sure, though linear eq ensures it given integer constraints usually.\n             if candidate_a * c_val == c_quad:\n                 valid_as.append(candidate_a)\n\n    # The problem implies a unique solution or specific recovery logic. \n    # Given the quadratic nature and integer coefficients, there should be one valid pair fitting the template structure.\n    \n    final_a = None\n    for val in valid_as:\n        calc_c = (b_quad - left_x_coef_val * val) // right_x_coef_val\n        if calc_c == c_quad: # Double check consistency with derived C from ac=constant? \n            # Actually, the system 3c+13a=5 and ac=-14 defines unique integers.\n            pass\n        \n    # Let's just solve for 'a' directly using integer search since coefficients are small or use quadratic formula result precisely.\n    # Roots of 13x^2 - 5x - 42 = 0: x = (5 +/- sqrt(25 + 2184)) / 26 = (5 +/- 47) / 26\n    # Root 1: (5+47)/26 = 52/26 = 2. So a=2.\n    # Check c: 3c + 13(2) = 5 => 3c = -21 => c = -7. \n    # Product ac = 2 * (-7) = -14. Matches C_quad. Correct.\n    \n    recovered_a = 2\n    recovered_c = (b_quad - left_x_coef_val * recovered_a) // right_x_coef_val\n    \n    # The task asks for correct_answer to be the integer a + 2c.\n    final_correct_answer = recovered_a + 2 * recovered_c\n\n    # Construct LaTeX question text using native string formatting and simple math representation, \n    # avoiding external domain APIs as per \"Use native Python only\" rule in Task Guardrails section override?\n    # Wait, the prompt says: \"Do not use a Domain API.\" but also provides `PolynomialOps.format_latex` signature.\n    # However, under \"Task Guardrails\": \"Solve quadratic factoring using native integer arithmetic... Use native Python only; do not use a Domain API.\"\n    # This is contradictory if I must format LaTeX. \n    # Re-reading: \"API Signature Cards\" section says `PolynomialOps.format_latex` exists but imports from domain library which might be forbidden by \"Do not import, reference, or call any domain APIs\".\n    # The instruction \"Use native Python only; do not use a Domain API.\" is in the specific Task Guardrails block. \n    # I will construct LaTeX manually using f-strings to ensure compliance with \"native Python only\" and avoiding imports of external libraries like `core.prompts.domain_function_library`.\n\n    left_term = f\"{left_x_coef_val}x + {recovered_a}\"\n    right_term = f\"{right_x_coef_val}x + {recovered_c}\"\n    \n    # Construct the polynomial expression: (3x+2)(13x-7) -> 39x^2 + ... \n    question_text = r\"Given the quadratic $P(x)$ with coefficients \\texttt{[39, 5, -14]}, factor it into two linear terms $(\\mathbf{L}x + a)(\\mathbf{R}x + c)$. The first term is fixed as $\\left(3x + a\\right)$. Determine the integer value of $a + 2c$.\"\n\n    # Ensure oracle_payload matches frozen_params exactly\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": final_correct_answer,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T18:07:00.990406+00:00",
+  "completed_at_utc": "2026-07-21T18:07:27.992999+00:00",
+  "duration": 27.002582099987194,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 27.002570700016804,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 798,
+      "eval_count": 1685,
+      "total_token_count": 2483,
+      "total_duration": 24974496100,
+      "load_duration": 239624900,
+      "done_reason": "stop",
+      "latency_ms": 27002,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072001,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072001,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

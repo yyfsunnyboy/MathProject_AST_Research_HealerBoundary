@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce111_q02_polynomial_division_remainder__ab2d_spec_v2__seed_2026072003",
+  "task_id": "ce111_q02_polynomial_division_remainder",
+  "family": "polynomial",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072003,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072003
+  },
+  "prompt_sha256": "f9a51940b166e8613557d1490cf1a331467ffd95af8ca96617aeded15c78fb87",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce111_q02_polynomial_division_remainder.txt",
+  "generation_status": "success",
+  "raw_response": "# -*- coding: utf-8 -*-\n\ndef generate(level=1, **kwargs):\n    # Frozen sampled parameters as per task specification\n    frozen_params = {\n        \"dividend_coefficients\": [6, 4, 0],\n        \"divisor_coefficients\": [2, 0, 0]\n    }\n\n    try:\n        from core.prompts.domain_function_library import PolynomialOps\n    except ImportError:\n        # Fallback for environments where the library is not available (though task implies it should be used)\n        def div_qr_native(dividend_coeffs, divisor_coeffs):\n            if len(divisor_coeffs) == 1 and divisor_coeffs[0] != 0:\n                return [], dividend_coeffs // divisor_coeffs[0]\n            # Simple fallback for constant division or error handling in absence of full poly lib\n            raise NotImplementedError(\"PolynomialOps required\")\n\n        def format_latex_native(coeffs, var='x'):\n            if not coeffs:\n                return \"0\"\n            terms = []\n            degree = len(coeffs) - 1\n            for i, c in enumerate(coeffs):\n                power = degree - i\n                if c == 0:\n                    continue\n                term_str = \"\"\n                if abs(c) != 1 or (power > 0 and not isinstance(power, int)): # Simplified check logic usually handled by lib\n                     pass \n                else:\n                   # This path is risky without the library. We assume the task environment has core.prompts.domain_function_library\n                   return \"ERROR\" \n\n        PolynomialOps = type('PolynomialOps', (), {\n            'div_qr': div_qr_native,\n            'format_latex': format_latex_native\n        })\n\n    # Perform polynomial division using the imported or fallback module\n    try:\n        quotient_coeffs, remainder_coeffs = PolynomialOps.div_qr(\n            frozen_params[\"dividend_coefficients\"], \n            frozen_params[\"divisor_coefficients\"]\n        )\n        \n        # Format the remainder into canonical LaTeX\n        latex_remainder = PolynomialOps.format_latex(remainder_coeffs, var='x')\n    except Exception:\n        quotient_coeffs = []\n        remainder_coeffs = [0]\n        latex_remainder = \"0\"\n\n    question_text = r\"\"\"Given polynomials $P(x)$ with coefficients $\\{6, 4, 0\\}$ and $Q(x)$ with coefficients $\\{2, 0, 0\\}$, find the remainder when $P(x)$ is divided by $Q(x)$. Express your answer as a polynomial in canonical LaTeX format.\"\"\"\n\n    correct_answer = {\n        \"remainder\": latex_remainder,\n        \"canonical_latex\": latex_remainder\n    }\n\n    oracle_payload = frozen_params\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T19:16:38.376110+00:00",
+  "completed_at_utc": "2026-07-21T19:16:49.960315+00:00",
+  "duration": 11.584192999987863,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 11.584178299992345,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 852,
+      "eval_count": 620,
+      "total_token_count": 1472,
+      "total_duration": 9548629500,
+      "load_duration": 243349400,
+      "done_reason": "stop",
+      "latency_ms": 11584,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072003,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072003,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce113_q01_negative_fraction_subtraction__ab1__seed_2026072003",
+  "task_id": "ce113_q01_negative_fraction_subtraction",
+  "family": "fraction",
+  "condition": "ab1",
+  "seed": 2026072003,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072003
+  },
+  "prompt_sha256": "d690b208e09d5f893ecd8b8abc38b4abb7d044968dc42c60dde3de96c0ad410d",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    expression = \"3/7 - (-1/4)\"\n    \n    # Parse and compute manually to ensure correctness without external libraries\n    import math\n    \n    def gcd(a, b):\n        while b:\n            a, b = b, a % b\n        return abs(a)\n\n    num1, den1 = 3, 7\n    sign2_str = \"-(-1/4)\" # The second term is subtracted, but the operand itself has a negative sign in standard form? \n    # Actually expression \"3/7 - (-1/4)\" means: (3/7) + (1/4).\n    \n    num2, den2 = 1, 4\n    \n    lcm_denom = abs(den1 * den2 // gcd(den1, den2))\n    factor1 = lcm_denom // den1\n    factor2 = lcm_denom // den2\n    \n    new_num1 = num1 * factor1\n    new_num2 = num2 * factor2\n    \n    # Operation: 3/7 - (-1/4) => (3*4 + 1*7) / 28 ? \n    # Wait, standard subtraction of a negative is addition.\n    # Term 1: 3/7 -> numerator contribution: 3 * 4 = 12\n    # Term 2: - (-1/4) => effectively adding 1/4 -> numerator contribution: 1 * 7 = 7\n    total_numerator = new_num1 + new_num2\n    \n    common_divisor = gcd(total_numerator, lcm_denom)\n    \n    final_numer = total_numerator // common_divisor\n    final_denom = (lcm_denom // common_divisor)\n    \n    if final_denom < 0:\n        final_numer *= -1\n        final_denom *= -1\n        \n    canonical_latex = f\"\\\\frac{{{final_numer}}}{{{final_denom}}}\"\n    \n    question_text = f\"Simplify the expression $3/7 - (-1/4)$.\"\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": {\n            \"numerator\": final_numer,\n            \"denominator\": final_denom,\n            \"canonical_latex\": canonical_latex\n        },\n        \"oracle_payload\": {\"expression\": expression}\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T19:58:29.506723+00:00",
+  "completed_at_utc": "2026-07-21T19:58:39.391610+00:00",
+  "duration": 9.884873799979687,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 9.884858999983408,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 156,
+      "eval_count": 517,
+      "total_token_count": 673,
+      "total_duration": 7866509900,
+      "load_duration": 252772300,
+      "done_reason": "stop",
+      "latency_ms": 9884,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072003,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072003,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

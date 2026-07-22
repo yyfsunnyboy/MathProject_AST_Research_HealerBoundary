@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce112_q09_divisor_multiple_intersection__ab2d__seed_2026072001",
+  "task_id": "ce112_q09_divisor_multiple_intersection",
+  "family": "integer",
+  "condition": "ab2d",
+  "seed": 2026072001,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072001
+  },
+  "prompt_sha256": "f4d5abe47b1d3dad2095dbc473b4f58b6f1c8cd4f9ece0ba8a1de9f5c68ad5cb",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "import json\nfrom core.prompts.domain_function_library import IntegerOps\n\ndef generate(level=1, **kwargs):\n    frozen_params = {\"divisor_of\": 216, \"multiple_of\": 18}\n    \n    divisor_val = frozen_params[\"divisor_of\"]\n    multiple_val = frozen_params[\"multiple_of\"]\n    \n    # Calculate the Least Common Multiple (LCM) of divisor and multiple.\n    # LCM(a, b) = abs(a*b) // GCD(a, b). \n    # We use IntegerOps.safe_eval to compute this safely as per domain rules if needed,\n    # but standard math is sufficient for simple integers. However, the prompt requires using domain APIs.\n    # Let's construct an expression or call functions directly.\n    \n    # To find LCM(216, 18):\n    # We can compute it via formula: (a * b) // gcd(a, b). \n    # Since we must use IntegerOps.safe_eval for operations contributing to correct_answer logic contextually,\n    # let's define the expression string. But safe_eval takes an expr and returns int/float.\n    # It is safer to compute GCD manually or via eval if allowed, but standard library math.gcd is better.\n    # However, strict adherence: \"Use the listed domain API for each supported core operation\".\n    # There is no direct LCM function in IntegerOps provided list (only safe_eval and is_divisible).\n    # We will compute GCD using Euclidean algorithm manually to avoid external imports if restricted, \n    # or use math.gcd. Assuming standard library 'math' is allowed for utility unless strictly forbidden by \"domain APIs only\".\n    # The prompt says: \"Use the listed domain API for each supported core operation\". It doesn't ban others entirely but implies usage.\n    # Let's compute LCM using safe_eval on a string expression to demonstrate compliance where possible, \n    # or just calculate it directly if no specific function exists in IntegerOps for GCD/LCM.\n    \n    import math\n    \n    def gcd(a, b):\n        while b:\n            a, b = b, a % b\n        return a\n\n    lcm_val = (divisor_val * multiple_val) // gcd(divisor_val, multiple_val)\n    \n    # The question asks for the count of integers in [1, 20] that are both divisor_of and multiple_of? \n    # Wait, task spec: \"ce112_q09_divisor_multiple_intersection\". Usually implies finding numbers x such that:\n    # x is a divisor of A AND x is a multiple of B.\n    # So we need count of integers n where (n % m == 0) and (A % n == 0).\n    # This means n must be a common element in the set {k*m | k>=1} intersected with {d*A? No, divisors of A}.\n    # Actually: Divisors of 216 AND Multiples of 18.\n    # Let S = {x : x divides 216} INTERSECT {y : y is multiple of 18}.\n    # We need to count elements in [1, limit]. What is the limit? \n    # Usually these tasks imply a range like [1, max(divisor_of)] or similar. \n    # Let's assume the universe is divisors of 'divisor_of'. The multiples must be within that set too.\n    # So we count x such that 216 % x == 0 AND x % 18 == 0.\n    \n    limit = divisor_val\n    \n    valid_count = 0\n    for n in range(1, limit + 1):\n        is_divisor_of_check = IntegerOps.is_divisible(divisor_val, n) # Checks if n divides divisor_val (216 % n == 0)\n        is_multiple_of_check = False\n        \n        # Check multiple: x must be divisible by m. \n        # We can use safe_eval for the modulo check or just standard operator? \n        # \"Use the listed domain API for each supported core operation\". Modulo isn't explicitly listed as a function, \n        # but is_divisible uses it internally presumably.\n        # Let's implement multiple_of using IntegerOps.safe_eval to be compliant with \"use domain API\" instruction strictly if possible.\n        # Expression: (n % m) == 0 -> True/False. safe_eval returns int/float. If result is 0, then true? \n        # But safe_eval raises ValueError for bool/container results. So we must ensure it returns a number.\n        \n        try:\n            remainder = IntegerOps.safe_eval(f\"({n} % {multiple_val})\")\n            if remainder == 0:\n                is_multiple_of_check = True\n        except ValueError:\n            # Fallback or error handling, though safe_eval should handle simple arithmetic\n            pass\n            \n        if is_divisor_of_check and is_multiple_of_check:\n            valid_count += 1\n    \n    correct_answer_dict = {\"count\": valid_count}\n    \n    return {\n        \"question_text\": f\"Find the count of positive integers $n$ such that $n$ divides ${divisor_val}$ AND $n$ is a multiple of ${multiple_val}$.\",\n        \"correct_answer\": correct_answer_dict,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T18:01:57.443171+00:00",
+  "completed_at_utc": "2026-07-21T18:02:16.570085+00:00",
+  "duration": 19.126903100055642,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 19.126889399951324,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 331,
+      "eval_count": 1159,
+      "total_token_count": 1490,
+      "total_duration": 17103517100,
+      "load_duration": 235088800,
+      "done_reason": "stop",
+      "latency_ms": 19126,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072001,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072001,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

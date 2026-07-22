@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce115_calc_polynomial_division_l1__ab2d__seed_2026072002",
+  "task_id": "ce115_calc_polynomial_division_l1",
+  "family": "polynomial",
+  "condition": "ab2d",
+  "seed": 2026072002,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072002
+  },
+  "prompt_sha256": "79b1936f146728f178f71569aa7cab9c2d284ace6e3fa97604a96c7b97f250d0",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "from typing import Dict, Any\nimport sys\nsys.path.insert(0, '/app')\ntry:\n    from core.prompts.domain_function_library import PolynomialOps\nexcept ImportError:\n    class PolynomialOps:\n        @staticmethod\n        def div_qr(dividend_coefficients: list[int], divisor_coefficients: list[int]) -> tuple[list[int | str], list[int | str]]:\n            # Fallback implementation if module not found, using standard polynomial division logic for integers\n            dividend = [int(c) for c in dividend_coefficients]\n            divisor = [int(c) for c in divisor_coefficients]\n            \n            n_dividend = len(dividend) - 1\n            n_divisor = len(divisor) - 1\n            \n            if not divisor or (len(divisor) == 1 and divisor[0] == 0):\n                raise ValueError(\"Divisor cannot be zero.\")\n                \n            # Pad dividend with zeros to align degrees for division simulation\n            quotient_degree = max(0, n_dividend - n_divisor)\n            remainder_coeffs = [0] * (n_dividend + 1)\n            \n            current_quotient_deg = n_dividend - n_divisor\n            \n            while current_quotient_deg >= 0:\n                if divisor[0] == 0: continue\n                \n                factor = dividend[current_quotient_deg + n_divisor] // divisor[0]\n                \n                # Update remainder and quotient (simplified for integer coeffs)\n                # We construct the term to subtract from dividend/remainder\n                sub_term_coeffs = [factor * c for c in reversed(divisor)] \n                # Align sub_term with current degree\n                \n                # Actually, standard Horner-like or direct subtraction:\n                # Let's do it properly.\n                \n                pass\n            \n            # Re-implementing robust integer polynomial division from scratch to ensure correctness without external lib dependency if import fails\n            dividend = [int(c) for c in dividend_coefficients]\n            divisor = [int(c) for c in divisor_coefficients]\n            \n            n_d = len(dividend) - 1\n            n_s = len(divisor) - 1\n            \n            quotient_coeffs = []\n            remainder_coeffs = list(dividend[:]) # Copy\n            \n            if not dividend: return [], []\n            if not divisor or sum(divisor)==0 and (len(divisor)>1): raise ValueError(\"Zero polynomial\")\n\n            for i in range(n_d, n_s - 1, -1):\n                deg_diff = i - n_s\n                factor = remainder_coeffs[i] // divisor[0] # Integer division\n                \n                if factor != 0:\n                    quotient_coeffs.append(factor)\n                    \n                    # Subtract factor * divisor shifted by (i - n_s) from remainder\n                    for j, coeff in enumerate(divisor):\n                        idx = i + deg_diff - len(divisor) + j\n                        if idx < len(remainder_coeffs):\n                            remainder_coeffs[idx] -= factor * coeff\n            \n            quotient_coeffs.reverse() # We appended highest degree first? No, loop goes high to low. \n            # Loop: i starts at n_d (highest). deg_diff = 0 initially.\n            # If we append 'factor', it corresponds to x^(deg_diff).\n            # So list is [coeff for x^k ... coeff for x^0]. Correct order if appended in loop?\n            # Example: dividend x^2, divisor x. i=1 (x^1 term of rem), deg_diff = 1-0=1. factor=x^1. Append f. Next i=0. deg_diff=0. Append g. List [f, g]. Correct.\n            \n            quotient_coeffs.reverse() # Wait, if I append for x^k then x^(k-1)... the list is reversed relative to standard polynomial representation (highest first)?\n            # Standard: a_n ... a_0. \n            # My loop i goes n_d down to n_s+1? No range(n_d, n_s - 1, -1).\n            # Example: rem has term at index 'i'. This is x^i. Divisor starts at x^{n_s}. Resulting quotient term is x^(i-n_s).\n            # First iteration i=n_d -> deg = n_d - n_s (highest degree of quotient).\n            # Last valid i = n_s + 1? No, loop stops when i < n_s. So last i processed for subtraction is such that we can subtract a term.\n            # Actually standard algorithm: while len(rem) > len(divisor): ...\n            \n            # Let's restart the logic cleanly inside generate to avoid confusion in this thought block and ensure code works.\n            pass\n\ndef generate(level=1, **kwargs):\n    frozen_params = {\"dividend_coefficients\": [6, 0, 6], \"divisor_coefficients\": [1, -4]}\n    \n    try:\n        from core.prompts.domain_function_library import PolynomialOps\n        quotient_coeffs, remainder_coeffs = PolynomialOps.div_qr(\n            dividend_coefficients=frozen_params[\"dividend_coefficients\"], \n            divisor_coefficients=frozen_params[\"divisor_coefficients\"]\n        )\n    except ImportError:\n        # Fallback implementation if the specific library is not available in this environment context\n        d = frozen_params[\"dividend_coefficients\"]\n        s = frozen_params[\"divisor_coefficients\"]\n        \n        n_d = len(d) - 1\n        n_s = len(s) - 1\n        \n        rem = list(d) # remainder initialized as dividend copy (conceptually, though indices matter)\n        quot = []\n        \n        if not d: return [], []\n        if sum(s)==0 and len(s)>1: raise ValueError(\"Zero divisor\")\n\n        for i in range(n_d - n_s + 1):\n            # We are looking at the term corresponding to x^(n_d - (i * something))... \n            # Simpler approach using Horner's method logic or direct subtraction loop\n            \n            current_rem = list(rem)\n            \n            while len(current_rem) > len(s):\n                if s[0] == 0: break\n                \n                deg_diff = len(current_rem) - len(s)\n                \n                factor = current_rem[-1] // s[0] # Leading coeff of remainder / leading coeff of divisor\n                \n                quot.append(factor)\n                \n                # Subtract factor * (s shifted by deg_diff) from current_rem\n                for j, sc in enumerate(s):\n                    idx_in_rem = len(current_rem) - 1 + (j - n_s) \n                    if idx_in_rem >= 0 and idx_in_rem < len(current_rem):\n                        current_rem[idx_in_rem] -= factor * sc\n                \n            rem = [c for c in current_rem if isinstance(c, int)] # Clean up zeros? No, keep structure\n            \n        quot.reverse() # The factors were appended from highest degree to lowest. \n                       # Wait: first iteration processes the term at index len(current_rem)-1 (highest).\n                       # This corresponds to x^(deg_diff * something)?\n                       # Let's trace indices carefully.\n                       \n            pass\n\n    # Re-doing logic strictly for correctness in final code block\n    \n    dividend = [int(c) for c in frozen_params[\"dividend_coefficients\"]]\n    divisor = [int(c) for c in frozen_params[\"divisor_coefficients\"]]\n    \n    n_d = len(dividend) - 1\n    n_s = len(divisor) - 1\n    \n    # Polynomial division: dividend / divisor\n    quotient_coeffs = []\n    remainder_coeffs = list(dividend[:]) \n    \n    if not divisor or (len(divisor) == 1 and divisor[0] == 0):\n        raise ValueError(\"Invalid divisor\")\n\n    for i in range(n_d, n_s - 1, -1): # Iterate from highest degree of dividend down to where subtraction is possible\n        deg_diff = i - n_s\n        \n        if remainder_coeffs[i] != 0:\n            factor = remainder_coeffs[i] // divisor[0]\n            \n            quotient_coeffs.append(factor)\n            \n            # Subtract factor * x^deg_diff * divisor from the current polynomial state (remainder_coeffs)\n            for j, coeff in enumerate(divisor):\n                target_idx = i + deg_diff - len(divisor) + j \n                if 0 <= target_idx < len(remainder_coeffs):\n                    remainder_coeffs[target_idx] -= factor * coeff\n    \n    # Clean up quotient: remove leading zeros if any (though logic above usually handles it, but let's be safe)\n    while len(quotient_coeffs) > 1 and quotient_coeffs[0] == 0:\n        quotient_coeffs.pop(0)\n        \n    # If dividend was zero or smaller than divisor degree initially? \n    # The loop range(n_d, n_s - 1, -1) handles cases where division yields empty quotient if deg(dividend) < deg(divisor).\n    # In that case remainder is just the dividend.\n    \n    # Clean up remainder: remove trailing zeros (lowest degrees)? No, keep exact coefficients including zero padding for degree? \n    # Usually polynomial representation [a_n ... a_0] implies non-zero leading coeff unless it's 0 poly.\n    while len(remainder_coeffs) > 1 and remainder_coeffs[-1] == 0:\n        remainder_coeffs.pop()\n\n    quotient_latex = \"\".join([f\"{c}x^{i}\" if i>0 else str(c) for c, i in zip(reversed(quotient_coeffs), range(len(quotient_coeffs)-1, -1, -1))]) \n    # Wait, constructing latex manually is error prone. Let's use a helper or simple join with powers.\n    \n    def format_poly(coeffs):\n        if not coeffs: return \"0\"\n        terms = []\n        for c in reversed(coeffs):\n            deg = len(coeffs) - 1 - list(reversed(range(len(coeffs))))[list(reversed(range(len(coeffs)))).index(list(reversed(coeffs))).index(c)] # No, simpler loop\n            pass\n        \n    def format_poly_str(coeffs):\n        if not coeffs: return \"0\"\n        terms = []\n        for i in range(len(coeffs)):\n            c = coeffs[i]\n            deg = len(coeffs) - 1 - i\n            term = str(c) + (\"x^\" + str(deg) if deg > 1 else (\"x\" if deg == 1 else \"\"))\n            terms.append(term)\n        return \" \".join(terms[::-1]) # Reverse to get high degree first? No, coeffs[0] is highest.\n        \n    quotient_latex = \"\".join([f\"{c}x^{i}\" for c,i in zip(reversed(quotient_coeffs), range(len(quotient_coeffs)-1, -1, -1)) if i>0]) + (\" \".join(str(c) for c in reversed(quotient_coeffs[-len(list(filter(lambda x: True, quotient_coeffs)))])) ) # This is getting messy.\n    \n    # Simpler Latex construction:\n    def make_latex(coeffs):\n        if not coeffs: return \"0\"\n        parts = []\n        for i, c in enumerate(reversed(coeffs)):\n            deg = len(coeffs) - 1 - (len(coeffs)-1-i) # Wait. \n            # coeffs[0] is highest degree.\n            # reversed(coeffs): [c_n, ..., c_0]. Index j=0 -> c_n (deg n).\n            pass\n        \n        parts = []\n        for idx, val in enumerate(reversed(coeffs)):\n            deg = len(coeffs) - 1 - idx\n            if val != 0:\n                term = str(val) + (\"x^\" + str(deg) if deg > 1 else \"x\")\n                if deg == 0 and val < 0: # Handle negative constant correctly in string? No, value is int.\n                    pass \n                parts.append(term)\n        return \"\".join(parts[::-1])\n\n    quotient_latex = make_latex(quotient_coeffs)\n    remainder_latex = make_latex(remainder_coeffs)\n\n    result = {\n        \"question_text\": f\"Divide the polynomial $\\\\{{{', '.join(map(str, dividend))}}}$ by $\\\\{{{', '.join(map(str, divisor))}}}$.\",\n        \"correct_answer\": {\n            \"quotient_coefficients\": quotient_coeffs,\n            \"remainder_coefficients\": remainder_coeffs,\n            \"quotient_latex\": f\"${quotient_latex}$$\", # Or just the latex string inside math delimiters? Spec says use \\( \\) / \\[ \\]. \n                     # Let's assume standard inline or display. The prompt asks for formal LaTeX delimiters \\( \\).\n                     # So: \"\\( quotient_latex \\)\"\n            \"remainder_latex\": f\"\\({ remainder_latex }\\)\",\n        },\n        \"oracle_payload\": frozen_params\n    }\n\n    return result",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T18:50:50.332245+00:00",
+  "completed_at_utc": "2026-07-21T18:51:32.972790+00:00",
+  "duration": 42.64053330000024,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 42.64051870000549,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 340,
+      "eval_count": 2774,
+      "total_token_count": 3114,
+      "total_duration": 40626618900,
+      "load_duration": 240088200,
+      "done_reason": "stop",
+      "latency_ms": 42640,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072002,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072002,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

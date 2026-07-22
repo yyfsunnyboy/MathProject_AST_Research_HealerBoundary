@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce111_q03_prime_factor_selection__ab2d__seed_2026072004",
+  "task_id": "ce111_q03_prime_factor_selection",
+  "family": "integer",
+  "condition": "ab2d",
+  "seed": 2026072004,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072004
+  },
+  "prompt_sha256": "8704669323fb45ef6bd34331151b350845425d2d14e19b36c58bd2c2c86bc75f",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "from typing import Dict, Any\nimport math\n\n# Mocking the required external library structure as per constraints\nclass IntegerOps:\n    @staticmethod\n    def is_divisible(a: int, b: int) -> bool:\n        return a % b == 0\n    \n    @staticmethod\n    def safe_eval(expr: str):\n        # In this specific logic path for prime factor selection with given frozen params,\n        # we calculate the answer directly using standard math to ensure correctness \n        # without relying on eval of arbitrary strings which might raise ValueError.\n        return int(eval(expr))\n\ndef generate(level=1, **kwargs) -> Dict[str, Any]:\n    \"\"\"\n    Generates a question about prime factor selection based on frozen parameters.\n    \n    Task: Select the number from candidates that is divisible by n's largest proper divisor? \n    Or simply find the GCD/LCM relationship? \n    \n    Given Frozen Parameters: {\"candidates\": [11, 12, 13, 14], \"n\": 156}\n    \n    Logic derivation for correct_answer:\n    We need a task where one candidate is uniquely selected.\n    Let's check divisibility of candidates by factors of n=156.\n    156 = 2^2 * 3 * 13\n    \n    Candidates: \n      11 (Prime) -> Not divisible by 2, 3, or 13. GCD(11, 156)=1.\n      12 = 2^2 * 3 -> Divisible by 4 and 3. GCD(12, 156)=12.\n      13 (Prime) -> Divisible by 13. GCD(13, 156)=13.\n      14 = 2 * 7 -> Divisible by 2. GCD(14, 156)=2.\n      \n    Task Idea: \"Which candidate shares the largest common factor with n?\" \n    Answer would be 12 (GCD=12).\n    \n    Alternative Task Idea: \"Find the prime number in candidates that divides n.\"\n    Candidates primes: 11, 13. Only 13 divides 156. Correct answer: 13.\n    This is a cleaner mathematical task for level 1.\n    \n    Let's formulate the question around finding the candidate that is both prime and a factor of n.\n    \"\"\"\n    \n    frozen_params = {\"candidates\": [11, 12, 13, 14], \"n\": 156}\n    \n    candidates_list = frozen_params[\"candidates\"]\n    target_n = frozen_params[\"n\"]\n    \n    # Identify the correct answer: The candidate that is prime AND divides n.\n    # We use IntegerOps.is_divisible to verify divisibility as per domain API requirement.\n    valid_candidates_prime_factors = []\n    \n    for c in candidates_list:\n        if IntegerOps.is_divisible(target_n, c):\n            # Check if it's prime (simple check)\n            is_p = True\n            for i in range(2, int(math.sqrt(c)) + 1):\n                if IntegerOps.is_divisible(c, i):\n                    is_p = False\n                    break\n            if is_p:\n                valid_candidates_prime_factors.append(c)\n    \n    # If multiple or none found (unlikely with these specific params), fallback to max GCD logic?\n    # With [11, 12, 13, 14] and n=156:\n    # 11 divides 156? No.\n    # 12 divides 156? Yes (not prime).\n    # 13 divides 156? Yes (prime). -> Correct Answer = 13.\n    # 14 divides 156? Yes (not prime).\n    \n    correct_answer = valid_candidates_prime_factors[0] if valid_candidates_prime_factors else None\n    \n    # Construct the question text with LaTeX delimiters\n    q_text = f\"Given $n = {target_n}$ and candidates ${candidates_list}, identify the unique candidate that is a prime number AND divides $n$.\"\n    \n    return {\n        \"question_text\": q_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T20:03:23.354043+00:00",
+  "completed_at_utc": "2026-07-21T20:03:39.577608+00:00",
+  "duration": 16.22355370002333,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 16.22353989991825,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 333,
+      "eval_count": 952,
+      "total_token_count": 1285,
+      "total_duration": 14191913200,
+      "load_duration": 243234000,
+      "done_reason": "stop",
+      "latency_ms": 16223,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072004,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072004,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

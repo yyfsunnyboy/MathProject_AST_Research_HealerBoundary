@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce111_q02_polynomial_division_remainder__ab2d__seed_2026072004",
+  "task_id": "ce111_q02_polynomial_division_remainder",
+  "family": "polynomial",
+  "condition": "ab2d",
+  "seed": 2026072004,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072004
+  },
+  "prompt_sha256": "d625ce0bed3b073c6289454121ab9960e1c1965a824c9db6a575d7ecbd3c0aa9",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "from typing import Dict, Any\nimport sys\nsys.path.insert(0, '.')\ntry:\n    from core.prompts.domain_function_library import PolynomialOps\nexcept ImportError:\n    class PolynomialOps:\n        @staticmethod\n        def div_qr(dividend_coefficients: list, divisor_coefficients: list):\n            # Fallback implementation if library is not found or to ensure logic works in isolation for this specific frozen case.\n            # Dividend: 6x^2 + 4x (coeffs [6, 4, 0]) -> Degree 2\n            # Divisor: 2x^3 (coeffs [2, 0, 0]) -> Degree 3\n            # Since divisor degree > dividend degree, quotient is 0 and remainder is the dividend.\n            \n            deg_div = len(dividend_coefficients) - 1 if any(c != 0 for c in reversed(dividend_coefficients)) else -1\n            deg_divisor = len(divisor_coefficients) - 1 if any(c != 0 for c in reversed(divisor_coefficients)) else -1\n            \n            quotient_coeffs = [0] * (deg_div - deg_divisor + 1) # Initialize with zeros, will truncate later\n            remainder_coeffs = dividend_coefficients[:]\n\n            while len(remainder_coeffs) > deg_divisor and any(c != 0 for c in reversed(remainder_coeffs)):\n                if not quotient_coeffs:\n                    quotient_coeffs = [0] * (len(remainder_coeffs) - deg_divisor + 1)\n                \n                lead_rem_idx = len(remainder_coeffs) - 1\n                lead_div_idx = len(divisor_coefficients) - 1\n                \n                # Calculate term to subtract\n                factor = remainder_coeffs[lead_rem_idx] / divisor_coefficients[lead_div_idx] if divisor_coefficients[lead_div_idx] != 0 else 0\n                \n                shift = lead_rem_idx - lead_div_idx\n                for i in range(lead_div_idx + 1):\n                    sub_val = int(factor * divisor_coefficients[i]) # Assuming integer arithmetic based on inputs, but float might occur. Let's stick to standard polynomial division logic. \n                    # Actually, let's do exact math. Inputs are ints usually.\n                    \n                quotient_coeffs[shift] += factor\n                \n                for i in range(lead_div_idx + 1):\n                    remainder_coeffs[i + shift] -= int(factor * divisor_coefficients[i])\n\n            # Clean up trailing zeros from remainder and quotient if necessary, though standard representation keeps them or trims based on context. \n            # For this specific frozen case: Dividend deg=2, Divisor deg=3. Quotient should be 0 (deg -1). Remainder is dividend.\n            \n            # Re-implementing strictly for the fallback to ensure correctness without external lib if needed, but primarily using logic derived from spec.\n            pass\n\ndef generate(level: int = 1, **kwargs) -> Dict[str, Any]:\n    frozen_params = {\"dividend_coefficients\": [6, 4, 0], \"divisor_coefficients\": [2, 0, 0]}\n    \n    # Execute division logic using the domain API if available, otherwise fallback (though spec implies library exists)\n    try:\n        quotient_coeffs, remainder_coeffs = PolynomialOps.div_qr(\n            frozen_params[\"dividend_coefficients\"], \n            frozen_params[\"divisor_coefficients\"]\n        )\n    except Exception:\n        # Fallback logic for the specific case where divisor degree > dividend degree\n        # Dividend: 6x^2 + 4x, Divisor: 2x^3. Quotient = 0, Remainder = 6x^2 + 4x\n        quotient_coeffs = [0]\n        remainder_coeffs = frozen_params[\"dividend_coefficients\"]\n\n    # Format LaTeX for the answer components\n    try:\n        latex_remainder = PolynomialOps.format_latex(remainder_coeffs)\n        # Quotient is not scored, but we might need it if format requires. \n        # The spec says correct_answer must include only remainder and canonical_latex (quotient is not scored).\n        # However, usually 'canonical_latex' refers to the full expression or just the remainder? \n        # Re-reading: \"correct_answer must include only remainder and canonical_latex\". This phrasing suggests two fields OR one field named canonical_latex containing the remainder.\n        # Given standard patterns for these tasks: correct_answer is often a dict with 'remainder' (value) and 'canonical_latex' (string). \n        # Let's assume canonical_latex holds the LaTeX string of the remainder.\n        \n        latex_quotient = PolynomialOps.format_latex(quotient_coeffs, var='x') if quotient_coeffs != [0] else \"0\"\n    except Exception:\n        # Manual formatting fallback for safety in this isolated script context\n        def manual_format(coeffs):\n            terms = []\n            power = len(coeffs) - 1\n            for i, c in enumerate(coeffs):\n                if c == 0 and i < len(coeffs)-2: continue \n                elif c != 0 or (i == len(coeffs)-1 and coeffs[-1] != 0): # Handle last term even if coeff is 0? No.\n                    pass\n                \n            # Simple reconstruction for the specific case [6, 4, 0] -> 6x^2 + 4x\n            terms = []\n            deg = len(coeffs) - 1\n            current_deg = deg\n            for i, c in enumerate(coeffs):\n                if c == 0: continue\n                power = deg - i\n                term = f\"{c}x^{power}\" if power > 1 else (f\"{c}x\" if power == 1 else str(c))\n                terms.append(term)\n            return \" + \".join(terms).replace(\"+ \", \"+\")\n\n        latex_remainder = manual_format(remainder_coeffs)\n        \n    # Construct the response dict\n    result: Dict[str, Any] = {\n        \"question_text\": r\"Find the remainder when dividing $6x^2 + 4x$ by $2x^3$. Express your answer in standard polynomial form.\",\n        \"correct_answer\": latex_remainder, \n        # Wait, spec says: correct_answer must include only remainder and canonical_latex.\n        # This implies a structure like {\"remainder\": ..., \"canonical_latex\": ...} or just the string?\n        # Usually 'oracle_payload' is params, 'question_text' is text.\n        # Let's look at similar tasks. Often correct_answer IS the latex string for grading systems that parse it. \n        # But if it says \"include only remainder and canonical_latex\", maybe they are separate keys in a dict?\n        # Or maybe `correct_answer` key holds an object with those fields?\n        # Let's assume `correct_answer` is the LaTeX string of the remainder, as that is standard for 'remainder' tasks. \n        # However, if strict adherence to \"include only remainder and canonical_latex\" means keys:\n        result = {\n            \"question_text\": r\"Determine the polynomial $r(x)$ such that $(6x^2 + 4x) \\div (2x^3) = q(x) + \\frac{r(x)}{(2x^3)}$. What is $r(x)$?\",\n            \"correct_answer\": latex_remainder, \n            # If the system expects a dict inside correct_answer:\n            # Let's try to interpret \"include only remainder and canonical_latex\" as keys within the value of 'correct_answer'?\n            # No, usually top level keys are question_text, correct_answer, oracle_payload.\n            # So `correct_answer` is likely just the string or a dict with specific keys. \n            # Given ambiguity, I will provide the LaTeX string directly if it's a single answer field, \n            # BUT \"include only remainder and canonical_latex\" sounds like two things. \n            # Let's assume correct_answer is a dictionary: {\"remainder\": ..., \"canonical_latex\": ...}\n            # Actually, looking at typical outputs for this prompt style: `correct_answer` often holds the string directly if it's a single value task.\n            # But let's follow the instruction literally: \"include only remainder and canonical_latex\". \n            # I will make correct_answer an object containing these two keys to be safe? \n            # No, standard is usually just the answer string for math problems unless specified otherwise as structured data.\n            # Let's re-read carefully: \"correct_answer must include only remainder and canonical_latex (quotient is not scored).\"\n            # This implies `correct_answer` might be a dict like {\"remainder\": \"...\", \"canonical_latex\": \"...\"}. \n            # I will construct it as such to strictly follow the text.\n        }\n\n    # Refining correct_answer structure based on strict instruction interpretation:\n    result[\"correct_answer\"] = {\n        \"remainder\": latex_remainder,\n        \"canonical_latex\": latex_remainder\n    }\n\n    return {\n        \"question_text\": r\"Find the remainder when dividing $6x^2 + 4x$ by $2x^3$. Express your answer in standard polynomial form.\",\n        \"correct_answer\": result[\"correct_answer\"], \n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T20:05:22.038770+00:00",
+  "completed_at_utc": "2026-07-21T20:05:53.556639+00:00",
+  "duration": 31.51785760000348,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 31.517845400027,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 367,
+      "eval_count": 2004,
+      "total_token_count": 2371,
+      "total_duration": 29479469900,
+      "load_duration": 241368200,
+      "done_reason": "stop",
+      "latency_ms": 31517,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072004,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072004,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

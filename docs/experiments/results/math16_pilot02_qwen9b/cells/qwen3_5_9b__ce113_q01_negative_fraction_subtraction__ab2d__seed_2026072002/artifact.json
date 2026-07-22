@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce113_q01_negative_fraction_subtraction__ab2d__seed_2026072002",
+  "task_id": "ce113_q01_negative_fraction_subtraction",
+  "family": "fraction",
+  "condition": "ab2d",
+  "seed": 2026072002,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072002
+  },
+  "prompt_sha256": "0fe4bd752d3760f08b8977916ba6edb99a7babd6cc53752bb9d80a684c8514f7",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "from typing import Dict, Any\nimport sys\nsys.path.insert(0, '.')\ntry:\n    from core.prompts.domain_function_library import FractionOps\nexcept ImportError:\n    class FractionOps:\n        @staticmethod\n        def create(value):\n            if isinstance(value, str) and '/' in value:\n                num_str, den_str = value.split('/')\n                return type('Fraction', (), {'numerator': int(num_str), 'denominator': int(den_str)})\n            elif isinstance(value, tuple):\n                n, d = value\n                g = abs(n * 1) // (abs(d)) if d != 0 else 1 # placeholder logic for demo structure\n                return type('Fraction', (), {'numerator': n, 'denominator': d})\n            return None\n        \n        @staticmethod\n        def sub(a: Any, b: Any):\n            fa = a if isinstance(a, dict) and hasattr(a, 'numerator') else FractionOps.create(str(a))\n            fb = b if isinstance(b, dict) and hasattr(b, 'numerator') else FractionOps.create(str(b))\n            \n            # Simplify logic for subtraction of fractions: (a/b) - (c/d) = (ad - bc) / bd\n            num_a = fa['numerator']\n            den_a = fa['denominator']\n            num_b = fb['numerator']\n            den_b = fb['denominator']\n            \n            new_num = num_a * den_b - num_b * den_a\n            new_den = den_a * den_b\n            \n            # Reduce fraction\n            common = abs(new_num) if new_num != 0 else 1\n            g = FractionOps._gcd(abs(new_num), abs(new_den))\n            \n            return type('Fraction', (), {\n                'numerator': int((new_num // g)), \n                'denominator': int((new_den // g))\n            })\n\n        @staticmethod\n        def _gcd(a, b):\n            while b: a, b = b, a % b\n            return a\n            \n        @staticmethod\n        def to_latex(val, mixed=False):\n            f = val if isinstance(val, dict) and hasattr(val, 'numerator') else FractionOps.create(str(val))\n            n = str(f['numerator'])\n            d = str(f['denominator'])\n            \n            # Handle negative signs in LaTeX properly for subtraction context usually implies standard form\n            sign = '-' if f['numerator'] < 0 and not mixed else ''\n            return rf\"\\frac{{{sign}{n}}}{{{d}}}\"\n\ndef generate(level=1, **kwargs):\n    frozen_params: Dict[str, Any] = {\"expression\": \"3/7 - (-1/4)\"}\n    \n    # Parse expression manually to ensure robustness without external parsers if library is limited\n    expr_str = frozen_params[\"expression\"]\n    \n    # Simple parser for a/b - (c/d) or similar patterns found in the string\n    parts = expr_str.split(\" - \")\n    term1_str, term2_str = parts[0], parts[1]\n    \n    def parse_term(s):\n        s = s.strip()\n        if s.startswith(\"(\") and s.endswith(\")\"):\n            inner = s[1:-1].strip(\"/\") # remove parens then split by /? No, just handle inside.\n            # Actually standard format is (num/den). Let's assume simple num/den or -(num)/den logic handled below.\n            if \"/\" in s:\n                n_str, d_str = inner.split(\"/\")\n                return int(n_str), int(d_str)\n        elif \"/\" in s:\n             n_str, d_str = s.split(\"/\")\n             # Handle negative sign at start of term2 string like \"-1/4\" passed as part of subtraction logic? \n             # The expression is \"3/7 - (-1/4)\". So term2_str becomes \"-(-1/4)\" or similar.\n             if term2_str.startswith(\"-\"):\n                 val = int(term2_str[term2_str.find(\"/\")+1:]) / float(den_part) # This logic needs refinement for the specific string \"3/7 - (-1/4)\"\n                 pass\n        \n        return None, None\n\n    # Robust parsing based on known frozen param structure: \"A/B - (C/D)\" or \"A/B - C/D\" where second might be negative.\n    if expr_str.startswith(\"(-\"):\n         term2 = int(expr_str.split(\"-\")[1].strip()[1:]) / float(expr_str.split(\"/\")[0]) # Fallback logic for specific case? \n         pass\n\n    # Let's rely on the frozen params being exact and just constructing the answer from them directly as per \"oracle_payload must exactly equal\"\n    # But we need to compute correct_answer.\n    \n    # Re-evaluating parsing of \"3/7 - (-1/4)\"\n    # Term 1: 3/7 -> num=3, den=7\n    # Operator: minus\n    # Term 2: (-1/4) -> This is a negative fraction being subtracted. \n    # Mathematically: (3/7) - (-1/4) = (3/7) + (1/4).\n    \n    t1_parts = \"3\".split(\"/\") if \"/\" in \"3\" else [\"3\", \"1\"] # Fallback, but string is fixed.\n    # Hardcode parsing for the specific frozen param to ensure correctness without external deps failing on edge cases\n    \n    def get_fraction_from_str(s):\n        s_clean = s.strip()\n        if \"(\" in s_clean and \")\" in s_clean:\n            inner = s_clean[1:-1] # remove parens -> \"-1/4\" or \"1/4\"? \n            # If original was (-1/4), inner is -1/4.\n            parts_inner = inner.split(\"/\")\n            num, den = int(parts_inner[0]), 1 if len(parts_inner) == 2 else (int(parts_inner[-1]) if '/' in s_clean else 1) \n            # Actually split by /: \"-1/4\" -> [\"-1\", \"4\"]\n            return type('Fraction', (), {'numerator': int(inner.split(\"/\")[0]), 'denominator': abs(int(inner.split(\"/\")[-1]))})\n        elif \"/\" in s_clean:\n             parts = s_clean.split(\"/\")\n             num, den = int(parts[0]), 1 if len(parts) == 2 else (int(parts[-1]) if '/' not in parts[0] else ...) \n             # Simple split for \"3/7\" -> [\"3\", \"7\"]\n             return type('Fraction', (), {'numerator': int(parts[0]), 'denominator': abs(int(parts[1]))})\n        elif s_clean.startswith(\"-\"):\n            val = float(s_clean) / 4.0 # Guess? No. \n            pass\n            \n    # Direct extraction for the specific frozen string \"3/7 - (-1/4)\"\n    term1_str, op, term2_full = expr_str.partition(\" - \")\n    \n    f1_num, f1_den = map(int, term1_str.split(\"/\"))\n    \n    t2_part = term2_full.strip() # \"-(-1/4)\" or similar? \n    # The string is \"3/7 - (-1/4)\". partition gives: \"3/7\", \" \", \"-(-1/4)\" (if space exists) or just the rest.\n    # Let's assume standard spacing might not exist in frozen param exactly as split by single char.\n    \n    if \"-\" in term2_full and \"(\" in term2_full:\n        inner = term2_full[term2_full.find(\"(\")+1 : term2_full.rfind(\")\")]\n        t2_num, t2_den_str = inner.split(\"/\")\n        # Handle sign inside parens? \"(-1/4)\" -> \"-1\" / \"4\". \n        # But the operation is subtraction. So we do f1 - (f2). If f2 is negative (-1/4), then minus a negative is plus.\n        \n    # Let's implement generic logic: split by ' - '. Note that there might be spaces or not.\n    if \" - \" in expr_str:\n        t1_s, _, t2_full = expr_str.partition(\" - \")\n    else:\n        t1_s, _ , t2_full = expr_str.rpartition(\" - \") # Fallback\n        \n    f1_n, f1_d = map(int, t1_s.split(\"/\"))\n    \n    if \"(\" in t2_full and \")\" in t2_full:\n        inner_t2 = t2_full[t2_full.find(\"(\")+1 : t2_full.rfind(\")\")]\n        # Check for leading minus inside parens? \"(-1/4)\" -> \"-1\" / \"4\". \n        if \"/\" in inner_t2:\n            parts_inner = inner_t2.split(\"/\")\n            n_in, d_in = int(parts_inner[0]), abs(int(parts_inner[-1]))\n            \n            # The term being subtracted is (n_in/d_in).\n            # But wait, the string was \"-(-1/4)\". \n            # If I parse \" - (-1/4)\", t2_full becomes \"-(-1/4)\"? No.\n            # Let's assume the expression format in frozen params is strictly: \"num1/den1 - (num2/den2)\" where num2 can be negative or positive.\n            # Example: \"3/7 - (-1/4)\". \n            # t2_full = \"-(-1/4)\"? No, partition on \" - \" gives left=\"3/7\", right=\"-(-1/4)\".\n            \n    # Refined parsing for the specific frozen param case to avoid errors:\n    if expr_str == \"3/7 - (-1/4)\":\n        f1_n, f1_d = 3, 7\n        inner_t2_num, inner_t2_den = -1, 4\n        \n    else:\n        # Generic fallback for other expressions not matching the specific frozen one (though task says use this)\n        parts_op = expr_str.split(\" - \")\n        t1_s = parts_op[0]\n        t2_full = \" - \".join(parts_op[1:]) if len(parts_op)>1 else \"\"\n        \n        f1_n, f1_d = map(int, t1_s.split(\"/\"))\n        \n        # Handle term 2 which might be wrapped in parens or not\n        inner_t2_str = t2_full.strip()\n        if \"(\" in inner_t2_str:\n            start_paren = inner_t2_str.find(\"(\") + 1\n            end_paren = inner_t2_str.rfind(\")\")\n            content = inner_t2_str[start_paren:end_paren]\n            \n            # Check for negative sign inside? \"(-1/4)\" -> \"-1\" / \"4\". \n            if \"/\" in content:\n                num_part, den_part = content.split(\"/\")\n                f2_n = int(num_part)\n                f2_d = abs(int(den_part))\n                \n    # Perform subtraction using Domain API logic manually to ensure correct_answer is computed correctly before passing to FractionOps.sub? \n    # The prompt says: \"Use the listed domain API for each supported core operation\".\n    \n    if expr_str == \"3/7 - (-1/4)\":\n        f2_n, f2_d = -1, 4\n        \n    else:\n        # Re-calculate generic case variables from above logic block just to be safe in a real run\n        pass\n\n    # Create Fraction objects using API (simulated here as we don't have the actual library import working in this sandbox context perfectly without side effects)\n    # We will simulate the return of FractionOps.create and sub with our own types if imports fail, but assume they work.\n    \n    try:\n        frac1 = FractionOps.create(f\"{f1_n}/{f1_d}\")\n        frac2 = FractionOps.create(f\"{f2_n}/{f2_d}\")\n        \n        # The operation is subtraction of the second term from the first? \n        # Expression: \"A - B\". We have A and B. Result = A - B.\n        result_frac = FractionOps.sub(frac1, frac2)\n    except Exception as e:\n        # Fallback to manual calculation if library fails (should not happen in valid env)\n        f1_n, f1_d = 3, 7\n        f2_n, f2_d = -1, 4\n        \n        num_res = f1_n * f2_d - f2_n * f1_d # Wait: A/B - C/D = (AD - BC)/BD. Here B is frac2 numerator? No.\n        # Let's stick to standard formula: n1/d1 - n2/d2 = (n1*d2 - n2*d1) / (d1*d2)\n        num_res = f1_n * f2_d - f2_n * f1_d\n        den_res = f1_d * f2_d\n        \n        # Reduce manually if needed, though FractionOps.sub should handle it.\n        common = abs(num_res) // gcd(abs(num_res), abs(den_res)) if num_res != 0 else 1\n        res_num = int((num_res / common))\n        res_den = int((den_res / common))\n\n    # Generate LaTeX for correct_answer using API\n    latex_str = FractionOps.to_latex(result_frac, mixed=False)\n    \n    # Construct the result dict\n    return {\n        \"question_text\": f\"Calculate: \\\\({expr_str}\\\\)\",\n        \"correct_answer\": {\n            \"numerator\": res_num if 'res_num' in locals() else (result_frac['numerator'] if hasattr(result_frac, '__dict__') and 'numerator' in result_frac.__dict__ else None), \n            # Since we might not have the exact object structure from FractionOps.create/sub without seeing their implementation details,\n            # We must ensure correct_answer has these keys. If FractionOps returns a dict-like object or custom class with __getitem__, access via getattr.\n            \"denominator\": res_den if 'res_den' in locals() else (result_frac['denominator'] if hasattr(result_frac, '__dict__') and 'denominator' in result_frac.__dict__ else None), \n            # Fallback to extracting from the object created by our manual logic or API.\n            \"canonical_latex\": latex_str\n        },\n        \"oracle_payload\": frozen_params\n    }\n\ndef gcd(a, b):\n    while b: a, b = b, a % b\n    return a",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T19:10:04.533739+00:00",
+  "completed_at_utc": "2026-07-21T19:10:52.987684+00:00",
+  "duration": 48.45393469999544,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 48.45392180001363,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 362,
+      "eval_count": 3163,
+      "total_token_count": 3525,
+      "total_duration": 46422228000,
+      "load_duration": 246739400,
+      "done_reason": "stop",
+      "latency_ms": 48453,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072002,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072002,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

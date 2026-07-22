@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce115_calc_exact_rational_expression_l1__ab2g__seed_2026072004",
+  "task_id": "ce115_calc_exact_rational_expression_l1",
+  "family": "fraction",
+  "condition": "ab2g",
+  "seed": 2026072004,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072004
+  },
+  "prompt_sha256": "5f397d56fab2649201b606af7abf51780a93d6d74269fd5f5d216a538aa8b8d9",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    frozen_params = {\"products\": [{\"left\": \"2.79\", \"right\": \"89.3\", \"sign\": 1}, {\"left\": \"-0.21\", \"right\": \"89.3\", \"sign\": -1}]}\n    \n    # Parse and compute exact rational arithmetic manually to avoid float errors\n    \n    def parse_decimal(s):\n        if '.' in s:\n            int_part, frac_part = s.split('.')\n            num = int(int_part) * (10 ** len(frac_part)) + int(frac_part.ljust(len(frac_part), '0')) # Ensure correct length handling\n            den = 10 ** len(s.split('.')[1])\n        else:\n            num = int(s)\n            den = 1\n        \n        if s.startswith('-'):\n            num *= -1\n            \n        return (num, den)\n\n    def gcd(a, b):\n        while b:\n            a, b = b, a % b\n        return abs(a)\n\n    def simplify(num, den):\n        common = gcd(num, den)\n        return (num // common, den // common)\n\n    # Product 1: left=2.79, right=89.3, sign=1 -> + (2.79 * 89.3)\n    l1_num, l1_den = parse_decimal(\"2.79\")   # 279/100\n    r1_num, r1_den = parse_decimal(\"89.3\")  # 893/10\n    \n    p1_num = l1_num * r1_num\n    p1_den = l1_den * r1_den\n\n    # Product 2: left=-0.21, right=89.3, sign=-1 -> - (-0.21 * 89.3) => + (0.21 * 89.3)\n    # Wait, specification says \"sign\": -1 for the second product entry in frozen params list? \n    # Let's re-read: [{\"left\": \"-0.21\", ...}, {\"left\": \"-0.21\" is not there... wait input was: \n    # [{\"left\": \"2.79\", \"right\": \"89.3\", \"sign\": 1}, {\"left\": \"-0.21\", \"right\": \"89.3\", \"sign\": -1}]\n    \n    l2_num, l2_den = parse_decimal(\"-0.21\") # -21/100\n    r2_num, r2_den = parse_decimal(\"89.3\")  # 893/10\n    \n    p2_raw_num = l2_num * r2_num\n    p2_raw_den = l2_den * r2_den\n    \n    sign_2 = frozen_params[\"products\"][1][\"sign\"] # -1\n    \n    # The task is \"ce115_calc_exact_rational_expression_l1\". Usually implies summing products or evaluating expression.\n    # Given the structure, it likely asks for: (Product 1) + (Sign of Product 2 * Value of Product 2)? \n    # Or simply evaluate the list as a sequence? The prompt says \"rational_arithmetic\".\n    # Let's assume standard interpretation: Calculate P1 and then calculate Term2 = sign_2 * (L2 * R2). Then sum them.\n    \n    term2_num = p2_raw_num * sign_2\n    term2_den = p2_raw_den\n    \n    total_num = p1_num + term2_num\n    total_den = p1_den # Denominators are same? No, P1 den is 100*10=1000. Term2 den is 100*10=1000. Yes!\n    \n    common_gcd = gcd(total_num, total_den)\n    final_num = total_num // common_gcd\n    final_den = total_den // common_gcd\n    \n    # Format answer string \"p/q\" or \"-q/p\"? Usually p/q where q>0. If num<0, keep sign in num.\n    \n    if final_den < 0:\n        final_num *= -1\n        final_den *= -1\n        \n    ans_str = f\"{final_num}/{final_den}\"\n    \n    # Construct LaTeX for question text based on frozen params structure\n    p1_left_latex = r\"\\frac{2.79}{1} \\times 89.3\" if \"2.79\" else r\"2.79\" \n    # Actually, inputs are decimals in string form but treated as rationals. \n    # Question text should reflect the exact input strings provided in frozen_params for clarity or standard math notation?\n    # Let's use the raw values from frozen params to construct a clean LaTeX expression representing the sum of products.\n    \n    p1_val = \"2.79\"\n    r1_val = \"89.3\"\n    sgn1_str = \"+\" if frozen_params[\"products\"][0][\"sign\"] == 1 else \"-\"\n    \n    l2_val = \"-0.21\"\n    r2_val = \"89.3\"\n    sgn2_str = \"+\" if frozen_params[\"products\"][1][\"sign\"] == 1 else \"-\"\n    \n    # Constructing the expression: (sgn1 * p1_left * p1_right) + (sgn2 * l2_left * r2_right)? \n    # Or just summing the signed products? The \"sign\" field likely indicates the operator before that term or the sign of the result.\n    # Let's assume the expression is: (+ 2.79 \\times 89.3) + (- -0.21 \\times 89.3)? \n    # Or maybe it's a list of terms to sum? \"products\" implies multiple multiplications summed up.\n    \n    term1_latex = f\"{p1_val} \\\\cdot {r1_val}\" if frozen_params[\"products\"][0][\"sign\"] == 1 else f\"-{p1_val} \\\\cdot {r1_val}\"\n    # Wait, sign=1 usually means positive contribution. \n    # Term 2: left is \"-0.21\". If sign=-1, does it mean subtract the product? Or multiply by -1 again?\n    # Let's assume standard algebraic sum of terms where 'sign' dictates the coefficient relative to (left * right).\n    \n    term1_raw = f\"{p1_val} \\\\cdot {r1_val}\" if frozen_params[\"products\"][0][\"sign\"] == 1 else f\"-{p1_val} \\\\cdot {r1_val}\"\n    # Actually, simpler: Just write the terms as they appear in math context. \n    # Term 1: + (2.79)(89.3)\n    # Term 2: - (-0.21)(89.3) ? Or just add them? \n    # Let's construct a generic \"Calculate:\" prompt with the specific numbers from frozen_params.\n    \n    q_text = f\"Compute the exact value of $\\\\left( {frozen_params['products'][0]['sign']} \\\\cdot {p1_val} \\\\times {r1_val} \\\\right) + \\\\left( {frozen_params['products'][1]['sign']} \\\\cdot {l2_val} \\\\times {r2_val} \\\\right)$.\"\n    # Wait, sign is integer 1 or -1. LaTeX needs +/- signs usually for readability in text unless using explicit multiplication by variable x? \n    # Better: \"Compute $\\\\text{sgn}_1 (A) + \\\\text{sgn}_2 (B)$\"? No, keep it simple math problem style.\n    \n    if frozen_params[\"products\"][0][\"sign\"] == 1:\n        t1 = f\"{p1_val} \\\\times {r1_val}\"\n    else:\n        t1 = f\"-{p1_val} \\\\times {r1_val}\"\n        \n    if frozen_params[\"products\"][1][\"sign\"] == 1:\n        t2 = f\"+ {l2_val} \\\\times {r2_val}\" # Note l2 is negative string \"-0.21\"\n    else:\n        t2 = f\"- ({l2_val}) \\\\times {r2_val}\" if frozen_params[\"products\"][1][\"sign\"] == -1 and str(l2_val).startswith(\"-\") else f\"+ {l2_val} \\\\times {r2_val}\" # Complex logic. \n        # Let's simplify: Just sum the signed products directly as written in params?\n        \n    # Re-evaluating \"sign\" meaning based on typical dataset generation for math tasks (like GSM8K or similar rational arithmetic):\n    # Often it defines a list of operations to perform sequentially or independently summed.\n    # Given \"products\", likely: Sum( sign_i * left_i * right_i ).\n    \n    t1_val = frozen_params[\"products\"][0][\"left\"] if frozen_params[\"products\"][0][\"sign\"] == 1 else f\"-{frozen_params['products'][0]['left']}\"\n    # Wait, if left is \"-0.21\" and sign=-1, then term is -(-0.21 * ...). \n    # Let's stick to the raw calculation logic: Term = sign * (float(left) * float(right)).\n    \n    t1_str_latex = f\"{frozen_params['products'][0]['left']} \\\\times {r1_val}\" if frozen_params[\"products\"][0][\"sign\"] == 1 else f\"-{abs(float(frozen_params['products'][0]['left'])):.2f} \\\\times {r1_val}\".replace(\".\",\"\") # No, keep decimals.\n    \n    # Let's just use the raw strings and apply sign visually in LaTeX if needed for clarity, or assume standard summation notation.\n    # To be safe and formal: \n    term1_latex = f\"{frozen_params['products'][0]['left']} \\\\times {r1_val}\" if frozen_params[\"products\"][0][\"sign\"] == 1 else f\"-{frozen_params['products'][0]['left'].replace('-', '')} \\\\times {r1_val}\" # This is risky with negative numbers.\n    \n    # Robust LaTeX construction:\n    def make_term(left, right, sign):\n        if left.startswith('-'):\n            val = left[1:] + \" (\" \n            return f\"-{val}{right})\" if sign == -1 else f\"+ {left} \\\\times {right}\" # Ambiguous.\n        \n        # Simplest robust way: Just write the expression as sum of terms with explicit signs from 'sign' field applied to (L*R).\n        l_str = left.replace(\"-\", \"-\") \n        r_str = right\n        \n        if sign == 1:\n            return f\"+ {l_str} \\\\times {r_str}\"\n        else:\n            # If L is negative, e.g., -0.21, and sign=-1 -> term is + (positive value)? Or subtract the product?\n            # Let's assume 'sign' modifies the whole product result.\n            return f\"- ({l_str}) \\\\times {r_str}\" if left.startswith(\"-\") else f\"- {l_str} \\\\times {r_str}\"\n\n    t1_latex = make_term(frozen_params[\"products\"][0][\"left\"], r1_val, frozen_params[\"products\"][0][\"sign\"])\n    # Remove leading + for cleaner text or keep? Usually \"Compute A + B\". \n    if t1_latex.startswith(\"+\"):\n        t1_latex = t1_latex[2:] # remove \"+ \"\n        \n    t2_latex = make_term(frozen_params[\"products\"][1][\"left\"], r2_val, frozen_params[\"products\"][1][\"sign\"])\n    \n    q_text = f\"Compute the exact value of $\\\\text{term}_1 + \\\\text{term}_2$ where term$_1={t1_latex}$ and term$_2={t2_latex}$. Simplify to an irreducible fraction.\"\n    # Or simpler: \"Calculate:\" followed by the expression.\n    \n    final_q_text = f\"Compute $\\\\left( {frozen_params['products'][0]['sign']} \\\\cdot {p1_val} \\\\times {r1_val} \\\\right) + \\\\left( {frozen_params['products'][1]['sign']} \\\\cdot {l2_val} \\\\times {r2_val} \\\\right)$.\"\n    # Wait, if sign is -1 and left is negative string \"-0.21\", then mathematically it's (-1)*(-0.21*89.3) = + (0.21*89.3). \n    # The LaTeX should reflect the intended operation clearly.\n    \n    # Let's try to make the question text match the exact arithmetic logic:\n    term1_expr = f\"{p1_val} \\\\times {r1_val}\" if frozen_params[\"products\"][0][\"sign\"] == 1 else f\"-{abs(float(p1_val)):.2f} \\\\times {r1_val}\".replace(\".\",\"\") # No, keep decimals. \n    # Let's just use the raw string and prepend sign char?\n    \n    sgn_char = \"+\" if frozen_params[\"products\"][0][\"sign\"] == 1 else \"-\"\n    term1_expr = f\"{sgn_char} {p1_val} \\\\times {r1_val}\"\n    \n    sgn_char2 = \"+\" if frozen_params[\"products\"][1][\"sign\"] == 1 else \"-\"\n    # If left is negative, e.g. \"-0.21\", and we want to subtract the product (-0.21 * ...), it becomes + (positive). \n    # But usually these datasets just list terms: (+ A*B) + (- C*D).\n    \n    term2_expr = f\"{sgn_char2} {l2_val} \\\\times {r2_val}\"\n    \n    q_text = f\"Compute $\\\\left( {term1_expr} \\\\right) + \\\\left( {term2_expr} \\\\right)$.\"\n\n    # Correct answer format: \"value (irreducible p/q string)\" and canonical_latex.\n    ans_str = f\"{final_num}/{final_den}\" if final_den != 0 else str(final_num).rstrip('0').rstrip('.') # Handle integer case? \n    # If denominator is 1, usually just the number or n/1? \"irreducible p/q string\". Usually implies fraction format even for integers (n/1) unless specified otherwise.\n    # Let's assume standard math notation: if den=1, return str(num). Else f\"{num}/{den}\".\n    \n    canonical_latex = ans_str\n    \n    result_dict = {\n        \"question_text\": q_text,\n        \"correct_answer\": f\"value={ans_str}; canonical_latex=${canonical_latex}$\", # Wait spec: \"must include value (irreducible p/q string) and canonical_latex\". \n        # Maybe format is just the latex of the answer? Or a dict inside correct_answer? \n        # Spec says: \"correct_answer must include value ... and canonical_latex.\"\n        # Likely structure: {\"value\": \"...\", \"canonical_latex\": \"...\"} or concatenated string.\n        # Given previous examples in similar tasks, often it's a single string like \"$\\\\frac{p}{q}$\". \n        # But instruction says \"include value... AND ...\". Let's make correct_answer a dict for clarity if allowed, but usually these are strings.\n        # Re-reading: \"correct_answer must include value (irreducible p/q string) and canonical_latex.\"\n        # I will format it as \"$\\\\frac{p}{q}$\" which serves both? Or explicit keys? \n        # Let's assume the field `correct_answer` is a dict with 'value' and 'canonical_latex'.\n        \n    }\n\n    if final_den == 1:\n        ans_str = str(final_num)\n        canonical_latex = f\"${final_num}$\"\n    else:\n        canonical_latex = rf\"\\frac{{{final_num}}}{{{final_den}}}\"\n    \n    result_dict[\"correct_answer\"] = {\n        \"value\": ans_str,\n        \"canonical_latex\": canonical_latex\n    }\n\n    return {\n        \"question_text\": q_text.replace(\"term_1\", \"\\\\text{Term}_1\").replace(\"term_2\", \"\\\\text{Term}_2\"), # Clean up text slightly if needed. \n        \"correct_answer\": result_dict[\"correct_answer\"],\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T20:33:07.454566+00:00",
+  "completed_at_utc": "2026-07-21T20:34:02.268942+00:00",
+  "duration": 54.8143622999778,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 54.814349799999036,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 264,
+      "eval_count": 3607,
+      "total_token_count": 3871,
+      "total_duration": 52803217000,
+      "load_duration": 243733200,
+      "done_reason": "stop",
+      "latency_ms": 54814,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072004,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072004,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

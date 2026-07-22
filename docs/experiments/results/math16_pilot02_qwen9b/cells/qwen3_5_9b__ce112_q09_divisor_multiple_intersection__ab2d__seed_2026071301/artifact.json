@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce112_q09_divisor_multiple_intersection__ab2d__seed_2026071301",
+  "task_id": "ce112_q09_divisor_multiple_intersection",
+  "family": "integer",
+  "condition": "ab2d",
+  "seed": 2026071301,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026071301
+  },
+  "prompt_sha256": "f4d5abe47b1d3dad2095dbc473b4f58b6f1c8cd4f9ece0ba8a1de9f5c68ad5cb",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "import json\nfrom core.prompts.domain_function_library import IntegerOps\n\ndef generate(level=1, **kwargs):\n    frozen_params = {\"divisor_of\": 216, \"multiple_of\": 18}\n    \n    divisor_val = frozen_params[\"divisor_of\"]\n    multiple_val = frozen_params[\"multiple_of\"]\n    \n    # Calculate the Least Common Multiple (LCM) of divisor and multiple to find a valid intersection point.\n    # LCM(a, b) = abs(a*b) // GCD(a, b). We can use IntegerOps.safe_eval for calculation if needed, \n    # but standard math is safer here unless forced. However, the prompt requires using domain APIs for operations.\n    # Let's compute GCD first to get LCM. Since we don't have a direct GCD API in the list, \n    # we must rely on safe_eval or implement logic that uses allowed functions if possible.\n    # The constraint says \"Use the listed domain API for each supported core operation\".\n    # We will use IntegerOps.safe_eval to compute LCM directly using math library inside eval string? \n    # No, better to stick strictly to provided APIs. If GCD is not an API, we might need safe_eval with a helper or just calculate manually if allowed.\n    # Re-reading: \"Use the listed domain API for each supported core operation\". It implies standard arithmetic might be fallback or via eval.\n    # Let's use IntegerOps.safe_eval to compute LCM using math.gcd logic embedded in string? \n    # Actually, let's just calculate manually and verify divisibility with is_divisible if needed.\n    \n    import math\n    \n    def gcd(a, b):\n        while b:\n            a, b = b, a % b\n        return a\n\n    lcm_val = (divisor_val * multiple_val) // gcd(divisor_val, multiple_val)\n    \n    # We need to find the count of integers in some range? The task description \"ce112_q09_divisor_multiple_intersection\" \n    # usually implies finding numbers that are both divisors and multiples. \n    # A number X is a divisor of D if D % X == 0.\n    # A number Y is a multiple of M if Y % M == 0.\n    # Intersection: Numbers that divide 'divisor_of' AND are multiples of 'multiple_of'.\n    # Let N be such a number. \n    # Condition 1: divisor_val % N == 0 (N divides divisor_val)\n    # Condition 2: N is multiple of multiple_val => N = k * multiple_val for integer k >= 1.\n    \n    count = 0\n    \n    # Iterate through multiples of 'multiple_of' up to 'divisor_of'.\n    # Since N must divide divisor_val, N cannot exceed divisor_val (assuming positive integers).\n    current_multiple = multiple_val\n    while current_multiple <= divisor_val:\n        if IntegerOps.is_divisible(divisor_val, current_multiple):\n            count += 1\n        current_multiple += multiple_val\n        \n    correct_answer_dict = {\"count\": count}\n    \n    return {\n        \"question_text\": r\"Find the number of positive integers that are both divisors of $216$ and multiples of $18$. Let this count be denoted by $C$. Return $\\{ \\text{\"count\"}: C \\}$.\",\n        \"correct_answer\": correct_answer_dict,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T17:35:32.419614+00:00",
+  "completed_at_utc": "2026-07-21T17:35:45.682362+00:00",
+  "duration": 13.262737300014123,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 13.26272469991818,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 331,
+      "eval_count": 747,
+      "total_token_count": 1078,
+      "total_duration": 11211553500,
+      "load_duration": 224360100,
+      "done_reason": "stop",
+      "latency_ms": 13262,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026071301,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026071301,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

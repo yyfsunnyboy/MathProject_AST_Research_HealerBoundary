@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce112_q04_radical_simplification__ab2g__seed_2026071301",
+  "task_id": "ce112_q04_radical_simplification",
+  "family": "radical",
+  "condition": "ab2g",
+  "seed": 2026071301,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026071301
+  },
+  "prompt_sha256": "6d252e1058c14eee07326788693fec710a5247c404e7dd74f3d22156235a82f4",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    radicand = kwargs.get(\"radicand\", 135)\n    \n    # Factorize radicand to simplify radical: sqrt(135) -> sqrt(9*15) -> 3*sqrt(15)\n    import math\n    \n    def get_prime_factors(n):\n        factors = {}\n        d = 2\n        while d * d <= n:\n            while n % d == 0:\n                factors[d] = factors.get(d, 0) + 1\n                n //= d\n            d += 1\n        if n > 1:\n            factors[n] = factors.get(n, 0) + 1\n        return factors\n    \n    prime_factors = get_prime_factors(radicand)\n    \n    # Calculate coefficient and new radicand for simplified radical form sqrt(k * m) -> c * sqrt(m)\n    coeff = 1\n    remaining_radicand = 1\n    for p, count in sorted(prime_factors.items()):\n        if count % 2 == 0:\n            q = count // 2\n            coeff *= (p ** q)\n        else:\n            remaining_radicand *= (p ** (count - (count % 2))) # This logic is slightly off for odd counts, let's fix\n    \n    # Correct simplification logic:\n    # For each prime factor p with exponent e in n = product(p^e), \n    # we can pull out floor(e/2) pairs of p from the square root.\n    coeff_new = 1\n    radicand_new = 1\n    for p, count in sorted(prime_factors.items()):\n        q = count // 2\n        if q > 0:\n            coeff_new *= (p ** q)\n        remaining_count = count % 2\n        if remaining_count == 1:\n            radicand_new *= p\n    \n    # Construct LaTeX strings\n    canonical_latex = f\"\\\\sqrt{{{radicand}}}\"\n    \n    if coeff_new > 1 or radicand_new != radicand:\n        # Simplified form exists and is different from original unsimplified representation in context of task usually implying simplification needed\n        # However, the task asks for correct_answer to include coefficient, radicand, and canonical_latex.\n        # Let's assume we need to output the simplified version if possible, or just format it properly.\n        # The prompt implies generating a question about radical simplification.\n        \n        # If fully reducible (e.g., sqrt(4)=2), coeff=2, radicand_new=1 -> 2\\\\sqrt{1} usually written as 2? \n        # But standard form keeps integer under root if possible or just writes the number.\n        # Let's stick to c * \\\\sqrt{n}. If n becomes 1, we might write just coefficient but let's keep structure for consistency unless specified otherwise.\n        \n        coeff_str = str(coeff_new)\n        radicand_str = f\"{radicand_new}\" if radicand_new != 1 else \"1\" # Usually simplified radicals don't have sqrt(1), but let's check standard math simplification rules. \n        # Standard: simplify completely. If result is integer, no radical. But the schema requires 'canonical_latex' which likely expects \\\\sqrt{...} format or just number?\n        # Given \"correct_answer must include coefficient, radicand...\", it implies a form like c\\\\sqrt{n}.\n        \n        if coeff_new == 1 and radicand_new == radicand:\n             canonical_latex = f\"\\\\sqrt{{{radicand}}}\"\n             correct_answer_str = f\"{canonical_latex}\" # No simplification possible or not requested to change representation? \n             # Actually, the task is \"radical_simplification\". We must simplify.\n        \n        if radicand_new == 1:\n            canonical_latex = str(coeff_new)\n            coeff_part = \"\"\n            radicand_part = \"\"\n        else:\n            canonical_latex = f\"{coeff_new}\\\\sqrt{{{radicand_new}}}\"\n    \n    # Re-evaluating based on typical dataset generation for math problems (like GSM8K or similar):\n    # Usually, if simplification is possible, we output the simplified form.\n    # If radicand was 135 -> 9*15 -> sqrt(135) = 3sqrt(15).\n    \n    final_coeff = coeff_new\n    final_radicand = radicand_new\n    \n    if final_radicand == 1:\n        correct_answer_str = str(final_coeff)\n        canonical_latex = f\"{final_coeff}\" # Or maybe just the number? \n        # But the requirement says \"include coefficient, radicand\". If radicand is 1, it's trivial.\n        # Let's assume for this specific task instance (radicand=135), simplification happens.\n        \n    else:\n        correct_answer_str = f\"{final_coeff}\\\\sqrt{{{final_radicand}}}\"\n    \n    question_text = \"Simplify the radical expression:\"\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer_str,\n        \"oracle_payload\": {\"radicand\": radicand}\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T17:45:41.630595+00:00",
+  "completed_at_utc": "2026-07-21T17:46:00.389902+00:00",
+  "duration": 18.75929570000153,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 18.759281300008297,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 213,
+      "eval_count": 1137,
+      "total_token_count": 1350,
+      "total_duration": 16715197500,
+      "load_duration": 246253600,
+      "done_reason": "stop",
+      "latency_ms": 18759,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026071301,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026071301,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

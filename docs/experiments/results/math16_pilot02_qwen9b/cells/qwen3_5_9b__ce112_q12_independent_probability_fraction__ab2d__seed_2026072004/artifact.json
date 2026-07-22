@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce112_q12_independent_probability_fraction__ab2d__seed_2026072004",
+  "task_id": "ce112_q12_independent_probability_fraction",
+  "family": "fraction",
+  "condition": "ab2d",
+  "seed": 2026072004,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072004
+  },
+  "prompt_sha256": "e0ceba6ddea69db946947e44372f0667b4445539f11857bbafa275c518a9506a",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "from typing import Dict, Any\nimport sys\nsys.path.insert(0, '.')\ntry:\n    from core.prompts.domain_function_library import FractionOps\nexcept ImportError:\n    class FractionOps:\n        @staticmethod\n        def create(value):\n            return value\n        \n        @staticmethod\n        def mul(a, b):\n            if isinstance(a, dict) and 'num' in a and 'den' in a:\n                num = a['num'] * b['num']\n                den = a['den'] * b['den']\n                g = 1\n                # Simple GCD for integers\n                def gcd(x, y):\n                    while y: x, y = y, x % y\n                    return x\n                if num != 0 and den != 0:\n                    common = abs(gcd(num, den))\n                    num //= common\n                    den //= common\n                else:\n                    pass # Handle zero case implicitly by logic below or defaulting to simplified form\n                return {'num': num, 'den': den}\n            elif isinstance(a, dict) and b == 1:\n                return a\n            elif isinstance(b, dict):\n                return FractionOps.mul(b, a)\n            \n        @staticmethod\n        def to_latex(val, mixed=False):\n            if not isinstance(val, dict):\n                val = {'num': int(val), 'den': 1}\n            n = val['num']\n            d = val['den']\n            if d == 1:\n                return f\"{n}\"\n            \n            # Simplify logic for LaTeX representation of irreducible fraction\n            # Assuming input is already simplified or handled by mul, but ensure canonical form here just in case.\n            import math\n            g = abs(math.gcd(n, d)) if n != 0 else 1\n            sn = n // g\n            sd = d // g\n            \n            latex_parts = []\n            \n            # Mixed number logic (simplified for this task context usually implies improper or proper)\n            # Task asks for irreducible fraction. Usually LaTeX is \\frac{num}{den}. \n            # If mixed=False, we just output the fraction.\n            \n            if sd == 1:\n                return f\"{sn}\"\n            \n            sign = \"-\" if sn < 0 else \"\"\n            n_abs = abs(sn)\n            d_abs = sd\n            \n            latex_str = rf\"\\frac{{{sign}{n_abs}}}{{{d_abs}}}\"\n            # If mixed number requested (not typical for pure fraction tasks unless specified, but spec says canonical_latex for irreducible fraction usually implies improper or proper reduced). \n            # Given \"irreducible fraction\", we stick to \\frac{num}{den}.\n            \n            return latex_str\n\ndef generate(level=1, **kwargs):\n    frozen_params = {\"p1\": [2, 6], \"p2\": [1, 5]}\n    \n    p1_num, p1_den = frozen_params[\"p1\"][0], frozen_params[\"p1\"][1]\n    p2_num, p2_den = frozen_params[\"p2\"][0], frozen_params[\"p2\"][1]\n    \n    # Calculate P(A and B) assuming independence: P(A)*P(B)\n    # Represent probabilities as fractions first to ensure exact arithmetic\n    \n    frac_p1 = FractionOps.create({'num': p1_num, 'den': p1_den})\n    frac_p2 = FractionOps.create({'num': p2_num, 'den': p2_den})\n    \n    result_frac = FractionOps.mul(frac_p1, frac_p2)\n    \n    # Ensure canonical form (irreducible). The mul function attempts this. \n    # Let's double check irreducibility manually to be safe for the output string construction if needed.\n    import math\n    n_res = result_frac['num']\n    d_res = result_frac['den']\n    common_divisor = abs(math.gcd(n_res, d_res)) if (n_res != 0 and d_res != 0) else 1\n    \n    canonical_num = n_res // common_divisor\n    canonical_den = d_res // common_divisor\n    \n    # Construct LaTeX string for the fraction\n    latex_str = rf\"\\frac{{{canonical_num}}}{{{canonical_den}}}\" if (d_res > 1 or abs(canonical_num) != canonical_den else f\"{canonical_num}\") \\\n                if False else \"\" \n                \n    # Re-evaluating to_latex usage based on spec: \"correct_answer must include numerator, denominator, and canonical_latex\"\n    # We will construct the dict manually for clarity.\n    \n    latex_str = FractionOps.to_latex({'num': n_res // common_divisor, 'den': d_res // common_divisor}, mixed=False) if (d_res != 1 or abs(n_res//common_divisor)!=0) else str(n_res//common_divisor)\n\n    # Handle case where result is integer\n    final_num = canonical_num\n    final_den = canonical_den\n    \n    correct_answer_dict = {\n        \"numerator\": final_num,\n        \"denominator\": final_den,\n        \"canonical_latex\": latex_str if (final_den != 1) else str(final_num) # If denominator is 1, usually just the number or \\frac{n}{1}? Spec says irreducible fraction. n/1 is a valid representation but often simplified to integer in text. However, LaTeX for math problems often keeps it as fraction if derived from fractions. Let's stick to standard latex unless integer.\n    }\n\n    # Refining canonical_latex: If den=1, usually just the number. But let's look at \"irreducible fraction\". \n    # 2/6 * 1/5 = 2/30 = 1/15. Den is not 1.\n    \n    if final_den == 1:\n        correct_answer_dict[\"canonical_latex\"] = str(final_num)\n    else:\n        correct_answer_dict[\"canonical_latex\"] = rf\"\\frac{{{final_num}}}{{{final_den}}}\"\n\n    question_text = f\"Given two independent events with probabilities $p_1 = \\\\frac{{frozen\\\\_params['p1'][0]}}{{frozen\\\\_params['p1'][1]}}$ and $p_2 = \\\\frac{{frozen\\\\_params['p2'][0]}}{{frozen\\\\_params['p2'][1]}}$, calculate the probability of both events occurring.\"\n    \n    # Replace placeholders with actual values for clean text or keep generic? \n    # Better to use specific numbers in question_text.\n    p1_val = f\"{frozen_params['p1'][0]}/{frozen_params['p1'][1]}\"\n    p2_val = f\"{frozen_params['p2'][0]}/{frozen_params['p2'][1]}\"\n    \n    # Reconstruct latex for question text properly using raw strings or simple formatting\n    q_text_latex_p1 = rf\"\\frac{{{frozen_params['p1'][0]}}}{{{frozen_params['p1'][1]}}}\"\n    q_text_latex_p2 = rf\"\\frac{{{frozen_params['p2'][0]}}}{{{frozen_params['p2'][1]}}}\"\n    \n    question_text = f\"Given two independent events with probabilities $p_1 = {q_text_latex_p1}$ and $p_2 = {q_text_latex_p2}$, calculate the probability of both events occurring.\"\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer_dict,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T20:25:07.983379+00:00",
+  "completed_at_utc": "2026-07-21T20:25:34.131689+00:00",
+  "duration": 26.148298399988562,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 26.14828470000066,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 368,
+      "eval_count": 1638,
+      "total_token_count": 2006,
+      "total_duration": 24125326800,
+      "load_duration": 253243800,
+      "done_reason": "stop",
+      "latency_ms": 26148,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072004,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072004,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

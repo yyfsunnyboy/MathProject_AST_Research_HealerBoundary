@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce111_q03_prime_factor_selection__ab2d__seed_2026072001",
+  "task_id": "ce111_q03_prime_factor_selection",
+  "family": "integer",
+  "condition": "ab2d",
+  "seed": 2026072001,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072001
+  },
+  "prompt_sha256": "8704669323fb45ef6bd34331151b350845425d2d14e19b36c58bd2c2c86bc75f",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "from typing import Dict, Any\nimport sys\nsys.path.insert(0, '/app')\ntry:\n    from core.prompts.domain_function_library import IntegerOps\nexcept ImportError:\n    class IntegerOps:\n        @staticmethod\n        def is_divisible(a: int, b: int) -> bool:\n            return a % b == 0\n        \n        @staticmethod\n        def safe_eval(expr: str):\n            try:\n                result = eval(expr)\n                if isinstance(result, (bool, list, dict, set)):\n                    raise ValueError(\"Boolean or container results not allowed\")\n                return int(result) if isinstance(result, float) and result.is_integer() else result\n            except Exception as e:\n                raise ValueError(f\"Evaluation failed: {e}\")\n\ndef generate(level=1, **kwargs):\n    frozen_params = {\"candidates\": [11, 12, 13, 14], \"n\": 156}\n    \n    candidates_list = frozen_params[\"candidates\"]\n    n_val = frozen_params[\"n\"]\n    \n    # Task: Find the smallest candidate that divides n.\n    # Logic: Iterate through candidates and check divisibility using IntegerOps.is_divisible\n    \n    correct_answer = None\n    \n    for c in candidates_list:\n        if IntegerOps.is_divisible(n_val, c):\n            correct_answer = c\n            break\n            \n    question_text = (\n        r\"Given the set of candidate integers $C = \\{\" + \", \".join([str(c) for c in candidates_list]) + \"}\\}$ and a target integer $N = $\" \n        + str(n_val) + r\"$, find the smallest element $c \\in C$ such that $c$ divides $N$. Express your answer as an exact integer.\"\n    )\n    \n    result_dict: Dict[str, Any] = {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": frozen_params\n    }\n    \n    return result_dict",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T18:01:13.696744+00:00",
+  "completed_at_utc": "2026-07-21T18:01:22.311846+00:00",
+  "duration": 8.615090900100768,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 8.615076299989596,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 333,
+      "eval_count": 431,
+      "total_token_count": 764,
+      "total_duration": 6581028300,
+      "load_duration": 241733000,
+      "done_reason": "stop",
+      "latency_ms": 8615,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072001,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072001,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

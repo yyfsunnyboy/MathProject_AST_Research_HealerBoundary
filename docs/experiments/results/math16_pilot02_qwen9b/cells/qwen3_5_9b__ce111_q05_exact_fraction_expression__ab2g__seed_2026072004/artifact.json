@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce111_q05_exact_fraction_expression__ab2g__seed_2026072004",
+  "task_id": "ce111_q05_exact_fraction_expression",
+  "family": "fraction",
+  "condition": "ab2g",
+  "seed": 2026072004,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072004
+  },
+  "prompt_sha256": "9932c16c2dd3109a2f340ae98c4b0e51ef01fe9e024fbcc5f63bab49ef3ae965",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    expression = \"9/22 + 11/18 - (23/22 - 7/18)\"\n    \n    # Calculate numerator: 9*18 + 11*22 - (23*18 - 7*22)\n    term1_num = 9 * 18\n    term2_num = 11 * 22\n    inner_parenthesis_term1_num = 23 * 18\n    inner_parenthesis_term2_num = 7 * 22\n    \n    numerator = (term1_num + term2_num) - (inner_parenthesis_term1_num - inner_parenthesis_term2_num)\n    \n    # Calculate denominator: LCM of denominators is not needed for the whole expression directly, \n    # but we can compute common denominator step by step or use product.\n    # Common denom for 9/22 and 11/18 (denoms 22=2*11, 18=2*3^2) -> LCM = 2*3^2*11 = 198\n    term1_denom = 198 // 22 * 18 # Wait, simpler: just use the common denominator of all terms.\n    \n    # Let's re-calculate using a single common denominator for clarity in logic check, \n    # though the previous numerator calculation assumed a specific path.\n    # Path used above: (9/22 + 11/18) - (23/22 - 7/18)\n    # = ((9*9)/(22*9)) ... no, let's stick to LCM(22, 18) = 198.\n    \n    term1_val_num = 9 * (198 // 22)\n    term2_val_num = 11 * (198 // 18)\n    inner_term1_val_num = 23 * (198 // 22)\n    inner_term2_val_num = 7 * (198 // 18)\n    \n    total_numerator = term1_val_num + term2_val_num - (inner_term1_val_num - inner_term2_val_num)\n    denominator_common = 198\n    \n    # Simplify fraction\n    def gcd(a, b):\n        while b:\n            a, b = b, a % b\n        return abs(a)\n    \n    common_divisor = gcd(total_numerator, denominator_common)\n    simplified_num = total_numerator // common_divisor\n    simplified_denom = denominator_common // common_divisor\n    \n    # Ensure canonical form (denominator positive)\n    if simplified_denom < 0:\n        simplified_num *= -1\n        simplified_denom *= -1\n        \n    correct_answer_dict = {\n        \"numerator\": simplified_num,\n        \"denominator\": simplified_denom,\n        \"canonical_latex\": f\"\\\\frac{{{simplified_num}}}{{{simplified_denom}}}\"\n    }\n    \n    return {\n        \"question_text\": r\"Simplify the expression: $9/22 + 11/18 - (23/22 - 7/18)$\",\n        \"correct_answer\": correct_answer_dict,\n        \"oracle_payload\": {\"expression\": \"9/22 + 11/18 - (23/22 - 7/18)\"}\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T20:23:54.142866+00:00",
+  "completed_at_utc": "2026-07-21T20:24:07.721287+00:00",
+  "duration": 13.578408100060187,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 13.578395299962722,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 234,
+      "eval_count": 770,
+      "total_token_count": 1004,
+      "total_duration": 11545703400,
+      "load_duration": 253188300,
+      "done_reason": "stop",
+      "latency_ms": 13578,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072004,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072004,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

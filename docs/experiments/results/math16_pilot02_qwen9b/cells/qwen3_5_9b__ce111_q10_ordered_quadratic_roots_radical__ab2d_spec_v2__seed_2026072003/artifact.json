@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce111_q10_ordered_quadratic_roots_radical__ab2d_spec_v2__seed_2026072003",
+  "task_id": "ce111_q10_ordered_quadratic_roots_radical",
+  "family": "radical",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072003,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072003
+  },
+  "prompt_sha256": "87ee0595a5ca441c1e15e5e7131277be034462d69eb6b3f90435a4d2507857f2",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce111_q10_ordered_quadratic_roots_radical.txt",
+  "generation_status": "success",
+  "raw_response": "# -*- coding: utf-8 -*-\ndef generate(level=1, **kwargs):\n    # Frozen sampled parameters as per task specification\n    equation = \"(x-2)^2=3\"\n    order_constraint = \"a>b\"\n    target_expression = \"2a+b\"\n    \n    # Parse the specific quadratic form (x-h)^2 = k to find roots directly without full expansion if desired, \n    # but standard formula works universally. Here we solve x-2 = +/- sqrt(3).\n    h = 2\n    k = 3\n    \n    import math\n\n    # Calculate discriminant equivalent for the shifted form: (x-h) = +/- sqrt(k)\n    # Roots are h + sqrt(k) and h - sqrt(k)\n    root1_val = h + math.sqrt(k)\n    root2_val = h - math.sqrt(k)\n    \n    # Order roots such that a > b\n    if root1_val >= root2_val:\n        a_float, b_float = root1_val, root2_val\n    else:\n        a_float, b_float = root2_val, root1_val\n        \n    # Compute target 2a + b\n    result_value = 2 * a_float + b_float\n    \n    # Construct the radical representation for canonical_latex and radicand details.\n    # The term is derived from sqrt(3). \n    # Result: (h+sqrt(k)) or (h-sqrt(k)). Since k=3, it's simple integer inside root.\n    \n    # Determine if we need to simplify coefficients outside the radical for 2a+b?\n    # a = h + sqrt(k), b = h - sqrt(k)\n    # 2a + b = 2(h + sqrt(k)) + (h - sqrt(k)) = 3h + sqrt(k)\n    \n    final_coefficient = 3 * h\n    radical_term_value = math.sqrt(k)\n    \n    # Check if the result is purely rational or has a radical part.\n    # Here, k=3 is not a perfect square, so we have a radical term.\n    # The expression simplifies to: integer_part + coefficient_radical * sqrt(radicand)\n    # However, in this specific case (2a+b), the coeff of sqrt(k) becomes 1.\n    \n    simplified_coeff = final_coefficient\n    radicand_val = k\n    \n    # Check if radical term exists and its sign/coeff\n    has_radical_part = True\n    rad_sign = 1\n    rad_coeff = 1\n    \n    # Construct canonical LaTeX: integer + coeff * sqrt(radicand) or just the value if rational.\n    # Since radicand is 3, it stays as \\sqrt{3}.\n    \n    latex_parts = []\n    if simplified_coeff != 0:\n        latex_parts.append(f\"{simplified_coeff}\")\n        \n    if has_radical_part and rad_sign == 1:\n        latex_parts.append(rf\"\\sqrt{{{radicand_val}}}\")\n    elif has_radical_part and rad_sign == -1:\n        latex_parts.append(rf\"-\\sqrt{{{radicand_val}}}\")\n    \n    # Join parts. If only one part (e.g., just integer or just radical), handle spacing if needed, \n    # but standard math notation usually separates terms with + or -.\n    # Here we have 6 + sqrt(3).\n    \n    canonical_latex = \"+\".join(latex_parts)\n    # Ensure no leading '+' unless it's the only term (not applicable here as coeff!=0 and has_radical)\n    if latex_parts[0] == \"\": \n        pass\n        \n    # Re-evaluate joining logic for standard LaTeX output: 6 + \\sqrt{3}\n    final_latex = canonical_latex\n    \n    question_text = f\"Solve the equation {equation}. Let $a$ and $b$ be the roots ordered such that {order_constraint}. Compute the value of {target_expression}.\"\n    \n    correct_answer_dict = {\n        \"value\": result_value, # The actual float/rational number if rationalizable exactly (here 6 + sqrt(3))\n        \"rational_part\": simplified_coeff,\n        \"radical_coefficient\": rad_sign * rad_coeff, \n        \"radicand\": radicand_val,\n        \"canonical_latex\": final_latex\n    }\n\n    # Ensure correct_answer is JSON serializable. Floats are okay if exact or we represent the radical structurally.\n    # The prompt asks for 'correct_answer' to include result with rational, etc. \n    # We will return a dict structure inside correct_answer as implied by \"include result with...\".\n    \n    oracle_payload = {\n        \"equation\": equation,\n        \"order\": order_constraint,\n        \"target\": target_expression\n    }\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer_dict,\n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T19:48:13.993837+00:00",
+  "completed_at_utc": "2026-07-21T19:48:32.282911+00:00",
+  "duration": 18.289063500007614,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 18.289050600025803,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 683,
+      "eval_count": 1069,
+      "total_token_count": 1752,
+      "total_duration": 16262579300,
+      "load_duration": 261645200,
+      "done_reason": "stop",
+      "latency_ms": 18289,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072003,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072003,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

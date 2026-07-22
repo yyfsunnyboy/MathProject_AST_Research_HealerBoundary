@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce111_q02_polynomial_division_remainder__ab1__seed_2026072003",
+  "task_id": "ce111_q02_polynomial_division_remainder",
+  "family": "polynomial",
+  "condition": "ab1",
+  "seed": 2026072003,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072003
+  },
+  "prompt_sha256": "138e8eae8822fb96a655fd1cfb5c14873f5397fb4b5a09ed617defd5fc0e42e5",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    dividend_coefficients = [6, 4, 0]\n    divisor_coefficients = [2, 0, 0]\n    \n    # Polynomial: P(x) = 6x^2 + 4x (from coefficients [6, 4, 0])\n    # Divisor: D(x) = 2x^2 (from coefficients [2, 0, 0])\n    # Division: (6x^2 + 4x) / (2x^2) = 3 + (4/x). \n    # Quotient is constant term of polynomial division if degree(dividend) >= degree(divisor), but here degrees are equal.\n    # Standard polynomial long division for P(x)/D(x):\n    # Leading coeff ratio: 6/2 = 3. New quotient term x^(deg_P - deg_D) = x^0 = 1. So Q=3? \n    # Wait, let's do it formally.\n    # P(x) = 6x^2 + 4x + 0\n    # D(x) = 2x^2 + 0x + 0\n    # Step 1: (6x^2)/(2x^2) = 3. Multiply D by 3 -> 6x^2. Subtract from P -> remainder is 4x.\n    # Degree of remainder (1) < degree of divisor (2). Stop.\n    # Quotient Q(x) = 3. Remainder R(x) = 4x.\n    \n    quotient_coefficients = [3]\n    remainder_coefficients = [0, 4]  # Represents 4x\n    \n    question_text = r\"Given the dividend polynomial $P(x)$ with coefficients $\\{6, 4, 0\\}$ and the divisor polynomial $D(x)$ with coefficients $\\{2, 0, 0\\}$, perform polynomial division to find the remainder. Express your answer as a polynomial.\"\n    correct_answer = f\"remainder: {remainder_coefficients}, canonical_latex: \\\\{{{', '.join(map(str, reversed(remainder_coefficients)))}}\\\\}\" if len(remainder_coefficients) > 1 else f\"remainder: {remainder_coefficients[0]}, canonical_latex: {{{remainder_coefficients[0]}}}x^{{len(remainder_coefficients)-2}}\"\n    \n    # Re-evaluating correct_answer format based on typical expectations for [0, 4]: it is $4x$. \n    # If remainder is constant c, latex is {c}. If linear ax+b (b=0 here), latex is {a}x.\n    if len(remainder_coefficients) == 1:\n        val = remainder_coefficients[0]\n        correct_answer = f\"remainder: [{val}], canonical_latex: {{{val}}}\"\n    else:\n        # For [0, 4], it represents $0 + 4x$. Canonical latex usually omits leading zeros or writes standard form.\n        # Standard polynomial string for coefficients [c_n, ..., c_0] is sum(c_i x^i).\n        terms = []\n        for i in range(len(remainder_coefficients) - 1, -1, -1):\n            coeff = remainder_coefficients[i]\n            if coeff == 0: continue\n            power = len(remainder_coefficients) - 1 - i\n            term_str = f\"{coeff}x^{{{power}}}\" if power > 1 else (f\"({coeff})x\" if abs(coeff)==1 and power==1 else str(coeff)) # Simplify signs? No, just raw.\n            # Actually simpler: construct latex directly from coeffs list logic used in similar tasks usually implies standard form.\n            pass\n        \n        # Let's stick to the specific calculation result: 4x.\n        correct_answer = \"remainder: [0, 4], canonical_latex: \\\\{4\\\\}x\"\n\n    oracle_payload = {\"dividend_coefficients\": dividend_coefficients, \"divisor_coefficients\": divisor_coefficients}\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T19:15:23.783125+00:00",
+  "completed_at_utc": "2026-07-21T19:15:39.331593+00:00",
+  "duration": 15.548456100048497,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 15.548444300075062,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 174,
+      "eval_count": 915,
+      "total_token_count": 1089,
+      "total_duration": 13533187600,
+      "load_duration": 251632100,
+      "done_reason": "stop",
+      "latency_ms": 15548,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072003,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072003,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

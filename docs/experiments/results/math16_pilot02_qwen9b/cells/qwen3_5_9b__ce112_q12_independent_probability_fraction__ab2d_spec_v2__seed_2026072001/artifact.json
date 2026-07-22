@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce112_q12_independent_probability_fraction__ab2d_spec_v2__seed_2026072001",
+  "task_id": "ce112_q12_independent_probability_fraction",
+  "family": "fraction",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072001,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072001
+  },
+  "prompt_sha256": "183c3a708e2a1361e9ccd41de1cb33c51bb169b1f6b7cd99d874f98aa23ada51",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce112_q12_independent_probability_fraction.txt",
+  "generation_status": "success",
+  "raw_response": "# -*- coding: utf-8 -*-\n\ndef generate(level=1, **kwargs):\n    from core.prompts.domain_function_library import FractionOps\n    \n    # 2. Define frozen parameters directly. Do not read kwargs.\n    p1_parts = [2, 6]\n    p2_parts = [1, 5]\n    \n    numerator_p1, denominator_p1 = p1_parts[0], p1_parts[1]\n    numerator_p2, denominator_p2 = p2_parts[0], p2_parts[1]\n    \n    # Create fractions from parts using the specified API signature\n    frac1 = FractionOps.from_parts(numerator_p1, denominator_p1)\n    frac2 = FractionOps.from_parts(numerator_p2, denominator_p2)\n    \n    # 3. Compute the exact result (independent probability -> multiplication)\n    product_frac = FractionOps.mul(frac1, frac2)\n    \n    num_res = product_frac.numerator\n    den_res = product_frac.denominator\n    \n    # Construct canonical LaTeX for irreducible fraction: \\frac{num}{den}\n    question_text = r\"Given two independent events with probabilities $p_1 = \\frac{%d}{%d}$ and $p_2 = \\frac{%d}{%d}$, what is the probability that both events occur? Express your answer as an irreducible fraction.\" % (numerator_p1, denominator_p1, numerator_p2, denominator_p2)\n    \n    correct_answer = {\n        \"numerator\": num_res,\n        \"denominator\": den_res,\n        \"canonical_latex\": r\"\\frac{%d}{%d}\" % (num_res, den_res),\n    }\n    \n    oracle_payload = {\"p1\": p1_parts, \"p2\": p2_parts}\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload,\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T18:37:25.571450+00:00",
+  "completed_at_utc": "2026-07-21T18:37:34.319250+00:00",
+  "duration": 8.747788999928162,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 8.747774600051343,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 931,
+      "eval_count": 421,
+      "total_token_count": 1352,
+      "total_duration": 6728059900,
+      "load_duration": 243728000,
+      "done_reason": "stop",
+      "latency_ms": 8747,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072001,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072001,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

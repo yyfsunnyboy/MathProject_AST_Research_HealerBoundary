@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce115_calc_polynomial_factor_roots_l1__ab2d__seed_2026072003",
+  "task_id": "ce115_calc_polynomial_factor_roots_l1",
+  "family": "polynomial",
+  "condition": "ab2d",
+  "seed": 2026072003,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072003
+  },
+  "prompt_sha256": "46eb44551fe48e5def0a14fdfe506b30e5987c44c0dee69f259bf42b90ab54a0",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "from fractions import Fraction\nimport math\n\ndef generate(level=1, **kwargs):\n    frozen_params = {\"quadratic_coefficients\": [1, 4, -12]}\n    \n    # Import domain functions (simulating the environment where these are available)\n    try:\n        from core.prompts.domain_function_library import PolynomialOps, FractionOps\n    except ImportError:\n        # Fallback implementation if imports fail in this specific execution context, \n        # though the prompt implies they should be present. We implement logic inline to ensure correctness without external deps failing silently.\n        \n        def create_fraction(numerator=0, denominator=1):\n            return Fraction(numerator, denominator)\n\n        class PolynomialOps:\n            @staticmethod\n            def factor_quadratic_exact(a, b, c):\n                # Solve ax^2 + bx + c = 0 for roots using quadratic formula or factoring if integer factors exist.\n                # Returns list of dicts with keys 'x_coefficient', 'constant'.\n                \n                discriminant = b*b - 4*a*c\n                \n                if discriminant < 0:\n                    return []\n                \n                sqrt_discriminant = int(math.isqrt(discriminant))\n                if sqrt_discriminant * sqrt_discriminant != discriminant:\n                    # Irrational roots, but task implies exact arithmetic. \n                    # However, for level 1 and given coefficients [1,4,-12], disc is positive perfect square (64).\n                    pass\n                \n                root_delta = Fraction(sqrt_discriminant) if math.isqrt(discriminant)**2 == discriminant else None\n                \n                # Calculate roots: (-b +/- sqrt(D)) / (2a)\n                \n                denom = 2 * a\n                \n                term1_num = -b + int(math.sqrt(discriminant))\n                term2_num = -b - int(math.sqrt(discriminant))\n                \n                root1_frac = Fraction(term1_num, denom) if math.isqrt(discriminant)**2 == discriminant else None\n                root2_frac = Fraction(term2_num, denom) if math.isqrt(discriminant)**2 == discriminant else None\n                \n                # Format roots as dicts for the factorization structure requested: \n                # The prompt asks for a list of dict with keys 'x_coefficient', 'constant'.\n                # This likely represents factors like (x - r1)(x - r2) -> x + (-r), const = 0? \n                # Or perhaps it wants the linear factor components. Let's assume standard form: (x + p/q).\n                \n                results = []\n                if root1_frac is not None and math.isqrt(discriminant)**2 == discriminant:\n                    res_dict = {\n                        \"x_coefficient\": 1, \n                        \"constant\": -root1_frac.numerator // root1_frac.denominator # Simplified integer logic for exact roots? No.\n                    }\n                else:\n                     pass\n                \n                # Re-evaluating the specific return format based on typical polynomial factorization tasks in this context:\n                # Usually returns factors like (x + 2) and (x - 6). \n                # The dict keys 'x_coefficient' and 'constant' suggest a linear term Ax + B.\n                \n                r1 = Fraction(-b, denom) if discriminant == 0 else None\n                \n                # Let's calculate exact roots for [1, 4, -12] -> x^2 + 4x - 12 = (x+6)(x-2). Roots: -6, 2.\n                # Factors: (x + (-(-6)))? No, factors are (x - root). \n                # Factor 1: x - (-6) => x + 6 -> coeff=1, const=6.\n                # Factor 2: x - 2    => x - 2  -> coeff=1, const=-2.\n                \n                roots_list = []\n                if discriminant >= 0 and math.isqrt(discriminant)**2 == discriminant:\n                    sqrt_d = int(math.sqrt(discriminant))\n                    \n                    r1_num = (-b + sqrt_d) * Fraction(1, denom).denominator # Keep as fraction logic\n                    r1_frac = Fraction(-b + sqrt_d, 2*a) if a != 0 else None\n                    \n                    r2_num = -b - sqrt_d\n                    r2_frac = Fraction(r2_num, 2*a) if a != 0 else None\n                    \n                    roots_list.append({\n                        \"x_coefficient\": 1, \n                        \"constant\": -r1_frac.numerator // r1_frac.denominator # Wait, constant in (x + c). If root is r, factor is x-r. So const = -r.\n                        # But the prompt says 'exact arithmetic'. Let's store as Fraction for precision then convert if needed? \n                        # The example output format isn't fully specified beyond keys. I will use simplified integers or Fractions.\n                    })\n                    \n                return roots_list\n\n    a, b, c = frozen_params[\"quadratic_coefficients\"]\n    \n    # Calculate discriminant and check for perfect square to ensure exact arithmetic (no floats)\n    disc_val = b*b - 4*a*c\n    \n    if disc_val < 0:\n        raise ValueError(\"No real roots\")\n        \n    sqrt_disc = int(math.isqrt(disc_val))\n    is_perfect_square = (sqrt_disc * sqrt_disc == disc_val)\n    \n    # Calculate exact roots as Fractions\n    denom = 2 * a\n    \n    if not is_perfect_square:\n        raise ValueError(\"Roots are irrational, cannot represent exactly with simple fractions in this context without surds.\")\n        \n    root1_num = -b + sqrt_disc\n    root2_num = -b - sqrt_disc\n    \n    # Create Fraction objects for roots\n    r1_frac = Fraction(root1_num, denom) if a != 0 else None\n    r2_frac = Fraction(root2_num, denom) if a != 0 else None\n    \n    # Sort roots ascending\n    sorted_roots = [r1_frac, r2_frac]\n    sorted_roots.sort()\n    \n    # Construct factorization components: (x + c). If root is r, term is x - r => constant part is -r.\n    # Factor 1: coeff=1, const=-sorted_roots[0].numerator // ... \n    # We need to represent the linear factors exactly.\n    \n    def get_factor_const(root_frac):\n        return Fraction(-root_frac.numerator, root_frac.denominator)\n\n    factor_1 = {\n        \"x_coefficient\": 1,\n        \"constant\": -sorted_roots[0].numerator // sorted_roots[0].denominator # Simplify to int if possible? \n        # Actually, Fraction handles simplification. Let's return the integer value of the constant term in (x + k).\n    }\n    \n    factor_2 = {\n        \"x_coefficient\": 1,\n        \"constant\": -sorted_roots[1].numerator // sorted_roots[1].denominator\n    }\n    \n    # Re-construct properly using Fraction arithmetic for the constant term in (x + k)\n    const1_frac = Fraction(-r2_frac.numerator * r1_frac.denominator, r2_frac.denominator * r1_frac.numerator)? No.\n    # If root is p/q, factor is x - p/q => q*x/p? No. Factor is (qx - p)/q. \n    # Standard monic factors: (x - p/q). The constant term in the polynomial representation of the factor scaled to integer coefficients might be different.\n    # However, usually \"factorization\" implies finding linear terms like (x+6) and (x-2).\n    \n    const1 = Fraction(-sorted_roots[0].numerator, sorted_roots[0].denominator)\n    const2 = Fraction(-sorted_roots[1].numerator, sorted_roots[1].denominator)\n    \n    # Format for correct_answer: roots (ascending), factorization_latex, roots_latex\n    \n    root_str_1 = str(sorted_roots[0]) if isinstance(sorted_roots[0], int) else f\"{sorted_roots[0]}\"\n    root_str_2 = str(sorted_roots[1]) if isinstance(sorted_roots[1], int) else f\"{sorted_roots[1]}\"\n    \n    # Roots latex: x_{-6}, x_{2} or just -6, 2? Usually \"roots\" means the values. \n    roots_latex = f\"x_{{{root_str_0}}}, x_{{{root_str_1}}}\" if len(sorted_roots) == 2 else str(sorted_roots[0])\n    \n    # Let's refine root string formatting for LaTeX\n    def format_root_for_latex(frac):\n        n, d = frac.numerator, frac.denominator\n        if d == 1:\n            return f\"{n}\"\n        elif n % d == 0:\n             return str(n // d) # Should be simplified by Fraction constructor usually.\n        else:\n            return rf\"\\frac{{{n}}}{{{d}}}\"\n\n    root_latex_1 = format_root_for_latex(sorted_roots[0])\n    root_latex_2 = format_root_for_latex(sorted_roots[1])\n    \n    # Roots latex string (ascending)\n    roots_latex_str = f\"x_{root_latex_1}, x_{root_latex_2}\" if len(sorted_roots) == 2 else str(root_latex_1)\n\n    # Factorization LaTeX: (x + c)(x + d). \n    # Note: factor is (x - root). So constant in latex is (-root).\n    \n    def format_factor_term(const_frac):\n        n, d = const_frac.numerator, const_frac.denominator\n        if d == 1:\n            term_str = f\"x {n}\" if n > 0 else f\"x{n}\" # x + c or x - |c|? \n            # If n is negative: \"x -5\". If positive: \"x +5\"\n            sign = \"+\" if n >= 0 else \"-\"\n            abs_n = abs(n)\n            return rf\"(x {sign} {abs_n})\"\n        else:\n             term_str = f\"x \\pm ...\" \n             # Complex formatting for fractions in factors. Let's assume integer roots for level 1 usually, but handle general case.\n             sign = \"+\" if n >= 0 else \"-\"\n             abs_n = abs(n)\n             return rf\"(x {sign} \\frac{{{abs_n}}}{{{d}}})\"\n\n    term_1_latex = format_factor_term(const1) # const is -root\n    term_2_latex = format_factor_term(const2)\n    \n    factorization_latex_str = f\"{term_1_latex}{term_2_latex}\" if len(sorted_roots) == 2 else term_1_latex\n\n    question_text = rf\"Find the roots and factorize the quadratic polynomial $x^2 + {b}x + {c}$.\"\n    \n    correct_answer = {\n        \"roots\": [sorted_roots[0], sorted_roots[1]], # List of Fractions or ints? Prompt says exact arithmetic. Keep as Fraction objects if possible, but JSON requires serializable types usually. \n                # However, the prompt asks for 'correct_answer' dict content. If it needs to be returned by Python function, keeping Fraction is fine unless specified otherwise.\n                # But often these tasks expect a specific structure. Let's assume standard list of numbers (int or float). Since exact arithmetic required -> int if possible else Fraction? \n                # The prompt says \"Exact arithmetic; no floats\". Fractions are the way to go in Python for this constraint.\n        \"correct_answer_roots\": sorted_roots, # List of Fractions\n        \"factorization_latex\": factorization_latex_str,\n        \"roots_latex\": roots_latex_str\n    }\n\n    oracle_payload = frozen_params\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T19:39:19.780264+00:00",
+  "completed_at_utc": "2026-07-21T19:40:00.611643+00:00",
+  "duration": 40.831369099905714,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 40.831356700044125,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 374,
+      "eval_count": 2637,
+      "total_token_count": 3011,
+      "total_duration": 38803867900,
+      "load_duration": 246184900,
+      "done_reason": "stop",
+      "latency_ms": 40831,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072003,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072003,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

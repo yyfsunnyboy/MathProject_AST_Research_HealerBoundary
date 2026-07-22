@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce115_calc_exact_rational_expression_l1__ab2d_spec_v2__seed_2026072001",
+  "task_id": "ce115_calc_exact_rational_expression_l1",
+  "family": "fraction",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072001,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072001
+  },
+  "prompt_sha256": "f46b8a30d79d77ca3811c9d7dc202a0b65b50302395ca871a24d3129a0f4e7c2",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce115_calc_exact_rational_expression_l1.txt",
+  "generation_status": "success",
+  "raw_response": "# -*- coding: utf-8 -*-\nfrom fractions import Fraction\n\ndef generate(level=1, **kwargs):\n    # Frozen sampled parameters as defined in task specification\n    frozen_params = {\"products\": [{\"left\": \"2.79\", \"right\": \"89.3\", \"sign\": 1}, {\"left\": \"-0.21\", \"right\": \"89.3\", \"sign\": -1}]}\n\n    # Helper to convert decimal string to Fraction\n    def str_to_frac(s):\n        return Fraction(int(float(s) * 100), 100).limit_denominator() if '.' in s else int(s) / 1\n    \n    # Parse left and right operands from the first product term (index 0) as per typical expression structure for this task type\n    # Term 1: sign=1, so + (left * right) -> but looking at standard rational arithmetic tasks of this format (ce115), \n    # it usually implies an addition/subtraction chain or a specific product sum. \n    # Given the parameters: {\"products\": [{\"left\": \"2.79\", \"right\": \"89.3\", \"sign\": 1}, ...]}\n    # This looks like two terms to be summed: (2.79 * 89.3) + (-0.21 * 89.3)? \n    # Or perhaps it's just a list of products where the sign applies to the product?\n    # Let's assume the expression is sum(sign_i * left_i * right_i).\n    \n    terms = []\n    for item in frozen_params[\"products\"]:\n        l_val = str_to_frac(item[\"left\"])\n        r_val = str_to_frac(item[\"right\"])\n        sign = int(item[\"sign\"])\n        \n        # Calculate product exactly using Fraction arithmetic (native Python fractions are sufficient and exact)\n        term_value = l_val * r_val\n        \n        if sign == 1:\n            terms.append(term_value)\n        else:\n            terms.append(-term_value)\n\n    # Sum all terms to get the final result\n    total_sum = sum(terms, Fraction(0))\n    \n    # Simplify and ensure irreducible form (Fraction does this automatically on creation/ops)\n    num = total_sum.numerator\n    den = total_sum.denominator\n    \n    # Construct canonical LaTeX for p/q\n    if den == 1:\n        latex_ans = f\"{num}\"\n    else:\n        latex_ans = rf\"\\frac{{{num}}}{{{den}}}\"\n\n    question_text = (f\"Calculate the exact value of the expression defined by the products. \"\n                     f\"The terms are given as pairs with signs: {', '.join([str(t) for t in frozen_params['products']])}.\")\n    \n    correct_answer_value = str(total_sum) # Irreducible p/q string (e.g., \"-1/2\" or \"3\")\n    canonical_latex = latex_ans\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": f\"value={correct_answer_value}, canonical_latex={canonical_latex}\",\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T18:39:44.673544+00:00",
+  "completed_at_utc": "2026-07-21T18:39:57.109281+00:00",
+  "duration": 12.435726199997589,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 12.435711199999787,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 687,
+      "eval_count": 682,
+      "total_token_count": 1369,
+      "total_duration": 10414040500,
+      "load_duration": 238369000,
+      "done_reason": "stop",
+      "latency_ms": 12435,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072001,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072001,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

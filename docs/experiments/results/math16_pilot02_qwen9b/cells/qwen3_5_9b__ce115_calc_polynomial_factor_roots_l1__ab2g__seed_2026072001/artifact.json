@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce115_calc_polynomial_factor_roots_l1__ab2g__seed_2026072001",
+  "task_id": "ce115_calc_polynomial_factor_roots_l1",
+  "family": "polynomial",
+  "condition": "ab2g",
+  "seed": 2026072001,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072001
+  },
+  "prompt_sha256": "9aa875c3c2de0b79cb0cf0bb5ec18ef9a02ead452db9d4d044500f175a8f485f",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    quadratic_coefficients = [1, 4, -12]\n    \n    # Calculate roots using exact arithmetic (fractions) to avoid floats\n    from fractions import Fraction\n    \n    a = quadratic_coefficients[0]\n    b = quadratic_coefficients[1]\n    c = quadratic_coefficients[2]\n    \n    discriminant = b * b - 4 * a * c\n    sqrt_discriminant_int = int(discriminant ** 0.5)\n    \n    # Roots formula: (-b +/- sqrt(D)) / (2a)\n    root1_num = -b + sqrt_discriminant_int\n    root1_denom = 2 * a\n    \n    root2_num = -b - sqrt_discriminant_int\n    root2_denom = 2 * a\n    \n    # Simplify fractions for roots\n    def simplify_fraction(n, d):\n        if n == 0:\n            return Fraction(0)\n        common = abs(int(d)) // gcd(abs(n), int(d)) # Need to import math.gcd or define it\n        from math import gcd as _gcd\n        g = _gcd(n, d)\n        sign = -1 if (n < 0 and d > 0) or (n > 0 and d < 0) else 1\n        return Fraction(sign * abs(n // g), abs(d // g))\n\n    # Re-implement gcd logic inline to ensure no external dependency issues if needed, \n    # but math.gcd is standard. Let's use fractions directly for exactness.\n    \n    root1 = Fraction(root1_num, 2*a)\n    root2 = Fraction(root2_num, 2*a)\n    \n    # Sort roots ascending (numerical comparison of Fractions works correctly)\n    sorted_roots = sorted([root1, root2])\n    \n    # Construct LaTeX for factors: a(x - r1)(x - r2) -> but usually monic form is preferred or expanded. \n    # Task asks for factorization_latex and roots_latex.\n    # Standard factorization of ax^2+bx+c = a(x-r1)(x-r2).\n    \n    def format_fraction(frac):\n        if frac.denominator == 1:\n            return str(frac.numerator)\n        else:\n            return f\"\\\\frac{{{frac.numerator}}}{{{{{frac.denominator}}}}}\"\n\n    r1_str = format_fraction(sorted_roots[0])\n    r2_str = format_fraction(sorted_roots[1])\n    \n    # Roots LaTeX (ascending order as requested by \"roots_latex\")\n    roots_latex = f\"\\\\left( {r1_str} \\\\right), \\\\left( {r2_str} \\\\right)\"\n    \n    # Factorization LaTeX: a(x - r1)(x - r2)\n    factorization_latex = f\"{a}(x-{format_fraction(Fraction(-sorted_roots[0].numerator, sorted_roots[0].denominator))})(x-{format_fraction(Fraction(-sorted_roots[1].numerator, sorted_roots[1].denominator))})\" \n    # Wait, the roots are already negative in value if we write (x - r).\n    # If root is 2/3, factor is (x - 2/3). If root is -4, factor is (x + 4) which is (x - (-4)).\n    # Let's reconstruct carefully.\n    \n    # Correct logic for LaTeX factors:\n    # Factor = a * (x - r1) * (x - r2)\n    # We need to format the term inside parenthesis correctly handling signs in numerator/denominator\n    \n    def get_factor_term(r):\n        num = r.numerator\n        den = r.denominator\n        if den == 1:\n            val_str = str(num)\n        else:\n            val_str = f\"\\\\frac{{{num}}}{{{{{den}}}}}\"\n        \n        # If value is positive, we write (x - val). If negative, (x + abs(val)).\n        # However, standard LaTeX often just uses minus and lets the fraction handle sign.\n        # Let's stick to strict mathematical notation: x - r.\n        return f\"\\\\left(x-{val_str}\\\\right)\"\n\n    factor1 = get_factor_term(sorted_roots[0])\n    factor2 = get_factor_term(sorted_roots[1])\n    \n    factorization_latex = f\"{a}{factor1}{factor2}\"\n    \n    # Question text construction\n    question_text = (f\"Find the roots and factorize the quadratic polynomial with coefficients {quadratic_coefficients}. \"\n                     f\"The polynomial is $x^{{4}} + 4x - 12$? No, it's degree 2. \"\n                     f\"The polynomial is ${a}x^2+{b}x+{c}$.\" )\n    \n    # Let's make the question text formal and precise using LaTeX delimiters for math parts if needed, \n    # but plain text with latex inside strings is fine per instructions (\"use formal LaTeX delimiters\").\n    poly_str = f\"{a}x^2 + {b}x + {c}\"\n    \n    return_dict = {\n        \"question_text\": (f\"Determine the roots and factorization of the quadratic polynomial defined by coefficients: $\\\\{poly_str}$.\" ),\n        \"correct_answer\": {\n            \"roots\": [sorted_roots[0], sorted_roots[1]], # List of Fractions or strings? \n                     # Task says \"Exact arithmetic; no floats\". Usually implies Fraction objects or string representations.\n                     # Given the context of 'latex', maybe strings are safer for display, but list usually expects values.\n                     # Let's provide Fraction objects as they represent exact roots perfectly in Python.\n            \"factorization_latex\": factorization_latex, \n            \"roots_latex\": roots_latex\n        },\n        \"oracle_payload\": {\"quadratic_coefficients\": [1, 4, -12]}\n    }\n\n# Fix: The previous code block had a syntax error in the thought process regarding variable scope and imports inside function.\n# Re-writing cleanly without errors.\n\ndef generate(level=1, **kwargs):\n    from math import gcd as _gcd\n    from fractions import Fraction\n    \n    quadratic_coefficients = [1, 4, -12]\n    \n    a = quadratic_coefficients[0]\n    b = quadratic_coefficients[1]\n    c = quadratic_coefficients[2]\n    \n    discriminant = b * b - 4 * a * c\n    sqrt_discriminant_int = int(discriminant ** 0.5)\n    \n    root1_num = -b + sqrt_discriminant_int\n    root1_denom = 2 * a\n    \n    root2_num = -b - sqrt_discriminant_int\n    root2_denom = 2 * a\n    \n    r1 = Fraction(root1_num, root1_denom)\n    r2 = Fraction(root2_num, root2_denom)\n    \n    sorted_roots = sorted([r1, r2])\n    \n    def format_latex_frac(frac):\n        if frac.denominator == 1:\n            return str(frac.numerator)\n        else:\n            # Ensure sign is handled in numerator for cleaner LaTeX usually, \n            # but standard fraction handles it. Let's keep simple.\n            num_str = f\"{frac.numerator}\"\n            den_str = f\"{{{frac.denominator}}}\"\n            return f\"\\\\frac{{{num_str}}}{{{{{den_str}}}}}\"\n\n    r1_latex_val = format_latex_frac(sorted_roots[0])\n    r2_latex_val = format_latex_frac(sorted_roots[1])\n    \n    roots_latex = f\"\\\\left( {r1_latex_val} \\\\right), \\\\left( {r2_latex_val} \\\\right)\"\n    \n    # Factorization: a(x - r1)(x - r2)\n    term1 = f\"x-{format_latex_frac(sorted_roots[0])}\" if sorted_roots[0].numerator > 0 else f\"x+{abs(format_latex_frac(Fraction(-sorted_roots[0])))}\" # Simplified logic below\n    \n    # Better approach for factor latex: just use x - r\n    def make_factor_term(r):\n        val = format_latex_frac(r)\n        return f\"\\\\left(x-{val}\\\\right)\"\n\n    term1 = make_factor_term(sorted_roots[0])\n    term2 = make_factor_term(sorted_roots[1])\n    \n    factorization_latex = f\"{a}{term1}{term2}\"\n    \n    poly_str = f\"{a}x^2 + {b}x + {c}\"\n    \n    return_dict = {\n        \"question_text\": (f\"Determine the roots and factorization of the quadratic polynomial defined by coefficients: $\\\\{poly_str}$.\" ),\n        \"correct_answer\": {\n            \"roots\": sorted_roots, \n            \"factorization_latex\": factorization_latex, \n            \"roots_latex\": roots_latex\n        },\n        \"oracle_payload\": {\"quadratic_coefficients\": [1, 4, -12]}\n    }\n\n# Wait, the previous thought block had a function definition inside another. I need to output ONLY ONE valid Python source file content starting with def generate...\n# The logic above is correct but needs to be in one clean block without comments that break syntax if not careful. \n# Also, ensure `sorted_roots` contains Fraction objects for \"Exact arithmetic\".\n\ndef generate(level=1, **kwargs):\n    from math import gcd as _gcd\n    from fractions import Fraction\n    \n    quadratic_coefficients = [1, 4, -12]\n    \n    a = quadratic_coefficients[0]\n    b = quadratic_coefficients[1]\n    c = quadratic_coefficients[2]\n    \n    discriminant = b * b - 4 * a * c\n    sqrt_discriminant_int = int(discriminant ** 0.5)\n    \n    root1_num = -b + sqrt_discriminant_int\n    root1_denom = 2 * a\n    \n    root2_num = -b - sqrt_discriminant_int\n    root2_denom = 2 * a\n    \n    r1 = Fraction(root1_num, root1_denom)\n    r2 = Fraction(root2_num, root2_denom)\n    \n    sorted_roots = sorted([r1, r2])\n    \n    def format_latex_frac(frac):\n        if frac.denominator == 1:\n            return str(frac.numerator)\n        else:\n            num_str = f\"{frac.numerator}\"\n            den_str = f\"{{{frac.denominator}}}\"\n            return f\"\\\\frac{{{num_str}}}{{{{{den_str}}}}}\"\n\n    r1_latex_val = format_latex_frac(sorted_roots[0])\n    r2_latex_val = format_latex_frac(sorted_roots[1])\n    \n    roots_latex = f\"\\\\left( {r1_latex_val} \\\\right), \\\\left( {r2_latex_val} \\\\right)\"\n    \n    def make_factor_term(r):\n        val = format_latex_frac(r)\n        return f\"\\\\left(x-{val}\\\\right)\"\n\n    term1 = make_factor_term(sorted_roots[0])\n    term2 = make_factor_term(sorted_roots[1])\n    \n    factorization_latex = f\"{a}{term1}{term2}\"\n    \n    poly_str = f\"{a}x^2 + {b}x + {c}\"\n    \n    return_dict = {\n        \"question_text\": (f\"Determine the roots and factorization of the quadratic polynomial defined by coefficients: $\\\\{poly_str}$.\" ),\n        \"correct_answer\": {\n            \"roots\": sorted_roots, \n            \"factorization_latex\": factorization_latex, \n            \"roots_latex\": roots_latex\n        },\n        \"oracle_payload\": {\"quadratic_coefficients\": [1, 4, -12]}\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T18:23:11.474978+00:00",
+  "completed_at_utc": "2026-07-21T18:23:52.205861+00:00",
+  "duration": 40.73087400000077,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 40.7308602000121,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 228,
+      "eval_count": 2643,
+      "total_token_count": 2871,
+      "total_duration": 38712949700,
+      "load_duration": 245501200,
+      "done_reason": "stop",
+      "latency_ms": 40730,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072001,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072001,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce112_q12_independent_probability_fraction__ab1__seed_2026072003",
+  "task_id": "ce112_q12_independent_probability_fraction",
+  "family": "fraction",
+  "condition": "ab1",
+  "seed": 2026072003,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072003
+  },
+  "prompt_sha256": "ce709937aef3026d48af8ea0b6eb6dbc53d0c07731b232df03b0657672d7d74c",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    p1 = kwargs.get(\"p1\", [2, 6])\n    p2 = kwargs.get(\"p2\", [1, 5])\n    \n    num_p1 = p1[0]\n    den_p1 = p1[1]\n    num_p2 = p2[0]\n    den_p2 = p2[1]\n    \n    # Probability of independent events: P(A and B) = P(A) * P(B)\n    numerator = num_p1 * num_p2\n    denominator = den_p1 * den_p2\n    \n    import math\n    gcd_val = math.gcd(numerator, denominator)\n    \n    simplified_numerator = numerator // gcd_val\n    simplified_denominator = denominator // gcd_val\n    \n    question_text = r\"Given two independent events $A$ and $B$, where the probability of event $A$ is $\\frac{\" + str(num_p1) + \"}{\\\\\" + str(den_p1) + \"\\}$ and the probability of event $B$ is $\\frac{\" + str(num_p2) + \"}{\\\\\" + str(den_p2) + \"\\}$, calculate the probability that both events occur. Express your answer as an irreducible fraction.\"\n    \n    canonical_latex = r\"\\frac{\" + str(simplified_numerator) + \"}{\\\\\" + str(simplified_denominator) + \"\\}\"\n    correct_answer_str = f\"numerator: {simplified_numerator}, denominator: {simplified_denominator}, canonical_latex: {canonical_latex}\"\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer_str,\n        \"oracle_payload\": {\"p1\": p1, \"p2\": p2}\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T19:57:43.877748+00:00",
+  "completed_at_utc": "2026-07-21T19:57:51.916581+00:00",
+  "duration": 8.038819900015369,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 8.038805200019851,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 162,
+      "eval_count": 386,
+      "total_token_count": 548,
+      "total_duration": 6010226000,
+      "load_duration": 268333700,
+      "done_reason": "stop",
+      "latency_ms": 8038,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072003,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072003,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

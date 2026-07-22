@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce112_q04_radical_simplification__ab2g__seed_2026072001",
+  "task_id": "ce112_q04_radical_simplification",
+  "family": "radical",
+  "condition": "ab2g",
+  "seed": 2026072001,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072001
+  },
+  "prompt_sha256": "6d252e1058c14eee07326788693fec710a5247c404e7dd74f3d22156235a82f4",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    frozen_params = {\"radicand\": 135}\n    \n    radicand = frozen_params[\"radicand\"]\n    \n    # Factorize radicand to simplify radical: sqrt(n * k^2) -> k*sqrt(n)\n    factors = []\n    temp = radicand\n    d = 2\n    while d * d <= temp:\n        if temp % d == 0:\n            count = 0\n            while temp % d == 0:\n                count += 1\n                temp //= d\n            factors.append((d, count))\n        else:\n            d += 1\n    \n    # Separate perfect square parts and remaining part\n    coeff_part = 1\n    new_radicand = 1\n    \n    for base, exponent in factors:\n        if exponent % 2 == 0:\n            q = exponent // 2\n            coeff_part *= (base ** q)\n        else:\n            remainder = exponent - ((exponent + 1) // 2 * 2) # This logic is slightly off for odd, let's fix\n            # Correct logic: take even part out to coefficient\n            full_pairs = exponent // 2\n            coeff_part *= (base ** full_pairs)\n            new_radicand *= base\n    \n    if temp > 1:\n        new_radicand *= temp\n        \n    simplified_coefficient = coeff_part\n    simplified_radicand = new_radicand\n    \n    # Construct LaTeX strings\n    canonical_latex = f\"\\\\sqrt{{{simplified_radicand}}}\"\n    \n    question_text = (f\"Simplify the radical expression: $\\\\\\\\sqrt{{{radicand}}}$. \"\n                     f\"The answer should be in the form of a coefficient times a simplified radical, e.g., $a\\\\\\\\sqrt{b}$ where b is square-free.\")\n    \n    correct_answer = {\n        \"coefficient\": str(simplified_coefficient),\n        \"radicand\": str(simplified_radicand),\n        \"canonical_latex\": canonical_latex\n    }\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T18:26:38.883748+00:00",
+  "completed_at_utc": "2026-07-21T18:26:48.197766+00:00",
+  "duration": 9.314004999934696,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 9.313991900067776,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 213,
+      "eval_count": 482,
+      "total_token_count": 695,
+      "total_duration": 7289260200,
+      "load_duration": 243341100,
+      "done_reason": "stop",
+      "latency_ms": 9313,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072001,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072001,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

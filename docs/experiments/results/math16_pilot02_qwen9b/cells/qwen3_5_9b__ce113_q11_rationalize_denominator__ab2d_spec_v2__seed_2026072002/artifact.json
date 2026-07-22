@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce113_q11_rationalize_denominator__ab2d_spec_v2__seed_2026072002",
+  "task_id": "ce113_q11_rationalize_denominator",
+  "family": "radical",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072002,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072002
+  },
+  "prompt_sha256": "4033ab46b2fd824676ffbdde5923011d60dab8b2e0ae8d562ec42a32b75da01a",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce113_q11_rationalize_denominator.txt",
+  "generation_status": "success",
+  "raw_response": "# -*- coding: utf-8 -*-\n\ndef generate(level=1, **kwargs):\n    # Frozen sampled parameters defined directly as per contract\n    denominator_str = \"4-sqrt(7)\"\n    numerator_val = 9\n    radicand_val = 7\n    \n    # Rationalize the denominator of (numerator) / (a - sqrt(b))\n    # Formula: n / (A - R) = n * (A + R) / ((A)^2 - (R)^2)\n    # Here A=4, R=sqrt(7), so denom^2 = 16 - 7 = 9.\n    \n    a_term = 4      # The rational part of the denominator term 'a' in (a - sqrt(b))\n    b_val = radicand_val  # The value under the radical\n    \n    # Calculate new numerator: n * (A + R) -> we only need integer parts for sum later, \n    # but let's compute exact form first.\n    # Resulting expression is [n*A / D] + [n*R / D] where D = A^2 - b_val\n    denominator_squared_minus_radicand = a_term * a_term - b_val  # 16 - 7 = 9\n    \n    new_numerator_rational_part = numerator_val * a_term   # n*A\n    new_numerator_irrational_coefficient = numerator_val    # n*1 (coefficient of R)\n    \n    final_rational_coef = new_numerator_rational_part // denominator_squared_minus_radicand  # Integer division is safe here as result is integer? \n    # Wait, let's check: 9 * 4 / 9 = 36/9 = 4. Yes.\n    # And irrational part coeff: (n) / D -> coefficient of sqrt(b).\n    \n    final_irrational_coef_num = new_numerator_irrational_coefficient\n    final_denom_val = denominator_squared_minus_radicand\n    \n    # The term is (final_rational_coef) + (final_irrational_coef_num // final_denom_val)*sqrt(b)? \n    # No, the coefficient of sqrt(7) is (n / D). Since n=9 and D=9, coeff is 1.\n    \n    rational_part = new_numerator_rational_part // denominator_squared_minus_radicand\n    irrational_coefficient_num = numerator_val\n    \n    final_irrational_coef = irrational_coefficient_num // denominator_squared_minus_radicand\n    \n    # The result form requested: a + b*sqrt(7) where a and b are integers.\n    val_a = rational_part\n    val_b = final_irrational_coef\n    \n    correct_answer = val_a + val_b\n    \n    question_text = r\"The expression $\\frac{9}{4-\\sqrt{7}}$ simplifies to $a+b\\sqrt{7}$ where $a$ and $b$ are integers. What is the value of $a+b$?\"\n    \n    oracle_payload = {\n        \"denominator\": denominator_str,\n        \"numerator\": numerator_val,\n        \"radicand\": radicand_val\n    }\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T19:05:08.866241+00:00",
+  "completed_at_utc": "2026-07-21T19:05:21.617235+00:00",
+  "duration": 12.750983500038274,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 12.750970699940808,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 598,
+      "eval_count": 705,
+      "total_token_count": 1303,
+      "total_duration": 10730315400,
+      "load_duration": 253065100,
+      "done_reason": "stop",
+      "latency_ms": 12750,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072002,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072002,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

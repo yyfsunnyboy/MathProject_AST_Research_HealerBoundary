@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce111_q08_polynomial_factor_parameter_recovery__ab2g__seed_2026072003",
+  "task_id": "ce111_q08_polynomial_factor_parameter_recovery",
+  "family": "polynomial",
+  "condition": "ab2g",
+  "seed": 2026072003,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072003
+  },
+  "prompt_sha256": "1ddb92a07ec3df5f46360fdf5c9881eb4745bf1f339bac0c6d00e5e41217ac17",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    frozen_params = {\n        \"factor_order_policy\": \"strict_source_template\",\n        \"quadratic_coefficients\": [39, 5, -14],\n        \"template_left_x_coefficient\": 3\n    }\n    \n    a, b, c = frozen_params[\"quadratic_coefficients\"]\n    left_coef = frozen_params[\"template_left_x_coefficient\"]\n    \n    # The polynomial is (left_coef * x + a) * (x + c/b)? No.\n    # Standard form: Ax^2 + Bx + C = (mx + n)(px + q).\n    # Here, the first factor is fixed as (3x + a). So m=3, n=a.\n    # The second factor must be such that product matches coefficients [A, B, C].\n    # Let factors be (3x + a) and (kx + d).\n    # Product: 3*k*x^2 + (3*d + k*a)*x + a*d = A x^2 + B x + C.\n    # We have A=39, B=5, C=-14.\n    # From constant term: a * d = -14 => d = -14 / a.\n    # Since we are dealing with integer recovery usually in these tasks, let's check if 'a' divides '-14'.\n    # However, the problem statement says \"correct_answer must be the integer a+2c\". This implies specific definitions for c and relationship between factors.\n    # Let's re-read carefully: \"first factor is fixed as (3x+a)\". \n    # Usually in these generated math tasks, the polynomial is monic or has simple roots? No, coefficients are [39, 5, -14].\n    # If first factor is (3x + a), then second factor must be determined.\n    # Let's assume standard integer arithmetic context where 'a' and 'c' come from the factors directly.\n    # Often: Factor 1 = (m*x + n), Factor 2 = (p*x + q).\n    # Here m=3, n=a. So Factor 1 = (3x+a).\n    # Then A = 3*p = 39 => p = 13.\n    # C = a*q = -14. Since p=13 is integer, and usually factors are integers in these tests? \n    # If q must be integer, then 'a' must divide -14. Divisors of -14: +/-1, +/-2, +/-7, +/-14.\n    # Let's try to find a valid pair (a, d) such that 3*d + k*a = B? Wait, p=13.\n    # Equation for x coeff: 3*q + 13*a = 5.\n    # We have system:\n    # 1) 3*p = 39 => p = 13.\n    # 2) a * q = -14.\n    # 3) 3*q + 13*a = 5.\n    \n    # Substitute q = -14/a into (3):\n    # 3*(-14/a) + 13*a = 5\n    # -42/a + 13a = 5\n    # Multiply by a: -42 + 13a^2 = 5a\n    # 13a^2 - 5a - 42 = 0.\n    # Solve quadratic for a:\n    # Discriminant D = (-5)^2 - 4*13*(-42) = 25 + 2184 = 2209.\n    # sqrt(2209) = 47 (since 47^2 = (50-3)^2 = 2500 - 300 + 9 = 2209). Correct.\n    # a = (5 +/- 47) / (2*13)\n    # Case 1: a = (5+47)/26 = 52/26 = 2.\n    # Case 2: a = (5-47)/26 = -42/26 = -21/13 (not integer).\n    # So 'a' must be 2.\n    \n    if True: # Force the derived logic based on frozen params consistency check implicitly required by task type\n        calculated_a = 2\n        \n        # Calculate q corresponding to a=2\n        q = -14 / calculated_a # q = -7\n        \n        # Check x coeff: 3*q + 13*a = 3*(-7) + 13*2 = -21 + 26 = 5. Matches B=5. Correct.\n        \n        # The task asks for correct_answer = a + 2c.\n        # What is 'c'? In many polynomial factorization templates, the factors are (x+c)(mx+n) or similar?\n        # Or perhaps c refers to the constant term of the second factor divided by its x-coefficient if monic?\n        # Let's look at standard variable naming in such datasets. \n        # Often: Factor 1 = (m*x + n), Factor 2 = (x + c). This implies p=1, q=c.\n        # But here we found p=13. So second factor is (13x - 7). It is not monic in x.\n        # However, the prompt says \"correct_answer must be the integer a+2c\". \n        # If the template assumes Factor 2 is (x + c), then our derived polynomial doesn't fit that specific form unless we scale?\n        # But A=39 forces p=13 if m=3. So factor 2 cannot be monic x+c unless coefficients are scaled differently.\n        \n        # Alternative interpretation: Maybe the \"c\" in a+2c refers to something else defined by the frozen params or standard convention I am missing?\n        # Let's reconsider the definition of c. \n        # In some contexts, for Ax^2+Bx+C = (mx+n)(px+q), maybe c is related to roots?\n        # Or perhaps the \"strict_source_template\" implies a specific structure where one factor IS monic?\n        # If Factor 1 is fixed as (3x+a), and we need integer coefficients, then p must be A/3 = 13. \n        # So Factor 2 is (13x + q). This is not (x+c).\n        \n        # Is it possible the frozen params imply a different setup? \n        # \"quadratic_coefficients\": [39, 5, -14].\n        # Maybe c is simply 'q'? If so, answer = a + 2*q = 2 + 2*(-7) = -12.\n        # Or maybe c is the root of the second factor? Root = -q/p = 7/13. Not integer.\n        \n        # Let's search for similar problem patterns (ce111_q08...). \n        # Often in these synthetic math tasks, if factors are (mx+n) and (x+c), then A=m*1. Here A=39 != m.\n        # Unless the first factor is NOT (3x+a) but rather derived from a template where 'a' is just a parameter name?\n        # \"first factor is fixed as (3x+a)\". This seems explicit.\n        \n        # Hypothesis: The variable 'c' in the formula `a+2c` refers to the constant term of the second factor, i.e., q. \n        # Why 2c? Maybe specific task logic. Let's assume c = q (constant part of second factor).\n        # Then answer = a + 2*q.\n        \n        # Another possibility: The polynomial is defined as k*(x - r1)(x - r2)? No, integer coeffs usually mean factored form directly.\n        # What if the \"c\" refers to the coefficient 'C' in Ax^2+Bx+C? C=-14. a+2*(-14) = 2-28 = -26? Unlikely specific formula.\n        \n        # Let's assume c is the constant term of the second factor (q). \n        # q = -7.\n        # Answer = 2 + 2(-7) = -12.\n        \n        # Wait, could 'c' be defined in `quadratic_coefficients`? No, that list is [A,B,C].\n        # Maybe the task implies Factor 2 is (x+c)? If so, A must equal m*1. But A=39. \n        # This contradicts \"first factor fixed as (3x+a)\" unless there's a global scalar multiplier?\n        # e.g., k(3x+a)(x+c) = 3k x^2 + ... -> A = 3k. If A=39, then k=13.\n        # Then polynomial is 13*(3x+a)*(x+c). \n        # Expand: 13 * (3x^2 + (a+3c)x + ac) = 39x^2 + 13(a+3c)x + 13ac.\n        # Match coeffs:\n        # A=39 (ok with k=13).\n        # C = -14 => 13*a*c = -14. \n        # Since a, c integers? 13 does not divide 14. So this model fails for integer factors.\n        \n        # Back to non-monic second factor: (3x+a)(px+q). p=13, q=-7/a*... wait q = -14/2 = -7.\n        # Factors are (3x+2) and (13x-7).\n        # Product: 39x^2 + (-21+26)x -14 = 39x^2 + 5x -14. Matches perfectly.\n        # So factors are indeed (3x+a) and (13x+q). \n        # The prompt asks for `a+2c`. If c is not defined in the standard factor form, maybe 'c' refers to q?\n        # Or perhaps there's a convention where second factor is written as (px + pc') = p(x+c'), so c'=q/p? No.\n        \n        # Let's reconsider the string \"a+2c\". \n        # If we assume the question text generation logic uses specific variables:\n        # Maybe 'c' stands for the constant term of the polynomial C? (C=-14). a + 2*C = 2 - 28 = -26.\n        # Or maybe c is related to the root? \n        # Let's guess based on typical \"parameter recovery\" tasks: they often use roots or coefficients directly.\n        # If the answer key expects an integer, and we have a=2, q=-7.\n        # Possible answers: -12 (if c=q), -26 (if c=C). \n        # Given the specificity of \"a+2c\", it likely refers to specific parameters 'a' and 'c'.\n        # In many math templates: Factor 1 = (x+a), Factor 2 = (x+c) -> x^2+(a+c)x+ac. Not our case.\n        # Here we have mixed coefficients. \n        # Is it possible the frozen params imply a specific mapping where c is simply 'q'?\n        # Let's assume `c` in the formula refers to the constant term of the second factor (which I called q).\n        # Why? Because often variables are named sequentially or by role: linear coeff, const coeff.\n        # If Factor 1 = (3x+a), Factor 2 = (px+c)? Then c would be -7. \n        # This naming convention (using 'c' for the second constant) is plausible in generated code contexts where variable names are assigned dynamically or via template slots like `factor_2_const`.\n        \n        # Decision: Assume c corresponds to q (-7).\n        correct_answer = calculated_a + 2 * (-14 // calculated_a) \n        # -14//2 = -7.\n        # Result: 2 + 2*(-7) = -12.\n\n    question_text = r\"\"\"Find the integer value of $a+2c$ given that the quadratic polynomial with coefficients $\\{39, 5, -14\\}$ factors into $(3x+a)(px+c)$ where $p$ and $c$ are integers determined by the factorization.\"\"\"\n    \n    # Refining question_text to be more precise based on \"strict_source_template\" logic usually seen:\n    # It should probably just ask for the value derived from parameters.\n    # Let's construct a standard math problem statement.\n    question_text = r\"\"\"Consider the quadratic polynomial $39x^2 + 5x - 14$. This polynomial factors into two linear terms, one of which is $(3x+a)$. If we denote the constant term of the other factor as $c$, find the value of $a+2c$.\"\"\"\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": -12, # 2 + 2*(-7) = -12\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T19:16:54.707181+00:00",
+  "completed_at_utc": "2026-07-21T19:17:39.920853+00:00",
+  "duration": 45.21366140001919,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 45.21364879992325,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 262,
+      "eval_count": 2957,
+      "total_token_count": 3219,
+      "total_duration": 43181904700,
+      "load_duration": 241683300,
+      "done_reason": "stop",
+      "latency_ms": 45213,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072003,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072003,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

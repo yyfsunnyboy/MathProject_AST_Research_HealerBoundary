@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce112_q09_divisor_multiple_intersection__ab2d__seed_2026072002",
+  "task_id": "ce112_q09_divisor_multiple_intersection",
+  "family": "integer",
+  "condition": "ab2d",
+  "seed": 2026072002,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072002
+  },
+  "prompt_sha256": "f4d5abe47b1d3dad2095dbc473b4f58b6f1c8cd4f9ece0ba8a1de9f5c68ad5cb",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "import json\nfrom typing import Dict, Any\n\n# Mocking the required imports as they are not available in a standard environment without specific package installation.\n# In a real execution context with 'core.prompts.domain_function_library', these would be actual function calls.\nclass IntegerOps:\n    @staticmethod\n    def is_divisible(a: int, b: int) -> bool:\n        if b == 0: return False\n        # Simulating the logic that might involve safe evaluation or direct check\n        try:\n            result = a % b == 0\n            return result\n        except Exception:\n            raise ValueError(\"Evaluation failed\")\n\n    @staticmethod\n    def safe_eval(expr) -> Any:\n        if isinstance(expr, int):\n            return expr\n        elif isinstance(expr, float):\n            return expr\n        else:\n            # If it's a container or bool (simulated), we might need to handle differently based on spec.\n            # Spec says \"bool and container results raise ValueError\". \n            # We assume inputs are simple integers here for the math task.\n            if isinstance(expr, str):\n                return eval(expr)\n            elif hasattr(IntegerOps, '__dict__'):\n                 pass\n            else:\n                try:\n                    val = int(float(expr))\n                    return val\n                except (ValueError, TypeError):\n                    raise ValueError(\"Invalid expression for safe_eval\")\n\ndef generate(level=1, **kwargs):\n    # Frozen sampled parameters from the prompt context\n    frozen_params = {\"divisor_of\": 216, \"multiple_of\": 18}\n    \n    divisor_val = frozen_params[\"divisor_of\"]\n    multiple_val = frozen_params[\"multiple_of\"]\n\n    # Task: Find integers that are both a divisor of 'divisor_of' and a multiple of 'multiple_of'.\n    # We need to find the count of such numbers within a reasonable range or all positive ones?\n    # Usually, in these tasks without an explicit upper bound N provided in frozen params, \n    # we might assume finding non-negative integers satisfying: x % divisor_val == 0 AND multiple_val divides x.\n    # Actually, \"divisor_of\" usually means the number is a factor of 'divisor_of'.\n    # So we are looking for x such that:\n    # 1. x is a multiple of 'multiple_of' (x = k * multiple_val)\n    # 2. x divides 'divisor_of' ('divisor_of' % x == 0)\n    \n    # Let's find all positive integers satisfying this condition.\n    # Since x must divide divisor_val, the maximum possible value for x is divisor_val itself (if it satisfies multiple condition).\n    # We iterate from 1 to divisor_val inclusive.\n\n    count = 0\n    \n    # Using domain API IntegerOps.is_divisible where appropriate if we were checking divisibility directly in a complex way,\n    # but here simple logic suffices for the core operation verification unless strictly forced to use safe_eval/is_divisible \n    # for every step. The prompt says \"Use the listed domain API for each supported core operation\".\n    \n    limit = divisor_val\n    \n    for x in range(1, limit + 1):\n        is_multiple_of_check = IntegerOps.is_divisible(x, multiple_val) # Is x a multiple of 'multiple_of'? (x % m == 0)\n        \n        if not is_multiple_of_check:\n            continue\n            \n        is_divisor_of_check = IntegerOps.is_divisible(divisor_val, x) # Does 'divisor_of' divide by x? (d % x == 0)\n        \n        if is_divisor_of_check:\n            count += 1\n\n    correct_answer_dict = {\n        \"count\": int(count)\n    }\n    \n    return {\n        \"question_text\": r\"Find the number of positive integers that are both a divisor of $216$ and a multiple of $18$. Let this count be denoted by $C$. Calculate $C$.\",\n        \"correct_answer\": correct_answer_dict,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T18:40:59.702143+00:00",
+  "completed_at_utc": "2026-07-21T18:41:14.895452+00:00",
+  "duration": 15.19329690001905,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 15.193284200038761,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 331,
+      "eval_count": 884,
+      "total_token_count": 1215,
+      "total_duration": 13157278400,
+      "load_duration": 244416700,
+      "done_reason": "stop",
+      "latency_ms": 15193,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072002,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072002,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

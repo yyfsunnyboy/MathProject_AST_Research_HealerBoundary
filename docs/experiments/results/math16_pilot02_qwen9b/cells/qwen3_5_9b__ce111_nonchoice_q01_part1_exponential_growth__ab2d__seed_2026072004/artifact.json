@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce111_nonchoice_q01_part1_exponential_growth__ab2d__seed_2026072004",
+  "task_id": "ce111_nonchoice_q01_part1_exponential_growth",
+  "family": "integer",
+  "condition": "ab2d",
+  "seed": 2026072004,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072004
+  },
+  "prompt_sha256": "1f1491d3b68e9620550398001b27cd72e2f8b6c08c2debbf346396314a69cb42",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "from typing import Dict, Any\nimport math\nfrom core.prompts.domain_function_library import IntegerOps\n\ndef generate(level=1, **kwargs):\n    frozen_params = {\"days\": 15, \"hours_per_generation\": 20, \"initial\": 1, \"split_factor\": 4}\n    \n    # Calculate number of generations based on days and hours per generation (assuming 24h day)\n    total_hours = frozen_params[\"days\"] * 24\n    num_generations = int(total_hours / frozen_params[\"hours_per_generation\"])\n    \n    initial_pop = frozen_params[\"initial\"]\n    split_factor = frozen_params[\"split_factor\"]\n    \n    # Exponential growth: P(t) = P0 * (r^t) where r is the split factor per generation\n    final_count = IntegerOps.safe_eval(str(initial_pop * (split_factor ** num_generations)))\n    \n    question_text = f\"A population starts with {IntegerOps.fmt_num(initial_pop)} individuals. Every {frozen_params['hours_per_generation']} hours, each individual splits into {split_factor} offspring. After {frozen_params['days']} days ({total_hours} hours), how many individuals are there? Assume the process runs for exactly that duration.\"\n    \n    correct_answer = {\"k\": final_count}\n    oracle_payload = frozen_params\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T20:04:50.798411+00:00",
+  "completed_at_utc": "2026-07-21T20:04:57.832653+00:00",
+  "duration": 7.034229499986395,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 7.034211700083688,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 344,
+      "eval_count": 316,
+      "total_token_count": 660,
+      "total_duration": 5007831000,
+      "load_duration": 261586200,
+      "done_reason": "stop",
+      "latency_ms": 7034,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072004,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072004,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

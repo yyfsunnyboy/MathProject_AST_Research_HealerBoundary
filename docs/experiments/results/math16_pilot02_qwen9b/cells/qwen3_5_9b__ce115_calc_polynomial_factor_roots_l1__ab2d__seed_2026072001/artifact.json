@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce115_calc_polynomial_factor_roots_l1__ab2d__seed_2026072001",
+  "task_id": "ce115_calc_polynomial_factor_roots_l1",
+  "family": "polynomial",
+  "condition": "ab2d",
+  "seed": 2026072001,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072001
+  },
+  "prompt_sha256": "46eb44551fe48e5def0a14fdfe506b30e5987c44c0dee69f259bf42b90ab54a0",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "from fractions import Fraction\nimport sys\nsys.path.insert(0, '.')\ntry:\n    from core.prompts.domain_function_library import PolynomialOps, FractionOps\nexcept ImportError:\n    # Fallback for local execution without full environment if necessary, \n    # but per instructions we assume the library is available or implement minimal stubs.\n    \n    class FakeFraction(Fraction):\n        def __init__(self, value=None):\n            super().__init__()\n\n    PolynomialOps = type('PolynomialOps', (), {\n        'factor_quadratic_exact': lambda a, b, c: [\n            {'x_coefficient': Fraction(-b + (b*b - 4*a*c)**0.5) / (2*a), 'constant': Fraction(c)/Fraction(a)}, # Simplified stub for fallback logic if needed\n            {'x_coefficient': Fraction(-b - (b*b - 4*a*c)**0.5) / (2*a), 'constant': Fraction(c)/Fraction(a)}\n        ]\n    })\n\ndef generate(level=1, **kwargs):\n    frozen_params = {\"quadratic_coefficients\": [1, 4, -12]}\n    \n    # Extract coefficients a, b, c from the list provided in frozen params or kwargs override if logic allowed (here strictly frozen)\n    coeffs = frozen_params[\"quadratic_coefficients\"]\n    a = int(coeffs[0])\n    b = int(coeffs[1])\n    c = int(coeffs[2])\n\n    # Use domain API to factor exactly\n    try:\n        factors_list = PolynomialOps.factor_quadratic_exact(a, b, c)\n    except Exception as e:\n        # Fallback calculation if library is not present in this specific run context (e.g., isolated execution)\n        discriminant_val = b*b - 4*a*c\n        sqrt_discriminant = int(discriminant_val**0.5)\n        \n        root1_num = -b + sqrt_discriminant\n        root1_denom = 2 * a\n        \n        root2_num = -b - sqrt_discriminant\n        root2_denom = 2 * a\n\n        # Construct factor dicts manually for fallback to ensure exact types match contract\n        if discriminant_val >= 0:\n            r1_frac = Fraction(root1_num, root1_denom)\n            r2_frac = Fraction(root2_num, root2_denom)\n            \n            f1 = {'x_coefficient': r1_frac, 'constant': c/a} # Note: constant term in factor (ax - b/2 +/- ...) logic varies. \n            # Standard form a(x-r1)(x-r2). Factors usually represented as {root: ..., coeff: ...}.\n            # Based on typical API return structure for this task type: [dict(root=r1), dict(root=r2)] or similar.\n            # Let's assume the standard factorization output format expected by 'correct_answer' generation logic in these tasks:\n            # List of dicts containing root info and constant term if applicable, OR just roots. \n            # Re-reading spec: \"returns: list[dict, dict] ... keys x_coefficient,constant\". This implies factors like (x - r).\n            \n            f1 = {'x_coefficient': Fraction(1), 'constant': -r1_frac}\n            f2 = {'x_coefficient': Fraction(1), 'constant': -r2_frac}\n        else:\n             # Complex roots not expected for level 1 integer coeffs usually, but handle gracefully if needed.\n             pass\n\n    # Sort factors by root value ascending to ensure deterministic output order in list? \n    # The spec says \"roots (ascending)\" inside correct_answer dict. It doesn't explicitly mandate the internal factor list sort, \n    # but for consistency we will process roots into a sorted tuple/list first.\n    \n    if isinstance(factors_list[0], Fraction):\n        r1 = factors_list[0]\n        r2 = factors_list[1]\n    else:\n        # If fallback logic produced dicts with 'x_coefficient' key, extract root from there? \n        # Actually, the spec says API returns list of dict. Let's assume standard behavior where we construct roots directly for safety if library fails or behaves differently.\n        r1 = factors_list[0]['x_coefficient']\n        r2 = factors_list[1]['x_coefficient']\n\n    # Ensure ascending order for correct_answer['roots']\n    sorted_roots_tuple = tuple(sorted([r1, r2]))\n    \n    # Construct LaTeX strings without floats\n    def frac_latex(n):\n        if n.denominator == 1: return str(n.numerator)\n        else: return f\"\\\\frac{{{n.numerator}}}{{{{{n.denominator}}}}}\"\n\n    roots_str = \", \".join([frac_latex(r) for r in sorted_roots_tuple])\n    \n    # Factorization LaTeX: a(x - r1)(x - r2). \n    # Format: k_0 (x + c_1/k_0)(x + c_2/k_0)? Or simply coefficients.\n    # Standard factor form: 1 * (x - root1) * (x - root2) since a=1 here.\n    term1 = f\"x {frac_latex(-r1)}\" if r1.numerator != 0 else \"x\" # Simplified visual, usually x + c\n    # Better LaTeX for factor: (x \\\\pm ...)\n    sign_r1 = \"+\" if sorted_roots_tuple[0].numerator < 0 else \"-\"\n    val_r1_abs = abs(sorted_roots_tuple[0])\n    \n    term2_str = f\"x {frac_latex(-sorted_roots_tuple[0])}\" # x + (-r) -> x - r. If r is negative, -r is positive.\n    # Let's build strictly: (x - root). \n    if sorted_roots_tuple[0].numerator < 0:\n        term1_str = f\"x {frac_latex(-sorted_roots_tuple[0])}\" # x + |root|\n    else:\n        term1_str = f\"x {-frac_latex(sorted_roots_tuple[0])}\" # x - root\n    \n    if sorted_roots_tuple[1].numerator < 0:\n        term2_str = f\"x {frac_latex(-sorted_roots_tuple[1])}\" \n    else:\n        term2_str = f\"x {-frac_latex(sorted_roots_tuple[1])}\"\n\n    factorization_latex = f\"{a} ({term1_str}) ({term2_str})\" if a != 1 else f\"({term1_str}) ({term2_str})\"\n\n    question_text = (\n        r\"Solve the quadratic equation $x^2 + bx + c = 0$ given coefficients from the frozen parameters. \"\n        r\"What are the roots of the polynomial and its factorization over $\\mathbb{Q}$?\"\n    ) # Using generic text, but could be specific to coeffs if needed. \n    # To make it robust: substitute actual numbers? The prompt says \"frozen sampled parameters\". Usually questions use these values.\n    question_text = (\n        f\"Solve the quadratic equation $x^2 + {b}x + {c} = 0$. Find the roots and factorization.\"\n    )\n\n    correct_answer = {\n        \"roots\": sorted_roots_tuple, # List of Fractions or tuple? Spec says list[dict] for API return. For 'correct_answer', usually a list of values. \n                                   # Wait: spec says \"correct_answer must include roots (ascending)\". Usually implies [r1, r2].\n                                   # Let's provide as list of dicts if the domain expects it, or just values? \n                                   # Re-reading: \"returns: list[dict...]\" is for API. correct_answer structure not strictly defined beyond keys.\n                                   # I will return roots as a tuple/list of Fractions to be exact arithmetic.\n        \"roots\": sorted_roots_tuple, \n        \"factorization_latex\": factorization_latex,\n        \"roots_latex\": f\"$\\\\{{{frac_latex(sorted_roots_tuple[0])}\\\\}}, \\\\{{{frac_latex(sorted_roots_tuple[1])}}}$$\" # Or comma separated inside math mode? Usually list. Let's do: $r_1, r_2$. \n    }\n    \n    # Adjust roots_latex to be a single string representation of the set or tuple in LaTeX\n    correct_answer[\"roots_latex\"] = f\"$\\\\{{{frac_latex(sorted_roots_tuple[0])}\\\\}}, \\\\{{{frac_latex(sorted_roots_tuple[1])}}}$$\"\n\n    oracle_payload = frozen_params\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T18:23:52.212901+00:00",
+  "completed_at_utc": "2026-07-21T18:24:22.256778+00:00",
+  "duration": 30.043867499916814,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 30.043853899929672,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 374,
+      "eval_count": 1902,
+      "total_token_count": 2276,
+      "total_duration": 28019345400,
+      "load_duration": 241846900,
+      "done_reason": "stop",
+      "latency_ms": 30043,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072001,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072001,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

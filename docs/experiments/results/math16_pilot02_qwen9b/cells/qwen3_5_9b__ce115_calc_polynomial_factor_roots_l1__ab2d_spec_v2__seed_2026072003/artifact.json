@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce115_calc_polynomial_factor_roots_l1__ab2d_spec_v2__seed_2026072003",
+  "task_id": "ce115_calc_polynomial_factor_roots_l1",
+  "family": "polynomial",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072003,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072003
+  },
+  "prompt_sha256": "64ff6dc7b8b1fe7e5e14585fdc620a7ed1d9b0c573d08f1674d5cd55f8709943",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce115_calc_polynomial_factor_roots_l1.txt",
+  "generation_status": "success",
+  "raw_response": "# -*- coding: utf-8 -*-\n\ndef generate(level=1, **kwargs):\n    # Frozen sampled parameters as per specification\n    quadratic_coefficients = [1, 4, -12]\n    \n    a, b, c = quadratic_coefficients\n    \n    # Compute discriminant using native Python arithmetic\n    delta = b * b - 4 * a * c\n    \n    # Compute roots exactly. Since coefficients are integers and delta is perfect square (64),\n    # we can compute integer roots directly to avoid floats.\n    sqrt_delta = int(delta ** 0.5)\n    \n    root1_num = -b + sqrt_delta\n    root2_num = -b - sqrt_delta\n    \n    denom = 2 * a\n    \n    # Calculate exact rational roots as tuples (numerator, denominator) for JSON serialization\n    if denom != 0:\n        r1_numerator = root1_num // denom\n        r1_denominator = denom // gcd(abs(root1_num), abs(denom))\n        \n        r2_numerator = root2_num // denom\n        r2_denominator = denom // gcd(abs(root2_num), abs(denom))\n    else:\n        # Should not happen for quadratic with a=1, but handled safely\n        r1_numerator, r1_denominator = 0, 1\n        r2_numerator, r2_denominator = 0, 1\n\n    def gcd(x, y):\n        while y:\n            x, y = y, x % y\n        return x\n    \n    # Normalize fractions to ensure canonical representation (positive denominator)\n    if r1_denominator < 0:\n        r1_numerator = -r1_numerator\n        r1_denominator = -r1_denominator\n        \n    if r2_denominator < 0:\n        r2_numerator = -r2_numerator\n        r2_denominator = -r2_denominator\n\n    # Determine ascending order based on float value of the rational numbers for sorting,\n    # but store exact rationals. Since we need to return a list in correct_answer['roots'],\n    # and JSON doesn't support tuples well as distinct objects without custom encoding,\n    # we will represent roots as strings \"num/den\" or just integers if den=1.\n    \n    def format_root(n, d):\n        if d == 1:\n            return str(n)\n        else:\n            return f\"{n}/{d}\"\n\n    root_str_1 = format_root(r1_numerator, r1_denominator)\n    root_str_2 = format_root(r2_numerator, r2_denominator)\n\n    # Sort roots in ascending order for the final list representation\n    val1 = float(root_str_1.replace('/', ' ').split()[0]) if '/' in root_str_1 else int(root_str_1)\n    val2 = float(root_str_2.replace('/', ' ').split()[0]) if '/' in root_str_2 else int(root_str_2)\n\n    # Re-evaluate sorting logic properly using cross-multiplication to avoid floats for comparison\n    def compare_roots(n1, d1, n2, d2):\n        return (n1 * d2) - (n2 * d1)\n\n    if compare_roots(r1_numerator, r1_denominator, r2_numerator, r2_denominator) > 0:\n        sorted_root_strs = [root_str_2, root_str_1]\n        sorted_rational_pairs = [(r2_numerator, r2_denominator), (r1_numerator, r1_denominator)]\n    else:\n        sorted_root_strs = [root_str_1, root_str_2]\n        sorted_rational_pairs = [(r1_numerator, r1_denominator), (r2_numerator, r2_denominator)]\n\n    # Construct LaTeX for factorization: a(x - r1)(x - r2) -> 1*(x - (-3))(x - 4) => (x+3)(x-4)\n    # Roots are integers here: x = -6/2 = -3, x = 8/2 = 4. Wait calculation check:\n    # b=4, c=-12. delta = 16 - 4(1)(-12) = 16 + 48 = 64. sqrt=8.\n    # r1 = (-4+8)/2 = 2. r2 = (-4-8)/2 = -6.\n    # Roots are 2 and -6. Ascending: -6, 2.\n    \n    # Re-calculate specific values for this frozen set to ensure correctness in text generation logic above was generic but needs instantiation here? \n    # No, the code must compute it dynamically based on quadratic_coefficients passed as frozen constant inside function scope or derived from kwargs if allowed (but spec says do not read from kwargs).\n    # The spec says \"Frozen sampled parameters: {\"quadratic_coefficients\": [1, 4, -12]}\". \n    # My code defines this variable directly. It works for any quadratic with integer roots ideally, but handles rationals too.\n\n    r_asc_0 = sorted_rational_pairs[0]\n    r_asc_1 = sorted_rational_pairs[1]\n\n    root_latex_list = [format_root(r_asc_0[0], r_asc_0[1]), format_root(r_asc_1[0], r_asc_1[1])]\n    \n    # Factorization LaTeX: (x - r1)(x - r2) where r are the roots found.\n    # If root is integer k, term is \"(x-{k})\". If rational p/q, usually written as \"q(x-p/q)\" or just standard form? \n    # Standard factorization for ax^2+bx+c = a(x-r1)(x-r2). Here a=1.\n    # Term construction: if root r = n/d, term is (d*x - n) / d ? No, usually we keep monic factors if possible or just list roots.\n    # Task asks for \"factorization_latex\". For x^2 + 4x - 12 = (x+3)(x-6)? \n    # Wait my manual calc: r = (-b +/- sqrt)/2a = (-4 +/- 8)/2 -> 4/2=2, -12/2=-6.\n    # Factors are (x-2) and (x+6). Product is x^2 + 4x - 12. Correct.\n    \n    def make_factor_term(n, d):\n        if d == 1:\n            return f\"(x-{n})\"\n        else:\n            # For rational roots p/q with a=1, factor is (qx-p). \n            # Example: root -3/2 -> (-2)x + 3? No. x = -3/2 => 2x+3=0 => (2x+3)\n            return f\"({d}*x-{n})\"\n\n    term1 = make_factor_term(r_asc_0[0], r_asc_0[1]) # Note: order in factorization doesn't strictly matter but usually sorted or by appearance. \n    term2 = make_factor_term(r_asc_1[0], r_asc_1[1])\n    \n    # Actually, standard form often lists factors corresponding to roots found. Order of multiplication is commutative.\n    # Let's just use the ascending order for consistency if needed, or arbitrary. Commutative property holds.\n    factorization_latex = f\"{term1} {term2}\"\n\n    question_text = r\"Given the quadratic polynomial $x^2 + 4x - 12$, find its roots and express them in a list sorted in ascending order.\"\n    \n    # Construct correct_answer dict with exact types: \n    # 'roots': list of strings representing rational numbers (e.g., \"-6\", \"2\") or formatted fractions.\n    # 'factorization_latex': string\n    # 'roots_latex': list of LaTeX representations\n    \n    roots_list = root_latex_list\n    roots_latex_str = f\"${root_latex_list[0]}, ${root_latex_list[1]}$\"\n\n    correct_answer = {\n        \"roots\": roots_list,\n        \"factorization_latex\": factorization_latex,\n        \"roots_latex\": roots_latex_str\n    }\n\n    oracle_payload = {\"quadratic_coefficients\": [1, 4, -12]}\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T19:40:00.620673+00:00",
+  "completed_at_utc": "2026-07-21T19:40:30.642657+00:00",
+  "duration": 30.021972900023684,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 30.02195770002436,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 597,
+      "eval_count": 1877,
+      "total_token_count": 2474,
+      "total_duration": 28001193900,
+      "load_duration": 310541800,
+      "done_reason": "stop",
+      "latency_ms": 30021,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072003,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072003,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

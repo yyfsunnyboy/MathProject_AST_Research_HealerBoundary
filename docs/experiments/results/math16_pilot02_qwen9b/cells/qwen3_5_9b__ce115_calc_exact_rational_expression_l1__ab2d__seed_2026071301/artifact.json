@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce115_calc_exact_rational_expression_l1__ab2d__seed_2026071301",
+  "task_id": "ce115_calc_exact_rational_expression_l1",
+  "family": "fraction",
+  "condition": "ab2d",
+  "seed": 2026071301,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026071301
+  },
+  "prompt_sha256": "ccc56c41370e2b807299372da9b9af0d6807abf4dbae441990b16044d5108244",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "from fractions import Fraction as _Frac\nimport json\n\ndef generate(level=1, **kwargs):\n    frozen_params = {\"products\": [{\"left\": \"2.79\", \"right\": \"89.3\", \"sign\": 1}, {\"left\": \"-0.21\", \"right\": \"89.3\", \"sign\": -1}]}\n\n    # Parse inputs to exact Fractions\n    val_left_1 = _Frac(int(\"279\"), int(\"100\"))\n    val_right_1 = _Frac(int(\"893\"), int(\"10\"))\n    \n    val_left_2 = _Frac(-int(\"21\"), int(\"100\"))\n    val_right_2 = _Frac(int(\"893\"), int(\"10\"))\n\n    # Perform operations using domain API logic (simulated here with standard Fraction for exactness as per constraints)\n    term_1 = val_left_1 * val_right_1\n    term_2 = val_left_2 * val_right_2\n    \n    result_frac = term_1 + term_2\n\n    # Format correct_answer value string\n    num, den = result_frac.numerator, result_frac.denominator\n    if den == 0:\n        ans_str = \"undefined\"\n    else:\n        sign = \"-\" if (num < 0) ^ ((den < 0)) and not (num == 0) else \"\" # Simplify logic for string construction\n        abs_num, abs_den = abs(num), abs(den)\n        \n        # Ensure irreducible is handled by Fraction class automatically. \n        # Construct p/q format: \"p/q\" or \"-p/q\". If q=1 just \"p\".\n        if abs_den == 1:\n            ans_str = f\"{sign}{abs_num}\"\n        else:\n            ans_str = f\"{sign}{abs_num}/{abs_den}\"\n\n    # Construct canonical LaTeX\n    latex_parts = []\n    \n    def format_latex_term(frac, sign):\n        n, d = frac.numerator, frac.denominator\n        if abs(d) == 1:\n            return str(abs(n)) + (\"-\" if (n < 0 and not (d<0)) else \"\") # Simplified logic for term display\n        s_n = \"-\" if n < 0 else \"\"\n        s_d = \"-\" if d < 0 else \"\"\n        num_str = abs(n)\n        den_str = abs(d)\n        \n        return f\"{s_n}{num_str}/{den_str}\"\n\n    # Re-evaluate signs for LaTeX construction cleanly\n    t1_sign = \" + \" if term_2.numerator >= 0 and (term_1.numerator < 0 or term_2.numerator > 0) else \"\" \n    # Actually, let's just build the expression string directly from components\n    \n    expr_parts = []\n    \n    def get_latex_term(val):\n        n, d = val.numerator, val.denominator\n        if abs(d) == 1:\n            return str(abs(n)) + (\"-\" if (n < 0 and not (d<0)) else \"\") # Wait, simpler: just use Fraction string logic\n        \n    # Let's rebuild the LaTeX expression carefully based on inputs provided in frozen params to ensure exact match of math.\n    # Term 1: 279/100 * 893/10 = (279*893)/(1000) -> positive\n    # Term 2: -21/100 * 893/10 = -(21*893)/1000\n    \n    term_1_latex_num = str(term_1.numerator) if abs(term_1.denominator)==1 else f\"{term_1.numerator}/{term_1.denominator}\"\n    # Actually, the inputs are floats in string. The task is rational arithmetic on those strings.\n    \n    # Re-calculate LaTeX parts for display: 279/100 * 893/10 + (-21)/100 * 893/10 ? No, usually standard form.\n    # Let's just output the simplified result in latex and the expression text.\n    \n    # Expression Text Construction\n    left_1_str = \"279/100\" if term_1.numerator > 0 else \"-{abs}\" \n    # Better: use original numbers from frozen params for display to look nice, but exact arithmetic implies using parsed values.\n    # Let's stick to the calculated result structure.\n    \n    def make_latex_frac(n, d):\n        if abs(d) == 1: return str(abs(n)) + (\"-\" if n < 0 else \"\")\n        s = \"\"\n        if n < 0 and d > 0: s += \"-\"\n        elif n > 0 and d < 0: s += \"(\" # rare case usually avoided by Fraction normalization but safe to handle sign on num\n        return f\"{s}{abs(n)}/{abs(d)}\"\n\n    t1_latex = make_latex_frac(term_1.numerator, term_1.denominator)\n    t2_latex = make_latex_frac(term_2.numerator, term_2.denominator)\n    \n    # Combine into expression: Term1 + Term2 (since Fraction handles sign in numerator usually)\n    if t2_latex.startswith(\"-\"):\n        expr_text = f\"{t1_latex} {t2_latex}\" \n    else:\n        expr_text = f\"{t1_latex} + {t2_latex}\"\n\n    # Correct Answer Value String (irreducible p/q)\n    correct_answer_val_str = make_latex_frac(result_frac.numerator, result_frac.denominator).replace(\"(\", \"\").replace(\")\", \"\") if \"(\" in str(make_latex_frac(term_2)) else \"\" \n    # Re-doing the string construction for correctness:\n    \n    def get_irreducible_string(frac):\n        n, d = frac.numerator, frac.denominator\n        sign_str = \"-\" if (n < 0) ^ ((d < 0)) and not (n == 0) else \"\" # Fraction normalizes so usually only num is negative or both. \n        # Actually Fraction always keeps denominator positive in Python? Yes. So check numerator.\n        s_n, s_d = \"\", \"\"\n        if n < 0: sign_str += \"-\"; abs_n = -n; d_pos = d\n        else: abs_n = n; d_pos = d\n        \n        return f\"{sign_str}{abs_n}/{d_pos}\"\n\n    correct_answer_val_str = get_irreducible_string(result_frac)\n    \n    # Canonical LaTeX for the answer (usually just the value or formatted fraction)\n    canonical_latex = make_latex_frac(result_frac.numerator, result_frac.denominator).replace(\"(\", \"\").replace(\")\", \"\") if \"(\" in str(make_latex_frac(term_2)) else \"\" \n    # Simpler: Just format the final fraction nicely.\n    \n    def clean_latex(frac):\n        n, d = frac.numerator, frac.denominator\n        s_n = \"-\" if n < 0 and not (d<0) else \"\" # Fraction ensures d > 0 usually? Yes.\n        return f\"{s_n}{abs(n)}/{abs(d)}\"\n\n    final_latex_val = clean_latex(result_frac).replace(\"(\", \"\").replace(\")\", \"\") \n    # Wait, if n is negative: \"-5/12\". If I do s_n logic above it works.\n    \n    question_text = f\"Simplify the expression: {expr_text}\"\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": {\"value\": correct_answer_val_str, \"canonical_latex\": final_latex_val},\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T18:00:28.795245+00:00",
+  "completed_at_utc": "2026-07-21T18:00:55.843990+00:00",
+  "duration": 27.048736199969426,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 27.04872520000208,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 403,
+      "eval_count": 1700,
+      "total_token_count": 2103,
+      "total_duration": 25024110300,
+      "load_duration": 249570300,
+      "done_reason": "stop",
+      "latency_ms": 27048,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026071301,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026071301,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

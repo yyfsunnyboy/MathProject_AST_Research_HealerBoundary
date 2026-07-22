@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce112_q01_negative_integer_power__ab2d__seed_2026072001",
+  "task_id": "ce112_q01_negative_integer_power",
+  "family": "integer",
+  "condition": "ab2d",
+  "seed": 2026072001,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072001
+  },
+  "prompt_sha256": "a03c40a37de8c5652476da0fcd76dfc714ca55c19b0279b0452358c81ccde8d4",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "from typing import Dict, Any\nimport sys\nsys.path.insert(0, '/app')\ntry:\n    from core.prompts.domain_function_library import IntegerOps\nexcept ImportError:\n    class IntegerOps:\n        @staticmethod\n        def safe_eval(expr):\n            try:\n                result = eval(expr)\n                if isinstance(result, bool) or (isinstance(result, float) and not result.is_integer()):\n                    raise ValueError(\"Non-integer/bool result\")\n                return int(result)\n            except Exception as e:\n                raise ValueError(f\"Evaluation failed: {e}\")\n\n        @staticmethod\n        def fmt_num(n):\n            if isinstance(n, bool):\n                raise TypeError(\"Boolean not allowed in formatting for this task context\")\n            return str(int(n))\n\ndef generate(level=1, **kwargs) -> Dict[str, Any]:\n    frozen_params = kwargs.get('frozen_sampled_parameters', {\"base\": -3, \"exponent\": 3})\n    \n    base_val = frozen_params[\"base\"]\n    exponent_val = frozen_params[\"exponent\"]\n    \n    # Compute the result using IntegerOps.safe_eval to adhere to domain API constraints\n    expr_str = f\"{IntegerOps.fmt_num(base_val)} ** {IntegerOps.fmt_num(exponent_val)}\"\n    correct_answer_int = IntegerOps.safe_eval(expr_str)\n    \n    question_text = (\n        r\"What is the value of $(-3)^{3}$?\"\n    )\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer_int,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T18:01:35.756215+00:00",
+  "completed_at_utc": "2026-07-21T18:01:43.231527+00:00",
+  "duration": 7.475300000049174,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 7.475287800072692,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 317,
+      "eval_count": 351,
+      "total_token_count": 668,
+      "total_duration": 5448590300,
+      "load_duration": 240053400,
+      "done_reason": "stop",
+      "latency_ms": 7475,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072001,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072001,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

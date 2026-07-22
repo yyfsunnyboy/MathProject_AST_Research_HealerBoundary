@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce112_q04_radical_simplification__ab2d_spec_v2__seed_2026072002",
+  "task_id": "ce112_q04_radical_simplification",
+  "family": "radical",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072002,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072002
+  },
+  "prompt_sha256": "14468d40af33b62b0c252bc11861baed124b1313d69a77fa4907ba256e91c080",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce112_q04_radical_simplification.txt",
+  "generation_status": "success",
+  "raw_response": "# -*- coding: utf-8 -*-\n\ndef generate(level=1, **kwargs):\n    # Frozen sampled parameters as per task specification\n    radicand = 135\n    \n    # Compute simplification manually to avoid external dependencies or eval/exec\n    # Factorize 135 into perfect squares and remaining factors\n    # 135 = 9 * 15, where 9 is a perfect square (sqrt(9) = 3)\n    \n    coeff = 0\n    simplified_radicand = radicand\n    \n    # Check for largest square factor starting from small primes or direct division\n    i = 2\n    while i * i <= simplified_radicand:\n        count = 0\n        temp = simplified_radicand\n        while temp % (i * i) == 0 and temp > 1:\n            # Actually, we need to find the largest square factor. \n            # Better approach: iterate through squares or prime factors.\n            pass\n        \n    # Direct calculation for this specific frozen value is safer and cleaner without complex loops if logic gets tricky\n    # However, let's implement a robust simplification function inline\n    \n    def simplify_radical(n):\n        result = 1\n        current_n = n\n        d = 2\n        while d * d <= current_n:\n            count = 0\n            while current_n % (d * d) == 0 and current_n > 0:\n                # This logic is slightly flawed for general case if we just divide by square. \n                # Correct approach: find exponent of prime factors.\n                pass\n        \n        # Re-implementing robustly:\n        temp = n\n        coeff_val = 1\n        remaining = 1\n        d = 2\n        while d * d <= temp:\n            count = 0\n            while temp % d == 0:\n                count += 1\n                temp //= d\n            if count >= 2:\n                # We can pull out sqrt(d^k) where k is even part of exponent? \n                # No, standard simplification pulls out pairs.\n                num_pairs = count // 2\n                coeff_val *= (d ** num_pairs)\n                remaining *= d % (count - 2 * num_pairs if count > 0 else 1) # Logic error in thought process above\n        \n        # Let's restart the logic for correctness:\n        temp = n\n        coeff_val = 1\n        remaining_part = 1\n        d = 2\n        while d * d <= temp:\n            exponent = 0\n            while temp % d == 0:\n                exponent += 1\n                temp //= d\n            \n            if exponent > 0:\n                pairs = exponent // 2\n                coeff_val *= (d ** pairs)\n                remaining_part *= (d ** (exponent - 2 * pairs))\n        \n        # Handle the case where a prime factor remains with odd power or just itself\n        if temp > 1:\n            remaining_part *= temp\n            \n        return coeff_val, remaining_part\n\n    coefficient, simplified_radicand = simplify_radical(radicand)\n    \n    # Construct LaTeX strings\n    import re\n    \n    def format_latex(coeff, rad):\n        if coeff == 1 and rad != 0:\n            return f\"\\\\sqrt{{{rad}}}\"\n        elif coeff == -1 and rad != 0:\n            return f\"-\\\\sqrt{{{rad}}}\"\n        else:\n            sign = \"+\" if coeff > 0 else \"-\"\n            abs_coeff = abs(coeff)\n            # Format radicand for LaTeX (remove braces around single digit numbers usually, but keep for clarity in math mode context or standard practice? \n            # Standard: \\\\sqrt{15} vs \\\\sqrt{a}. Let's use minimal braces.\n            rad_str = str(rad).replace(\" \", \"\")\n            if len(str(abs_coeff)) == 1 and abs_coeff != 0:\n                return f\"{sign}\\\\sqrt{{{rad_str}}}\"\n            else:\n                # If coeff is multi-digit or negative (handled by sign), ensure proper spacing/formatting isn't strictly enforced but standard LaTeX usually puts number before sqrt.\n                if rad_str.isdigit():\n                    return f\"{coeff}\\\\\\\\sqrt{{{rad_str}}}\" \n                else:\n                     return f\"{sign}\\\\sqrt{{{rad_str}}}\"\n\n    # Refining format_latex for canonical output consistency with typical math platforms (e.g., Khan Academy, etc.)\n    # Usually: 3\\\\sqrt{15}, -2\\\\sqrt{7}\n    \n    if coefficient == 0:\n        latex_ans = \"0\"\n    else:\n        sign_str = \"+\" if coefficient > 0 else \"\"\n        \n        # Format radicand without spaces inside braces for simplicity unless it's a variable (not the case here)\n        rad_int = simplified_radicand\n        \n        # Construct string carefully\n        term_part = f\"{rad_int}\"\n        \n        if abs(coefficient) == 1:\n            latex_ans = sign_str + \"\\\\sqrt{\" + str(rad_int) + \"}\"\n        else:\n            latex_ans = sign_str + str(abs(coefficient)) + \"\\\\\\\\sqrt{\" + str(rad_int) + \"}\"\n\n    # Ensure canonical format matches expected output structure exactly as per typical tasks\n    # Re-evaluating the specific frozen value 135 -> 9*15 -> coeff=3, rad=15.\n    \n    final_coeff = coefficient\n    final_radicand = simplified_radicand\n    \n    if final_coeff == 0:\n        canonical_latex = \"0\"\n    else:\n        sgn = \"+\" if final_coeff > 0 else \"\"\n        \n        # Check if we need to handle the negative sign placement correctly in LaTeX string construction for display vs internal rep.\n        # The prompt asks for 'canonical_latex'. Usually, this is just the rendered math expression.\n        \n        r_str = str(final_radicand)\n        \n        if abs(final_coeff) == 1:\n            canonical_latex = sgn + \"\\\\sqrt{\" + r_str + \"}\"\n        else:\n            # For multi-digit coefficients or negative ones, standard is coeff\\\\sqrt{rad}\n            c_abs = abs(final_coeff)\n            canonical_latex = sgn + str(c_abs) + \"\\\\\\\\sqrt{\" + r_str + \"}\"\n\n    question_text = f\"Simplify the radical expression $\\\\\\\\sqrt{{{radicand}}}$.\"\n    \n    correct_answer_dict = {\n        \"coefficient\": final_coeff,\n        \"radicand\": final_radicand,\n        \"canonical_latex\": canonical_latex\n    }\n    # The task says 'correct_answer must include coefficient, radicand, and canonical_latex'. \n    # It implies the value of correct_answer should be this dict or a string representation? \n    # Looking at typical patterns: usually it's a structured object if JSON serializable is required.\n    # However, often these tasks expect `correct_answer` to be the LaTeX string itself in some contexts, BUT here spec says \"include coefficient...\".\n    # Let's assume correct_answer IS the dictionary containing those fields as per strict reading of \"must include\". \n    # Wait, re-reading: \"Return a dict with exactly question_text, correct_answer, and oracle_payload.\"\n    # And inside that return value, `correct_answer` field must contain coefficient, radicand, canonical_latex.\n    \n    final_correct_answer = {\n        \"coefficient\": final_coeff,\n        \"radicand\": final_radicand,\n        \"canonical_latex\": canonical_latex\n    }\n\n    oracle_payload = {\"radicand\": 135}\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": final_correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T19:03:36.611178+00:00",
+  "completed_at_utc": "2026-07-21T19:04:03.629517+00:00",
+  "duration": 27.01832509995438,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 27.018310999963433,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 639,
+      "eval_count": 1689,
+      "total_token_count": 2328,
+      "total_duration": 24972332500,
+      "load_duration": 245089400,
+      "done_reason": "stop",
+      "latency_ms": 27018,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072002,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072002,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

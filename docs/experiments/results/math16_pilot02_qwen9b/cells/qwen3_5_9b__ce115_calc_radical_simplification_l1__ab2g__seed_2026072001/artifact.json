@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce115_calc_radical_simplification_l1__ab2g__seed_2026072001",
+  "task_id": "ce115_calc_radical_simplification_l1",
+  "family": "radical",
+  "condition": "ab2g",
+  "seed": 2026072001,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072001
+  },
+  "prompt_sha256": "a88ec9aa5f19dc7b5348cdd1cfdc9b503c1fbefcc0ad12889e21eeff5cb19621",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    radicand = kwargs.get(\"radicand\", 27)\n    \n    # Factorization for simplification: 27 = 3^3 * 1 (or just 3^3 if we consider perfect cubes directly inside radical)\n    # sqrt(27) -> simplify to 3*sqrt(3). \n    # However, the task is \"radical_simplification_l1\". Usually this implies simplifying a square root.\n    # Let's assume standard form: k * sqrt(n).\n    # For radicand = 27 (which is 9*3), sqrt(27) = 3*sqrt(3).\n    \n    import math\n    \n    def simplify_radical(r):\n        if r <= 0:\n            return None, None\n        \n        # Find largest square factor k^2 such that n = k^2 * m\n        simplified_radicand = r\n        coefficient = 1\n        \n        for i in range(5, -1, -1): # Check squares from 25 down to 1 (since sqrt is involved)\n            sq = i ** 2\n            if sq <= simplified_radicand:\n                count = 0\n                temp = simplified_radicand\n                while temp % sq == 0 and int(math.sqrt(temp)) == math.isqrt(temp): # Check divisibility by square? No, simpler logic.\n                    pass\n                \n        # Better approach for integer radicands in sqrt context (level 1 usually implies square roots)\n        # Find largest perfect square factor d such that r = d * m where d is a perfect square > 0\n        simplified_radicand = r\n        coefficient = 1\n        \n        for i in range(2, int(math.sqrt(r)) + 1):\n            count = 0\n            while (r % (i*i) == 0):\n                r //= (i*i)\n                count += 1\n            \n            if count > 0:\n                coefficient *= i ** count\n        \n        # If the original number was a perfect square, radicand becomes 1 and coeff is sqrt(original). \n        # But usually canonical form keeps integer inside. Let's refine logic for standard simplification.\n        \n    # Re-implementing simplify correctly without complex loops first:\n    def get_simplified_form(n):\n        if n <= 0: return None, None\n        \n        simplified_radicand = n\n        coefficient = 1\n        \n        d = 2\n        while d * d <= simplified_radicand:\n            count = 0\n            while (simplified_radicand % (d*d) == 0): # This checks if we can pull out a pair? No, standard is to check divisibility by square.\n                pass\n            \n            # Correct logic: Check how many times d divides n, then take floor(count/2).\n            temp = simplified_radicand\n            count_d = 0\n            while temp % d == 0:\n                count_d += 1\n                temp //= d\n            \n            if count_d >= 2:\n                pull_out_count = count_d // 2\n                coefficient *= (d ** pull_out_count)\n                simplified_radicand = int(temp * (simplified_radicand / (temp))) # Wait, logic error above.\n        \n        # Let's restart the simplification function cleanly inside generate to avoid state issues\n        \n    def simplify(n):\n        if n <= 0: return None, None\n        temp_n = n\n        coeff = 1\n        d = 2\n        while d * d <= temp_n:\n            count = 0\n            while temp_n % (d*d) == 0 and int(temp_n / (d*d)) < temp_n: # This is wrong. \n                pass\n            \n            # Correct standard algorithm:\n            cnt = 0\n            curr = n\n            for p in range(2, int(n**0.5)+1):\n                c = 0\n                while curr % p == 0:\n                    c += 1\n                    curr //= p\n                if c >= 2:\n                    coeff *= (p ** (c // 2))\n            # Handle remaining prime factor in 'curr' which is < d*d, so it's square free.\n            \n        return coefficient, simplified_radicand\n\n    # Actually, let's just hardcode the logic for specific input or generic loop properly:\n    \n    def calc_simplified(n):\n        if n <= 0: return None, None\n        \n        temp = n\n        coeff = 1\n        \n        d = 2\n        while d * d <= temp:\n            count = 0\n            while (temp % (d*d) == 0 and int(temp / (d**2)) < temp): # No. \n                pass\n            \n            # Proper factorization loop\n            cnt = 0\n            curr_temp = n\n            for p in range(2, int(n**0.5)+1):\n                c = 0\n                while curr_temp % p == 0:\n                    c += 1\n                    curr_temp //= p\n                if c >= 2:\n                    coeff *= (p ** (c // 2))\n            \n            # The remaining part in curr_temp is square-free. \n            # But wait, the loop above modifies curr_temp but I need to multiply back? No.\n            # Let's do it simply: factorize n completely into primes p1^e1 * ... then coeff = product(pi^(ei//2)), radicand = product(pi^(ei%2)).\n            \n        return None\n\n    def get_canonical_form(n):\n        if n <= 0: return None, None\n        \n        # Factorization\n        temp_n = n\n        factors = {}\n        \n        d = 2\n        while d * d <= temp_n:\n            while temp_n % d == 0:\n                factors[d] = factors.get(d, 0) + 1\n                temp_n //= d\n            d += 1\n        \n        if temp_n > 1:\n            factors[temp_n] = factors.get(temp_n, 0) + 1\n            \n        coeff = 1\n        radicand = 1\n        \n        for p, exp in factors.items():\n            pull_out = exp // 2\n            remaining = exp % 2\n            if pull_out > 0:\n                coeff *= (p ** pull_out)\n            if remaining == 1:\n                radicand *= p\n                \n        return coeff, radicand\n\n    # Apply to frozen parameter or default\n    n_val = kwargs.get(\"radicand\", 27)\n    \n    coefficient, simplified_radicand = get_canonical_form(n_val)\n    \n    canonical_latex = f\"{coefficient}\\\\sqrt{{{simplified_radicand}}}\" if (coeff != 1 and simplified_radicand > 0) else f\"\\\\sqrt{{{n_val}}\" # Wait, if coeff is 1, latex usually omits it or writes just sqrt. \n    # Standard canonical form: k * sqrt(n). If k=1, write \\\\sqrt{n}.\n    \n    final_latex = \"\"\n    if coefficient == 1 and simplified_radicand > 0:\n        final_latex = f\"\\\\sqrt{{{simplified_radicand}}}\"\n    elif coefficient != 1 or (coefficient == 1 and simplified_radicand <= 0): # Should not happen for positive input\n         pass \n    else:\n        if coefficient == 1:\n             # This case handled above. What if n=4? coeff=2, rad=1 -> 2\\\\sqrt{1} = 2. Usually we write integer result if radicand is 1.\n             final_latex = f\"{coefficient}\" \n         else:\n             final_latex = f\"{coefficient}\\\\sqrt{{{simplified_radicand}}}\"\n\n    # Correction for perfect squares resulting in integers (radicand=1)\n    if simplified_radicand == 1 and coefficient > 0:\n        canonical_latex = str(coefficient)\n    else:\n        if coefficient == 1:\n            canonical_latex = f\"\\\\sqrt{{{simplified_radicand}}}\"\n        else:\n            canonical_latex = f\"{coefficient}\\\\sqrt{{{simplified_radicand}}}\"\n\n    question_text = (f\"Simplify the radical expression $\\\\\\\\sqrt{{{n_val}}}$. \"\n                     f\"The simplified form is of the shape $k\\\\\\\\sqrt{n}$ where $n$ has no perfect square factors greater than 1. \"\n                     f\"Provide your answer in LaTeX format.\")\n    \n    # Ensure correct_answer matches canonical_latex exactly as a string for grading, but also ensure it's valid math representation.\n    # The prompt asks: correct_answer must include coefficient, radicand, and canonical_latex. \n    # It implies the value of correct_answer IS the canonical_latex? Or a dict? \"return a dict with ... correct_answer\". Usually correct_answer is the string to compare against.\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": canonical_latex,\n        \"oracle_payload\": {\"radicand\": n_val}\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T18:28:51.870948+00:00",
+  "completed_at_utc": "2026-07-21T18:29:23.051020+00:00",
+  "duration": 31.180060600047,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 31.180044999928214,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 218,
+      "eval_count": 1992,
+      "total_token_count": 2210,
+      "total_duration": 29152193100,
+      "load_duration": 238330400,
+      "done_reason": "stop",
+      "latency_ms": 31180,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072001,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072001,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

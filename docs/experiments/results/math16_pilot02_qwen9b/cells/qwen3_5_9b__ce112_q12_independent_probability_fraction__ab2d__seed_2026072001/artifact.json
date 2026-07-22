@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce112_q12_independent_probability_fraction__ab2d__seed_2026072001",
+  "task_id": "ce112_q12_independent_probability_fraction",
+  "family": "fraction",
+  "condition": "ab2d",
+  "seed": 2026072001,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072001
+  },
+  "prompt_sha256": "e0ceba6ddea69db946947e44372f0667b4445539f11857bbafa275c518a9506a",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "from typing import Dict, Any\nimport sys\nsys.path.insert(0, '.')\ntry:\n    from core.prompts.domain_function_library import FractionOps\nexcept ImportError:\n    class FractionOps:\n        @staticmethod\n        def create(value):\n            if isinstance(value, list) and len(value) == 2:\n                return value[0] / value[1]\n            raise ValueError(\"Invalid input for create\")\n\n        @staticmethod\n        def mul(a, b):\n            num_a = a.numerator * b.numerator\n            den_a = a.denominator * b.denominator\n            if isinstance(num_a, int) and isinstance(den_a, int):\n                from fractions import Fraction as F\n                return F(num_a, den_a)\n            raise TypeError(\"Expected Fractions\")\n\n        @staticmethod\n        def to_latex(val, mixed=False):\n            num = val.numerator\n            den = val.denominator\n            if isinstance(num, float) or isinstance(den, float):\n                from fractions import Fraction as F\n                f_val = F(float(num), float(den))\n                return r\"\\frac{\" + str(f_val.numerator) + \"}{\"}\" + str(f_val.denominator) + r\"}\"\n            if mixed:\n                whole = num // den\n                rem_num = abs(num % den)\n                latex_str = f\"{whole} \\\\frac{{{rem_num}}}{{{den}}}\"\n            else:\n                latex_str = fr\"\\frac{{{num}}}{{{den}}}\"\n            return latex_str\n\ndef generate(level=1, **kwargs):\n    frozen_params = {\"p1\": [2, 6], \"p2\": [1, 5]}\n    \n    # Create fractions from p1 and p2 lists\n    f_p1 = FractionOps.create(frozen_params[\"p1\"])\n    f_p2 = FractionOps.create(frozen_params[\"p2\"])\n    \n    # Multiply the two probabilities to get independent probability fraction\n    result_fraction = FractionOps.mul(f_p1, f_p2)\n    \n    # Generate LaTeX representation (default mixed=False for standard improper or proper fractions unless specified otherwise in typical math contexts, but usually simple fractions are preferred over mixed numbers for raw calculation results unless asked. We will stick to the default behavior which handles integers and floats gracefully).\n    latex_str = FractionOps.to_latex(result_fraction)\n    \n    # Construct correct_answer dict with numerator, denominator, canonical_latex\n    # Ensure we handle float conversion if necessary for JSON serialization of numer/denom in some contexts, \n    # but standard math problems expect ints. The to_exact adapter logic implies returning a structured object or dict.\n    # We will construct the answer as a dictionary containing these fields.\n    \n    numerator = result_fraction.numerator\n    denominator = result_fraction.denominator\n    \n    correct_answer = {\n        \"numerator\": int(numerator),\n        \"denominator\": int(denominator),\n        \"canonical_latex\": latex_str\n    }\n    \n    return {\n        \"question_text\": r\"Given two independent events with probabilities $p_1$ and $p_2$, where $p_1 = \\frac{2}{6}$ and $p_2 = \\frac{1}{5}$, calculate the probability of both events occurring. Express your answer as an irreducible fraction.\",\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T18:37:12.491799+00:00",
+  "completed_at_utc": "2026-07-21T18:37:25.562637+00:00",
+  "duration": 13.070828499970958,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 13.070815999992192,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 368,
+      "eval_count": 733,
+      "total_token_count": 1101,
+      "total_duration": 11040596500,
+      "load_duration": 259322800,
+      "done_reason": "stop",
+      "latency_ms": 13070,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072001,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072001,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

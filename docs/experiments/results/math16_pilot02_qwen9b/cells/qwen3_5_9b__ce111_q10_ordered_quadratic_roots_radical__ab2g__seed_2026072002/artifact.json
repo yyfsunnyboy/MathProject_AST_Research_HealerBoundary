@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce111_q10_ordered_quadratic_roots_radical__ab2g__seed_2026072002",
+  "task_id": "ce111_q10_ordered_quadratic_roots_radical",
+  "family": "radical",
+  "condition": "ab2g",
+  "seed": 2026072002,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072002
+  },
+  "prompt_sha256": "6179a8fb58654189712d53044e6df49b7171ccf57f1b1666d3e735f38758a766",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    import math\n    \n    # Frozen sampled parameters from task specification\n    frozen_params = {\n        \"equation\": \"(x-2)^2=3\",\n        \"order\": \"a>b\",\n        \"target\": \"2a+b\"\n    }\n    \n    # Parse the equation to extract roots and coefficients for validation logic\n    # Equation: (x-2)^2 = 3 => x^2 - 4x + 1 = 0\n    # Roots are derived from quadratic formula or expansion.\n    # Let's simulate parsing based on the frozen \"equation\" string provided.\n    \n    # Hardcoded extraction for this specific frozen instance to ensure correctness without external libs like sympy\n    # Equation: (x-2)^2 = 3 -> x^2 - 4x + 1 = 0\n    a_coeff = 1\n    b_coeff = -4\n    c_coeff = 1\n    \n    discriminant = b_coeff**2 - 4*a_coeff*c_coeff\n    sqrt_discriminant = math.sqrt(discriminant)\n    \n    root_a = (-b_coeff + sqrt_discriminant) / (2 * a_coeff)\n    root_b = (-b_coeff - sqrt_discriminant) / (2 * a_coeff)\n    \n    # Ensure order 'a > b' as per frozen params \"order\": \"a>b\"\n    if root_a <= root_b:\n        temp = root_a\n        root_a = root_b\n        root_b = temp\n        \n    # Construct the radical representation for canonical_latex\n    # Format: \\frac{-b \\pm \\sqrt{D}}{2a} -> specifically for roots a and b here.\n    # We need to represent them in form rational + coefficient * sqrt(radicand) or similar if needed, \n    # but standard quadratic root is usually just the radical expression.\n    # However, task asks for 'radical_coefficient' (may be +/-1), 'radicand'.\n    \n    # For x = 2 ± sqrt(3):\n    rational_part_a = 2\n    coefficient_a = 1\n    radicand_a = 3\n    \n    rational_part_b = 2\n    coefficient_b = -1\n    radicand_b = 3\n    \n    # Build canonical_latex for the set of roots {a, b} ordered a > b\n    # Example: \"x_1=2+\\sqrt{3}, x_2=2-\\sqrt{3}\" or similar structured string.\n    latex_a = f\"\\\\frac{{{rational_part_a}}+{{coefficient_a}}\\\\\\\\sqrt{{{radicand_a}}}}{{1}}\" if coefficient_a != 0 else str(rational_part_a)\n    # Simplify LaTeX for integer rational part + radical\n    def make_latex_root(q, c, r):\n        sign = \"+\" if c > 0 else \"-\"\n        abs_c = abs(c)\n        latex_str = f\"\\\\frac{{{q}}{sign}{{abs_c}}\\\\\\\\sqrt{{{r}}}}{{1}}\" # Denom is 2*1=2 usually but here simplified? \n        # Actually roots of (x-2)^2=3 are x = 2 +/- sqrt(3).\n        return f\"x_1={q}{c:+d}\\\\sqrt{{{r}}}, \\\\quad x_2={q}{(-c):+d}\\\\sqrt{{{r}}}\" if c != -abs_c else None\n        \n    # Correct LaTeX construction for roots of (x-2)^2=3 -> x = 2 ± √3\n    latex_root_a_str = f\"x_1=2{'+\\\\sqrt{{' + str(radical_coefficient) + '\\\\sqrt{{{radicand}}'}}}}\" \n    # Let's build it precisely: \"x_1=2+\\\\sqrt{3}, x_2=2-\\\\sqrt{3}\"\n    \n    radical_str_a = f\"2+\\\\\\\\sqrt{{{radicand_a}}}\" if coefficient_a == 1 else f\"{rational_part_a}{coefficient_a:+d}\\\\\\\\sqrt{{{radicand_a}}}\"\n    # Wait, standard form is usually just the value. \n    # Let's stick to: \"x_1=2+\\\\sqrt{3}, x_2=2-\\\\sqrt{3}\"\n    \n    canonical_latex = f\"x_1={rational_part_a}{'+' if coefficient_b < 0 else ''}{abs(coefficient_b)}\\\\\\\\sqrt{{{radicand}}}, \\\\quad x_2={rational_part_a}-{'-' if coefficient_b > 0 else ''}{abs(coefficient_b)}\\\\\\\\sqrt{{{radicand}}}\"\n    # Correction: root a is +, root b is -. \n    # Since coeff was -1 for the second term in my logic above (x = 2 - sqrt(3))\n    \n    final_latex_a = f\"2+\\\\\\\\sqrt{{3}}\"\n    final_latex_b = f\"2-\\\\\\\\sqrt{{3}}\"\n    canonical_latex = f\"x_1={final_latex_a}, \\\\quad x_2={final_latex_b}\"\n\n    # Calculate target value: 2a + b where a and b are the roots (values) or coefficients? \n    # Task says \"target\": \"2a+b\". Usually in these contexts, if 'order' is specified on roots,\n    # it implies algebraic manipulation of root values. But often 'a' and 'b' refer to specific variables defined in a hidden context.\n    # Given the frozen params don't define what 'a' and 'b' are numerically other than being roots or coefficients.\n    # Re-reading: \"target\": \"2a+b\". If a, b are roots x1, x2? \n    # Or if it refers to standard quadratic ax^2+bx+c=0 where target is expression of coeffs?\n    # Given the specific equation (x-2)^2=3 -> 1*x^2 -4*x +1 =0. Coeffs: a_q=1, b_q=-4, c_q=1.\n    # If 'a' and 'b' in target refer to roots x1, x2? \n    # Let's assume the question asks for an expression involving the roots or specific values derived from them.\n    # However, without explicit definition of what variables a and b map to in the text generation phase beyond \"roots\",\n    # we must infer. Common pattern: If order is 'a>b', then a=root1 (larger), b=root2 (smaller).\n    # Target = 2*a + b? \n    # Let's compute numeric target based on roots being x1, x2 with x1 > x2.\n    \n    val_a = root_a\n    val_b = root_b\n    \n    computed_target_val = 2 * val_a + val_b\n    \n    # The correct_answer dict needs: result (numeric or symbolic?), radical_coefficient, radicand, canonical_latex.\n    # Since the target is an expression \"2a+b\", and we need a structured answer.\n    # If the question asks to evaluate 2x1+x2 given x^2-4x+1=0? \n    # Let's provide the numeric result rounded or exact if possible, but usually these tasks want symbolic verification.\n    # However, \"correct_answer\" must include 'result'. Let's assume it wants the evaluated value of the target expression using roots a,b.\n    \n    # Exact calculation:\n    # x1 = 2 + sqrt(3)\n    # x2 = 2 - sqrt(3)\n    # Target = 2*(2+sqrt(3)) + (2-sqrt(3)) = 4 + 2*sqrt(3) + 2 - sqrt(3) = 6 + sqrt(3).\n    \n    result_val = \"6+\\\\\\\\sqrt{{3}}\"\n    \n    # Construct the answer object\n    correct_answer_dict = {\n        \"result\": result_val,\n        \"radical_coefficient\": 1, \n        \"radicand\": 3,\n        \"canonical_latex\": f\"x_1=2+\\\\\\\\sqrt{{{3}}}, \\\\quad x_2=2-\\\\\\\\sqrt{{3}}\" # Or include the target evaluation in latex? Usually canonical refers to roots.\n    }\n\n    return {\n        \"question_text\": r\"Given the equation $(x-2)^2=3$, let $a$ and $b$ be its two real roots such that $a>b$. Calculate the value of $2a+b$.\",\n        \"correct_answer\": correct_answer_dict,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T19:01:03.477800+00:00",
+  "completed_at_utc": "2026-07-21T19:01:33.043793+00:00",
+  "duration": 29.565983599983156,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 29.565972000011243,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 262,
+      "eval_count": 1880,
+      "total_token_count": 2142,
+      "total_duration": 27537851800,
+      "load_duration": 240246100,
+      "done_reason": "stop",
+      "latency_ms": 29565,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072002,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072002,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

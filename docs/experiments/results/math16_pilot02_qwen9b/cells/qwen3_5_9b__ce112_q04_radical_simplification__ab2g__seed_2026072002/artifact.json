@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce112_q04_radical_simplification__ab2g__seed_2026072002",
+  "task_id": "ce112_q04_radical_simplification",
+  "family": "radical",
+  "condition": "ab2g",
+  "seed": 2026072002,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072002
+  },
+  "prompt_sha256": "6d252e1058c14eee07326788693fec710a5247c404e7dd74f3d22156235a82f4",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    radicand = kwargs.get(\"radicand\", 135)\n    \n    # Factorize radicand to simplify radical: sqrt(135) = sqrt(9*15) = 3*sqrt(15)\n    import math\n    \n    def get_prime_factors(n):\n        factors = {}\n        d = 2\n        while d * d <= n:\n            while n % d == 0:\n                factors[d] = factors.get(d, 0) + 1\n                n //= d\n            d += 1\n        if n > 1:\n            factors[n] = factors.get(n, 0) + 1\n        return factors\n    \n    prime_factors = get_prime_factors(radicand)\n    \n    # Calculate coefficient and remaining radicand for simplified radical form sqrt(a*b^2*c...) -> b*sqrt(ac...)\n    coeff = 1\n    new_radicand = 1\n    \n    for p, exponent in sorted(prime_factors.items()):\n        if exponent % 2 == 0:\n            # Even power comes out completely as part of coefficient? \n            # Wait, standard simplification: sqrt(p^k) where k is even -> p^(k/2). If odd -> p^((k-1)/2)*sqrt(p)\n            # Actually for general radical simplification sqrt(n): we pull out pairs.\n            count = exponent // 2\n            coeff *= (p ** count)\n        else:\n            # Odd power: one remains inside, rest come out\n            count = (exponent - 1) // 2\n            new_radicand *= (p ** count)\n    \n    # Re-evaluate logic for standard simplification sqrt(n):\n    # We want to write n = s^2 * r where r is square-free. Then sqrt(n) = s*sqrt(r).\n    # To find s: take product of p^(floor(exponent/2)) for each prime factor? No.\n    # Actually, if exponent is k, we pull out floor(k/2) copies of the base? \n    # Example: 135 = 3^3 * 5^1. sqrt(3^3*5) = sqrt(3^2 * 3 * 5) = 3 * sqrt(15).\n    # So for each prime p with exponent e, we pull out p^(e//2)? No, that would be wrong if e=3 -> pulls 3^1? \n    # Wait: 3^3. floor(3/2)=1. We pull out 3^1? But 3^2 is the square part.\n    # Correct logic: The largest square divisor d = product(p^(e - (e%2))). Then s = sqrt(d). r = n/d.\n    \n    def simplify_radical(n):\n        if n <= 0:\n            return None, None, None\n        \n        factors = get_prime_factors(abs(n))\n        \n        # Calculate the square part and remaining non-square part\n        square_part = 1\n        remainder_radicand = 1\n        \n        for p in sorted(factors.keys()):\n            exponent = factors[p]\n            \n            if exponent % 2 == 0:\n                # Even power, all comes out as sqrt(p^e) = p^(e/2). But we want to keep it simple.\n                # Actually standard form is coefficient * sqrt(square_free_part).\n                # If e=4 -> p^4 inside -> p^2 outside. Square part contributes p^2 to coeff? \n                # No, let's stick to: pull out pairs.\n                count_out = exponent // 2\n                square_root_factor = (p ** count_out) if count_out > 0 else 1\n                remainder_radicand *= (p ** (exponent % 2))\n            else:\n                # Odd power, e.g., p^3 -> sqrt(p^3)=p*sqrt(p). Pull out one p.\n                count_out = exponent // 2\n                square_root_factor = (p ** count_out) if count_out > 0 else 1\n                remainder_radicand *= (p ** (exponent % 2)) # which is p^(e-1) effectively since e%2=1\n                \n            coeff_part = square_root_factor\n        \n        # Wait, my loop logic above was flawed. Let's restart the simplification function cleanly.\n        \n    def get_simplified_radical(n):\n        if n <= 0: return None, None, None\n        factors = get_prime_factors(abs(n))\n        coefficient = 1\n        radicand_part = 1\n        \n        for p in sorted(factors.keys()):\n            exponent = factors[p]\n            \n            # Number of pairs we can pull out is floor(exponent / 2)\n            num_pairs = exponent // 2\n            \n            if num_pairs > 0:\n                coefficient *= (p ** num_pairs)\n                \n                # The remaining part inside the radical is p^(exponent % 2)\n                remainder_exp = exponent % 2\n                radicand_part *= (p ** remainder_exp)\n        \n        return coefficient, abs(radicand), f\"{coefficient}\\\\sqrt{{{radicand}}}\" if radicand > 1 else str(coefficient).replace(\" \", \"\")\n\n    # Re-run simplification for the specific frozen parameter or general case? \n    # The task says \"frozen sampled parameters: {\"radicand\": 135}\".\n    # But generate() should probably work generally, using kwargs if provided.\n    # However, to strictly follow \"oracle_payload must exactly equal the frozen sampled parameters\",\n    # we use the radicand from kwargs or default.\n    \n    current_radicand = kwargs.get(\"radicand\", 135)\n    \n    coeff_val, final_rad, latex_expr = get_simplified_radical(current_radicand)\n    \n    if coeff_val is None:\n        return {\"question_text\": \"\", \"correct_answer\": \"\", \"oracle_payload\": {}}\n        \n    # Construct question text with LaTeX delimiters\n    q_text = f\"Simplify the radical expression $\\\\sqrt{{{current_radicand}}}$. Express your answer in simplest form as a coefficient times a square root.\"\n    \n    correct_ans_str = latex_expr\n    \n    oracle_data = {\"radicand\": current_radicand}\n    \n    return {\n        \"question_text\": q_text,\n        \"correct_answer\": correct_ans_str,\n        \"oracle_payload\": oracle_data\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T19:02:33.096363+00:00",
+  "completed_at_utc": "2026-07-21T19:02:56.002154+00:00",
+  "duration": 22.90577760001179,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 22.90576280001551,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 213,
+      "eval_count": 1418,
+      "total_token_count": 1631,
+      "total_duration": 20882533400,
+      "load_duration": 241155600,
+      "done_reason": "stop",
+      "latency_ms": 22905,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072002,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072002,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

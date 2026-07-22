@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce111_q03_prime_factor_selection__ab2d__seed_2026072002",
+  "task_id": "ce111_q03_prime_factor_selection",
+  "family": "integer",
+  "condition": "ab2d",
+  "seed": 2026072002,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072002
+  },
+  "prompt_sha256": "8704669323fb45ef6bd34331151b350845425d2d14e19b36c58bd2c2c86bc75f",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "from typing import Dict, Any\nimport math as _math\nfrom core.prompts.domain_function_library import IntegerOps\n\ndef generate(level: int = 1, **kwargs) -> Dict[str, Any]:\n    frozen_params = {\"candidates\": [11, 12, 13, 14], \"n\": 156}\n    \n    candidates_list = frozen_params[\"candidates\"]\n    n_value = frozen_params[\"n\"]\n    \n    # Calculate prime factorization of n using IntegerOps.safe_eval for the expression logic\n    # We need to find a subset product that equals n or is closest, but typically these tasks ask \n    # if there exists a subset whose product divides n or exactly equals n.\n    # Given \"prime_factor_selection\", we look for factors in candidates_list that multiply to form divisors of n.\n    \n    def get_prime_factors(num: int) -> list:\n        \"\"\"Helper to get prime factors using safe_eval logic implicitly via math.\"\"\"\n        if num <= 1: return []\n        factors = []\n        d = 2\n        while d * d <= num:\n            while num % d == 0:\n                factors.append(d)\n                num //= d\n            d += 1\n        if num > 1:\n            factors.append(num)\n        return factors\n    \n    n_factors = get_prime_factors(n_value)\n    \n    # Task logic: Select a subset of candidates whose product equals the largest possible divisor of n \n    # composed only of these candidate numbers, or simply find which combination works.\n    # Standard interpretation for this specific task ID pattern often involves finding if 'n' can be formed by multiplying distinct elements from candidates.\n    \n    found_combination = None\n    \n    # Brute force subsets to see if any product equals n (or a significant divisor)\n    import itertools\n    best_product = 1\n    valid_subset = []\n    \n    for r in range(1, len(candidates_list) + 1):\n        for subset in itertools.combinations(candidates_list, r):\n            prod_val = _math.prod(subset)\n            if n_value % prod_val == 0: # Divides evenly\n                if best_product < prod_val:\n                    best_product = prod_val\n                    valid_subset = list(subset)\n    \n    # If no subset divides it perfectly (other than empty), usually the answer is related to specific factors.\n    # However, looking at candidates [11, 12, 13, 14] and n=156:\n    # 156 = 2 * 2 * 3 * 13\n    # Candidates: 11 (prime), 12 (2*2*3), 13 (prime), 14 (2*7)\n    # Subset {13, ?} -> need factor of 12. \n    # If we pick just 13? No, must use selection logic.\n    # Often the question asks: \"Which subset product divides n?\" or similar.\n    \n    # Let's assume the standard format for this task type requires identifying a specific valid set.\n    # Since {12} divides 156 (156/12 = 13), and {13} is in candidates, maybe we need both? \n    # But usually it asks for ONE subset that satisfies the condition \"product equals n\" or similar constraint not fully specified but implied by 'prime_factor_selection'.\n    \n    # Re-evaluating typical dataset constraints: Usually find a subset whose product IS n.\n    # 156 = 2*78, 3*52... \n    # Can we make 156 from {11, 12, 13, 14}?\n    # 12 * ? = 156 -> need 13. We have 13! So subset [12, 13] works (12*13=156).\n    \n    if valid_subset:\n        correct_answer = _math.prod(valid_subset)\n        question_text = f\"Given the candidate integers $\\\\{{{', '.join(map(str, candidates_list))}\\\\}$}, select a subset whose product equals $n$ where $n={n_value}$. What is this product?\"\n    else:\n        # Fallback if exact match not found (though [12, 13] works here)\n        correct_answer = n_value \n        question_text = f\"Given the candidate integers $\\\\{{{', '.join(map(str, candidates_list))}\\\\}$}, determine a subset product that divides $n={n_value}$. If multiple exist, provide one.\"\n\n    # Ensure we use IntegerOps for verification if needed, but calculation is direct.\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T18:40:05.512133+00:00",
+  "completed_at_utc": "2026-07-21T18:40:23.328658+00:00",
+  "duration": 17.816513700061478,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 17.81650149996858,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 333,
+      "eval_count": 1061,
+      "total_token_count": 1394,
+      "total_duration": 15790004500,
+      "load_duration": 255534000,
+      "done_reason": "stop",
+      "latency_ms": 17816,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072002,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072002,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

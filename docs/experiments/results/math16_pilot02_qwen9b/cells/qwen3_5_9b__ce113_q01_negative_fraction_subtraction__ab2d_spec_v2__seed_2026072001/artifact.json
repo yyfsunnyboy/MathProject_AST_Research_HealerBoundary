@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce113_q01_negative_fraction_subtraction__ab2d_spec_v2__seed_2026072001",
+  "task_id": "ce113_q01_negative_fraction_subtraction",
+  "family": "fraction",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072001,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072001
+  },
+  "prompt_sha256": "319926943ccbc9ca260979e04cf024cc1d896f00bc3e6be23e7b9632170ca54a",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce113_q01_negative_fraction_subtraction.txt",
+  "generation_status": "success",
+  "raw_response": "# -*- coding: utf-8 -*-\n\ndef generate(level=1, **kwargs):\n    from core.prompts.domain_function_library import FractionOps\n    \n    # Frozen sampled parameters defined directly as per task specification\n    frozen_params = {\"expression\": \"3/7 - (-1/4)\"}\n    \n    # Parse the expression components manually to avoid eval/exec while adhering to API rules.\n    # Expression: 3/7 - (-1/4) -> Term1: 3/7, Operator: -, Term2: -1/4\n    \n    term1_str = \"3/7\"\n    term2_str = \"-1/4\"\n    \n    try:\n        f1 = FractionOps.create(term1_str)\n        f2 = FractionOps.create(term2_str)\n        \n        # Perform subtraction using the API method\n        result_fraction = FractionOps.sub(f1, f2)\n        \n        numerator = int(result_fraction.numerator)\n        denominator = int(result_fraction.denominator)\n        \n        # Construct canonical LaTeX for irreducible fraction: \\frac{num}{den}\n        if denominator == 0:\n            raise ValueError(\"Denominator cannot be zero\")\n            \n        # Handle negative signs in LaTeX properly (usually numerator carries the sign or use minus before frac)\n        latex_parts = []\n        \n        if numerator < 0 and denominator > 0:\n            latex_parts.append(f\"-\\\\frac{{{abs(numerator)}}}{{{denominator}}}\")\n        elif numerator > 0 and denominator < 0:\n            # Move negative to numerator for canonical form usually, but let's stick to standard fraction representation\n             if abs(denominator) == 1:\n                 latex_parts.append(f\"{numerator // -abs(numerator)}\") \n             else:\n                latex_parts.append(f\"-\\\\frac{{{-numerator}}}{{-{denominator}}}\") # Simplify signs? No, keep canonical.\n        elif numerator < 0 and denominator < 0:\n            latex_parts.append(f\"\\\\frac{{{abs(numerator)}}}{{{abs(denominator)}}}\")\n        else:\n             if abs(denominator) == 1:\n                 latex_parts.append(str(abs(numerator))) # Integer result\n             else:\n                latex_parts.append(f\"\\\\frac{{{numerator}}}{{{denominator}}}\")\n\n        canonical_latex = \"\".join(latex_parts)\n        \n    except Exception as e:\n        raise RuntimeError(\"Failed to compute fraction arithmetic\") from e\n    \n    correct_answer = {\n        \"numerator\": numerator,\n        \"denominator\": denominator,\n        \"canonical_latex\": canonical_latex\n    }\n    \n    question_text = r\"Compute the result of $3/7 - (-1/4)$.\"\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T18:38:04.321777+00:00",
+  "completed_at_utc": "2026-07-21T18:38:15.895393+00:00",
+  "duration": 11.57360460003838,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 11.573592399945483,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 929,
+      "eval_count": 617,
+      "total_token_count": 1546,
+      "total_duration": 9551569700,
+      "load_duration": 238035000,
+      "done_reason": "stop",
+      "latency_ms": 11573,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072001,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072001,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

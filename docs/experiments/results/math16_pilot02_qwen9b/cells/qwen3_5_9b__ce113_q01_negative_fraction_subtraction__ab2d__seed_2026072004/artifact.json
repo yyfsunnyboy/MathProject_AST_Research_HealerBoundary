@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce113_q01_negative_fraction_subtraction__ab2d__seed_2026072004",
+  "task_id": "ce113_q01_negative_fraction_subtraction",
+  "family": "fraction",
+  "condition": "ab2d",
+  "seed": 2026072004,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072004
+  },
+  "prompt_sha256": "0fe4bd752d3760f08b8977916ba6edb99a7babd6cc53752bb9d80a684c8514f7",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "from typing import Dict, Any\nimport sys\nsys.path.insert(0, '.')\ntry:\n    from core.prompts.domain_function_library import FractionOps\nexcept ImportError:\n    class FractionOps:\n        @staticmethod\n        def create(value):\n            if isinstance(value, str) and '/' in value:\n                num_str, den_str = value.split('/')\n                return (int(num_str), int(den_str))\n            elif isinstance(value, tuple):\n                return value\n            else:\n                raise ValueError(f\"Unsupported format for FractionOps.create: {value}\")\n\n        @staticmethod\n        def sub(a: Any, b: Any) -> Any:\n            if not (isinstance(a, tuple) and len(a)==2) or not (isinstance(b, tuple) and len(b)==2):\n                raise ValueError(\"FractionOps.sub expects tuples of (numerator, denominator)\")\n            \n            n1, d1 = a\n            n2, d2 = b\n            \n            new_numerator = n1 * d2 - n2 * d1\n            new_denominator = d1 * d2\n            \n            gcd_val = 0\n            if abs(new_numerator) > 0 and abs(new_denominator) > 0:\n                import math\n                g = math.gcd(abs(new_numerator), abs(new_denominator))\n                new_numerator //= g\n                new_denominator //= g\n                \n                # Ensure denominator is positive for canonical form\n                if new_denominator < 0:\n                    new_numerator *= -1\n                    new_denominator *= -1\n            \n            return (new_numerator, new_denominator)\n\n        @staticmethod\n        def to_latex(val: Any, mixed=False):\n            n, d = val\n            import math\n            if abs(n) == 0:\n                return r\"0\"\n            \n            g = math.gcd(abs(n), abs(d))\n            n //= g\n            d //= g\n            \n            sign_str = \"-\" if n < 0 else \"\"\n            num_abs = str(-n) if n < 0 else str(n)\n            den_abs = str(d)\n            \n            return f\"{sign_str}\\\\frac{{{num_abs}}}{{{{{den_abs}}}}}\"\n\ndef generate(level=1, **kwargs):\n    frozen_params: Dict[str, Any] = {\"expression\": \"3/7 - (-1/4)\"}\n    \n    # Parse expression manually based on the specific string provided in frozen params\n    expr_str = frozen_params[\"expression\"]\n    \n    # Logic to parse \"3/7 - (-1/4)\" into components for FractionOps.sub(a, b) where result is a-b\n    # The task implies calculating 3/7 minus negative 1/4.\n    # So we need fraction A = 3/7 and fraction B = -1/4 (which represents the second term in subtraction).\n    \n    try:\n        part_a_str, op_part_b_str = expr_str.split(\" - \")\n        \n        num_a, den_a = map(int, part_a_str.replace(\"/\", \"\").split(\"/\")) if \"/\" in part_a_str else [int(part_a_str), 1] # Fallback\n        \n        # Handle the second term which might have a negative sign inside parens like (-1/4) or just -5\n        b_term_raw = op_part_b_str.strip()\n        \n        # If it starts with -, remove it for parsing, then apply logic. \n        # Actually, standard format is usually \"num/den\" and the subtraction operator handles the minus.\n        # But here we have \"- (-1/4)\". The expression string includes the outer minus from ' - '.\n        # So part_b_str inside split might be \"(-1/4)\" or similar? \n        # Let's assume standard parsing: 3/7 and then subtracting (-1/4).\n        \n        if b_term_raw.startswith(\"(\"):\n            inner = b_term_raw[1:-1] # remove parens\n            parts_inner = inner.split(\"/\")\n            num_b = int(parts_inner[0])\n            den_b = int(parts_inner[1])\n            \n            # The term being subtracted is (num/den). \n            # Wait, the expression is \"3/7 - (-1/4)\". This means 3/7 minus negative one fourth.\n            # So we compute A - B where B is -1/4? No, usually subtraction of a fraction implies:\n            # Term2 = num/den inside parens. The operation is subtracting that term.\n            # If the string says \"- (-1/4)\", it means minus (negative 1/4).\n            # So we calculate A - B where B = -1/4? \n            # Or does FractionOps.sub(a, b) implement a - b directly? Yes.\n            # We need to represent the second operand as the value inside the parenthesis if there are parens around it in the string context of subtraction?\n            # Actually, let's look at standard math: 3/7 - (-1/4). \n            # This is equivalent to adding 1/4.\n            # If we use FractionOps.sub(a, b), and a=3/7, what should b be?\n            # The string says \"- (-1/4)\". So the term being subtracted IS negative one fourth.\n            # But usually in these tasks, 'b' is just the fraction value (num/den) without the outer minus sign if it's part of the subtraction operator context? \n            # Let's re-read: \"expression\": \"3/7 - (-1/4)\".\n            # If we parse strictly: Term 1 = 3/7. Operator = -. Term 2 = -1/4 (inside parens).\n            # So FractionOps.sub(3/7, -1/4) would be correct if b is passed as a tuple representing the value to subtract.\n            \n            val_b_tuple = (num_b, den_b)\n        else:\n             parts_inner = op_part_b_str.split(\"/\")\n             num_b = int(parts_inner[0])\n             den_b = int(parts_inner[1])\n             val_b_tuple = (num_b, den_b)\n\n        # Create fractions\n        frac_a = FractionOps.create(f\"{num_a}/{den_a}\") if \"/\" in part_a_str else None\n        \n        # Re-parse A properly: \"3/7\" -> 3, 7\n        parts_a = part_a_str.split(\"/\")\n        num_a = int(parts_a[0])\n        den_a = int(parts_a[1])\n        \n        frac_b_raw_tuple = (num_b, den_b)\n\n        # Perform subtraction using domain API: a - b\n        result_frac = FractionOps.sub(frac_a, frac_b_raw_tuple)\n        \n    except Exception as e:\n        raise RuntimeError(f\"Failed to parse expression {expr_str}: {e}\") from e\n    \n    numerator, denominator = result_frac\n    \n    canonical_latex = FractionOps.to_latex(result_frac, mixed=False)\n    \n    question_text = f\"Simplify the following rational arithmetic expression:\\n\\n$$\\\\text{{expression}}: \\\\frac{{{numerator}}}{{{{{denominator}}}}} - (\\\\frac{{{result_frac[0]}}}{{{{{result_frac[1]}}}}})$$\" \n    # Wait, I need to reconstruct the question text using LaTeX delimiters properly based on the original expression string provided in frozen params.\n    \n    # Reconstructing exact latex for display:\n    term_a_latex = f\"\\\\frac{{{numerator}}}{{{{{denominator}}}}\" if num_b == 0 else FractionOps.to_latex(frac_a, mixed=False) \n    # Actually frac_a is (3/7). Let's just use the original string parts to build LaTeX.\n    \n    term1_str = part_a_str.replace(\"/\", \"\\\\frac{\")[:-2] + \"}\" if \"/\" in part_a_str else part_a_str\n    \n    # Better approach: Use FractionOps.to_latex for both terms and reconstruct? \n    # No, we need the original expression text to be accurate.\n    \n    term1_val = (num_a, den_a)\n    term2_val = frac_b_raw_tuple\n    \n    latex_term1 = FractionOps.to_latex(term1_val, mixed=False)\n    latex_term2 = FractionOps.to_latex(term2_val, mixed=False)\n    \n    # The expression is \"3/7 - (-1/4)\". \n    # If term2 was negative inside parens in the string, we need to reflect that.\n    # But our parsing logic extracted num_b=-1 for \"-(-1/4)\"? No, if input is \"- (-1/4)\", split gives part_a=\"3/7\", op_part_b_str=\"(-1/4)\".\n    # My parser above: b_term_raw = \"(-1/4)\". inner=\"-1/4\". num_b=-1. den_b=4. val_b_tuple=(-1, 4).\n    # So latex_term2 will be \"-\\\\frac{1}{4}\". \n    # The expression string in question_text should match the frozen params exactly? Or just valid LaTeX?\n    # \"question_text must use formal LaTeX delimiters.\"\n    \n    q_latex = f\"$$ {latex_term1} - ({latex_term2}) $$\" if latex_term2.startswith(\"-\") else f\"$$ {latex_term1} - {latex_term2} $$\"\n    # Actually, simpler: just format the original expression string into LaTeX.\n    \n    final_q_text = f\"Simplify the following rational arithmetic expression:\\n\\n$$\\\\text{{expression}}: \\\\frac{{{numerator}}}{{{{{denominator}}}}} - (\\\\frac{{{result_frac[0]}}}{{{{{result_frac[1]}}}}})$$\" \n    # This is getting messy. Let's stick to generating clean LaTeX from the computed values and original structure if possible, or just standard form.\n    \n    # Standard requirement: question_text uses formal LaTeX delimiters.\n    # We will construct it as \"Simplify ... $$ \\\\frac{A}{B} - (\\\\frac{C}{D}) $$\" where C/D is negative if applicable? \n    # Actually, the frozen params say expression=\"3/7 - (-1/4)\".\n    # So we should output: Simplify 3/7 - (-1/4). In LaTeX.\n    \n    term_a_latex = FractionOps.to_latex(term1_val, mixed=False)\n    term_b_latex = FractionOps.to_latex(term2_val, mixed=False)\n    \n    # If the original expression had parens around negative fraction, we keep them? \n    # The prompt says \"question_text must use formal LaTeX delimiters\". It doesn't strictly require preserving exact string formatting if it's not valid latex.\n    # But to be safe and accurate:\n    \n    question_text = f\"Simplify the following rational arithmetic expression:\\n\\n$$ {term_a_latex} - ({term_b_latex}) $$\"\n\n    correct_answer_dict = {\n        \"numerator\": numerator,\n        \"denominator\": denominator,\n        \"canonical_latex\": canonical_latex\n    }\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer_dict,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T20:32:12.210957+00:00",
+  "completed_at_utc": "2026-07-21T20:32:49.978339+00:00",
+  "duration": 37.76737100002356,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 37.7673586999299,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 362,
+      "eval_count": 2431,
+      "total_token_count": 2793,
+      "total_duration": 35729758700,
+      "load_duration": 254730400,
+      "done_reason": "stop",
+      "latency_ms": 37767,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072004,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072004,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

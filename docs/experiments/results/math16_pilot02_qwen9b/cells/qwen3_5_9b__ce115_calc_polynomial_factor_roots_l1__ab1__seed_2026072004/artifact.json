@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce115_calc_polynomial_factor_roots_l1__ab1__seed_2026072004",
+  "task_id": "ce115_calc_polynomial_factor_roots_l1",
+  "family": "polynomial",
+  "condition": "ab1",
+  "seed": 2026072004,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072004
+  },
+  "prompt_sha256": "62fcdc20f64c26274f92f2d05134f84475477eacfec37cfadae8f5dd3505e50e",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    quadratic_coefficients = [1, 4, -12]\n    \n    a = quadratic_coefficients[0]\n    b = quadratic_coefficients[1]\n    c = quadratic_coefficients[2]\n    \n    discriminant = b**2 - 4*a*c\n    \n    if discriminant < 0:\n        raise ValueError(\"No real roots for the given coefficients.\")\n    \n    sqrt_discriminant = int(discriminant ** 0.5)\n    \n    root1_num = (-b + sqrt_discriminant) // (2 * a)\n    root1_denom = 2 * a\n    \n    if discriminant % 4 != 0:\n        # Roots are irrational or involve square roots of non-perfect squares, \n        # but the problem implies exact arithmetic. Let's assume perfect square for level 1 simplicity as per typical math problems unless specified otherwise.\n        # However, -12 is not a multiple that makes discriminant a perfect square with integer b=4?\n        # Discriminant = 16 - 4(1)(-12) = 16 + 48 = 64. sqrt(64) = 8. Perfect square.\n        \n    root1_num = (-b + int(discriminant ** 0.5)) // (2 * a) if ((-b + int(discriminant ** 0.5)) % (2*a) == 0) else None\n    \n    # Re-evaluating roots precisely for x^2 + 4x - 12 = 0\n    # Roots are (-4 +/- sqrt(64))/2 = (-4 +/- 8)/2\n    # r1 = 4/2 = 2, r2 = -12/2 = -6\n    \n    root_values = sorted([(-b + int(discriminant ** 0.5)) / (2 * a), (-b - int(discriminant ** 0.5)) / (2 * a)])\n    \n    # Since we need exact arithmetic and no floats in the final output representation for roots if they are integers, \n    # but the spec says \"Exact arithmetic; no floats\". If roots are integers, represent as ints.\n    r1 = (-b + int(discriminant ** 0.5)) / (2 * a)\n    r2 = (-b - int(discriminant ** 0.5)) / (2 * a)\n    \n    # Check if they are integers to format correctly without float point\n    def is_int(x):\n        return x == int(x)\n\n    root1_val = int(r1) if is_int(r1) else r1\n    root2_val = int(r2) if is_int(r2) else r2\n    \n    roots_list = sorted([root1_val, root2_val])\n    \n    # Factorization: a(x - r1)(x - r2) -> 1(x - (-6))(x - 2) -> (x + 6)(x - 2)\n    factor_latex_str = f\"(x {'+ ' if roots_list[0] < 0 else '-'}{abs(roots_list[0])})(x {'+' if roots_list[1] > 0 else ''}{roots_list[1]})\"\n    \n    # Construct LaTeX for factors carefully based on signs\n    def format_factor(r):\n        sign = '+' if r >= 0 else '-'\n        val_str = str(abs(int(r))) if isinstance(r, int) and r != 0 else str(r)\n        return f\"(x {sign} {val_str})\"\n\n    # Re-calculate roots to ensure correct formatting logic inside the function body for general case\n    sqrt_d = discriminant ** 0.5\n    root_a_num = -b + int(sqrt_d)\n    root_b_num = -b - int(sqrt_d)\n    \n    r1_exact = root_a_num / (2*a)\n    r2_exact = root_b_num / (2*a)\n    \n    # Sort roots ascending\n    sorted_roots = [min(r1_exact, r2_exact), max(r1_exact, r2_exact)]\n    \n    def get_latex_root(val):\n        if val == int(val):\n            return f\"{int(val)}\"\n        else:\n            return str(val)\n\n    roots_str_list = sorted([get_latex_root(sorted_roots[0]), get_latex_root(sorted_roots[1])], key=lambda x: float(x)) # Sort numerically\n    \n    # Build factorization string manually for precision\n    def build_factor(r):\n        if r == 0:\n            return \"(x)\" \n        sign = '+' if r > 0 else '-'\n        val = abs(int(r)) if isinstance(r, int) and float(val_str_check := str(abs(float(r)))) == str(abs(int(r))) else abs(r) # Simplified check\n        \n        # Better approach for factor latex: (x - root) or (x + |root|)\n        if r > 0:\n            return f\"(x-{int(r)})\"\n        elif r < 0:\n            return f\"(x{'+ '}{abs(int(r))})\"\n        else:\n            return \"(x)\"\n\n    # Recalculate specific values for the hardcoded input to ensure correctness in this instance logic\n    # Input: [1, 4, -12] -> roots are 2 and -6. Sorted ascending: [-6, 2].\n    # Factors: (x+6)(x-2).\n    \n    r_sorted = sorted([(-b + int(discriminant ** 0.5)) / (2 * a), (-b - int(discriminant ** 0.5)) / (2 * a)])\n    \n    factor1_str = f\"(x{'+ ' if r_sorted[0] < 0 else ''}{abs(int(r_sorted[0]))})\" if isinstance(r_sorted[0], float) and abs(r_sorted[0]) == int(abs(r_sorted[0])) else \"(x)\" # Handle zero case separately\n    factor2_str = f\"(x{'+ ' if r_sorted[1] < 0 else ''}{abs(int(r_sorted[1]))})\" if isinstance(r_sorted[1], float) and abs(r_sorted[1]) == int(abs(r_sorted[1])) else \"(x)\" # Handle zero case separately\n    \n    # Correct logic for factor strings\n    def make_factor_str(root):\n        val = root\n        sign_char = '+' \n        num_val = 0\n        \n        if isinstance(val, float) and abs(val - round(val)) < 1e-9:\n            int_val = int(round(val))\n            if int_val > 0:\n                return f\"(x-{int_val})\"\n            elif int_val < 0:\n                sign_char = '+'\n                num_val = abs(int_val)\n                return f\"(x{sign_char}{num_val})\"\n            else:\n                return \"(x)\"\n        else:\n             # Should not happen with integer coefficients and perfect discriminant in level 1 usually, but fallback\n             if val > 0: return f\"(x-{int(val)})\"\n             elif val < 0: sign_char = '+'; num_val = abs(int(val)); return f\"(x{sign_char}{num_val})\"\n             else: return \"(x)\"\n\n    # Re-implementing cleanly for the specific case [1,4,-12] inside generate to be robust\n    roots_vals = sorted([(-b + int(discriminant ** 0.5)) / (2 * a), (-b - int(discriminant ** 0.5)) / (2 * a)])\n    \n    # Format roots for latex answer list\n    formatted_roots_latex = []\n    for r in roots_vals:\n        if isinstance(r, float) and abs(r % 1) < 1e-9:\n            formatted_roots_latex.append(str(int(r)))\n        else:\n            formatted_roots_latex.append(f\"{r}\") # Should be int here\n            \n    # Format factorization latex string\n    f_str = \"\"\n    for r in roots_vals:\n        if isinstance(r, float) and abs(r % 1) < 1e-9:\n            val = abs(int(r))\n            sign = '+' if r > 0 else '-'\n            term = f\"{val}\" if r != 0 else \"0\" # x - (-6) -> x+6; x - (2) -> x-2. Wait, logic check: factor is (x-root). \n            # If root is -6, factor is (x - (-6)) => (x + 6).\n            # If root is 2, factor is (x - 2).\n            \n            if r > 0:\n                f_str += f\"(x-{int(r)})\"\n            elif r < 0:\n                f_str += f\"(x{'+ '}{abs(int(r))})\"\n            else:\n                f_str += \"(x)\"\n        else:\n             # Fallback for non-integers (unlikely in level 1 with these params)\n             if r > 0: f_str += f\"(x-{r})\"\n             elif r < 0: f_str += f\"(x{'+ '}{abs(r)})\"\n             else: f_str += \"(x)\"\n\n    question_text = (f\"Solve the quadratic equation $a x^2 + b x + c = 0$ for roots, where \"\n                     f\"$a={a}$, $b={b}$, and $c={c}$. Provide the factorization in LaTeX format.\")\n    \n    # Ensure correct_answer structure matches spec: dict with question_text (wait, no), \n    # Spec says: return a dict with exactly question_text, correct_answer, and oracle_payload.\n    # Wait, \"correct_answer must include roots..., factorization_latex...\". So correct_answer is a sub-dict?\n    # Re-reading: \"return a dict with exactly question_text, correct_answer, and oracle_payload.\"\n    # And \"correct_answer must include roots (ascending), factorization_latex, and roots_latex\".\"\n    \n    return {\n        \"question_text\": f\"Solve the quadratic equation $x^2 + 4x - 12 = 0$. Find the roots and write the polynomial in factored form.\",\n        \"correct_answer\": {\n            \"roots\": [-6, 2], # Ascending order integers\n            \"factorization_latex\": \"(x+6)(x-2)\",\n            \"roots_latex\": \"-6, 2\"\n        },\n        \"oracle_payload\": {\"quadratic_coefficients\": [1, 4, -12]}\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T20:17:06.196685+00:00",
+  "completed_at_utc": "2026-07-21T20:17:42.468222+00:00",
+  "duration": 36.27152389998082,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 36.27151089999825,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 164,
+      "eval_count": 2335,
+      "total_token_count": 2499,
+      "total_duration": 34245865200,
+      "load_duration": 252136800,
+      "done_reason": "stop",
+      "latency_ms": 36271,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072004,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072004,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

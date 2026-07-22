@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce115_calc_polynomial_factor_roots_l1__ab2g__seed_2026071301",
+  "task_id": "ce115_calc_polynomial_factor_roots_l1",
+  "family": "polynomial",
+  "condition": "ab2g",
+  "seed": 2026071301,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026071301
+  },
+  "prompt_sha256": "9aa875c3c2de0b79cb0cf0bb5ec18ef9a02ead452db9d4d044500f175a8f485f",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    quadratic_coefficients = [1, 4, -12]\n    \n    # Calculate roots using exact arithmetic (fractions) to avoid floats\n    from fractions import Fraction\n    \n    a = quadratic_coefficients[0]\n    b = quadratic_coefficients[1]\n    c = quadratic_coefficients[2]\n    \n    discriminant = b*b - 4*a*c\n    sqrt_discriminant_int = int(discriminant**0.5) if (sqrt_disc := float(discriminant)**0.5).is_integer() else None\n    \n    # Since coefficients are integers and we need exact roots, check for perfect square discriminant\n    import math\n    delta_sq = b*b - 4*a*c\n    sqrt_delta = int(math.isqrt(delta_sq)) if (sqrt_delta * sqrt_delta == delta_sq) else None\n    \n    if sqrt_delta is not None:\n        root1_num = (-b + sqrt_delta)\n        root2_num = (-b - sqrt_delta)\n        \n        # Simplify fractions for roots\n        def simplify_fraction(n):\n            from math import gcd\n            g = abs(gcd(a, n))  # Actually we need to divide by a first conceptually, but let's do standard fraction reduction\n            if n == 0: return Fraction(0)\n            \n            # The root is (-b +/- sqrt(delta)) / (2a)\n            num1 = -b + sqrt_delta\n            den1 = 2 * a\n            \n            g1 = abs(gcd(num1, den1))\n            simplified_num1 = num1 // g1\n            simplified_den1 = den1 // g1\n            \n            if simplified_den1 == 1:\n                return Fraction(simplified_num1)\n            \n            # For the second root\n            num2 = -b - sqrt_delta\n            g2 = abs(gcd(num2, den1))\n            simplified_num2 = num2 // g2\n            simplified_den2 = den1 // g2\n            \n            if simplified_den2 == 1:\n                return Fraction(simplified_num2)\n                \n        root1 = simplify_fraction(root1_num) # This logic is slightly flawed above for separate calls, let's redo cleanly\n        \n    # Redo calculation cleanly with Fractions\n    from fractions import Fraction\n    \n    delta_sq_val = b*b - 4*a*c\n    sqrt_delta_val = int(delta_sq_val**0.5) if (sqrt_d := float(delta_sq_val)**0.5).is_integer() else None\n    \n    roots_list = []\n    \n    if sqrt_delta_val is not None:\n        # Roots are (-b +/- sqrt(d)) / 2a\n        numerator1 = -b + sqrt_delta_val\n        denominator_common = 2 * a\n        \n        root1_frac = Fraction(numerator1, denominator_common)\n        roots_list.append(root1_frac.numerator if root1_frac.denominator == 1 else f\"{root1_frac.numerator}/{root1_frac.denominator}\") # Store string representation for latex? No, store value. But correct_answer needs specific format.\n        \n        numerator2 = -b - sqrt_delta_val\n        root2_frac = Fraction(numerator2, denominator_common)\n        roots_list.append(root2_frac.numerator if root2_frac.denominator == 1 else f\"{root2_frac.numerator}/{root2_frac.denominator}\")\n        \n    # Sort roots ascending (numerical value comparison for sorting strings representing fractions is tricky, convert to float for sort key then map back? Or just compare Fraction objects)\n    # We need the list of root values. Let's store as Fractions first.\n    \n    if sqrt_delta_val:\n        r1 = Fraction(-b + sqrt_delta_val, 2*a)\n        r2 = Fraction(-b - sqrt_delta_val, 2*a)\n        \n        sorted_roots = [min(r1, r2), max(r1, r2)] # Fractions support comparison\n        \n    else:\n        # Complex roots? Task says difficulty level 1, usually implies real. \n        # If discriminant < 0, handle complex or assume valid input for L1.\n        # Given frozen params [1, 4, -12], delta = 16 + 48 = 64 > 0. Real roots exist.\n        sorted_roots = []\n\n    # Format roots_latex and correct_answer.roots (ascending)\n    def format_root(r):\n        if r.denominator == 1:\n            return str(r.numerator)\n        else:\n            return f\"{r.numerator}/{r.denominator}\"\n            \n    sorted_roots_str = [format_root(root) for root in sorted_roots]\n    \n    # Factorization: a(x - r1)(x - r2). Note roots are values. Factors are (ax + b +/- ...)? \n    # Standard factorization over rationals/integers usually looks like 1*(x - r1)*(x - r2) if monic, or scaled.\n    # Since leading coeff is 1: (x - root1)(x - root2).\n    # If roots are fractions p/q and u/v? \n    # Actually for integer coefficients, factors are usually linear terms with integer coeffs like (qx + p).\n    # Let's construct factorization string.\n    \n    r1 = sorted_roots[0]\n    r2 = sorted_roots[1]\n    \n    term1_num = -r1.numerator if r1.denominator == 1 else (-r1.numerator, r1.denominator)\n    # Better approach for factorization string: (den*x + num)(other_den*x + other_num)? \n    # No, standard form is usually monic factors if possible or integer coefficients.\n    # For x^2 + 4x - 12 = (x+6)(x-2). Roots are -6 and 2.\n    \n    # Let's reconstruct the linear factors from roots directly for LaTeX display: (x - r)\n    def get_factor_latex(r):\n        if r.denominator == 1:\n            val = r.numerator\n            sign = \"+\" if val < 0 else \"-\" if val > 0 else \"\"\n            term_val = abs(val)\n            return f\"(x {sign} {term_val})\" if (val != 0 and not (r==Fraction(0))) else \"(x)\" # Handle zero root case separately? \n            # Actually simpler: x - (-6) -> x + 6. x - (2) -> x - 2.\n            return f\"(x {'' if val == 0 else ('+' if val < 0 else '-')} {abs(val)})\"\n        else:\n            # Fractional root p/q => factor is (qx - p). Root = p/q. Factor (q*x - p) or (-q*x + p)? \n            # If x^2+4x-12, roots are integers here.\n            pass\n            \n    if r1.denominator == 1 and r2.denominator == 1:\n        f1_str = f\"(x {'' if r1.numerator==0 else ('+' if r1.numerator<0 else '-')} {abs(r1.numerator)})\"\n        f2_str = f\"(x {'' if r2.numerator==0 else ('+' if r2.numerator<0 else '-')} {abs(r2.numerator)})\"\n    else:\n        # General case for fractions p/q (root) -> factor is (q*x - p). \n        # Check sign. If root = 1/3, x=1/3 => 3x-1=0. Factor (3x-1).\n        f1_str = f\"({r1.denominator}*x {'' if r1.numerator==0 else ('+' if -r1.numerator>=0 and r1.numerator!=0 else '')} {-r1.numerator})\" # Logic check: root=2 => 1*x-2. num=2, den=1. -> (1*x + (-2))\n        f2_str = f\"({r2.denominator}*x {'' if r2.numerator==0 else ('+' if -r2.numerator>=0 and r2.numerator!=0 else '')} {-r2.numerator})\"\n        \n    factorization_latex = f\"{a}{f1_str}{f2_str}\" # a is 1 here. If not monic, need to distribute? \n    # Usually for \"factor_roots\", we want the product form. Since a=1 in frozen params:\n    \n    question_text = (\n        r\"Given the quadratic polynomial $x^2 + bx + c$ with coefficients from the set $\\{a,b,c\\} = \\{\" + str(quadratic_coefficients) + \"}\\$, find its roots and factorization.\"\n    ) # Wait, need to use actual values in text.\n    \n    b_val = quadratic_coefficients[1]\n    c_val = quadratic_coefficients[2]\n    \n    question_text = (\n        r\"Find the roots of the polynomial $x^{\" + str(b_val) + \"}\" + f\"x {'' if b_val==0 else ('+' if b_val>0 else '')} {b_val})$\" \n        + f\"+{c_val}$ and its factorization.\"\n    ) # Simplified text generation. Let's make it robust.\n    \n    poly_str = f\"x^2 {'+ ' if c_val>=0 else ''}{abs(c_val)} x {'+' if b_val>0 else '-'} {b_val}\" \n    # Wait, standard form ax^2 + bx + c. Here a=1.\n    term_b = \"\"\n    sign_b = \"+\"\n    val_b = abs(b_val)\n    if b_val < 0:\n        sign_b = \"-\"\n        val_b = -b_val\n    \n    poly_str = f\"x^2 {sign_b} {val_b}x\" + (f\"+{c_val}\" if c_val >= 0 else \"\") # If c is negative, handled by logic? \n    # Let's just build the string carefully.\n    \n    term_c_sign = \"+\"\n    term_c_abs = abs(c_val)\n    if c_val < 0:\n        term_c_sign = \"-\"\n        \n    poly_str = f\"x^2 {'+' if b_val>=0 else ''}{b_val}x {term_c_sign}{c_val}\" # This is getting messy. \n    # Let's just use the coefficients directly in a readable way or standard math notation.\n    \n    final_poly_text = (f\"Find the roots and factorization of $x^2 {'+' if b_val>=0 else ''}{b_val}x {'' if c_val==0 else ('+' if c_val>0 else '')}{c_val}$.\")\n\n    correct_answer_dict = {\n        \"roots\": sorted_roots_str, # List of strings representing roots ascending\n        \"factorization_latex\": f\"{a}*{f1_str}*{f2_str}\", \n        \"roots_latex\": \", \".join(sorted_roots_str)\n    }\n    \n    return {\n        \"question_text\": final_poly_text,\n        \"correct_answer\": correct_answer_dict,\n        \"oracle_payload\": {\"quadratic_coefficients\": [1, 4, -12]}\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T17:41:51.605250+00:00",
+  "completed_at_utc": "2026-07-21T17:42:29.438095+00:00",
+  "duration": 37.832835100009106,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 37.83282219991088,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 228,
+      "eval_count": 2452,
+      "total_token_count": 2680,
+      "total_duration": 35801088300,
+      "load_duration": 233013000,
+      "done_reason": "stop",
+      "latency_ms": 37832,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026071301,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026071301,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

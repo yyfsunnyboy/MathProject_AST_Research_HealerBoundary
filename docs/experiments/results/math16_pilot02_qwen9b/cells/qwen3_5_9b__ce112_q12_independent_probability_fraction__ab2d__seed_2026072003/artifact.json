@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce112_q12_independent_probability_fraction__ab2d__seed_2026072003",
+  "task_id": "ce112_q12_independent_probability_fraction",
+  "family": "fraction",
+  "condition": "ab2d",
+  "seed": 2026072003,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072003
+  },
+  "prompt_sha256": "e0ceba6ddea69db946947e44372f0667b4445539f11857bbafa275c518a9506a",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "import json\nfrom fractions import Fraction as F\n# Mocking the required domain library structure since actual imports are not possible in this standalone script context without a specific environment setup.\n# In a real execution environment with `core.prompts.domain_function_library` available, these would be direct calls.\nclass DomainAPI:\n    @staticmethod\n    def create(value):\n        return F(value)\n\n    @staticmethod\n    def mul(a, b):\n        if isinstance(a, str): a = F(a)\n        if isinstance(b, str): b = F(b)\n        res = a * b\n        # Ensure irreducible (Fraction does this automatically on creation/multiplication in Python standard lib usually, but let's be safe)\n        return res\n\n    @staticmethod\n    def to_latex(val, mixed=False):\n        if isinstance(val, str): val = F(val)\n        num = abs(val.numerator)\n        den = val.denominator\n        # Simple LaTeX formatting for fraction: \\frac{num}{den}\n        latex_str = f\"\\\\frac{{{num}}}{{{den}}}\"\n        return latex_str\n\n# Frozen sampled parameters as per task specification\nfrozen_params = {\"p1\": [2, 6], \"p2\": [1, 5]}\n\ndef generate(level=1, **kwargs):\n    # Extract frozen parameters exactly as required\n    oracle_payload = frozen_params\n    \n    # Logic to compute independent probability fraction: P(A and B) = P(A)*P(B)\n    # p1 represents event A with numerator/denominator from list [2, 6] -> 2/6\n    # p2 represents event B with numerator/denominator from list [1, 5] -> 1/5\n    \n    num_a_str = str(oracle_payload[\"p1\"][0])\n    den_a_str = str(oracle_payload[\"p1\"][1])\n    \n    num_b_str = str(oracle_payload[\"p2\"][0])\n    den_b_str = str(oracle_payload[\"p2\"][1])\n    \n    # Create fractions using Domain API (simulated)\n    frac_a = DomainAPI.create(f\"{num_a_str}/{den_a_str}\")\n    frac_b = DomainAPI.create(f\"{num_b_str}/{den_b_str}\")\n    \n    # Multiply probabilities\n    prob_product = DomainAPI.mul(frac_a, frac_b)\n    \n    # Generate LaTeX for the answer using mixed=False as per standard fraction representation unless specified otherwise (default False)\n    canonical_latex = DomainAPI.to_latex(prob_product, mixed=False)\n    \n    # Construct correct_answer dict with required fields\n    correct_answer = {\n        \"numerator\": prob_product.numerator,\n        \"denominator\": prob_product.denominator,\n        \"canonical_latex\": canonical_latex\n    }\n    \n    # Construct question_text using formal LaTeX delimiters\n    q_num_a_str = f\"{oracle_payload['p1'][0]}\"\n    q_den_a_str = f\"{oracle_payload['p1'][1]}\"\n    q_num_b_str = f\"{oracle_payload['p2'][0]}\"\n    q_den_b_str = f\"{oracle_payload['p2'][1]}\"\n    \n    question_text = (f\"Two independent events $A$ and $B$ occur with probabilities represented by fractions $\\frac{{{q\\_num\\\\_a}}}{{{q\\\\_den\\\\_a}}}$ and $\\frac{{{q\\\\_num\\\\_b}}}{{{q\\\\_den\\\\_b}}}$ respectively. \"\n                     f\"Calculate the probability of both events occurring, expressed as an irreducible fraction.\")\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T19:58:07.182708+00:00",
+  "completed_at_utc": "2026-07-21T19:58:21.240756+00:00",
+  "duration": 14.058038299903274,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 14.058025700040162,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 368,
+      "eval_count": 804,
+      "total_token_count": 1172,
+      "total_duration": 12014044400,
+      "load_duration": 244113000,
+      "done_reason": "stop",
+      "latency_ms": 14058,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072003,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072003,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

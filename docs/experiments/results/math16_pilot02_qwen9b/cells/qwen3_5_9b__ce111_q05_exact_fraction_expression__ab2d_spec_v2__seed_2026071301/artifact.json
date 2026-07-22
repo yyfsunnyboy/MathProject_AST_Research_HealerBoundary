@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce111_q05_exact_fraction_expression__ab2d_spec_v2__seed_2026071301",
+  "task_id": "ce111_q05_exact_fraction_expression",
+  "family": "fraction",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026071301,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026071301
+  },
+  "prompt_sha256": "927977168ad6a72c644641fed7ef653495e55279689dc0beb06253033242926d",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce111_q05_exact_fraction_expression.txt",
+  "generation_status": "success",
+  "raw_response": "# -*- coding: utf-8 -*-\n\ndef generate(level=1, **kwargs):\n    from core.prompts.domain_function_library import FractionOps\n    \n    # Frozen sampled parameters as defined in task specification\n    frozen_params = {\"expression\": \"9/22 + 11/18 - (23/22 - 7/18)\"}\n    \n    # Parse components using native Python for robustness before passing to API if needed, \n    # but strictly following the instruction to use FractionOps for arithmetic.\n    # We will construct fractions manually or via string parsing compatible with standard logic,\n    # then apply FractionOps methods as per signature cards (create/from_parts).\n    \n    # Define terms: 9/22 + 11/18 - (23/22 - 7/18)\n    # Term A: 9/22\n    term_a = FractionOps.from_parts(9, 22)\n    \n    # Term B: 11/18\n    term_b = FractionOps.from_parts(11, 18)\n    \n    # Inner Parenthesis: (23/22 - 7/18)\n    inner_part_1 = FractionOps.from_parts(23, 22)\n    inner_part_2 = FractionOps.from_parts(7, 18)\n    inner_result = FractionOps.sub(inner_part_1, inner_part_2)\n    \n    # Full Expression: A + B - InnerResult\n    step1 = FractionOps.add(term_a, term_b)\n    final_fraction = FractionOps.sub(step1, inner_result)\n    \n    # Extract numerator and denominator from the resulting Fraction object\n    num = final_fraction.numerator\n    den = final_fraction.denominator\n    \n    # Construct canonical LaTeX for irreducible fraction: \\frac{num}{den}\n    import re\n    latex_num_str = str(num).replace(\"-\", \"\\\\text{-}\") if isinstance(num, int) else str(num)\n    latex_den_str = str(den).replace(\"-\", \"\\\\text{-}\") if isinstance(den, int) else str(den)\n    \n    # Handle negative sign placement for canonical LaTeX (usually before fraction or in numerator)\n    # Standard convention: \\frac{a}{b} where a can be negative. \n    # If denominator is 1, just the number. Here den != 1.\n    if num < 0 and den > 0:\n        latex_str = f\"-\\\\frac{{{abs(num)}}}{{{den}}}\"\n    else:\n        latex_str = f\"\\\\frac{{{num}}}{{{den}}}\"\n\n    # Construct correct_answer dict with required fields\n    correct_answer = {\n        \"numerator\": num,\n        \"denominator\": den,\n        \"canonical_latex\": latex_str\n    }\n    \n    question_text = r\"The value of the expression $9/22 + 11/18 - (23/22 - 7/18)$ is:\"\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T17:52:32.989476+00:00",
+  "completed_at_utc": "2026-07-21T17:52:45.527556+00:00",
+  "duration": 12.538069300004281,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 12.538057000027038,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 963,
+      "eval_count": 681,
+      "total_token_count": 1644,
+      "total_duration": 10508438200,
+      "load_duration": 247376600,
+      "done_reason": "stop",
+      "latency_ms": 12538,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026071301,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026071301,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

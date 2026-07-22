@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce115_calc_radical_simplification_l1__ab2d__seed_2026072004",
+  "task_id": "ce115_calc_radical_simplification_l1",
+  "family": "radical",
+  "condition": "ab2d",
+  "seed": 2026072004,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072004
+  },
+  "prompt_sha256": "7277f140eeaadbdfe1f64a2215413acadf06fb134b09efa280f2011d19e5588c",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "from fractions import Fraction\nimport random\n\ndef generate(level=1, **kwargs):\n    frozen_params = kwargs.get(\"frozen_sampled_parameters\", {\"radicand\": 27})\n    \n    # Extract radicand from frozen parameters or use default if not provided in a way that overrides logic\n    radicand_input = frozen_params.get(\"radicand\")\n    \n    # Ensure we work with integers as per \"Exact integers only\" requirement for inputs/outputs where applicable, \n    # but the domain API returns Fraction for coefficient. We must handle this carefully to return exact integers if possible or follow spec.\n    # The task says correct_answer must include coefficient... Exact integers only; no floats.\n    # However, RadicalOps.simplify_term returns tuple[int | Fraction, int]. \n    # If the result is a fraction like 3/1, we might need to convert? Or just return as is if it's an integer type in Python (Fraction(3) != 3).\n    # Let's assume standard math simplification: sqrt(27) = 3*sqrt(3). Coefficient=3.\n    \n    from core.prompts.domain_function_library import RadicalOps\n    \n    coeff, square_free_radicand = RadicalOps.simplify_term(radicand_input, radicand_input)\n    \n    # Construct the canonical LaTeX string: coefficient * sqrt(square-free radicand)\n    # If coefficient is 1 or -1, usually just write sqrt(...). But let's stick to a standard format.\n    # The spec says \"include coefficient\". Let's assume if coeff is Fraction(3), we print '3'. \n    # We need to ensure the output string uses LaTeX delimiters.\n    \n    def get_coeff_str(c):\n        from fractions import Fraction as F\n        c_val = float(c)\n        if abs(c_val - round(c_val)) < 1e-9:\n            return str(int(round(c_val)))\n        else:\n            # Should not happen with exact integers input and standard radicals, but fallback to string rep\n            return f\"{c}\"\n\n    coeff_str = get_coeff_str(coeff)\n    \n    if coeff == 0 or (isinstance(coeff, Fraction) and abs(float(coeff)) < 1e-9):\n        latex_expr = \"\\\\sqrt{\" + str(square_free_radicand) + \"}\"\n    else:\n        # Handle negative coefficients? The radicand is usually positive in these tasks. \n        # If coeff is -3, we write \"-3\\\\sqrt{...}\".\n        if isinstance(coeff, Fraction):\n            sign = \"-\" if float(coeff) < 0 else \"\"\n            abs_coeff_str = get_coeff_str(abs(coeff))\n            latex_expr = f\"{sign}{abs_coeff_str}\\\\sqrt{{{square_free_radicand}}}\"\n        else:\n             # Fallback for integer coeff directly (though API returns Fraction or int)\n             if float(coeff) < 0:\n                 sign = \"-\"\n                 abs_c = -coeff\n             else:\n                 sign = \"\"\n                 abs_c = coeff\n             \n             latex_expr = f\"{sign}{abs_c}\\\\sqrt{{{square_free_radicand}}}\"\n\n    # Ensure the radicand in LaTeX is formatted correctly (no spaces inside sqrt usually)\n    \n    question_text = \"Simplify \\\\sqrt{\" + str(radicand_input) + \"}.\"\n    correct_answer_latex = latex_expr\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": f\"{coeff_str}\\\\sqrt{{{square_free_radicand}}}\", # Reconstructing to ensure clean string representation if Fraction was used internally but we want exact text. \n                                # Actually, let's use the logic derived above for correct_answer directly.\n    }\n\n# Wait, I need to fix the return statement inside generate based on my thought process in the function body properly without defining it twice or having errors.\n# Let me rewrite cleanly.\n\nfrom core.prompts.domain_function_library import RadicalOps\nimport re\n\ndef generate(level=1, **kwargs):\n    frozen_params = kwargs.get(\"frozen_sampled_parameters\", {\"radicand\": 27})\n    \n    radicand_input = frozen_params[\"radicand\"]\n    \n    # Call domain API\n    coeff_raw, square_free_radicand = RadicalOps.simplify_term(radicand_input, radicand_input)\n    \n    # Convert coefficient to a clean string representation (integer if possible)\n    from fractions import Fraction as F\n    \n    def format_coeff(c):\n        if isinstance(c, int):\n            return str(c)\n        elif isinstance(c, float):\n            # If it's an integer value in float form due to some reason? Unlikely here.\n            return str(int(round(c))) \n        else:\n            val = c.numerator / c.denominator\n            if abs(val - round(val)) < 1e-9:\n                return str(int(round(val)))\n            else:\n                # Return fraction string like \"3/4\" or just numerator? Task implies integer coefficients usually.\n                # For sqrt simplification, coeff is always integer.\n                return f\"{c.numerator}/{c.denominator}\"\n\n    c_str = format_coeff(coeff_raw)\n    \n    # Build LaTeX answer\n    if float(c_str.replace('/', '')) == 0: \n        ans_latex = r\"\\sqrt{\" + str(square_free_radicand) + \"}\"\n    else:\n        sign = \"-\" if coeff_raw < 0 else \"\"\n        abs_c_val = -coeff_raw if coeff_raw < 0 else float(coeff_raw) # This logic is messy with mixed types. \n        # Let's simplify: use string manipulation on the formatted coefficient and check sign from raw value\n        \n        c_sign = \"minus\" if isinstance(coeff_raw, F) and (coeff_raw.numerator % coeff_raw.denominator == 0 and int(coeff_raw.numerator/coeff_raw.denominator) < 0) else \"\"\n        \n        # Simpler approach: \n        val_float = float(coeff_raw)\n        sign_str = \"-\" if val_float < 0 else \"\"\n        abs_val_int = round(abs(val_float))\n        c_final_str = f\"{sign_str}{abs_val_int}\"\n        \n        ans_latex = r\"\\sqrt{\" + str(square_free_radicand) + \"}\"\n        if float(coeff_raw) != 1 and float(coeff_raw) != -1: # If coeff is not +/- 1, include it. \n            # Wait, standard convention: 3\\sqrt{2} vs \\sqrt{8}. \n            # My code above handles sign separately.\n            pass\n            \n        if abs_val_int == 0:\n             ans_latex = r\"\\sqrt{\" + str(square_free_radicand) + \"}\"\n        else:\n             ans_latex = f\"{sign_str}{abs_val_int}\\\\sqrt{{{square_free_radicand}}}\"\n\n    # Re-evaluating the logic to be robust. \n    # If coeff is 3, square_free is 3 -> \"3\\\\sqrt{3}\".\n    # If coeff is -2, square_free is 5 -> \"-2\\\\sqrt{5}\".\n    \n    final_ans = ans_latex\n    \n    return {\n        \"question_text\": f\"Simplify \\\\sqrt{{{radicand_input}}}.\",\n        \"correct_answer\": final_ans,\n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T20:23:17.076379+00:00",
+  "completed_at_utc": "2026-07-21T20:23:42.351784+00:00",
+  "duration": 25.27539299998898,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 25.275381000014022,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 309,
+      "eval_count": 1577,
+      "total_token_count": 1886,
+      "total_duration": 23230104800,
+      "load_duration": 246211800,
+      "done_reason": "stop",
+      "latency_ms": 25275,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072004,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072004,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

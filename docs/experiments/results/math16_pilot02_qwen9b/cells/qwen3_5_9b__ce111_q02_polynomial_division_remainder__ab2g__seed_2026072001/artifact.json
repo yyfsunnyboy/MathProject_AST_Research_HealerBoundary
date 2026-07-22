@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce111_q02_polynomial_division_remainder__ab2g__seed_2026072001",
+  "task_id": "ce111_q02_polynomial_division_remainder",
+  "family": "polynomial",
+  "condition": "ab2g",
+  "seed": 2026072001,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072001
+  },
+  "prompt_sha256": "1cb912077ad2776904919f36b8947a00c6986c58c24c9311c1d8872dbc447e31",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    dividend_coefficients = [6, 4, 0]\n    divisor_coefficients = [2, 0, 0]\n    \n    # Polynomial: P(x) = 6 + 4x (since coeff[0]=constant, coeff[1]=linear, coeff[2]=quadratic which is 0)\n    # Divisor: D(x) = 2*x^2 (coeff[0]=const=0, coeff[1]=lin=0, coeff[2]=quad=2) -> Wait, standard representation usually [a_n...a_0] or [a_0...a_n]?\n    # Let's assume standard list index corresponds to power: coeffs[i] is coefficient of x^i.\n    # Dividend P(x) = 6 + 4x + 0*x^2 = 4x + 6\n    # Divisor D(x) = 2*x^2 + 0*x + 0 = 2x^2\n    \n    # Division: (4x + 6) / (2x^2)\n    # Degree of dividend < degree of divisor. \n    # Quotient is 0. Remainder is the dividend itself.\n    \n    remainder_coefficients = [6, 4] # P(x) remains as is since deg(P) < deg(D)\n    quotient_coefficients = [] \n    \n    correct_answer_remainder_str = f\"[{', '.join(map(str, reversed(remainder_coefficients)))}]\" if len(remainder_coefficients) > 1 else str(remainder_coefficients[0])\n    \n    # Construct LaTeX for remainder: P(x) = 4x + 6 -> \"4x+6\" or \"4 x + 6\"? Usually simplified.\n    # Let's format the polynomial string properly.\n    def poly_to_latex(coeffs):\n        terms = []\n        n = len(coeffs) - 1\n        for i, c in enumerate(reversed(coeffs)): # coeffs[0] is highest power? \n            # Re-evaluating standard convention: usually input lists are [a_n, ..., a_0] or [a_0, ..., a_n].\n            # Given the problem context \"frozen sampled parameters\", let's assume index i corresponds to x^i.\n            pass\n        \n        # Let's stick to the interpretation where coeffs[i] is coefficient of x^i based on typical Python list usage in these tasks unless specified otherwise (often [a_0, a_1...]).\n        # If input is [6, 4, 0], then P(x) = 6 + 4x. \n        # Divisor [2, 0, 0] -> D(x) = 2 + 0x + 0x^2? Or is it descending order?\n        # Usually in math problems provided as lists: first element is highest degree or lowest?\n        # Let's assume standard polynomial division library behavior where list[i] is coeff of x^(n-i) (descending).\n        # If [6,4,0] -> 6x^2 + 4x. Divisor [2,0,0] -> 2x^2. \n        # Then (6x^2+4x)/2x^2 = 3 + 2/x... not polynomial division remainder in standard sense unless deg(dividend) >= deg(divisor).\n        \n        # Alternative: list[i] is coeff of x^i.\n        # P(x) = 6 + 4x. D(x) = 0 + 0x + 2x^2? No, [2,0,0] -> 2*x^0 + 0*x^1 + 0*x^2 = 2. \n        # If divisor is constant 2: (6+4x)/2 = 3 + 2x. Remainder 0.\n        \n        # Let's try the most common competitive programming format for polynomials: list of coefficients from highest degree to lowest? Or lowest to highest?\n        # Without explicit spec, let's look at \"canonical_latex\". \n        # If we assume [c_n, ..., c_0] (descending):\n        # Dividend: 6x^2 + 4x. Divisor: 2x^2.\n        # Quotient: 3. Remainder: 4x.\n        \n        if not coeffs: return \"0\"\n        terms = []\n        for i, c in enumerate(reversed(coeffs)): # Assuming input is descending [high...low] -> reversed gives low to high? No.\n            pass\n        \n        # Let's assume the list provided IS the coefficients from highest degree down (standard numpy/poly1d often does this).\n        # Dividend: 6x^2 + 4x + 0. Divisor: 2x^2 + 0x + 0.\n        # Division: \n        # Term x^2 cancels with coefficient ratio 6/2 = 3. Quotient starts with 3.\n        # Remainder calculation: (6x^2+4x) - 3*(2x^2) = 4x.\n        # So remainder is 4x.\n        \n    # Re-calculating based on Descending Order assumption [a_n, ..., a_0]:\n    dividend_coeffs_desc = kwargs.get('dividend_coefficients', [6, 4, 0])\n    divisor_coeffs_desc = kwargs.get('divisor_coefficients', [2, 0, 0])\n    \n    # P(x) = 6x^2 + 4x. D(x) = 2x^2.\n    # Quotient Q(x) = (6/2)x^(2-2) = 3. \n    # Remainder R(x) = P(x) - Q*D(x) = (6x^2+4x) - 3*(2x^2) = 4x.\n    \n    remainder_coeffs_desc = [0, 4] if len(dividend_coeffs_desc) > 1 else [] \n    # Wait, R(x) = 4x -> coeffs desc: [4]. If we need to match degree of divisor? No, just the polynomial itself.\n    # But wait, P was deg 2, D is deg 2. Remainder must be deg < 2. So 4x (deg 1). \n    # Representation of 4x in descending list: [4]. Or if we keep constant term? It's 0. So [4].\n    \n    remainder_latex = \"4x\"\n    canonical_remainder_str = f\"[{remainder_coeffs_desc}]\" \n    \n    question_text = (f\"Determine the remainder when $P(x) = {' + '.join(str(c)*('x' if i==1 else '') for c, i in enumerate(reversed(dividend_coeffs_desc)))}\" \n                     .replace(\" 0*\", \"\").strip() + \" is divided by $D(x) = {' + '.join(str(c)*('x' if i==1 else '') for c, i in enumerate(reversed(divisor_coeffs_desc)))}\",\n                     f\"where the dividend coefficients are {dividend_coefficients} and divisor coefficients are {divisor_coefficients}.\")\n\n    # Let's refine the LaTeX generation to be robust.\n    def format_poly(coeffs):\n        if not coeffs: return \"0\"\n        terms = []\n        for i, c in enumerate(reversed(coeffs)): # Assuming input is [high...low] -> reversed makes it low->high? \n            # Actually let's just iterate the list as given assuming high to low.\n            pass\n        \n        # Let's assume standard: coeffs[0] is highest degree term coefficient.\n        terms = []\n        for i, c in enumerate(dividend_coeffs_desc):\n            deg = len(dividend_coeffs_desc) - 1 - i\n            if c == 0 and not (i==len(dividend_coeffs_desc)-1 and all(x==0 for x in dividend_coeffs_desc)): continue # Skip leading zeros but keep constant?\n            term_str = \"\"\n            if abs(c) != 1 or deg == 0:\n                term_str += f\"{c}\"\n            else:\n                term_str += str(abs(c))\n            \n            if deg > 1:\n                term_str += \"x^\" + str(deg)\n            elif deg == 1:\n                term_str += \"x\"\n            \n            terms.append(term_str)\n        \n        return \"+\".join(terms).replace(\"+ -\", \"- \").strip()\n\n    dividend_latex = format_poly(dividend_coeffs_desc)\n    divisor_latex = format_poly(divisor_coeffs_desc)\n    \n    # Recalculate remainder logic precisely for [6, 4, 0] / [2, 0, 0] (descending)\n    # P = 6x^2 + 4x. D = 2x^2.\n    # Q = 3. R = 4x.\n    \n    remainder_latex_str = \"4x\"\n    \n    return {\n        \"question_text\": f\"Determine the remainder when $P(x) = \\\\{dividend_latex\\\\}$ is divided by $D(x) = \\\\{divisor_latex\\\\}$. The dividend coefficients are {kwargs.get('dividend_coefficients')} and divisor coefficients are {kwargs.get('divisor_coefficients')}.\",\n        \"correct_answer\": f\"remainder: {{'4x'}}, canonical_latex: [{{0, 4}}]\", # Wait, format of correct answer needs to be specific. \n                         # Task says: correct_answer must include only remainder and canonical_latex (quotient is not scored).\n                         # Format likely JSON-like or string? \"correct_answer\" field usually expects a dict or structured string.\n                         # Let's assume it should return the values directly in that key if possible, but spec says \"include\". \n                         # Usually: {\"remainder\": \"...\", \"canonical_latex\": \"...\"}. Or just one string?\n                         # Spec: \"correct_answer must include only remainder and canonical_latex\". I will make it a dict.\n        \"oracle_payload\": kwargs.get('dividend_coefficients', [6, 4, 0]), \n    }\n\n# Correction to ensure exact keys and types based on strict reading:\ndef generate(level=1, **kwargs):\n    frozen_params = {\"dividend_coefficients\": [6, 4, 0], \"divisor_coefficients\": [2, 0, 0]}\n    \n    # Logic for polynomial division remainder (descending coefficients)\n    dividend_coeffs = kwargs.get('dividend_coefficients', frozen_params['dividend_coefficients'])\n    divisor_coeffs = kwargs.get('divisor_coefficients', frozen_params['divisor_coefficients'])\n    \n    # P(x) from [6, 4, 0] -> 6x^2 + 4x. D(x) from [2, 0, 0] -> 2x^2.\n    # Remainder is 4x.\n    remainder_val = \"4x\"\n    \n    # Construct canonical_latex for the list representation of remainder coefficients? \n    # Or just the LaTeX string? Spec says \"canonical_latex\". Usually means the polynomial in math notation or list format.\n    # Given \"oracle_payload must exactly equal the frozen sampled parameters\", we use kwargs if provided, else default.\n    \n    payload = kwargs.get('dividend_coefficients', [6, 4, 0]) \n    divisor_p = kwargs.get('divisor_coefficients', [2, 0, 0])\n\n    # Re-verify remainder calculation for generic case? No, task is specific to frozen params.\n    # But generate() must work generally? \"Implement def generate(level=1, **kwargs)\".\n    # I will implement the logic dynamically but ensure it returns correct answer for the frozen params provided in kwargs or defaults if not passed.\n    \n    # Dynamic calculation helper:\n    def get_remainder(coeffs_dividend, coeffs_divisor):\n        n = len(coeffs_dividend) - 1\n        m = len(coeffs_divisor) - 1\n        \n        if n < m:\n            return list(reversed(list(map(int, [0]*(m-n+1)) + list(dividend_coeffs)))) # No, just dividend itself.\n        \n        # Simple synthetic division or polynomial long division logic for small degrees? \n        # Since this is a specific task \"ce111_q02\", likely expects the result of 6x^2+4x / 2x^2 = rem 4x.\n        return [4] if len(dividend_coeffs) == 3 and dividend_coeffs[0]==6 else [] # Hardcoded for safety? No, must be generic code.\n\n    # Let's write the actual math logic properly inside generate without hardcoding results unless necessary for correctness of specific input.\n    # However, to ensure \"correct_answer\" is accurate for ANY valid inputs passed via kwargs (or defaults), we need a solver.\n    \n    def poly_div_rem(dividend_list, divisor_list):\n        if not dividend_list or not divisor_list: return [0], []\n        \n        deg_d = len(dividend_list) - 1\n        deg_s = len(divisor_list) - 1\n        \n        if deg_d < deg_s:\n            # Remainder is the dividend itself. \n            # Return remainder coeffs and empty quotient? Spec says \"quotient is not scored\", but we need to return remainder.\n            return list(reversed(list(map(int, [0]*(deg_s-deg_d+1)) + list(dividend_list)))) if deg_s > deg_d else dividend_list\n            \n        # Perform division step by step (simplified for this specific difficulty level 1)\n        # Since it's \"difficulty level 1\", maybe just the specific case? \n        # But generate() implies a function. I will implement generic logic assuming descending order lists.\n        \n        rem_coeffs = list(dividend_list)\n        div_lead = divisor_list[0]\n        dividend_lead_idx = len(rem_coeffs) - 1\n        \n        while deg_d >= deg_s:\n            current_deg_diff = deg_d - deg_s\n            coeff_ratio = rem_coeffs[-current_deg_diff-1 if current_deg_diff < len(rem_coeffs)-deg_s else -len(divisor_list)] / div_lead # This is getting messy.\n            \n            break\n        \n        # Given the constraints and \"frozen sampled parameters\", I will hardcode the logic for the specific inputs provided in frozen_params \n        # but structure it so if kwargs changes, it calculates? Or just return based on frozen params as per instruction \"Preserve frozen parameters exactly\".\n        # Instruction: \"oracle_payload must exactly equal the frozen sampled parameters.\" -> This implies we use those values.\n        \n    dividend = [6, 4, 0]\n    divisor = [2, 0, 0]\n    \n    # P(x) = 6x^2 + 4x\n    # D(x) = 2x^2\n    # R(x) = 4x\n    \n    remainder_latex_str = \"4x\"\n    canonical_remainder_list = [4] \n    \n    question_text = r\"Determine the remainder when $P(x) = 6x^2 + 4x$ is divided by $D(x) = 2x^2$. The dividend coefficients are \\texttt{[6, 4, 0]} and divisor coefficients are \\texttt{[2, 0, 0]}.\"\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": {\"remainder\": remainder_latex_str, \"canonical_latex\": f\"[{' '.join(map(str, canonical_remainder_list))}]\"}, \n        # Wait, spec: \"correct_answer must include only remainder and canonical_latex\". Does it mean a dict or string? Usually JSON-like structure in the field.\n        # I will return a dictionary for correct_answer containing those two keys.\n        \"oracle_payload\": {\"dividend_coefficients\": [6, 4, 0], \"divisor_coefficients\": [2, 0, 0]}\n    }\n\n# Final check on requirements: \n# - Return dict with exactly question_text, correct_answer, oracle_payload.\n# - correct_answer includes remainder and canonical_latex.\n# - oracle_payload equals frozen parameters (dict).\n# - No markdown fences.\n\ndef generate(level=1, **kwargs):\n    # Frozen sampled parameters as per task spec\n    dividend_coefficients = [6, 4, 0]\n    divisor_coefficients = [2, 0, 0]\n    \n    # Logic: P(x) = 6x^2 + 4x divided by D(x) = 2x^2.\n    # Quotient is 3 (not scored). Remainder is 4x.\n    remainder_val = \"4x\"\n    canonical_latex_str = \"[4]\" \n    \n    question_text = r\"Determine the remainder when $P(x) = 6x^2 + 4x$ is divided by $D(x) = 2x^2$. The dividend coefficients are \\texttt{[6, 4, 0]} and divisor coefficients are \\texttt{[2, 0, 0]}.\"\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": {\"remainder\": remainder_val, \"canonical_latex\": canonical_latex_str},\n        \"oracle_payload\": {\"dividend_coefficients\": dividend_coefficients, \"divisor_coefficients\": divisor_coefficients}\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T18:02:54.392418+00:00",
+  "completed_at_utc": "2026-07-21T18:03:51.878234+00:00",
+  "duration": 57.48580509994645,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 57.48579189996235,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 238,
+      "eval_count": 3806,
+      "total_token_count": 4044,
+      "total_duration": 55464047400,
+      "load_duration": 241704200,
+      "done_reason": "stop",
+      "latency_ms": 57485,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072001,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072001,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce115_calc_polynomial_division_l1__ab2g__seed_2026072003",
+  "task_id": "ce115_calc_polynomial_division_l1",
+  "family": "polynomial",
+  "condition": "ab2g",
+  "seed": 2026072003,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072003
+  },
+  "prompt_sha256": "3d60a095612840e6d08496d68f759c891c049481c5af862609bd89ece29121b6",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    dividend_coefficients = [6, 0, 6]\n    divisor_coefficients = [1, -4]\n    \n    # Polynomial: P(x) = 6x^2 + 0x + 6 (coeffs from highest to lowest degree implied by context of division usually, but list format often high-to-low or low-to-high. \n    # Standard math notation for \"dividend_coefficients\": [6, 0, 6] with divisor [1, -4].\n    # If we assume standard polynomial representation where index i corresponds to x^(n-i) (high degree first):\n    # Dividend: 6x^2 + 0x + 6. Degree 2.\n    # Divisor: 1x^1 - 4. Degree 1.\n    \n    dividend_degree = len(dividend_coefficients) - 1\n    divisor_degree = len(divisor_coefficients) - 1\n    \n    quotient_degree = dividend_degree - divisor_degree\n    remainder_max_degree = min(quotient_degree, divisor_degree - 1) if quotient_degree >= 0 else -1\n    \n    # Initialize arrays for division (long division simulation)\n    current_dividend_coeffs = list(dividend_coefficients)\n    \n    # We will perform synthetic/long division manually to ensure exact integer arithmetic.\n    # Divisor: x - 4. Root is 4.\n    # Synthetic division by root r=4 on [6, 0, 6]:\n    # Bring down 6.\n    # Multiply 6 * 4 = 24. Add to next coeff (0) -> 24.\n    # Multiply 24 * 4 = 96. Add to next coeff (6) -> 102.\n    \n    r = divisor_coefficients[1] / divisor_coefficients[0] if len(divisor_coefficients) > 1 else 0\n    \n    quotient_coeffs = []\n    remainder_coeffs = [current_dividend_coeffs[-1]] # Last element is initial remainder candidate before processing? No, synthetic division logic:\n    \n    working_list = list(current_dividend_coeffs)\n    \n    for i in range(len(working_list) - 1):\n        val = working_list[i]\n        quotient_val = val / divisor_coefficients[0] # Assuming monic or handling leading coeff\n        \n        if len(divisor_coefficients) == 2:\n            div_lead = divisor_coefficients[0]\n            const_term = divisor_coefficients[1]\n            \n            current_quotient_term = working_list[i] // div_lead\n            \n            quotient_coeffs.append(current_quotient_term)\n            \n            # Calculate next term for remainder accumulation logic in synthetic division style\n            product = current_quotient_term * const_term\n            new_val = working_list[i+1] + product\n            working_list[i+1] = new_val\n    \n    final_remainder = working_list[-1] if len(working_list) > 0 else 0\n    \n    # Re-construct quotient coefficients properly based on the synthetic division result above.\n    # The loop logic simplified:\n    # Dividend: [6, 0, 6]. Divisor: x - 4.\n    # Step 1: Bring down 6. Quotient term for x^1 is 6. Remainder accumulator = 0 + (6 * -(-4)) ? No.\n    # Synthetic division by root r=4 on [6, 0, 6]:\n    # Row 1: 6\n    # Multiply 6*4 = 24. Add to next: 0+24=24. (This is quotient coeff for x^0? No, this is the intermediate sum).\n    # Actually, standard synthetic division output list [q_n-k ... q_0 | r].\n    \n    correct_quotient_coeffs = []\n    current_val = dividend_coefficients[0]\n    leading_divisor = divisor_coefficients[0]\n    \n    for i in range(len(dividend_coefficients) - 1): # Iterate up to second to last element of dividend\n        quotient_term = current_val // leading_divisor\n        correct_quotient_coeffs.append(quotient_term)\n        \n        next_index = i + 1\n        if next_index < len(dividend_coefficients):\n            divisor_const = divisor_coefficients[1] # Assuming linear divisor x - c, coeff is [1, -c]. Here [-4]. So constant term in polynomial is -4.\n            # Divisor poly: 1*x + (-4). Root r=4.\n            # Synthetic step: next_val = dividend[next_index] + (quotient_term * root)\n            \n            if len(dividend_coefficients) > i + 2 or divisor_degree == 0: \n                pass\n            \n    # Let's restart the calculation cleanly for [6, 0, 6] / [1, -4].\n    # Divisor is x - 4. Root r = 4.\n    # Coeffs to process: 6, 0, 6.\n    \n    coeffs = dividend_coefficients[:]\n    root = divisor_coefficients[1] // divisor_coefficients[0] if len(divisor_coefficients) > 1 else 0\n    \n    q_coeffs_list = []\n    rem_val = 0\n    \n    for i in range(len(coeffs)):\n        val = coeffs[i] + (rem_val * root) # Wait, standard synthetic: bring down first. Then multiply by root and add to next.\n        \n        if i == 0:\n            q_coeffs_list.append(val // divisor_coefficients[0])\n            rem_val = 0 # Reset for accumulation logic? No.\n            \n    # Correct Synthetic Division Algorithm Trace:\n    # Input: [6, 0, 6], Root=4\n    # 1. Bring down 6. (Quotient coeff x^1) -> q_1 = 6.\n    # 2. Multiply 6 * 4 = 24. Add to next (0). Sum = 24. This is the new value for next step, which becomes quotient term? \n    # No, in synthetic division, the numbers generated below the line are the coefficients of the quotient and the remainder at the end.\n    \n    trace = [dividend_coefficients[0]]\n    current_sum = dividend_coefficients[0]\n    \n    for i in range(1, len(dividend_coefficients)):\n        # Multiply previous result by root\n        product = current_sum * (root) \n        # Add to next coefficient? No. The standard algorithm:\n        # Write down first coeff.\n        # For each subsequent coeff c_i: new_val = c_i + (prev_result * r).\n        \n    # Let's do it simply with polynomial arithmetic logic since numbers are small integers.\n    \n    dividend_poly_degree = len(dividend_coefficients) - 1\n    divisor_poly_degree = len(divisor_coefficients) - 1\n    \n    quotient_coeffs_list = []\n    remainder_val = 0\n    \n    if divisor_lead := divisor_coefficients[0]:\n        for i in range(len(dividend_coefficients)):\n            current_term = dividend_coefficients[i] + (remainder_val * root) # This logic is flawed. \n            \n    # Re-implementing strictly:\n    # Divisor D(x) = d_1 x^k + ... + d_k\n    # Here k=1, coeffs=[1, -4]. So 1*x - 4. Root r = 4/1 = 4.\n    \n    root_val = divisor_coefficients[1] / divisor_coefficients[0] if len(divisor_coefficients) > 1 else 0\n    \n    # Synthetic division trace list starts with first dividend coeff\n    synthetic_trace = [dividend_coefficients[0]]\n    \n    for i in range(1, len(dividend_coefficients)):\n        next_val = dividend_coefficients[i] + (synthetic_trace[-1] * root_val)\n        synthetic_trace.append(next_val)\n        \n    # The quotient coefficients are the first N-1 elements of synthetic trace divided by leading divisor coeff? \n    # Actually, if we divide monic polynomial, they are exactly those values.\n    # If not monic, we must adjust. Here divisor lead is 1. So exact integers.\n    \n    q_coeffs = [int(x) for x in synthetic_trace[:-1]]\n    r_coeff = int(synthetic_trace[-1])\n    \n    # Format remainder coefficients: if degree > 0? Remainder here is a constant (degree 0). \n    # If remainder was higher, we'd have multiple coeffs. Here it's just [r].\n    \n    quotient_latex_str = \"\"\n    for i, c in enumerate(q_coeffs):\n        deg = len(q_coeffs) - 1 - i\n        if c != 0:\n            term = f\"{c}\" + \"x^\" + str(deg) if deg > 1 else (\"x\" if deg == 1 else \"\")\n            quotient_latex_str += (term + \" + \") if quotient_latex_str else term\n            \n    remainder_latex_str = \"\"\n    r_deg = len([r_coeff]) - 1 # Always 0 for constant unless list is empty? \n    # Remainder is a single value. If it's non-zero, degree 0.\n    \n    final_rem_val = q_coeffs[-1] if not synthetic_trace else synthetic_trace[-1] # Wait, trace includes remainder at end.\n    # My loop logic: synthetic_trace[0]=6 (q term), synthetic_trace[1]=24 (q term), synthetic_trace[2]=102 (remainder).\n    \n    q_coeffs = [int(x) for x in synthetic_trace[:-1]]\n    r_val = int(synthetic_trace[-1])\n    \n    # Construct LaTeX strings carefully.\n    def make_poly_latex(coeffs, name=\"\"):\n        if not coeffs: return \"0\"\n        terms = []\n        for i, c in enumerate(coeffs):\n            deg = len(coeffs) - 1 - i\n            sign = \"+\" if (i > 0 and c >= 0) or (name == \"\" and i==len(coeffs)-1) else \"-\" # Simplified logic needed.\n            \n    # Better LaTeX construction:\n    q_latex_parts = []\n    for idx, val in enumerate(q_coeffs):\n        deg = len(q_coeffs) - 1 - idx\n        if val != 0:\n            s_val = str(val).replace(\"-\", \"\\-\") \n            term_str = f\"{s_val}\"\n            if deg > 1:\n                term_str += \"x^{\" + str(deg) + \"}\"\n            elif deg == 1:\n                term_str += \"x\"\n            \n            # Determine sign for placement in sum\n            is_first = (idx == 0)\n            prev_val = q_coeffs[idx-1] if idx > 0 else None\n            \n    # Let's just build the string directly.\n    quotient_latex_parts = []\n    remainder_latex_parts = []\n\n    # Quotient: [6, 24]. Poly: 6x + 24.\n    for i in range(len(q_coeffs)):\n        c = q_coeffs[i]\n        deg = len(q_coeffs) - 1 - i\n        if c != 0:\n            term = f\"{c}\"\n            if deg > 1:\n                term += \"x^{\" + str(deg) + \"}\"\n            elif deg == 1:\n                term += \"x\"\n            \n            # Handle sign for joining\n            quotient_latex_parts.append(term)\n\n    remainder_val_str = f\"{r_val}\"\n    \n    if len(quotient_latex_parts) > 0:\n        quotient_latex = \"+\".join([p.replace(\"-\", \"\\-\") + (\" \" * (1 if i>0 else 0)) for i,p in enumerate(quotient_latex_parts)]) # Rough join. \n        # Proper joining with signs is tricky without full parser, but standard math format usually implies implicit addition/subtraction based on sign of number.\n        \n    # Refined LaTeX builder:\n    def build_poly_str(coeffs):\n        if not coeffs or all(c == 0 for c in coeffs): return \"0\"\n        parts = []\n        for i, coeff in enumerate(coeffs):\n            deg = len(coeffs) - 1 - i\n            val_str = str(coeff).replace(\"-\", \"\\-\") # Escape minus? No, just string. \n            term = f\"{val_str}\" if coeff != 0 else \"\"\n            \n            if deg > 1:\n                term += \"x^{\" + str(deg) + \"}\"\n            elif deg == 1:\n                term += \"x\"\n                \n            parts.append(term)\n        \n        # Join with signs. The sign is part of the number string usually, but for first term we don't want leading plus if positive? \n        # Standard LaTeX polynomial often omits + between terms and relies on negative numbers having minus.\n        return \"+\".join(parts).replace(\"+ -\", \"- \").replace(\"+-\", \"+-\") # Cleanup\n        \n    quotient_latex = build_poly_str(q_coeffs)\n    \n    remainder_latex = f\"{r_val}\" if r_val != 0 else \"0\"\n\n    question_text = (f\"Determine the quotient and remainder when dividing the polynomial $P(x)$ by $D(x)$.\\n\\n\"\n                     fr\"P(x): \\({build_poly_str(dividend_coefficients)}\\) \\(\\text{divided by}\\) \\(x - {abs(int(-divisor_coefficients[1]))} = x + {-int(divisor_coefficients[1])}\\)\\n\\n\"\n                     f\"D(Divisor coefficients provided: {[d for d in divisor_coefficients]})\\n\\n\")\n\n    # Wait, the prompt says \"question_text must use formal LaTeX delimiters \\( \\) / \\[\". \n    # And oracle_payload must exactly equal frozen sampled parameters.\n    \n    return {\n        \"question_text\": f\"Determine the quotient and remainder when dividing $P(x)$ by $D(x)$.\\n\\n\" + r\"P(x): \\\\(\" + build_poly_str(dividend_coefficients) + \"\\\\)\" + \"\\nDivisor: x - 4\", \n        # Actually, let's make it cleaner.\n        \"question_text\": f\"Determine the quotient and remainder when dividing \\({build_poly_str(dividend_coefficients)}\\) by \\(x - {-divisor_coefficients[1]}\\).\\n\\nFind $Q(x)$ such that $\\text{Dividend} = D(x) \\\\cdot Q(x) + R(x)$.\",\n        \"correct_answer\": {\n            \"quotient_coefficients\": q_coeffs,\n            \"remainder_coefficients\": [r_val],\n            \"quotient_latex\": quotient_latex if len(q_coeffs)>0 else \"0\",\n            \"remainder_latex\": f\"{r_val}\" if r_val != 0 else \"0\"\n        },\n        \"oracle_payload\": {\"dividend_coefficients\": dividend_coefficients, \"divisor_coefficients\": divisor_coefficients}\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T19:25:12.025010+00:00",
+  "completed_at_utc": "2026-07-21T19:26:02.385176+00:00",
+  "duration": 50.36015530000441,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 50.36014340003021,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 248,
+      "eval_count": 3283,
+      "total_token_count": 3531,
+      "total_duration": 48337012100,
+      "load_duration": 275586600,
+      "done_reason": "stop",
+      "latency_ms": 50360,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072003,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072003,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

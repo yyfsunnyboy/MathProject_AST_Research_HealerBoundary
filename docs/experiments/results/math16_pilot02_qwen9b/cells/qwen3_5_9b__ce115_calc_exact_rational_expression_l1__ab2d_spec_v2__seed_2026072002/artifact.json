@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce115_calc_exact_rational_expression_l1__ab2d_spec_v2__seed_2026072002",
+  "task_id": "ce115_calc_exact_rational_expression_l1",
+  "family": "fraction",
+  "condition": "ab2d_spec_v2",
+  "seed": 2026072002,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072002
+  },
+  "prompt_sha256": "f46b8a30d79d77ca3811c9d7dc202a0b65b50302395ca871a24d3129a0f4e7c2",
+  "prompt_path": "docs/experiments/prompts/ab2d_spec_v2/prompts/ce115_calc_exact_rational_expression_l1.txt",
+  "generation_status": "success",
+  "raw_response": "# -*- coding: utf-8 -*-\nfrom fractions import Fraction\n\ndef generate(level=1, **kwargs):\n    # Frozen sampled parameters as defined in task specification\n    frozen_params = {\"products\": [{\"left\": \"2.79\", \"right\": \"89.3\", \"sign\": 1}, {\"left\": \"-0.21\", \"right\": \"89.3\", \"sign\": -1}]}\n\n    # Helper to convert decimal string to exact Fraction\n    def str_to_frac(s):\n        return Fraction(int(float(s) * 10**len(s.split('.')[-1]) if '.' in s else float(s)*10), \n                        int(1)) if False else Fraction(*map(int, s.replace('.', 'e-').split('e'))) # Fallback logic handled below properly\n    \n    def parse_decimal_str_to_frac(d_str):\n        \"\"\"Converts a decimal string like '2.79' to an exact Fraction.\"\"\"\n        d = float(d_str)\n        denom = 10 ** len(str(d).split('.')[-1]) if '.' in str(d) else 1\n        # Reconstruct integer numerator carefully from original string to avoid float precision loss before conversion\n        int_part, frac_part = str(d).split('.')\n        num_int = int(int_part + (frac_part or '0'))\n        return Fraction(num_int, denom)\n\n    left_1_str = frozen_params[\"products\"][0][\"left\"]\n    right_1_str = frozen_params[\"products\"][0][\"right\"]\n    sign_1 = frozen_params[\"products\"][0][\"sign\"]\n    \n    left_2_str = frozen_params[\"products\"][1][\"left\"]\n    right_2_str = frozen_params[\"products\"][1][\"right\"]\n    sign_2 = frozen_params[\"products\"][1][\"sign\"]\n\n    # Parse inputs to exact Fractions\n    val_left_1 = parse_decimal_str_to_frac(left_1_str)\n    val_right_1 = parse_decimal_str_to_frac(right_1_str)\n    \n    val_left_2 = parse_decimal_str_to_frac(left_2_str)\n    val_right_2 = parse_decimal_str_to_frac(right_2_str)\n\n    # Perform arithmetic: (left1 * right1^sign1) + (left2 * right2^sign2)\n    term1_num, term1_denom = sign_1 * val_left_1.numerator, abs(sign_1) * val_right_1.denominator if sign_1 < 0 else val_right_1.numerator # Simplified logic: just multiply\n    \n    # Correct multiplication logic for exact arithmetic\n    def mul_frac(frac_a, frac_b):\n        return (frac_a.numerator * frac_b.numerator, abs(frac_a.denominator) * abs(frac_b.denominator))\n\n    term1_num = val_left_1.numerator * sign_1 * val_right_1.numerator # Wait, right is base? No, usually left op right.\n    # Re-evaluating standard expression format \"left\" and \"right\". Usually implies (left) * (right). \n    # But looking at values: 2.79 * 89.3 vs -0.21 * 89.3? Or is it left +/- right?\n    # Given the structure of similar tasks, it's often a sum/product list where each item is an operation or term.\n    # Let's assume standard interpretation: Term = sign * (left) * (right). \n    # Actually, looking at \"products\" key in frozen params usually implies multiplication terms to be summed?\n    # Or maybe the expression is left1 + right1 with a sign? No, keys are 'left', 'right'.\n    # Let's assume the task is: Calculate sum of (sign * left * right) for each product entry.\n    \n    term1 = Fraction(val_left_1.numerator * val_right_1.numerator * sign_1, \n                     abs(val_left_1.denominator) * abs(val_right_1.denominator)) # Wait, standard fraction mult\n    \n    def exact_mul(a_str, b_str):\n        fa = parse_decimal_str_to_frac(a_str)\n        fb = parse_decimal_str_to_frac(b_str)\n        return Fraction(fa.numerator * fb.numerator, fa.denominator * fb.denominator)\n\n    term1_val = sign_1 * exact_mul(left_1_str, right_1_str) # Assuming multiplication based on \"products\" key name? \n    # Alternative: Maybe it's just left + right with a global sign? No.\n    # Let's look at the numbers: 2.79 and -0.21 are small decimals. 89.3 is larger.\n    # If it were addition/subtraction, why separate 'left'/'right'? \n    # Standard math task format often uses \"products\" to denote terms like a*b or similar.\n    # However, if the sign applies to the whole term: Term = left * right? Or just left +/- right?\n    # Given \"rational_arithmetic\", let's assume standard multiplication for 'products'. \n    # Wait, could it be (left) ^ (right)? Unlikely with negative signs.\n    # Let's try a different interpretation common in these datasets: The expression is simply the sum of terms defined by left/right pairs?\n    # Actually, looking at similar \"math16\" tasks, often they are simple additions/subtractions where 'left' and 'right' might be operands for an operator not explicitly listed but implied or it's a product. \n    # Let's assume Product: Term = sign * (Left) * (Right).\n    \n    term2_val = exact_mul(left_2_str, right_2_str)\n    total_value = term1_val + (-term2_val if sign_2 == -1 else term2_val) # Wait, the list has signs inside. \n    # The frozen params have 'sign' for each product item. So: Total = (s1 * L1*R1) + (s2 * L2*R2).\n    \n    final_frac = Fraction(term1_val.numerator * sign_1, term1_val.denominator) if False else None\n    \n    # Recalculate cleanly\n    def calc_term(left_s, right_s, sgn):\n        f_l = parse_decimal_str_to_frac(left_s)\n        f_r = parse_decimal_str_to_frac(right_s)\n        prod = Fraction(f_l.numerator * f_r.numerator, f_l.denominator * f_r.denominator)\n        if sgn < 0:\n            return -prod\n        else:\n            return prod\n            \n    term1_res = calc_term(left_1_str, right_1_str, sign_1)\n    term2_res = calc_term(left_2_str, right_2_str, sign_2)\n    \n    final_frac_num = term1_res.numerator + term2_res.numerator # Wait, need common denominator first? \n    # Fraction addition handles this automatically if we add the Fraction objects.\n    total_result = term1_res + term2_res\n    \n    # Format answer\n    num_str = str(total_result.numerator)\n    den_str = str(total_result.denominator)\n    \n    canonical_latex = f\"\\\\frac{{{num_str}}}{{{den_str}}}\"\n\n    question_text = (f\"Simplify the expression: {sign_1}*({left_1_str})*({right_1_str}) + {sign_2}*({left_2_str})*({right_2_str}). \"\n                     f\"Provide your answer as an irreducible fraction.\") # Formal LaTeX delimiters not strictly required in text but good for math\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": {\"value\": canonical_latex}, \n        \"oracle_payload\": frozen_params\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T19:12:58.922820+00:00",
+  "completed_at_utc": "2026-07-21T19:13:25.870556+00:00",
+  "duration": 26.94772609998472,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 26.947714200010523,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 687,
+      "eval_count": 1682,
+      "total_token_count": 2369,
+      "total_duration": 24926027300,
+      "load_duration": 281146000,
+      "done_reason": "stop",
+      "latency_ms": 26947,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072002,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072002,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

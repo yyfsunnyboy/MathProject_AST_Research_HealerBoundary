@@ -1,0 +1,73 @@
+Write only Python source. Implement def generate(level=1, **kwargs).
+Task: ce111_q05_exact_fraction_expression (rational_arithmetic, difficulty level 1).
+Task specification: math16_exact_fraction_expression.
+Frozen sampled parameters: {"expression": "9/22 + 11/18 - (23/22 - 7/18)"}
+generate() must return a dict with exactly question_text, correct_answer, and oracle_payload. question_text must use formal LaTeX delimiters. correct_answer must include numerator, denominator, and canonical_latex for an irreducible fraction. oracle_payload must exactly equal the frozen sampled parameters. Do not use input, files, network, subprocess, Markdown fences, or explanations.
+
+## Clean-incremental GENERIC
+Output complete Python source only. Do not use Markdown fences or explanatory prose. Preserve frozen parameters exactly. Verify that generate() exists. Verify that the return value has exactly the three required top-level keys. Verify field types match the stated contract and that oracle_payload equals the frozen parameters.
+
+## Compact Domain Scaffold
+# -*- coding: utf-8 -*-
+
+def generate(level=1, **kwargs):
+    # Rules:
+    # - Do not read frozen parameters from kwargs or external state.
+    # - For API-only / mixed tasks, import and use FractionOps.
+    # - For native-only tasks, use native Python arithmetic.
+    # - Do not use eval, exec, safe_eval, files, network, or fabricated helpers.
+    # - Return exactly question_text, correct_answer, and oracle_payload.
+    # - All returned values must be JSON-serializable.
+
+    # 1. Import FractionOps if needed (only for API-only / mixed tasks)
+    # from core.prompts.domain_function_library import FractionOps
+
+    # 2. Define frozen parameters directly. Do not read kwargs.
+    pass
+
+    # 3. Compute the exact result using FractionOps or native code.
+    # Example: res = FractionOps.add(FractionOps.create("9/22"), FractionOps.create("11/18"))
+    # Example (two ints): res = FractionOps.from_parts(9, 22)
+    pass
+
+    correct_answer = "correct_answer"
+    question_text = "question_text"
+    oracle_payload = "oracle_payload"
+
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer,
+        "oracle_payload": oracle_payload,
+    }
+
+## API Signature Cards
+# API Signature Cards (ab2d_spec_v2 patch)
+# Use ONLY the signatures below. Do not invent alternate constructors.
+
+- `FractionOps.create` | import: `core.prompts.domain_function_library` | signature: `(value)` | returns: Fraction
+  - `value` is a single argument: int, Fraction, or string such as `"9/22"` / `"-1/4"`.
+  - Do NOT call `FractionOps.create(numerator, denominator)` — that is invalid (ArityError / TypeError).
+  - For two integer parts, use `FractionOps.from_parts` instead.
+
+- `FractionOps.from_parts` | import: `core.prompts.domain_function_library` | signature: `(numerator, denominator)` | returns: Fraction
+  - `numerator` and `denominator` must be `int` (not float/bool/str).
+  - Example: `FractionOps.from_parts(9, 22)` → `Fraction(9, 22)`.
+  - Example: `FractionOps.from_parts(-1, 4)` → `Fraction(-1, 4)`.
+
+## Task Guardrails
+Task Guardrails
+
+- Use FractionOps to perform fraction arithmetic and formatting.
+- Evaluate the exact expression: 9/22 + 11/18 - (23/22 - 7/18).
+- Use FractionOps.add and FractionOps.sub for computations.
+- Do not leak the final exact fraction answer in the code.
+- Return a dictionary containing the numerator, denominator, and canonical LaTeX.
+
+## Final Check
+Final check before output:
+- Output one complete Python source only.
+- Define the required generate() entry point.
+- Use the frozen parameters exactly.
+- Return the exact required keys and answer schema.
+- Only import the specified Domain API.
+- Obey the API Signature Cards exactly (no invented helpers / wrong arity).

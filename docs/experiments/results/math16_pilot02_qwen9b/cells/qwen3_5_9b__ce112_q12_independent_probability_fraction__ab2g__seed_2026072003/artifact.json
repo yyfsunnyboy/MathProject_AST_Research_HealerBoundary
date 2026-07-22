@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce112_q12_independent_probability_fraction__ab2g__seed_2026072003",
+  "task_id": "ce112_q12_independent_probability_fraction",
+  "family": "fraction",
+  "condition": "ab2g",
+  "seed": 2026072003,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072003
+  },
+  "prompt_sha256": "d68af74fd5f59ae1178e9835684479397bd58a2b1f31fd9ef7b022e34b96fcf1",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    import math\n    \n    # Frozen sampled parameters as specified in the task description\n    frozen_params = {\"p1\": [2, 6], \"p2\": [1, 5]}\n    \n    p1_num, p1_den = frozen_params[\"p1\"]\n    p2_num, p2_den = frozen_params[\"p2\"]\n    \n    # Calculate independent probability fraction: (p1 * p2) / (denom1 * denom2)\n    numerator = p1_num * p2_num\n    denominator = p1_den * p2_den\n    \n    # Simplify the fraction to irreducible form using GCD\n    common_divisor = math.gcd(numerator, denominator)\n    \n    simplified_numerator = numerator // common_divisor\n    simplified_denominator = denominator // common_divisor\n    \n    # Construct canonical LaTeX for the fraction\n    if simplified_denominator == 1:\n        canonical_latex = f\"{simplified_numerator}\"\n    else:\n        canonical_latex = rf\"\\frac{{{simplified_numerator}}}{{{simplified_denominator}}}\"\n    \n    question_text = (\n        r\"Given two independent events with probabilities $\\frac{p_1}{q_1}$ and $\\frac{p_2}{q_2}$, \"\n        f\"where $P(E_1) = \\frac{{p_1}}{{q_1}}$ and $P(E_2) = \\frac{{p_2}}{{q_2}}$, calculate the probability of both events occurring. \"\n        r\"The probabilities are given as $\\frac{{{p_1}}}{{{q_1}}} = \\frac{{{frozen_params['p1'][0]}}}{{{frozen_params['p1'][1]}}}$ and $\\frac{{{p_2}}}{{{q_2}}} = \\frac{{{frozen_params['p2'][0]}}}{{{frozen_params['p2'][1]}}}$. \"\n        r\"What is the probability of both events occurring, expressed as an irreducible fraction?\"\n    )\n\n    # Replace placeholders with actual values in question text for clarity and correctness based on frozen params\n    p1_val = f\"{frozen_params['p1'][0]} / {frozen_params['p1'][1]}\"\n    p2_val = f\"{frozen_params['p2'][0]} / {frozen_params['p2'][1]}\"\n    \n    question_text_cleaned = (\n        r\"Given two independent events with probabilities $\\frac{a}{b}$ and $\\frac{c}{d}$, \"\n        f\"where $P(E_1) = \\frac{{{frozen_params['p1'][0]}}}{{{frozen_params['p1'][1]}}}$ and $P(E_2) = \\frac{{{frozen_params['p2'][0]}}}{{{frozen_params['p2'][1]}}}$. \"\n        r\"What is the probability of both events occurring, expressed as an irreducible fraction?\"\n    )\n\n    # Reconstruct question text properly with LaTeX delimiters and correct values\n    p1_str = rf\"\\frac{{{{{frozen_params['p1'][0]}}}}}{{{{{frozen_params['p1'][1]}}}}}\"\n    p2_str = rf\"\\frac{{{{{frozen_params['p2'][0]}}}}}{{{{{frozen_params['p2'][1]}}}}}\"\n    \n    question_text_final = (\n        r\"Given two independent events with probabilities $P(A) = \" + p1_str + \n        r\"$ and $P(B) = \" + p2_str + r\"$, what is the probability of both A and B occurring? Express your answer as an irreducible fraction.\"\n    )\n\n    correct_answer_dict = {\n        \"numerator\": simplified_numerator,\n        \"denominator\": simplified_denominator,\n        \"canonical_latex\": canonical_latex\n    }\n\n    result_dict = {\n        \"question_text\": question_text_final,\n        \"correct_answer\": correct_answer_dict,\n        \"oracle_payload\": frozen_params\n    }\n    \n    return result_dict",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T19:57:51.925428+00:00",
+  "completed_at_utc": "2026-07-21T19:58:07.173918+00:00",
+  "duration": 15.248477899935097,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 15.248465200071223,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 226,
+      "eval_count": 888,
+      "total_token_count": 1114,
+      "total_duration": 13233591200,
+      "load_duration": 250886400,
+      "done_reason": "stop",
+      "latency_ms": 15248,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072003,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072003,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}

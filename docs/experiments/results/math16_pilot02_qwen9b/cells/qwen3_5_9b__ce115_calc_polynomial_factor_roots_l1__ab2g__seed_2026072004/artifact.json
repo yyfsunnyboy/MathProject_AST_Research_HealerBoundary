@@ -1,0 +1,83 @@
+{
+  "experiment_id": "math16_pilot02_qwen9b_freeze_v1",
+  "cell_id": "qwen3_5_9b__ce115_calc_polynomial_factor_roots_l1__ab2g__seed_2026072004",
+  "task_id": "ce115_calc_polynomial_factor_roots_l1",
+  "family": "polynomial",
+  "condition": "ab2g",
+  "seed": 2026072004,
+  "model_tag": "qwen3.5:9b",
+  "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "runtime_config_fingerprint": "f45f79238bbf9400729fd00dbfaf4e33a7a7716cb9f81d4095a1fd1d52e0da5b",
+  "runtime_parameters": {
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repeat_penalty": "ollama_default_unset",
+    "think": false,
+    "num_ctx": 65536,
+    "num_predict": 24576,
+    "timeout_seconds": 1800,
+    "seed": 2026072004
+  },
+  "prompt_sha256": "9aa875c3c2de0b79cb0cf0bb5ec18ef9a02ead452db9d4d044500f175a8f485f",
+  "prompt_path": null,
+  "generation_status": "success",
+  "raw_response": "def generate(level=1, **kwargs):\n    quadratic_coefficients = [1, 4, -12]\n    \n    # Calculate roots using exact arithmetic (fractions) to avoid floats\n    a = quadratic_coefficients[0]\n    b = quadratic_coefficients[1]\n    c = quadratic_coefficients[2]\n    \n    discriminant = b * b - 4 * a * c\n    \n    if discriminant < 0:\n        raise ValueError(\"No real roots for the given coefficients.\")\n    \n    sqrt_discriminant = int(discriminant ** 0.5)\n    root1_num = (-b + sqrt_discriminant) // (2 * a)\n    root1_denom = 2 * a\n    \n    # Handle simplification of fractions manually if needed, but for this specific case:\n    # roots are integers here because discriminant is perfect square and divisible.\n    # Let's verify divisibility to ensure exact integer representation or simple fraction string.\n    \n    def simplify_fraction(numerator, denominator):\n        common = 1\n        min_abs = abs(min(abs(numerator), abs(denominator)))\n        for i in range(2, int(min_abs ** 0.5) + 1):\n            if numerator % i == 0 and denominator % i == 0:\n                while numerator % i == 0 and denominator % i == 0:\n                    common = i * common # simplified logic below is better\n        import math\n        gcd_val = abs(math.gcd(numerator, denominator))\n        return (numerator // gcd_val) / (denominator // gcd_val), gcd_val\n\n    root1_num_simplified = -b + sqrt_discriminant\n    root2_num_simplified = -b - sqrt_discriminant\n    \n    # Construct roots as exact values. Since inputs are integers and discriminant is perfect square,\n    # we check if they divide evenly by 2a.\n    \n    def get_root_value(num_val):\n        denom = 2 * a\n        gcd_num_denom = abs(int(__import__('math').gcd(num_val, denom)))\n        simplified_num = num_val // gcd_num_denom\n        simplified_denom = denom // gcd_num_denom\n        \n        if simplified_denom == 1:\n            return str(simplified_num)\n        else:\n            # Return as a fraction string for exactness in LaTeX context usually preferred or float if integer? \n            # Task says \"Exact arithmetic; no floats\". So use Fraction representation.\n            return f\"{simplified_num}/{simplified_denom}\"\n\n    root1_str = get_root_value(root1_num_simplified)\n    root2_str = get_root_value(root2_num_simplified)\n    \n    roots_list = sorted([root1_str, root2_str]) # Ascending order\n    \n    factorization_latex = f\"(x - {roots_list[0]})(x - {roots_list[1]})\" if a == 1 else f\"{a}(x - {roots_list[0]})(x - {roots_list[1]})\"\n    \n    roots_latex = f\"${roots_list[0]}, ${roots_list[1]}\"\n\n    return {\n        \"question_text\": r\"Solve the quadratic equation $ax^2 + bx + c = 0$ for coefficients $a=1, b=4, c=-12$. Find the exact real roots and write them in ascending order.\",\n        \"correct_answer\": {\n            \"roots\": [root1_str, root2_str], # List of strings representing exact values\n            \"factorization_latex\": factorization_latex,\n            \"roots_latex\": f\"${roots_list[0]}, ${roots_list[1]}\"\n        },\n        \"oracle_payload\": {\"quadratic_coefficients\": [1, 4, -12]}\n    }",
+  "error": null,
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T20:17:42.477234+00:00",
+  "completed_at_utc": "2026-07-21T20:17:56.793124+00:00",
+  "duration": 14.31588060001377,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "wall_clock_seconds": 14.315868300036527,
+        "exception_type": null,
+        "exception_message": null,
+        "retryable": false
+      }
+    ],
+    "provider_metadata": {
+      "prompt_eval_count": 228,
+      "eval_count": 823,
+      "total_token_count": 1051,
+      "total_duration": 12267498100,
+      "load_duration": 251147600,
+      "done_reason": "stop",
+      "latency_ms": 14315,
+      "request_payload": {
+        "model": "qwen3.5:9b",
+        "stream": false,
+        "think": false,
+        "options": {
+          "temperature": 0.2,
+          "top_p": 0.8,
+          "top_k": 20,
+          "seed": 2026072004,
+          "num_ctx": 65536,
+          "num_predict": 24576
+        }
+      },
+      "inference_config": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_predict": 24576,
+        "num_ctx": 65536,
+        "think": false,
+        "runtime_mode": "non_thinking",
+        "stream": false,
+        "seed": 2026072004,
+        "request_timeout_seconds": 1800.0,
+        "vendor_sampling_source": "temperature=0.2, top_p=0.8, top_k=20 (preregistration revision 2026-07-21: revised from 0.7 to 0.2 to reduce sampling noise in constrained math program generation while retaining minimal seed variation); presence_penalty omitted (Ollama default); ollama show Parameters remain thinking-mode defaults (temperature=1, top_p=0.95, presence_penalty=1.5) and are not used; identical freeze for qwen3.5:4b and qwen3.5:9b",
+        "presence_penalty": "ollama_default_unset"
+      }
+    }
+  },
+  "scoring": false,
+  "healer": false,
+  "ab3": false
+}
