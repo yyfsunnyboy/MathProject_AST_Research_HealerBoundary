@@ -98,6 +98,17 @@ def test_section5_task_ids_match_official_roster():
     ]
     for placeholder in forbidden_placeholders:
         assert placeholder not in text, f"Forbidden placeholder task id found: {placeholder}"
+    assert "`ce115`" not in text, "Bare non-official ce115 identifier must not remain"
+
+
+def test_polynomial_anomaly_task_id_is_full_official_id_everywhere():
+    text = REPORT.read_text(encoding="utf-8")
+    official_id = "ce115_calc_polynomial_division_l1"
+    for number in (5, 14, 18):
+        assert official_id in section(text, number), (
+            f"Section {number} must use the complete official Polynomial anomaly task id"
+        )
+    assert not re.search(r"`ce115`", text), "Bare non-official ce115 reference found"
 
 
 def test_section20_abstain_wording_conservative():

@@ -38,8 +38,14 @@
 5. **Section 15 (Figure 2 note)**：removed '證明' overclaim wording -> reworded as descriptive '顯示'
 6. **Section 16**：removed guarantee wording '確保修改不會破壞原本正確之程式' -> reworded as risk reduction
 7. **Section 20 conclusion item 3**：removed '有效維護...安全性' safety-guarantee wording -> reworded as risk reduction + interpretability maintenance
+8. **Section 18 item 4（同版號勘誤）**：舊值 `` `ce115` ``；新值 `` `ce115_calc_polynomial_division_l1` ``。此為單點正式 task_id 勘誤；無數字、結論、Primary／Post-hoc 分帳、Fraction 21／15／6、corrected-chain 10／8／2／1、限制內容或圖表變動。
 
-## 8. SHA 保護與來源未修改
+## 8. v1.3 同版號勘誤凍結
+- 本次不開 v1.4；v1.3 僅完成第18節第4項的非正式 task_id 勘誤。
+- 全文裸露 `` `ce115` `` 引用為 0；`ce115_calc_polynomial_division_l1` 已出現在第5、14、18節。
+- 第18節仍為 10 項限制；六張圖與凍結統計數字均未變更。
+
+## 9. SHA 保護與來源未修改
 - v1 SHA-256：`1a168805bfd8f2c076d2e8fd0556e90b049648e771d3481cc35abaeac250e730`
 - v1.1 SHA-256：`a9df82efc2424b3c4f15b9f6daa725d2f40371d2c3be659a70fc5f494166cfe7`
 - v1.2 SHA-256：`1e10eb3319272421f4866712a01c40eea12c4140d7264124c0fba4fb54c787b4`
@@ -47,5 +53,5 @@
 - Evidence Complete manifest SHA-256：`de11b9bd5038171689ee2895fc3a499a7b404f5259b3f5b3bcc31cb4d4af2225`
 - Integrated report SHA-256：`a13f0e0b71a1d1f0f0bc0ab0fdcecfc330c18238d0bd434218447939568992ca`
 - Q&A SHA-256：`b2b0d2a750e5edf0a8b88cf31c2b238fa502d92787f220a9ca2d270e9e116741`
-- v1.3 SHA-256：`f78964b660ebf8b6fa0be3812ba8a4fc1a769359c249fe77fc7a8a70527e0aa6`
+- v1.3 SHA-256：`dcf6ae6ee0ac94b5896d8bc0d037ef4f06b7a3de905edf1be891022c6fd0754b`
 - v1、v1.1、v1.2、Evidence Complete、Integrated report、Q&A、六張核心圖均未修改。

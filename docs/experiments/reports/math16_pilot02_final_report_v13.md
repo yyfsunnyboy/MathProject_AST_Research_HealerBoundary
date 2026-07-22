@@ -250,7 +250,7 @@ Deterministic AST Healer 之安全介入架構概念如下：
 1. **Overall 統計顯著性與外推不確定性 (Cell-level vs Task-level)**：細胞層級 Exact McNemar 檢定顯示 9B-only (49格) 顯著多於 4B-only (26格) ($p = 0.010582$)；然考慮 16 個 Task 聚類效應之 Task-clustered Bootstrap 95% CI 跨 0 (`[-0.94%, +14.38%]`)，顯示外推至未知全新題型時仍具抽樣不確定性。不得宣稱「9B 保證優於 4B」。
 2. **四大數學家族分層屬探索性分析 (Exploratory Subgroup Analysis)**：四大家族分層未事前預註冊族群 alpha 矯正，屬 Post-hoc 探索性分析，其 $p$-values 僅供假說生成參考。
 3. **Fraction 家族差距不可解讀為純數學能力差異 (Fraction Gap Interpretation)**：9B 在 Fraction 淨勝 14 格 ($p = 0.012541$)，機制拆解顯示 21 格 NINE_B_ONLY 中有 15 格屬 L1–L4（涵蓋語法、契約、API 與執行問題），另 6 格屬 L5 語意層，不可解讀為純數學推理能力差距。
-4. **Polynomial 9B 偏低為局部格式共現 (Polynomial Anomaly Localized Co-occurrence)**：9B 在 Polynomial 表現偏低集中於 `ce115` 多項式除法單一題型與特定 LaTeX 組裝衝突，未建立因果關係，不可外推為 9B 全域能力失控。
+4. **Polynomial 9B 偏低為局部格式共現 (Polynomial Anomaly Localized Co-occurrence)**：9B 在 Polynomial 表現偏低集中於 `ce115_calc_polynomial_division_l1` 多項式除法單一題型與特定 LaTeX 組裝衝突，未建立因果關係，不可外推為 9B 全域能力失控。
 5. **Qwen 4B `Ab2d+api` 77.8% 語法錯誤侷限於診斷樣本 (4B Ab2d Anomaly Sample Bound)**：4B 在 `Ab2d+api` 下 77.8% (21/27) SyntaxError 結論僅適用於已剖析之 27 格診斷樣本，不可外推為全域失敗比例。
 6. **Gemini 作為 Tier 2 描述性參照 (Gemini as Tier 2 Reference Only)**：Gemini 3.5 Flash (289/320, 90.31%) 僅作強模型描述性基準參照，不可宣稱「證明大模型規模因果壓倒性勝出」。
 7. **Prompt 提示版本異質性 (Prompt Version Discrepancy)**：Gemini 正式生成採用 `Ab2d+spec-v1` (63/80)；Qwen 4B/9B 採用 `Ab2d+spec-v2` (36/80 與 40/80)，兩者提示版本不同。
