@@ -53,11 +53,21 @@ def test_manifest_structure_and_hashes():
         manifest = json.load(f)
 
     assert manifest["manifest_id"] == "math16_pilot02_core_figures_v1_manifest"
+    assert manifest["visual_hotfix_id"] == "math16_pilot02_batch01_visual_hotfix_v1"
     assert manifest["batch"] == "batch_01_figures_1_3_4_5"
     assert manifest["font_family_used"] == "Microsoft JhengHei"
+    assert manifest["affected_figures"] == ["fig4_tier1_paired_analysis", "fig5_healer_eligibility_boundary"]
+    assert manifest["unchanged_figures"] == ["fig1_baseline_overall", "fig3_family_breakdown"]
 
     rendered = manifest["rendered_figures"]
     assert len(rendered) == 4
+
+    # Verify Figures 1 & 3 SHA immutability
+    fig1 = next(item for item in rendered if item["figure_id"] == "fig1_baseline_overall")
+    assert fig1["png_sha256"] == "5bc0c714769c987710dd124b7f126a53a4c77f96ccd578fbff4a0c82bdb52db2"
+
+    fig3 = next(item for item in rendered if item["figure_id"] == "fig3_family_breakdown")
+    assert fig3["png_sha256"] == "f164edc807659c45628cbab4711074879af58d3beaa825f59aaf2ebce4c9fb79"
 
     for item in rendered:
         assert item["dpi"] == 300
