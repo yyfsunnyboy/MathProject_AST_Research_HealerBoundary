@@ -462,11 +462,12 @@ Qwen 3.5 9B 在 Polynomial 家族的通過率為 **9/80 (11.3%)**，少於 Qwen 
 6. **完成報告措辭與方法學修正與 Fraction 機制分布補充**：✅ **已完成**。[Fraction 9B-Only Pass Audit](file:///c:/Projects/MathProject_AST_Research_HealerBoundary/docs/experiments/results/math16_pilot02_fraction_9b_only_pass_mechanism_audit_v1/audit_report.md) (21 格描述性分布解析已納入).
 
 ### 17.2 分類 B：最終呈現必做 (`REQUIRED_FOR_PRESENTATION`)
-1. **正式展板向量圖表 (High-res Vector Charts)**：繪製展板專用之分頁柱狀圖與結構圖。
-2. **評審版一頁精華摘要 (Executive One-Pager)**：提煉 1,000 字精簡一頁摘要。
-3. **最終成果書完整敘事架構**：將本報告擴充為正式競賽報告書格式。
-4. **評審 Q&A 定稿**：根據專家審查反饋完成 18 題 Q&A 終版文字。
-5. **Primary / Post-hoc 圖像分帳**：於圖表中明確以不同圖例/顏色分隔 Primary 與 Post-hoc 數據。
+1. **核心圖表設計規格 v1 (Core Figure Specification v1)**：✅ **已完成**。[Core Figure Spec v1](file:///c:/Projects/MathProject_AST_Research_HealerBoundary/docs/experiments/visualization/math16_pilot02_core_figure_spec_v1/) (6 張核心圖表規格、數據表、治理規範、雙版本圖說、溯源與選圖排序定稿)。
+2. **正式展板與簡報向量圖表實體檔繪製 (High-res PNG/SVG/Vector Chart Output)**：⏳ **未完成** (6 張核心圖表規格已凍結，圖檔實體繪製待後續處理)。
+3. **評審版一頁精華摘要 (Executive One-Pager)**：⏳ **未完成** (4 張選圖與版面規格已定稿，內容擴充待處理)。
+4. **最終成果書完整敘事架構**：⏳ **未完成** (將本報告擴充為正式競賽報告書格式)。
+5. **評審 Q&A 定稿**：✅ **已完成**。[Jury Defense Q&A Final v1](file:///c:/Projects/MathProject_AST_Research_HealerBoundary/docs/experiments/reports/math16_pilot02_jury_qa_final_v1.md) (19 題雙版本定稿)。
+6. **Primary / Post-hoc 圖像分帳規範**：✅ **已完成**。[Primary/Post-hoc Visual Governance](file:///c:/Projects/MathProject_AST_Research_HealerBoundary/docs/experiments/visualization/math16_pilot02_core_figure_spec_v1/primary_posthoc_visual_governance.md) (視覺分層與禁止過度宣稱規範已凍結)。
 
 ### 17.3 分類 C：可選拓寬 (`OPTIONAL`)
 1. **Logistic Mixed-effects 模型**：包含 Task/Seed 隨機效應之三向交互作用迴歸。

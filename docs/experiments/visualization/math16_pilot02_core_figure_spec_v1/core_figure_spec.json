@@ -1,0 +1,264 @@
+{
+  "spec_id": "math16_pilot02_core_figure_spec_v1",
+  "version": "1.0.0",
+  "scope": "Math16 Pilot-02 Core 6 Figures Specification",
+  "frozen_at_utc": "2026-07-22T13:20:00Z",
+  "figures": [
+    {
+      "figure_id": "fig1_baseline_overall",
+      "title_zh": "Figure 1: 三模型 Baseline 端到端通過率總覽",
+      "title_en": "Figure 1: Baseline Overall End-to-End Pass Rates across Three Models",
+      "one_sentence_message": "三模型端到端通過率不同，但 Baseline 高低不等於 Healer 可修復窗口大小。",
+      "chart_type": "single_grouped_bar_chart",
+      "x_axis": "Model Name (Gemini 3.5 Flash, Qwen 3.5 4B, Qwen 3.5 9B)",
+      "y_axis": "Pass Count / Pass Rate (%) [Starts at 0]",
+      "series": [
+        "Baseline Passed Cells"
+      ],
+      "exact_data": {
+        "Gemini 3.5 Flash": "289/320 (90.31%)",
+        "Qwen 3.5 4B": "78/320 (24.38%)",
+        "Qwen 3.5 9B": "101/320 (31.56%)"
+      },
+      "denominator": 320,
+      "source_files": [
+        "docs/experiments/results/math16_pilot02_full_evaluation_v4_r001/baseline_summary.json",
+        "docs/experiments/results/math16_pilot02_qwen4b_evaluation_v4_r001/overall_summary.json",
+        "docs/experiments/results/math16_pilot02_qwen9b_evaluation_v4_r001/overall_summary.json"
+      ],
+      "primary_posthoc_status": "Primary baseline for all three models. Gemini designated as Tier 2 Descriptive Reference.",
+      "mandatory_annotations": [
+        "Gemini labeled as Tier 2 Descriptive Benchmark Reference",
+        "Qwen 4B / 9B labeled as Tier 1 Paired Comparison",
+        "Pass rate reflects end-to-end Python/JSON execution success, not pure math reasoning"
+      ],
+      "forbidden_interpretations": [
+        "Do not claim Gemini superiority proves pure model scale causality",
+        "Do not claim Baseline height dictates Healer repair window size"
+      ],
+      "caption_report": "圖 1：三模型在 320 個測試單元中之端到端 Baseline 通過率。Gemini 3.5 Flash 達到 289/320 (90.3%)，作為 Tier 2 描述性基準參照；Qwen 3.5 9B 達到 101/320 (31.6%)，顯著高於 Qwen 3.5 4B 之 78/320 (24.4%)，兩者構成 Tier 1 正式配對比較。通過率反映包含 Python 語法、JSON 包裝與 API 呼叫之端到端執行成功率，不等於純數學推理能力；Baseline 高低亦不直接代表 Healer 可修復視窗之大小。",
+      "caption_oral": "圖 1：三模型基線通過率對比。9B 基線 (101/320) 高於 4B (78/320)；Gemini (289/320) 作為強模型參照。基線高低不代表 Healer 修復視窗的大小。",
+      "usage_locations": {
+        "integrated_report": "Section 4.1",
+        "one_pager": "Top Left (Item 1)",
+        "poster": "Column 1 (Item 1)",
+        "oral_slides": "Slide 4"
+      }
+    },
+    {
+      "figure_id": "fig2_prompt_conditions",
+      "title_zh": "Figure 2: 四 Prompt 條件 × 三模型通過數比較",
+      "title_en": "Figure 2: Four Prompt Conditions across Three Models",
+      "one_sentence_message": "Prompt 條件效果依模型與提示版本而異，沒有普遍最佳條件。",
+      "chart_type": "grouped_bar_chart",
+      "x_axis": "Prompt Condition (Ab1, Ab2g, Ab2d+api, Ab2d+spec)",
+      "y_axis": "Pass Count [Out of 80] (Starts at 0)",
+      "series": [
+        "Gemini 3.5 Flash",
+        "Qwen 3.5 4B",
+        "Qwen 3.5 9B"
+      ],
+      "exact_data": {
+        "Ab1": {"Gemini": "72/80", "4B": "15/80", "9B": "18/80"},
+        "Ab2g": {"Gemini": "76/80", "4B": "19/80", "9B": "27/80"},
+        "Ab2d+api": {"Gemini": "78/80", "4B": "8/80", "9B": "16/80"},
+        "Ab2d+spec": {"Gemini (spec-v1)": "63/80", "4B (spec-v2)": "36/80", "9B (spec-v2)": "40/80"}
+      },
+      "denominator": 80,
+      "source_files": [
+        "docs/experiments/results/math16_pilot02_full_evaluation_v4_r001/baseline_summary.json",
+        "docs/experiments/results/math16_pilot02_qwen4b_evaluation_v4_r001/overall_summary.json",
+        "docs/experiments/results/math16_pilot02_qwen9b_evaluation_v4_r001/overall_summary.json"
+      ],
+      "primary_posthoc_status": "Primary 4-condition baseline. Gemini tested spec-v1; Qwen tested spec-v2. Gemini Post-hoc spec-v2 (80/80) excluded from main bar.",
+      "mandatory_annotations": [
+        "Note Gemini tested spec-v1 while Qwen models tested spec-v2",
+        "Gemini Post-hoc 80/80 is mechanism verification only and must not be drawn as equal primary bar"
+      ],
+      "forbidden_interpretations": [
+        "Do not claim Ab2d+spec-v2 is universally best prompt condition across all models",
+        "Do not treat Gemini Post-hoc 80/80 as part of formal 4-condition Primary comparison"
+      ],
+      "caption_report": "圖 2：四種 Prompt 提示條件在三模型中之通過數對比 ($n=80$ per cell)。對 Qwen 4B 與 9B 小模型而言，提供完整家族規格之 Ab2d+spec-v2 觀察到最高通過數 (36/80 與 40/80)；對 Gemini 而言，簡潔之 Ab2d+api (78/80) 表現優於 Ab2d+spec-v1 (63/80)。Gemini 未正式重新生成 Ab2d+spec-v2；其 Post-hoc 80/80 僅屬事後 API 簽名補齊機制驗證，不列入 Primary 正式 Bar。 Prompt 效果依模型、提示版本與部署條件而異。",
+      "caption_oral": "圖 2：提示條件效果依模型與提示版本而異。4B 與 9B 在家族規格 v2 下表現最好；Gemini 正式生成只跑到 v1，事後補齊才達 80/80，證明沒有普遍最佳 Prompt。",
+      "usage_locations": {
+        "integrated_report": "Section 4.2",
+        "one_pager": "Excluded (Back-up)",
+        "poster": "Column 1 (Item 2)",
+        "oral_slides": "Slide 6"
+      }
+    },
+    {
+      "figure_id": "fig3_family_breakdown",
+      "title_zh": "Figure 3: 四大數學家族 Qwen 4B vs Qwen 9B 通過數",
+      "title_en": "Figure 3: Four Mathematical Families for Qwen 4B vs Qwen 9B",
+      "one_sentence_message": "9B 整體較高，但 Family 差異非單調，Polynomial 出現反向結果。",
+      "chart_type": "grouped_bar_chart",
+      "x_axis": "Mathematical Family (Integer, Polynomial, Radical, Fraction)",
+      "y_axis": "Pass Count [Out of 80] (Starts at 0)",
+      "series": [
+        "Qwen 3.5 4B",
+        "Qwen 3.5 9B"
+      ],
+      "exact_data": {
+        "Integer": {"4B": "30/80", "9B": "42/80"},
+        "Polynomial": {"4B": "16/80", "9B": "9/80"},
+        "Radical": {"4B": "15/80", "9B": "19/80"},
+        "Fraction": {"4B": "17/80", "9B": "31/80"}
+      },
+      "denominator": 80,
+      "source_files": [
+        "docs/experiments/results/math16_pilot02_qwen4b_evaluation_v4_r001/overall_summary.json",
+        "docs/experiments/results/math16_pilot02_qwen9b_evaluation_v4_r001/overall_summary.json"
+      ],
+      "primary_posthoc_status": "Primary baseline family breakdown for Tier 1 models.",
+      "mandatory_annotations": [
+        "Denominator = 80 per family",
+        "Polynomial 9B drop is localized to ce115 template format co-occurrence, not general math degradation",
+        "Fraction gap reflects end-to-end format/syntax stability, not pure math capability"
+      ],
+      "forbidden_interpretations": [
+        "Do not extrapolate Polynomial 9B drop to overall 9B mathematical failure",
+        "Do not interpret Fraction +14 gap as pure math capability difference"
+      ],
+      "caption_report": "圖 3：Qwen 4B 與 9B 在四大數學家族之通過數比較 ($n=80$ per family)。9B 在 Integer (42 vs 30)、Fraction (31 vs 17) 與 Radical (19 vs 15) 均高於 4B；惟在 Polynomial 呈現反向低下 (9 vs 16)。診斷顯示 9B 在 Polynomial 之偏低高度集中於 ce115 多項式除法單一題型與 LaTeX 組裝衝突，屬特定結構敏感性，尚未證實因果，不可外推為 9B 全域失控或純數學能力下降。",
+      "caption_oral": "圖 3：四大數學家族表現對比。9B 整體較高，但在 Polynomial 出現反向偏低，主要受單一題型 LaTeX 欄位組裝影響，非全域數學能力下降。",
+      "usage_locations": {
+        "integrated_report": "Section 4.3",
+        "one_pager": "Top Right (Item 2)",
+        "poster": "Column 2 Bottom (Table)",
+        "oral_slides": "Back-up Slide"
+      }
+    },
+    {
+      "figure_id": "fig4_tier1_paired_analysis",
+      "title_zh": "Figure 4: Tier 1 配對 2x2 四格表與 Discordant 分析",
+      "title_en": "Figure 4: Tier 1 Paired 2x2 Contingency and Discordant Analysis",
+      "one_sentence_message": "9B-only PASS 多於 4B-only PASS，但 task-level 外推仍有不確定性。",
+      "chart_type": "contingency_matrix_and_discordant_bars",
+      "x_axis": "Cell Status / Match Category",
+      "y_axis": "Matched Cell Count [Out of 320]",
+      "series": [
+        "BOTH_PASS",
+        "FOUR_B_ONLY_PASS",
+        "NINE_B_ONLY_PASS",
+        "BOTH_FAIL"
+      ],
+      "exact_data": {
+        "BOTH_PASS": 52,
+        "FOUR_B_ONLY_PASS": 26,
+        "NINE_B_ONLY_PASS": 49,
+        "BOTH_FAIL": 193,
+        "TOTAL": 320,
+        "paired_risk_difference": "+7.1875%",
+        "exact_mcnemar_p": 0.010582,
+        "task_clustered_bootstrap_95ci": "[-0.94%, +14.38%]"
+      },
+      "denominator": 320,
+      "source_files": [
+        "docs/experiments/results/math16_pilot02_qwen4b_vs_qwen9b_tier1_paired_analysis_v1/overall_paired_summary.json"
+      ],
+      "primary_posthoc_status": "Primary Tier 1 paired matched cells analysis.",
+      "mandatory_annotations": [
+        "Must present BOTH cell-level Exact McNemar p = 0.010582 AND task-clustered Bootstrap 95% CI = [-0.94%, +14.38%]",
+        "Task-clustered CI crossing 0 indicates sampling uncertainty when extrapolating to new tasks"
+      ],
+      "forbidden_interpretations": [
+        "Do not state 'statistically significant' without mentioning task-level Bootstrap CI crossing 0",
+        "Do not claim 9B is guaranteed superior on all unseen math problems"
+      ],
+      "caption_report": "圖 4：Qwen 4B 與 9B 在 320 個匹配測試單元中之 2x2 四格聯表與配對檢定。兩模型同對 BOTH_PASS 52 格、同錯 BOTH_FAIL 193 格；不一致配對中 9B_ONLY_PASS (49格) 顯著多於 4B_ONLY_PASS (26格)，細胞層級 Exact McNemar 檢定具顯著方向性 ($p = 0.010582$)。然考慮 16 個 Task 聚類效應之 Task-clustered Bootstrap 95% CI 跨 0 (`[-0.94%, +14.38%]`)，顯示外推至未知全新題型時仍具抽樣不確定性。",
+      "caption_oral": "圖 4：4B vs 9B 配對四格表與不一致分析。9B 獨勝 49 格多於 4B 獨勝 26 格，細胞層級 McNemar 顯著 ($p=0.0106$)；但 Task 聚類 CI 跨 0，提醒全域外推不確定性。",
+      "usage_locations": {
+        "integrated_report": "Section 5.1",
+        "one_pager": "Mid Left (Item 3)",
+        "poster": "Column 3 Top (Item 4)",
+        "oral_slides": "Slide 8"
+      }
+    },
+    {
+      "figure_id": "fig5_healer_eligibility_boundary",
+      "title_zh": "Figure 5: Healer Eligibility 審查與救援邊界",
+      "title_en": "Figure 5: Healer Eligibility and Rescue Boundary across Three Models",
+      "one_sentence_message": "FAIL 數量不等於可安全修復數量；Healer 只在窄小唯一修法窗口介入。",
+      "chart_type": "stepped_funnel_and_layered_bar_chart",
+      "x_axis": "Model Name",
+      "y_axis": "Cell Count [Out of 320]",
+      "series": [
+        "Baseline FAIL",
+        "Eligible Cases",
+        "Primary Rescue",
+        "Post-hoc Rescue"
+      ],
+      "exact_data": {
+        "Gemini 3.5 Flash": {"FAIL": 31, "Eligible": 0, "Primary_Rescue": 0, "Primary_Final": "289/320", "Posthoc_Final": "289/320", "Observed_Regression": 0},
+        "Qwen 3.5 4B": {"FAIL": 242, "Eligible": 10, "Primary_Rescue": 5, "Primary_Final": "83/320", "Posthoc_Rescue": 6, "Posthoc_Final": "84/320", "Observed_Regression": 0},
+        "Qwen 3.5 9B": {"FAIL": 219, "Eligible": 0, "Primary_Rescue": 0, "Primary_Final": "101/320", "Posthoc_Final": "101/320", "Observed_Regression": 0}
+      },
+      "denominator": 320,
+      "source_files": [
+        "docs/experiments/results/math16_pilot02_full_evaluation_v4_r001/baseline_summary.json",
+        "docs/experiments/results/math16_pilot02_qwen4b_healer_v4_r001/overall_summary.json",
+        "docs/experiments/results/math16_pilot02_qwen9b_healer_eligibility_v4_r001/eligibility_summary.json"
+      ],
+      "primary_posthoc_status": "Primary pre-registered protocol Healer rescue (4B=83). Post-hoc corrected-chain rescue (4B=84) annotated separately.",
+      "mandatory_annotations": [
+        "4B Post-hoc rescue=6 shown as dashed/dotted overlay only",
+        "Primary final = 83/320; Post-hoc final = 84/320",
+        "Observed regression = 0 in tested cells"
+      ],
+      "forbidden_interpretations": [
+        "Do not claim Eligible=0 means model had zero failures",
+        "Do not claim Healer guarantees zero regression under all future unconstrained scenarios"
+      ],
+      "caption_report": "圖 5：三模型 Baseline FAIL 案例中 Healer 審查 (Eligibility) 與救回 (Rescue) 邊界。在 Gemini (31 FAIL) 與 Qwen 9B (219 FAIL) 中，由於殘餘失敗未命中事前凍結規則，Healer 主動選擇 Abstain (Eligible=0)；在 Qwen 4B (242 FAIL) 中識別出 10 個 Eligible 案例，在 Primary 成功救回 5 格 (83/320)，Post-hoc 修正後救回 6 格 (84/320)。實際執行修復之案例中均觀察到 Regression=0。FAIL 總數不等於可修復數。",
+      "caption_oral": "圖 5：Healer 介入邊界與救援成果。失敗多不等於修復多。4B 命中 10 格修復 5~6 格；Gemini 與 9B 因未命中凍結規則主動 Abstain，觀察到 zero regression。",
+      "usage_locations": {
+        "integrated_report": "Section 10.1",
+        "one_pager": "Mid Right (Item 4)",
+        "poster": "Column 3 Bottom (Item 5)",
+        "oral_slides": "Slide 10"
+      }
+    },
+    {
+      "figure_id": "fig6_healer_concept_zones",
+      "title_zh": "Figure 6: Deterministic AST Healer 三區域安全介入邊界概念圖",
+      "title_en": "Figure 6: Healer Boundary 3-Zone Conceptual Model",
+      "one_sentence_message": "Deterministic Healer 只修復明確、局部、唯一、可驗證的表面錯誤；其他錯誤必須 Abstain。",
+      "chart_type": "conceptual_zone_diagram",
+      "x_axis": "Error Type / Repair Feasibility Spectrum",
+      "y_axis": "Safety and Uniqueness Boundary",
+      "series": [
+        "Zone 1: Safe Repair Window",
+        "Zone 2: Abstain Zone",
+        "Zone 3: Out of Scope"
+      ],
+      "exact_data": {
+        "safe_repair_window": ["Unique rule hit", "Local AST/contract patch", "No answer back-derivation", "Deterministic unique fix"],
+        "abstain_zone": ["Ambiguous entry point", "Multiple possible candidate fixes", "Large-scale syntax corruption"],
+        "out_of_scope": ["Algorithmic logic error", "Math semantic error", "Missing core logic"]
+      },
+      "denominator": null,
+      "source_files": [
+        "docs/experiments/reports/math16_pilot02_integrated_results_report_v1.md"
+      ],
+      "primary_posthoc_status": "Conceptual architecture diagram; no empirical numerical data.",
+      "mandatory_annotations": [
+        "Conceptual model diagram; no fabricated dummy numbers",
+        "Analogy: 'Small fence at the farthest boundary of a ball field' (球場最遠邊界的小柵欄)"
+      ],
+      "forbidden_interpretations": [
+        "Do not put fake quantitative percentages or counts in conceptual zones",
+        "Do not represent Healer as a general-purpose LLM rewriting solver"
+      ],
+      "caption_report": "圖 6：Deterministic AST Healer 之三區域安全介入邊界概念架構。Healer 僅在 Zone 1 (Safe Repair Window) 介入：必須同時滿足明確語法/契約瑕疵、確定性 unique fix 且不反推答案；Zone 2 (Abstain Zone) 涵蓋入口點模糊或多可能修法歧義，系統主動放棄修改以防 Regression；Zone 3 (Out of Scope) 為演算法或數學邏輯錯誤，非確定性 Healer 之處理範疇。",
+      "caption_oral": "圖 6：Healer 三區域安全介入邊界。Healer 只修 Zone 1 的表面臨門一腳瑕疵；對 Zone 2 歧義主動 Abstain 放棄盲猜，防止將可能的程式改壞。",
+      "usage_locations": {
+        "integrated_report": "Section 9.1",
+        "one_pager": "Sidebar Inset",
+        "poster": "Column 2 Center (Hero)",
+        "oral_slides": "Slide 11"
+      }
+    }
+  ]
+}
