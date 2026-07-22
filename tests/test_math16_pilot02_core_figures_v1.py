@@ -22,12 +22,16 @@ def test_core_figures_files_exist():
     expected_files = [
         "figure_01_baseline_overall.png",
         "figure_01_baseline_overall.svg",
+        "figure_02_prompt_conditions.png",
+        "figure_02_prompt_conditions.svg",
         "figure_03_family_breakdown.png",
         "figure_03_family_breakdown.svg",
         "figure_04_tier1_paired_analysis.png",
         "figure_04_tier1_paired_analysis.svg",
         "figure_05_healer_eligibility_boundary.png",
         "figure_05_healer_eligibility_boundary.svg",
+        "figure_06_healer_concept_zones.png",
+        "figure_06_healer_concept_zones.svg",
     ]
 
     for fname in expected_files:
@@ -36,38 +40,32 @@ def test_core_figures_files_exist():
         assert fpath.stat().st_size > 0, f"Figure file is empty: {fname}"
 
 
-def test_figure_2_and_6_not_generated_in_batch01():
-    forbidden_files = [
-        "figure_02_prompt_conditions.png",
-        "figure_02_prompt_conditions.svg",
-        "figure_06_healer_concept_zones.png",
-        "figure_06_healer_concept_zones.svg",
-    ]
-    for fname in forbidden_files:
-        fpath = OUT_DIR / fname
-        assert not fpath.exists(), f"Figure file from other batches should not be generated: {fname}"
-
-
-def test_manifest_structure_and_hashes():
+def test_manifest_structure_and_all_six_figures():
     with open(MANIFEST_PATH, encoding="utf-8") as f:
         manifest = json.load(f)
 
     assert manifest["manifest_id"] == "math16_pilot02_core_figures_v1_manifest"
-    assert manifest["visual_hotfix_id"] == "math16_pilot02_batch01_visual_hotfix_v1"
-    assert manifest["batch"] == "batch_01_figures_1_3_4_5"
+    assert manifest["batch"] == "all_six_core_figures_complete"
+    assert manifest["rendered_figures_count"] == 6
     assert manifest["font_family_used"] == "Microsoft JhengHei"
-    assert manifest["affected_figures"] == ["fig4_tier1_paired_analysis", "fig5_healer_eligibility_boundary"]
-    assert manifest["unchanged_figures"] == ["fig1_baseline_overall", "fig3_family_breakdown"]
+    assert manifest["newly_rendered_figures"] == ["fig2_prompt_conditions", "fig6_healer_concept_zones"]
+    assert manifest["preserved_figures"] == ["fig1_baseline_overall", "fig3_family_breakdown", "fig4_tier1_paired_analysis", "fig5_healer_eligibility_boundary"]
 
     rendered = manifest["rendered_figures"]
-    assert len(rendered) == 4
+    assert len(rendered) == 6
 
-    # Verify Figures 1 & 3 SHA immutability
+    # Verify Figures 1, 3, 4, 5 SHA immutability
     fig1 = next(item for item in rendered if item["figure_id"] == "fig1_baseline_overall")
     assert fig1["png_sha256"] == "5bc0c714769c987710dd124b7f126a53a4c77f96ccd578fbff4a0c82bdb52db2"
 
     fig3 = next(item for item in rendered if item["figure_id"] == "fig3_family_breakdown")
     assert fig3["png_sha256"] == "f164edc807659c45628cbab4711074879af58d3beaa825f59aaf2ebce4c9fb79"
+
+    fig4 = next(item for item in rendered if item["figure_id"] == "fig4_tier1_paired_analysis")
+    assert fig4["png_sha256"] == "f18bbb774e9a75c51da364f080281172e7c35c4a5b2e30245142de0993565fdf"
+
+    fig5 = next(item for item in rendered if item["figure_id"] == "fig5_healer_eligibility_boundary")
+    assert fig5["png_sha256"] == "5887f0b829797ab63f30a096ec2e27c80530c1f988dcc16e3bead4bd7feb9885"
 
     for item in rendered:
         assert item["dpi"] == 300
