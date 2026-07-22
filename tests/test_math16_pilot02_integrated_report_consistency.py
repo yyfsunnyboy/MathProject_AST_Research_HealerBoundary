@@ -122,3 +122,13 @@ def test_reconcile_evidence_numbers():
     assert "REQUIRED_BEFORE_FINAL" in report_text
     assert "REQUIRED_FOR_PRESENTATION" in report_text
     assert "OPTIONAL" in report_text
+
+    # Assertions for Fraction McNemar p-value correction & 27-cell breakdown
+    assert "0.0001" not in report_text
+    assert "0.012541" in report_text
+    assert "21/27" in report_text
+    assert "5/27" in report_text
+    assert "1/27" in report_text
+    assert "77.8%" in report_text
+    assert "18.5%" in report_text
+    assert "3.7%" in report_text

@@ -165,7 +165,7 @@ FINAL_REPORT_GAPS_IDENTIFIED
 ### 重要觀察與分析：
 1. **Gemini 在 Ab2d+api 觀察到較高通過率 (78/80)**：在簡單 API 暴露下表現良好，過於繁複的凍結 spec-v1 出現較多 API arity/name 不對齊 (63/80)。
 2. **Qwen 4B 與 9B 在 Ab2d+spec-v2 獲得較高通過數**：4B 通過 36/80，9B 通過 40/80，顯示小模型對家族規格 (spec-v2) 具較高依賴度。
-3. **Qwen 4B 在 Ab2d+api 通過數較低 (8/80)**：在僅暴露 API 卻無精確規格時出現較多無效 Python 生成。經診斷，在該條件 27 格診斷樣本中，有 77.8% (21/27) 屬候選 Python 本體內部的 SyntaxError。
+3. **Qwen 4B 在 Ab2d+api 通過數較低 (8/80)**：在僅暴露 API 卻無精確規格時出現較多無效 Python 生成。經診斷，在 Qwen 4B Ab2d+api 的 27 格診斷樣本中，21/27 格 (77.8%) 屬候選 Python 本體內部的 SyntaxError (如括號不平衡、字串未閉合或語法結構破損)，5/27 格 (18.5%) 屬 parser/抽取不友善 (PARSER_UNFRIENDLY)，1/27 格 (3.7%) 屬真邏輯錯誤 (TRUE_LOGIC_ERROR)。結果不偏向「Evaluator Parser 不公平是主要失敗來源」；但本診斷未建立 Prompt 結構對生成錯誤的因果責任，且該比例僅限定於此 27 格診斷樣本，不得外推至其他條件或模型。
 4. **結論**：Prompt 條件效果依模型而異，無普遍最佳條件。
 
 ---
@@ -189,7 +189,7 @@ FINAL_REPORT_GAPS_IDENTIFIED
 ### 7.1 Fraction Family 9B 獨勝 (NINE_B_ONLY_PASS) 機制分布診斷
 
 依據專屬診斷產物 [Fraction 9B-Only Pass Audit](file:///c:/Projects/MathProject_AST_Research_HealerBoundary/docs/experiments/results/math16_pilot02_fraction_9b_only_pass_mechanism_audit_v1/audit_report.md)：
-- **配對不一致矩陣**：Fraction 家族 9B 獨勝 $c = 21$ 格 (`NINE_B_ONLY_PASS`)，4B 獨勝 $b = 7$ 格 (`FOUR_B_ONLY_PASS`)，淨增加 $c - b =$ **+14 格** (Paired RD = $+17.50\%$, Exact McNemar $p = 0.0001$).
+- **配對不一致矩陣**：Fraction 家族 9B 獨勝 $c = 21$ 格 (`NINE_B_ONLY_PASS`)，4B 獨勝 $b = 7$ 格 (`FOUR_B_ONLY_PASS`)，淨增加 $c - b =$ **+14 格** (Paired RD = $+17.50\%$, Exact McNemar $p = 0.012541$).
 - **4B Failure Layer 分布**：在 21 格 4B 失敗/9B 成功案例中，4B 失敗層級分別為 **L1 (Syntax/Parse)** 10 格 (47.62%)、**L5 (Algorithmic)** 6 格 (28.57%)、**L2 (Contract)** 2 格 (9.52%)、**L4 (Runtime)** 2 格 (9.52%)、**L3 (API Misuse)** 1 格 (4.76%)。格式與執行層級 (L1~L4) 合計占 **71.43%** (`FRACTION_GAP_MAINLY_FORMAT_EXECUTION_RELATED`).
 - **Condition 分布**：差距分散於 `Ab2g` (7格, 33.33%)、`Ab2d+spec-v2` (7格, 33.33%)、`Ab1` (4格, 19.05%) 與 `Ab2d+api` (3格, 14.29%)，**非由 Ab2d+api 條件主導** (僅占 14.29%)。
 - **Task 分布**：差距分散於 `ce113_q01` (9格)、`ce111_q05` (5格)、`ce112_q12` (4格)、`ce115` (3格)，無單一 Task 超過 50%。
@@ -382,7 +382,7 @@ Qwen 3.5 9B 在 Polynomial 家族的通過率為 **9/80 (11.3%)**，少於 Qwen 
 **答**：不能這樣解讀。9B 總體通過數 (101/320) 高於 4B (78/320)。Polynomial 的低下高度集中於 `ce115_calc_polynomial_division_l1` 單一題型，與多個 LaTeX 欄位組裝高度共現，尚未證實因果，不能外推為純數學能力落後。
 
 ### Q5: 為什麼不修改 Evaluator 的 Parser 讓採分更寬鬆？
-**答**：Evaluator 的職責是維護嚴謹的評分契約。診斷顯示在特定異常樣本中 77.8% 的解析失敗是模型生成的 Python 程式碼本體存在 SyntaxError，隨意放寬 Parser 只會掩蓋真實生成缺陷。
+**答**：Evaluator 的職責是維護嚴謹的評分契約。在 Qwen 4B Ab2d+api 27 格診斷樣本中，21/27 格 (77.8%) 屬候選 Python 本體內部的 SyntaxError (如括號不平衡、字串未閉合或語法結構破損)，僅 5/27 格 (18.5%) 屬 parser/抽取不友善 (PARSER_UNFRIENDLY)，1/27 格 (3.7%) 屬真邏輯錯誤 (TRUE_LOGIC_ERROR)。結果不支持「Evaluator Parser 不公平是主要失敗來源」；隨意放寬 Parser 並無法修復破損的 Python 程式本體。
 
 ### Q6: 為什麼不把所有 SyntaxError 都納入 Healer 修復範圍？
 **答**：因為大多數 SyntaxError（如少寫半段邏輯、字串未閉合、語法結構混亂）並沒有唯一的修復解答。若強行修復違反了「修法唯一、不可反推答案」的核心原則。
@@ -424,7 +424,7 @@ Qwen 3.5 9B 在 Polynomial 家族的通過率為 **9/80 (11.3%)**，少於 Qwen 
 **答**：Polynomial 異常確實影響 9B 總分，但已被分層揭露，因此沒有被隱藏；整體比較必須連同此限制一起解讀。
 
 ### Q19: 為什麼 Fraction family 的 9B 優勢最明顯 (淨增加 14 格)？
-**答**：在配對分析中，Fraction 家族 9B 獨勝 $c = 21$ 格，4B 獨勝 $b = 7$ 格，淨增加 14 格 ($p = 0.0001$). 對 21 格 4B 失敗/9B 成功案例的機制分布顯示：4B 的失敗有 71.43% 落在 L1~L4 格式與執行層級（L1 語法無法解析 47.62%），L5 演算法錯誤占 28.57%。差距分散於多個 Prompt 條件（`Ab2g` 與 `Ab2d+spec-v2` 各佔 33.33%，`Ab2d+api` 僅佔 14.29%）與多個分數題型，顯示 9B 展現了跨條件與跨題型的累積優勢。此分析屬描述性分布，未做因果驗證，不可簡單解讀為純數學能力差異。
+**答**：在配對分析中，Fraction 家族 9B 獨勝 $c = 21$ 格，4B 獨勝 $b = 7$ 格，淨增加 14 格 (Exact two-sided McNemar $p = 0.012541$). 對 21 格 4B 失敗/9B 成功案例的機制分布顯示：4B 的失敗有 71.43% 落在 L1~L4 格式與執行層級（L1 語法無法解析 47.62%），L5 演算法錯誤占 28.57%。差距分散於多個 Prompt 條件（`Ab2g` 與 `Ab2d+spec-v2` 各佔 33.33%，`Ab2d+api` 僅佔 14.29%）與多個分數題型，顯示 9B 展現了跨條件與跨題型的累積優勢。此分析屬次要探索性分解 (Exploratory Decomposition)，未做因果驗證，不可簡單解讀為純數學能力差異。
 
 ---
 
