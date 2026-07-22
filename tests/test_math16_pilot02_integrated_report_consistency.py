@@ -104,3 +104,21 @@ def test_reconcile_evidence_numbers():
     assert "219" in report_text
     assert "214" in report_text
     assert "MATH16_PILOT02_INTEGRATED_RESULTS_REPORT_V1_COMPLETED" in report_text
+
+    # Assertions for non-overclaiming rules
+    assert "100%安全" not in report_text
+    assert "絕對安全" not in report_text
+    assert "零倒退防禦" not in report_text
+    assert "Polynomial 異常未污染整體比較" not in report_text
+    assert "100%深層數學邏輯錯誤" not in report_text
+
+    # Assertions for tiering and methodology
+    assert "Tier 1" in report_text
+    assert "Tier 2" in report_text
+    assert "only-Python" in report_text
+    assert "LaTeX" in report_text
+
+    # Assertions for gap inventory categories
+    assert "REQUIRED_BEFORE_FINAL" in report_text
+    assert "REQUIRED_FOR_PRESENTATION" in report_text
+    assert "OPTIONAL" in report_text
