@@ -195,6 +195,20 @@ FINAL_REPORT_GAPS_IDENTIFIED
 - **Task 分布**：差距分散於 `ce113_q01` (9格)、`ce111_q05` (5格)、`ce112_q12` (4格)、`ce115` (3格)，無單一 Task 超過 50%。
 - **與舊 Ab2d 診斷交集**：僅 2 格重疊於舊 Ab2d 27格異常集合，**嚴禁將舊 27格的 77.8% 格式污染外推至全 21 格**。
 
+### 7.2 四大 Family 2×2 配對列聯表地面真值覆核與閉合
+
+依據全量對帳產物 [Non-Fraction Family Tables Revalidation Audit](file:///c:/Projects/MathProject_AST_Research_HealerBoundary/docs/experiments/audits/math16_pilot02_nonfraction_family_table_revalidation_v1/audit_report.md)，四大 Family 原始 Baseline 獨立 Rebuild 重建結果如下：
+
+| Family | 4B PASS | 9B PASS | BOTH PASS ($a$) | 4B ONLY ($b$) | 9B ONLY ($c$) | BOTH FAIL ($d$) | 淨增加 ($c-b$) | Paired RD ($\Delta$) | Exact McNemar $p$-value | Matched OR |
+| :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| **Integer** | 30/80 | 42/80 | **29** | **1** | **13** | **37** | **+12** | +0.1500 | **0.001831** | **13.00** |
+| **Polynomial** | 16/80 | 9/80 | **3** | **13** | **6** | **58** | **-7** | -0.0875 | **0.167089** | **0.46** |
+| **Radical** | 15/80 | 19/80 | **10** | **5** | **9** | **56** | **+4** | +0.0500 | **0.423950** | **1.80** |
+| **Fraction** | 17/80 | 31/80 | **10** | **7** | **21** | **42** | **+14** | +0.1750 | **0.012541** | **3.00** |
+| **合計 (Closure)** | **78/320** | **101/320** | **52** | **26** | **49** | **193** | **+23** | **+0.0719** | **0.010582** | **1.88** |
+
+**Family-to-Overall 閉合驗證**：四大 Family 四格列聯表加總精確等於 Overall 2×2 列聯表 ($29+3+10+10=\mathbf{52}$, $1+13+5+7=\mathbf{26}$, $13+6+9+21=\mathbf{49}$, $37+58+56+42=\mathbf{193}$)，無任何不對齊或矛盾。
+
 ---
 
 ## 8. Failure Layer 與 Mechanism 分布 (Failure Analysis)
