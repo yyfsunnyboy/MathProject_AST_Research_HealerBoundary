@@ -3,7 +3,8 @@
 ```text
 FIGURE_CAPTION_BANK_V1
 DUAL_CAPTION_STRUCTURE_ENFORCED
-FORMAL_REPORT_AND_ORAL_PRESENTATION_VERSIONS
+EXPLICIT_PRIMARY_POSTHOC_ACCOUNTING
+NO_VAGUE_RANGE_PHRASES
 ```
 
 > **使用說明**：
@@ -65,11 +66,11 @@ FORMAL_REPORT_AND_ORAL_PRESENTATION_VERSIONS
 
 * **正式報告圖說**：
   > **圖 5：三模型 Baseline FAIL 案例中 Healer 審查 (Eligibility) 與救回 (Rescue) 邊界。**
-  > 在 Gemini (31 FAIL) 與 Qwen 9B (219 FAIL) 中，由於殘餘失敗未命中事前凍結規則，Healer 主動選擇 Abstain (Eligible=0)；在 Qwen 4B (242 FAIL) 中識別出 10 個 Eligible 案例，在 Primary 成功救回 5 格 (83/320)，Post-hoc 修正後救回 6 格 (84/320)。實際執行修復之案例中均觀察到 Regression=0。FAIL 總數不等於可修復數。
+  > 在 Gemini (31 FAIL) 與 Qwen 9B (219 FAIL) 中，由於殘餘失敗未命中事前凍結規則，Healer 主動選擇 Abstain (Eligible=0)；在 Qwen 4B (242 FAIL) 中識別出 10 個 Eligible 案例，Primary 救回 5 格 (Primary final = 83/320)，Post-hoc 修正後救回 6 格 (Post-hoc final = 84/320)。實際執行修復之案例中均觀察到 Regression=0。FAIL 總數不等於可修復數。
 
-* **口試短答/簡報圖說**：
+* **口試簡報圖說**：
   > **圖 5：Healer 介入邊界與救援成果。**
-  > 失敗多不等於修復多。4B 命中 10 格修復 5~6 格；Gemini 與 9B 因未命中凍結規則主動 Abstain，觀察到 zero regression。
+  > 失敗多不等於修復多。4B 命中 10 格，Primary 救回 5 格 (83/320)，Post-hoc 救回 6 格 (84/320)；Gemini 與 9B 因未命中凍結規則主動 Abstain，觀察到 zero regression。
 
 ---
 

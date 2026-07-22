@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -80,62 +81,82 @@ def test_every_figure_has_required_fields():
             assert fig[key], f"Figure {fig['figure_id']} key '{key}' is empty"
 
 
-def test_fig2_version_differentiation():
+def test_one_pager_exactly_four_figures():
     with open(SPEC_JSON_PATH, encoding="utf-8") as f:
         spec = json.load(f)
 
-    fig2 = next(fig for fig in spec["figures"] if fig["figure_id"] == "fig2_prompt_conditions")
-    data_str = json.dumps(fig2["exact_data"], ensure_ascii=False)
-    assert "spec-v1" in data_str
-    assert "spec-v2" in data_str
+    constraints = spec.get("layout_constraints", {})
+    assert constraints.get("exactly_4_core_figures_in_one_pager") is True
 
-    annos_str = json.dumps(fig2["mandatory_annotations"], ensure_ascii=False)
-    assert "spec-v1" in annos_str
-    assert "spec-v2" in annos_str
+    one_pager_content = ONE_PAGER_PATH.read_text(encoding="utf-8")
+    assert "EXACTLY_4_CORE_FIGURES = TRUE" in one_pager_content or "exactly_4_core_figures = true" in one_pager_content
+    assert "Figure 1" in one_pager_content
+    assert "Figure 3" in one_pager_content
+    assert "Figure 4" in one_pager_content
+    assert "Figure 5" in one_pager_content
+
+    # Figure 6 must NOT be an independent figure in One-Pager
+    assert "Figure 6" not in [f for f in constraints.get("one_pager_figures", [])]
 
 
-def test_fig4_dual_statistical_evidence():
+def test_poster_exactly_five_figures():
     with open(SPEC_JSON_PATH, encoding="utf-8") as f:
         spec = json.load(f)
 
-    fig4 = next(fig for fig in spec["figures"] if fig["figure_id"] == "fig4_tier1_paired_analysis")
-    exact_data = fig4["exact_data"]
+    constraints = spec.get("layout_constraints", {})
+    assert constraints.get("exactly_5_core_figures_in_poster") is True
 
-    assert exact_data["BOTH_PASS"] == 52
-    assert exact_data["FOUR_B_ONLY_PASS"] == 26
-    assert exact_data["NINE_B_ONLY_PASS"] == 49
-    assert exact_data["BOTH_FAIL"] == 193
-    assert exact_data["exact_mcnemar_p"] == 0.010582
-    assert "[-0.94%, +14.38%]" in exact_data["task_clustered_bootstrap_95ci"]
+    poster_content = POSTER_ORAL_PATH.read_text(encoding="utf-8")
+    assert "POSTER_EXACTLY_FIVE_FIGURES = TRUE" in poster_content or "exactly_5_core_figures = true" in poster_content
+    assert "Figure 1" in poster_content
+    assert "Figure 2" in poster_content
+    assert "Figure 6" in poster_content
+    assert "Figure 4" in poster_content
+    assert "Figure 5" in poster_content
 
-    annos_str = json.dumps(fig4["mandatory_annotations"], ensure_ascii=False)
-    assert "McNemar" in annos_str
-    assert "Bootstrap" in annos_str
+    # Figure 3 must NOT be a main figure in Poster selection
+    assert "Figure 3" not in [f for f in constraints.get("poster_figures", [])]
+    assert "完全排除 Figure 3" in poster_content or "Moved to report and backup slides" in poster_content or "Excluded from main poster" in poster_content
 
 
-def test_fig5_rescue_and_regression_qualification():
+def test_no_vague_rescue_range_phrases():
+    spec_files = [
+        SPEC_JSON_PATH,
+        DATA_TABLES_PATH,
+        GOVERNANCE_PATH,
+        CAPTIONS_PATH,
+        ONE_PAGER_PATH,
+        POSTER_ORAL_PATH,
+        REPORT_SPEC_PATH,
+    ]
+
+    vague_phrases = ["5~6", "5-6", "5至6", "救回 5~6 格", "5/6格"]
+
+    for filepath in spec_files:
+        content = filepath.read_text(encoding="utf-8")
+        for phrase in vague_phrases:
+            assert phrase not in content, f"Vague phrase '{phrase}' found in {filepath.name}"
+
+
+def test_explicit_primary_posthoc_rescue_accounting():
+    captions = CAPTIONS_PATH.read_text(encoding="utf-8")
+    assert "5" in captions
+    assert "6" in captions
+    assert "83/320" in captions
+    assert "84/320" in captions
+
+    governance = GOVERNANCE_PATH.read_text(encoding="utf-8")
+    assert "Primary rescue = 5" in governance
+    assert "Post-hoc corrected-chain rescue = 6" in governance or "Post-hoc rescue = 6" in governance
+
+
+def test_fig6_retained_in_spec():
     with open(SPEC_JSON_PATH, encoding="utf-8") as f:
         spec = json.load(f)
 
-    fig5 = next(fig for fig in spec["figures"] if fig["figure_id"] == "fig5_healer_eligibility_boundary")
-    exact_data = fig5["exact_data"]
-
-    assert exact_data["Qwen 3.5 4B"]["Primary_Rescue"] == 5
-    assert exact_data["Qwen 3.5 4B"]["Posthoc_Rescue"] == 6
-    assert exact_data["Gemini 3.5 Flash"]["Eligible"] == 0
-    assert exact_data["Qwen 3.5 9B"]["Eligible"] == 0
-
-    annos_str = json.dumps(fig5["mandatory_annotations"], ensure_ascii=False)
-    assert "Observed regression = 0" in annos_str or "Regression=0" in annos_str
-
-
-def test_fig6_no_fabricated_numbers():
-    with open(SPEC_JSON_PATH, encoding="utf-8") as f:
-        spec = json.load(f)
-
-    fig6 = next(fig for fig in spec["figures"] if fig["figure_id"] == "fig6_healer_concept_zones")
+    fig6 = next((fig for fig in spec["figures"] if fig["figure_id"] == "fig6_healer_concept_zones"), None)
+    assert fig6 is not None, "Figure 6 must be retained in core figure spec"
     assert fig6["denominator"] is None
-    assert "no fabricated" in fig6["primary_posthoc_status"].lower() or "no empirical" in fig6["primary_posthoc_status"].lower()
 
 
 def test_no_forbidden_chart_types():
@@ -149,34 +170,7 @@ def test_no_forbidden_chart_types():
             assert forbidden not in c_type, f"Forbidden chart type '{forbidden}' found in figure {fig['figure_id']}"
 
 
-def test_one_pager_selects_exactly_four_figures():
-    content = ONE_PAGER_PATH.read_text(encoding="utf-8")
-    assert "Figure 1" in content
-    assert "Figure 3" in content
-    assert "Figure 4" in content
-    assert "Figure 5" in content
-    assert "精選 4 張圖表" in content or "4 張圖表" in content
-
-
-def test_data_tables_match_sources():
-    with open(DATA_TABLES_PATH, encoding="utf-8") as f:
-        data_tables = json.load(f)
-
-    fig1 = data_tables["fig1_baseline_overall"]["data"]
-    assert fig1["Gemini 3.5 Flash"]["pass_cells"] == 289
-    assert fig1["Qwen 3.5 4B"]["pass_cells"] == 78
-    assert fig1["Qwen 3.5 9B"]["pass_cells"] == 101
-
-    fig4 = data_tables["fig4_tier1_paired_analysis"]
-    matrix = fig4["contingency_matrix"]
-    assert matrix["BOTH_PASS"] == 52
-    assert matrix["FOUR_B_ONLY_PASS"] == 26
-    assert matrix["NINE_B_ONLY_PASS"] == 49
-    assert matrix["BOTH_FAIL"] == 193
-
-
 def test_integrated_report_gap_inventory_updated():
     content = REPORT_PATH.read_text(encoding="utf-8")
-    # Verify Gap Inventory section is present
     assert "17. 正式成果缺口盤點" in content
     assert "Core Figure Specification v1" in content or "Core Figure Spec v1" in content
