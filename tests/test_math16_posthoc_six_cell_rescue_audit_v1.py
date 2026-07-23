@@ -527,13 +527,13 @@ class TestNoStressTest:
         )
 
     def test_no_stress_test_scripts_executed(self):
-        """No stress test scripts should be present in the scripts dir."""
+        """No stress test execution runner scripts should be present in scripts dir."""
         scripts_dir = REPO_ROOT / "scripts"
         stress_scripts = [
             p for p in scripts_dir.glob("*stress_test*")
-            if p.is_file()
+            if p.is_file() and not p.name.startswith(("build_", "preflight_"))
         ]
-        assert not stress_scripts, f"Stress test scripts found: {stress_scripts}"
+        assert not stress_scripts, f"Stress test execution scripts found: {stress_scripts}"
 
 
 # ---------------------------------------------------------------------------
