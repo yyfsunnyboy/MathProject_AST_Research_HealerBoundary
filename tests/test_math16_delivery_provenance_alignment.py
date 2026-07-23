@@ -52,6 +52,24 @@ def test_primary_delivery_files_exist():
     assert PROV_MANIFEST_PATH.exists()
     assert JURY_RISK_REVIEW.exists()
 
+def test_submission_reading_order_and_rule_path():
+    readme = README_DELIV.read_text(encoding="utf-8")
+    entries = [
+        "02_math16_pilot02_one_pager_v23.pdf",
+        "03_math16_pilot02_poster_v11.pdf",
+        "01_math16_pilot02_final_report_v13.md",
+        "05_math16_pilot02_appendices_v1.md",
+        "04_math16_pilot02_jury_qa_final_v1.md",
+    ]
+    assert [readme.index(entry) for entry in entries] == sorted(readme.index(entry) for entry in entries)
+    assert "289 / 320" in readme
+    assert "80 / 80" in readme
+
+    appendix_delivery = APPENDICES_DELIV.read_text(encoding="utf-8")
+    assert "\x07gent_tools/finals_rebuild/ce115_research_healer_rules_*.py" not in appendix_delivery
+    assert "| agent_tools/finals_rebuild/ce115_research_healer_rules_*.py" in appendix_delivery
+    assert list((REPO_ROOT / "agent_tools/finals_rebuild").glob("ce115_research_healer_rules_*.py"))
+
 def test_eight_high_risk_questions_are_reviewed():
     qa = JURY_QA_REPORT.read_text(encoding="utf-8")
     review = JURY_RISK_REVIEW.read_text(encoding="utf-8")
