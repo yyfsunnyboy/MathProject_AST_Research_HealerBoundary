@@ -1,0 +1,36 @@
+{
+  "experiment_id": "math16_pilot02_integer_gemini_freeze_v1",
+  "cell_id": "gemini_3_5_flash__ce111_nonchoice_q01_part1_exponential_growth__ab2d__seed_2026072004",
+  "task_id": "ce111_nonchoice_q01_part1_exponential_growth",
+  "condition": "ab2d",
+  "seed": 2026072004,
+  "model_tag": "gemini-3.5-flash",
+  "runtime_config_fingerprint": "de65d34f265dbfab10d54b7c3c7f2cc1e8248977058a0b0aa27e3753feaaa93b",
+  "runtime_parameters": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576,
+    "timeout_seconds": 600
+  },
+  "prompt_sha256": "1f1491d3b68e9620550398001b27cd72e2f8b6c08c2debbf346396314a69cb42",
+  "request_metadata": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "raw_response": "from core.prompts.domain_function_library import IntegerOps\n\ndef generate(level=1, **kwargs):\n    # Frozen sampled parameters\n    days = 15\n    hours_per_generation = 20\n    initial = 1\n    split_factor = 4\n\n    # Calculate the number of generations\n    total_hours = IntegerOps.safe_eval(f\"{days} * 24\")\n    generations = IntegerOps.safe_eval(f\"{total_hours} // {hours_per_generation}\")\n\n    # Format numbers for the question text\n    initial_str = IntegerOps.fmt_num(initial)\n    split_factor_str = IntegerOps.fmt_num(split_factor)\n    hours_str = IntegerOps.fmt_num(hours_per_generation)\n    days_str = IntegerOps.fmt_num(days)\n\n    organism_word = \"organism\" if initial == 1 else \"organisms\"\n    question_text = f\"A population of bacteria starts with ${initial_str}$ {organism_word} and splits into ${split_factor_str}$ organisms every ${hours_str}$ hours. How many generations of division will occur in ${days_str}$ days?\"\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": {\"k\": int(generations)},\n        \"oracle_payload\": {\n            \"days\": days,\n            \"hours_per_generation\": hours_per_generation,\n            \"initial\": initial,\n            \"split_factor\": split_factor\n        }\n    }",
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T08:54:53.922117+00:00",
+  "completed_at_utc": "2026-07-21T08:55:02.532511+00:00",
+  "duration": 8.610386100015603,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "retryable": false,
+        "wall_clock_seconds": 8.610381599981338
+      }
+    ],
+    "provider_metadata": {}
+  }
+}

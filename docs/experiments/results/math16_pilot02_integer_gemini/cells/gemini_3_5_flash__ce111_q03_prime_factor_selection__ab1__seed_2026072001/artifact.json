@@ -1,0 +1,36 @@
+{
+  "experiment_id": "math16_pilot02_integer_gemini_freeze_v1",
+  "cell_id": "gemini_3_5_flash__ce111_q03_prime_factor_selection__ab1__seed_2026072001",
+  "task_id": "ce111_q03_prime_factor_selection",
+  "condition": "ab1",
+  "seed": 2026072001,
+  "model_tag": "gemini-3.5-flash",
+  "runtime_config_fingerprint": "de65d34f265dbfab10d54b7c3c7f2cc1e8248977058a0b0aa27e3753feaaa93b",
+  "runtime_parameters": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576,
+    "timeout_seconds": 600
+  },
+  "prompt_sha256": "398a9ab7067574286a3f7b6a955033b2f3af8d244d34098aa907623bb706bcc4",
+  "request_metadata": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "raw_response": "def generate(level=1, **kwargs):\n    candidates = kwargs.get(\"candidates\", [11, 12, 13, 14])\n    n = kwargs.get(\"n\", 156)\n    \n    def is_prime(m):\n        if m < 2:\n            return False\n        for i in range(2, int(m**0.5) + 1):\n            if m % i == 0:\n                return False\n        return True\n\n    correct_answer = None\n    for c in candidates:\n        if n % c == 0 and is_prime(c):\n            correct_answer = c\n            break\n            \n    candidates_str = \", \".join(f\"${c}$\" for c in candidates)\n    question_text = f\"Which of the following is a prime factor of ${n}$?\\nCandidates: {candidates_str}\"\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": {\n            \"candidates\": candidates,\n            \"n\": n\n        }\n    }",
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T08:48:29.588367+00:00",
+  "completed_at_utc": "2026-07-21T08:48:35.641169+00:00",
+  "duration": 6.052794800023548,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "retryable": false,
+        "wall_clock_seconds": 6.052783299935982
+      }
+    ],
+    "provider_metadata": {}
+  }
+}
