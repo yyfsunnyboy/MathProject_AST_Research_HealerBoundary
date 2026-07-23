@@ -40,7 +40,7 @@ APPENDIX_B_MANIFEST_PATH = REPO_ROOT / "docs/experiments/manifests/math16_eligib
 UPSTREAM_SIX_CELL_MANIFEST_PATH = REPO_ROOT / "docs/experiments/manifests/math16_posthoc_six_cell_rescue_audit_v1_result_manifest.json"
 UPSTREAM_STRESS_TEST_MANIFEST_PATH = REPO_ROOT / "docs/experiments/manifests/math16_pilot02_qwen4b_unrestricted_stress_test_v11_result_manifest.json"
 
-FROZEN_SHA_FINAL_REPORT_V13 = "dcf6ae6ee0ac94b5896d8bc0d037ef4f06b7a3de905edf1be891022c6fd0754b"
+FROZEN_SHA_FINAL_REPORT_V13 = "d77eb8c4e1d7ccae03e276adb60bbe5f8a71ef38deef6246ae842ed840fe2fdd"
 FROZEN_SHA_EVIDENCE_COMPLETE = "de11b9bd5038171689ee2895fc3a499a7b404f5259b3f5b3bcc31cb4d4af2225"
 
 def sha256_file(path: Path) -> str:

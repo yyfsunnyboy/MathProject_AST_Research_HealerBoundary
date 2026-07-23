@@ -105,10 +105,8 @@
 本稽核完全尊重既有正式結果分帳，不進行任何改寫：
 - **Qwen 4B Baseline Pass**: `78 / 320`
 - **Primary Eligible**: `10` 格
-- **Primary Rescued**: `5` 格 (Pass $
-ightarrow$ `83 / 320`)
-- **Corrected Rescued**: `6` 格 (Pass $
-ightarrow$ `84 / 320`，技術修正，不回寫 Primary)
+- **Primary Rescued**: `5` 格 (Pass $\rightarrow$ `83 / 320`)
+- **Corrected Rescued**: `6` 格 (Pass $\rightarrow$ `84 / 320`，技術修正，不回寫 Primary)
 - **Qwen 9B Baseline Pass**: `101 / 320`
 - **242 Baseline FAIL 互斥帳目**: `NO_RULE_CANDIDATE=231`, `UNIQUE_CANDIDATE_PRIMARY_ELIGIBLE=10`, `AMBIGUOUS_MULTIPLE_CANDIDATES=1`
 

@@ -106,3 +106,16 @@ CATEGORY_B_QA_COMPLETED
 4. ❌ **「Evaluator Parser 100% 沒有任何限制或偏見」** $\rightarrow$ ⭕ 應說：「診斷數據不偏向以 Evaluator 偏差為主要失敗原因，77.8% 屬候選碼本體 SyntaxError。」
 5. ❌ **「Gemini 代表所有雲端大模型的極限」** $\rightarrow$ ⭕ 應說：「Gemini 3.5 Flash 作為強模型參照組，展現了高基線下的 Ceiling Effect。」
 6. ❌ **「Post-hoc 數據 (84/320 或 306/320) 是主要的實驗結果」** $\rightarrow$ ⭕ 應說：「Primary 預註冊數據 (83/320) 為唯一正式結果，Post-hoc 僅作探索討論。」
+
+
+
+### Q20: Healer 規則的 Provenance（來源與凍結狀態）與雙層學術定位為何？
+**正式回答：**
+1. **規則凍結狀態 (`rule_freeze_status = PRE_FROZEN_UNCHANGED`)**：六條 Healer 規則及其適用條件均於正式 Math16 320-cell generation 前完成凍結 (d9aa264c)，且後續未修改 detector、eligibility、transform 或 activation scope。
+2. **Primary 5 定位 (`validation_status = PROSPECTIVE_WITHIN_MATH16_COHORT`)**：Primary 帳目的 5 格救援屬於預先固定規則在 Math16 cohort 上的前瞻性評估結果；但因規則源自先期開發資料，且尚未在完全獨立資料集驗證 (independent_external_validation = false)，本研究不主張其為外部獨立確認性證據。
+3. **Corrected 第 6 格定位 (POST_HOC_TECHNICAL_CORRECTION)**：第 6 格來自既有規則成功 transform 被 runner false-loop rollback 錯誤撤回後的技術修正。此修正未新增或修改 Healer 規則，不改變 PRE_FROZEN_UNCHANGED 狀態；但因屬正式結果揭露後的技術重算，只列入 Corrected technical account，不回寫 Primary。
+4. **Payload Wrap 結構 (oracle_payload 內部包裝)**：single-key 指固定三欄回傳結構中 oracle_payload 欄位內部的唯一包裝鍵，不是最外層 return dict 只有一個鍵。Healer 不讀取 correct_answer，oracle_answer_used = false。此結果支持窄範圍、唯一、局部且離線可驗證的 deterministic repair candidate，不代表零副作用或一般語意安全保證。
+
+- 權威 Provenance Audit 報告：docs/experiments/reports/math16_healer_rule_provenance_audit_v1.md (SHA256: 872fb71d602c11c3600fbbf0d762b8dc046a167d00205c460341809f45e70965)
+- 權威 Provenance Audit Manifest：docs/experiments/reports/math16_healer_rule_provenance_audit_v1_manifest.json (SHA256: 3e45b5e67d32e6d43a1aea5928af0879e78ac1fdf7244a86c3f5b8f269f99bbf)
+- 規則凍結 Commit：d9aa264c | 分類修正 Commit：97c4e985

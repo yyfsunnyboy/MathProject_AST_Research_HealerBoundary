@@ -51,3 +51,16 @@
 1. **正式 Primary 對決**：Gemini Math16 四條件 Pass 為 **289 / 320** (Ab1 72, Ab2g 76, Ab2d+api 78, Ab2d+spec-v1 63)。
 2. **Post-hoc 驗證**：Ab2d+spec-v2 補齊 API 檔案卡後為 **80 / 80 (+17)**，Hybrid Inventory 為 **306 / 320**（僅作機制驗證，不取代 Primary 計分）。
 3. **Healer 救援數**：Gemini Cohort 為 **0**（Evaluator v4 修復假陰性 +24 屬評分契約修正，Spec-v2 +17 屬 Prompt/Spec 修補，皆非 Healer 算力介入）。
+
+
+
+## 5. Healer 規則 Provenance Audit 對齊與雙層學術定位 (Provenance Alignment)
+
+1. **規則凍結狀態 (`rule_freeze_status = PRE_FROZEN_UNCHANGED`)**：六條 Healer 規則及其適用條件均於正式 Math16 320-cell generation 前完成凍結 (d9aa264c)，且後續未修改 detector、eligibility、transform 或 activation scope。
+2. **Primary 5 定位 (`validation_status = PROSPECTIVE_WITHIN_MATH16_COHORT`)**：Primary 帳目的 5 格救援屬於預先固定規則在 Math16 cohort 上的前瞻性評估結果；但因規則源自先期開發資料，且尚未在完全獨立資料集驗證 (independent_external_validation = false)，本研究不主張其為外部獨立確認性證據。
+3. **Corrected 第 6 格定位 (POST_HOC_TECHNICAL_CORRECTION)**：第 6 格來自既有規則成功 transform 被 runner false-loop rollback 錯誤撤回後的技術修正。此修正未新增或修改 Healer 規則，不改變 PRE_FROZEN_UNCHANGED 狀態；但因屬正式結果揭露後的技術重算，只列入 Corrected technical account，不回寫 Primary。
+4. **Payload Wrap 結構 (oracle_payload 內部包裝)**：single-key 指固定三欄回傳結構中 oracle_payload 欄位內部的唯一包裝鍵，不是最外層 return dict 只有一個鍵。Healer 不讀取 correct_answer，oracle_answer_used = false。此結果支持窄範圍、唯一、局部且離線可驗證的 deterministic repair candidate，不代表零副作用或一般語意安全保證。
+
+- 權威 Provenance Audit 報告：docs/experiments/reports/math16_healer_rule_provenance_audit_v1.md (SHA256: 872fb71d602c11c3600fbbf0d762b8dc046a167d00205c460341809f45e70965)
+- 權威 Provenance Audit Manifest：docs/experiments/reports/math16_healer_rule_provenance_audit_v1_manifest.json (SHA256: 3e45b5e67d32e6d43a1aea5928af0879e78ac1fdf7244a86c3f5b8f269f99bbf)
+- 規則凍結 Commit：d9aa264c | 分類修正 Commit：97c4e985

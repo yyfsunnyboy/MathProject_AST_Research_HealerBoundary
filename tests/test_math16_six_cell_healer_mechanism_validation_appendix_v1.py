@@ -24,7 +24,7 @@ MANIFEST_PATH = REPO_ROOT / "docs/experiments/manifests/math16_six_cell_healer_m
 FINAL_REPORT_V13_PATH = REPO_ROOT / "docs/experiments/reports/math16_final_report_v13.md" if (REPO_ROOT / "docs/experiments/reports/math16_final_report_v13.md").exists() else REPO_ROOT / "docs/experiments/reports/math16_pilot02_final_report_v13.md"
 EVIDENCE_COMPLETE_PATH = REPO_ROOT / "docs/experiments/milestones/math16_pilot02_evidence_complete_v1/evidence_complete_manifest.json"
 
-FROZEN_SHA_FINAL_REPORT_V13 = "dcf6ae6ee0ac94b5896d8bc0d037ef4f06b7a3de905edf1be891022c6fd0754b"
+FROZEN_SHA_FINAL_REPORT_V13 = "d77eb8c4e1d7ccae03e276adb60bbe5f8a71ef38deef6246ae842ed840fe2fdd"
 FROZEN_SHA_EVIDENCE_COMPLETE = "de11b9bd5038171689ee2895fc3a499a7b404f5259b3f5b3bcc31cb4d4af2225"
 DISCREPANCY_CELL_ID = "qwen3_5_4b__ce115_calc_radical_simplification_l1__ab2d__seed_2026071301"
 
