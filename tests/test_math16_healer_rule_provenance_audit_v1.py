@@ -1,23 +1,23 @@
 """
 tests/test_math16_healer_rule_provenance_audit_v1.py
 =====================================================
-Test suite for Math16 Healer Rule Provenance Audit v1.
+Test suite for Math16 Healer Rule Provenance Audit v1 (Refined Classification).
 
 Validates:
 1. Report file and manifest JSON exist and are readable.
 2. Manifest contains exactly 6 rules matching the frozen allowlist.
-3. Every rule is classified as one of PRE_FROZEN_CONFIRMATORY, PRE_EXISTING_BUT_MODIFIED_POST_HOC, EXPLORATORY_POST_HOC_DISCOVERY, or PROVENANCE_UNRESOLVED.
-4. L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP is correctly classified as PRE_EXISTING_BUT_MODIFIED_POST_HOC.
-5. All commit hashes are valid (8 or 40 hex chars).
-6. All evidence paths exist in repository.
-7. Official report numbers match (Primary rescued=5, Corrected=6, Qwen4B baseline=78, final=83/84).
-8. Protected SHAs (Final Report v1.3 and Evidence Complete) are preserved.
-9. Zero model, zero healer, and zero evaluator calls flags are true.
+3. Every rule has rule_freeze_status == "PRE_FROZEN_UNCHANGED" and validation_status == "PROSPECTIVE_WITHIN_MATH16_COHORT".
+4. Runner-only fix (d3b5a69c) is explicitly separated from rule freeze status (0 rule modifications post-freeze).
+5. L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP structure description verified (not 'entire dict single key').
+6. All commit hashes are valid (8 or 40 hex chars).
+7. All evidence paths exist in repository.
+8. Official report numbers match (Primary rescued=5, Corrected=6, Qwen4B baseline=78, final=83/84).
+9. Protected SHAs (Final Report v1.3 and Evidence Complete) are preserved.
+10. Zero model, zero healer, and zero evaluator calls flags are true.
 """
 
 import json
 import hashlib
-import re
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).parent.parent.resolve()
@@ -63,32 +63,34 @@ def test_manifest_structure_and_rules():
     rule_ids = [r["rule_id"] for r in rules]
     assert set(rule_ids) == set(EXPECTED_RULE_IDS)
 
-    valid_classes = {
-        "PRE_FROZEN_CONFIRMATORY",
-        "PRE_EXISTING_BUT_MODIFIED_POST_HOC",
-        "EXPLORATORY_POST_HOC_DISCOVERY",
-        "PROVENANCE_UNRESOLVED"
-    }
-
     for r in rules:
-        assert r["provenance_class"] in valid_classes
+        assert r["rule_freeze_status"] == "PRE_FROZEN_UNCHANGED"
+        assert r["validation_status"] == "PROSPECTIVE_WITHIN_MATH16_COHORT"
+        assert r["rule_diff_since_freeze"] == "EMPTY_UNCHANGED"
+        assert r["independently_validated"] is False
         assert len(r["first_commit"]) in [7, 8, 40]
         assert len(r["freeze_commit"]) in [7, 8, 40]
 
         for p in r.get("evidence_paths", []):
             assert (REPO_ROOT / p).exists(), f"Evidence path missing: {p}"
 
-def test_l2_single_key_payload_wrap_classification():
+def test_l2_single_key_payload_wrap_classification_and_structure():
     with open(MANIFEST_PATH, encoding="utf-8") as f:
         m = json.load(f)
 
     rules_by_id = {r["rule_id"]: r for r in m.get("rules", [])}
     wrap_rule = rules_by_id["L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP"]
 
-    assert wrap_rule["provenance_class"] == "PRE_EXISTING_BUT_MODIFIED_POST_HOC"
+    assert wrap_rule["rule_freeze_status"] == "PRE_FROZEN_UNCHANGED"
+    assert wrap_rule["validation_status"] == "PROSPECTIVE_WITHIN_MATH16_COHORT"
     assert wrap_rule["first_commit"] == "e098dc04"
     assert wrap_rule["freeze_commit"] == "d9aa264c"
     assert wrap_rule["independently_validated"] is False
+
+    text = REPORT_PATH.read_text(encoding="utf-8")
+    assert "整個return dict只有一個key" not in text
+    assert "最外層dict只包含oracle_payload" not in text
+    assert "oracle_payload" in text
 
 def test_report_numbers_and_disclaimer():
     text = REPORT_PATH.read_text(encoding="utf-8")
@@ -96,7 +98,9 @@ def test_report_numbers_and_disclaimer():
     assert "84/320" in text
     assert "5" in text
     assert "6" in text
-    assert "PRE_EXISTING_BUT_MODIFIED_POST_HOC" in text
+    assert "PRE_FROZEN_UNCHANGED" in text
+    assert "PROSPECTIVE_WITHIN_MATH16_COHORT" in text
+    assert "POST_HOC_TECHNICAL_CORRECTION" in text
     assert "oracle_answer_used = false" in text
 
 def test_protected_shas_intact():
