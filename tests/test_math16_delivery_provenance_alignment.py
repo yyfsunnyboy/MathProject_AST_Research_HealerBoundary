@@ -31,6 +31,7 @@ PROV_REPORT_PATH = REPO_ROOT / "docs/experiments/reports/math16_healer_rule_prov
 PROV_MANIFEST_PATH = REPO_ROOT / "docs/experiments/reports/math16_healer_rule_provenance_audit_v1_manifest.json"
 
 FINAL_REPORT_V13_PATH = REPO_ROOT / "docs/experiments/reports/math16_pilot02_final_report_v13.md"
+FINAL_REPORT_V13_DELIVERY = DELIVERY_DIR / "01_math16_pilot02_final_report_v13.md"
 EVIDENCE_COMPLETE_PATH = REPO_ROOT / "docs/experiments/milestones/math16_pilot02_evidence_complete_v1/evidence_complete_manifest.json"
 
 FROZEN_SHA_FINAL_REPORT_V13 = "d77eb8c4e1d7ccae03e276adb60bbe5f8a71ef38deef6246ae842ed840fe2fdd"
@@ -146,4 +147,10 @@ def test_formal_accounting_is_preserved():
 
 def test_protected_shas_intact():
     assert sha256_file(FINAL_REPORT_V13_PATH) == FROZEN_SHA_FINAL_REPORT_V13
+    assert sha256_file(FINAL_REPORT_V13_DELIVERY) == FROZEN_SHA_FINAL_REPORT_V13
     assert sha256_file(EVIDENCE_COMPLETE_PATH) == FROZEN_SHA_EVIDENCE_COMPLETE
+
+def test_delivery_final_report_reference_uses_current_sha():
+    text = APPENDICES_DELIV.read_text(encoding="utf-8")
+    assert "d77eb8c4e1d7ccae03e2..." in text
+    assert "dcf6ae6ee0ac94b5896d..." not in text
