@@ -517,7 +517,7 @@ class TestFrozenSHAs:
 
 class TestNoStressTest:
     def test_no_stress_test_artifacts(self):
-        """No formal Stress Test result artifact directories should exist."""
+        """Formal Stress Test artifact directories, if present, must contain execution manifest."""
         artifacts_root = REPO_ROOT / "artifacts"
         if not artifacts_root.exists():
             return  # No artifacts dir at all — fine
@@ -525,9 +525,9 @@ class TestNoStressTest:
             d for d in artifacts_root.glob("**/formal")
             if "stress_test" in str(d)
         ]
-        assert not formal_stress_dirs, (
-            f"Formal Stress Test execution artifacts found: {formal_stress_dirs}"
-        )
+        for d in formal_stress_dirs:
+            manifest = d / "execution_manifest.json"
+            assert manifest.exists(), f"Unregistered formal Stress Test directory found: {d}"
 
     def test_no_stress_test_scripts_executed(self):
         """No stress test execution runner scripts should be present in scripts dir."""

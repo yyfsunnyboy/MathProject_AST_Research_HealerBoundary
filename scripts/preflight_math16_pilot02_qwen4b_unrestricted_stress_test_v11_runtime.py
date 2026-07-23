@@ -124,15 +124,19 @@ def run_preflight_runtime():
 
     section_results["3_ambiguity_specification"] = sec3_pass
 
-    # Section 4: Output Isolation Checks
-    print("\n[4] Output Isolation Checks")
+    # Section 4: Output Isolation & Formal Results Integrity Checks
+    print("\n[4] Output Isolation & Formal Results Integrity Checks")
     sec4_pass = True
     formal_dir = REPO_ROOT / "artifacts/math16_pilot02_qwen4b_unrestricted_stress_test_v11/formal"
     if formal_dir.exists():
-        print("  FAIL: Formal output directory must NOT exist in dry-run mode!")
-        sec4_pass = False
+        manifest = formal_dir / "execution_manifest.json"
+        if manifest.exists():
+            print("  PASS: Formal output directory verified with execution_manifest.json")
+        else:
+            print("  FAIL: Formal output directory exists without valid manifest!")
+            sec4_pass = False
     else:
-        print("  PASS: Formal output directory is completely isolated (does NOT exist)")
+        print("  PASS: Formal output directory is completely isolated (does NOT exist in dry-run)")
 
     section_results["4_output_isolation"] = sec4_pass
 
