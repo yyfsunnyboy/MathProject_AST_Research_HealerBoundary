@@ -119,3 +119,31 @@ CATEGORY_B_QA_COMPLETED
 - 權威 Provenance Audit 報告：docs/experiments/reports/math16_healer_rule_provenance_audit_v1.md (SHA256: 872fb71d602c11c3600fbbf0d762b8dc046a167d00205c460341809f45e70965)
 - 權威 Provenance Audit Manifest：docs/experiments/reports/math16_healer_rule_provenance_audit_v1_manifest.json (SHA256: 3e45b5e67d32e6d43a1aea5928af0879e78ac1fdf7244a86c3f5b8f269f99bbf)
 - 規則凍結 Commit：d9aa264c | 分類修正 Commit：97c4e985
+
+---
+
+## 三、 最終高風險追問速答
+
+### R1: 六條規則是否看完正式 320 格才寫？
+**直接回答：** 不是；規則在正式 generation 前凍結，freeze 後未改邏輯。**證據：** 6/6 `PRE_FROZEN_UNCHANGED`，freeze commit `d9aa264c`。**限制：** 尚無獨立外部驗證。**不可宣稱：** 已完成外部確認性驗證。
+
+### R2: Primary 5 為何可算前瞻性？
+**直接回答：** 它是預先凍結規則在 Math16 cohort 內的前瞻性評估。**證據：** 78/320 baseline、10 eligible、5 rescued、83/320 final，分類為 `PROSPECTIVE_WITHIN_MATH16_COHORT`。**限制：** 不等於外部獨立驗證。**不可宣稱：** Primary 5 是外部確認證據。
+
+### R3: Corrected 第 6 格是否事後灌水？
+**直接回答：** 不是新增規則，而是 runner rollback 錯誤撤回既有成功 transform 的技術勘誤。**證據：** Corrected=6、84/320，規則仍為 `PRE_FROZEN_UNCHANGED`。**限制：** 屬 `POST_HOC_TECHNICAL_CORRECTION`。**不可宣稱：** Corrected 6 等同 Primary 6。
+
+### R4: 為何不只強化 Prompt？
+**直接回答：** Prompt 降低生成錯誤；Healer 處理生成後可唯一、局部、離線判定的窄型契約錯誤。**證據：** 4B 有 242 個 baseline FAIL，僅 10 格符合唯一候選。**限制：** Healer 不是 Prompt 替代品。**不可宣稱：** Healer 優於 Prompt。
+
+### R5: 231/242 無候選是否代表 Healer 失敗？
+**直接回答：** 不是；這是介入窗口很窄的負面邊界結果。**證據：** `NO_RULE_CANDIDATE=231`、unique=10、ambiguous=1。**限制：** 僅描述此規則庫與 Math16 cohort。**不可宣稱：** 231 格代表 Healer 無效。
+
+### R6: PASS 案例誤觸會不會造成 regression？
+**直接回答：** 不應任意改寫 PASS；detector、eligibility 與 abstain gate 必須分離。**證據：** 本次 Observed Regression=0，候選須唯一、局部、離線可驗證。**限制：** 觀察到零倒退不代表零副作用。**不可宣稱：** Healer 保證安全。
+
+### R7: 9B eligible=0 是模型太強還是規則沒用？
+**直接回答：** 只能說 9B 在此 cohort 沒有六條規則可捕捉的失敗型態。**證據：** 9B=101/320、eligible=0，仍有 219 FAIL。**限制：** 不能外推至其他模型或錯誤。**不可宣稱：** 9B 完全不需要 Healer。
+
+### R8: 只有 6 格成功能否泛化？
+**直接回答：** 不能；Six-Cell 是機制驗證與自然窗口描述。**證據：** Primary=5、Corrected=6、231/242 無安全候選。**限制：** 仍需未參與規則開發的獨立資料。**不可宣稱：** 六格證明可泛化。

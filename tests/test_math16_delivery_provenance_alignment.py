@@ -25,6 +25,7 @@ APPENDICES_DELIV = DELIVERY_DIR / "05_math16_pilot02_appendices_v1.md"
 README_DELIV = DELIVERY_DIR / "README.md"
 JURY_QA_REPORT = REPO_ROOT / "docs/experiments/reports/math16_pilot02_jury_qa_final_v1.md"
 APPENDICES_REPORT = REPO_ROOT / "docs/experiments/appendices/math16_pilot02_appendices_v1.md"
+JURY_RISK_REVIEW = REPO_ROOT / "docs/experiments/reports/math16_jury_risk_review_v1.md"
 
 PROV_REPORT_PATH = REPO_ROOT / "docs/experiments/reports/math16_healer_rule_provenance_audit_v1.md"
 PROV_MANIFEST_PATH = REPO_ROOT / "docs/experiments/reports/math16_healer_rule_provenance_audit_v1_manifest.json"
@@ -49,6 +50,25 @@ def test_primary_delivery_files_exist():
     assert README_DELIV.exists()
     assert PROV_REPORT_PATH.exists()
     assert PROV_MANIFEST_PATH.exists()
+    assert JURY_RISK_REVIEW.exists()
+
+def test_eight_high_risk_questions_are_reviewed():
+    qa = JURY_QA_REPORT.read_text(encoding="utf-8")
+    review = JURY_RISK_REVIEW.read_text(encoding="utf-8")
+    for question in ["R1:", "R2:", "R3:", "R4:", "R5:", "R6:", "R7:", "R8:"]:
+        assert question in qa
+    for evidence in [
+        "PRE_FROZEN_UNCHANGED",
+        "PROSPECTIVE_WITHIN_MATH16_COHORT",
+        "POST_HOC_TECHNICAL_CORRECTION",
+        "NO_RULE_CANDIDATE=231",
+        "Observed Regression=0",
+        "9B baseline/final 為 101/320",
+        "獨立資料驗證",
+    ]:
+        assert evidence in review
+    for prohibited in ["Healer 優於 Prompt", "Healer 保證安全", "六格證明可泛化"]:
+        assert prohibited in review
 
 def test_jury_qa_provenance_alignment():
     for path in [JURY_QA_DELIV, JURY_QA_REPORT]:
