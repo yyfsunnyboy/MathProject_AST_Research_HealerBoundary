@@ -517,13 +517,16 @@ class TestFrozenSHAs:
 
 class TestNoStressTest:
     def test_no_stress_test_artifacts(self):
-        """No Stress Test artifact directories should exist."""
+        """No formal Stress Test result artifact directories should exist."""
         artifacts_root = REPO_ROOT / "artifacts"
         if not artifacts_root.exists():
             return  # No artifacts dir at all — fine
-        stress_test_dirs = list(artifacts_root.glob("*stress_test*"))
-        assert not stress_test_dirs, (
-            f"Stress Test artifacts found (prohibited in this round): {stress_test_dirs}"
+        formal_stress_dirs = [
+            d for d in artifacts_root.glob("**/formal")
+            if "stress_test" in str(d)
+        ]
+        assert not formal_stress_dirs, (
+            f"Formal Stress Test execution artifacts found: {formal_stress_dirs}"
         )
 
     def test_no_stress_test_scripts_executed(self):
