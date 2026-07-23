@@ -1,0 +1,35 @@
+{
+  "experiment_id": "math16_pilot02_full_gemini_freeze_v1",
+  "cell_id": "gemini_3_5_flash__ce111_q02_polynomial_division_remainder__ab1__seed_2026072003",
+  "task_id": "ce111_q02_polynomial_division_remainder",
+  "condition": "ab1",
+  "seed": 2026072003,
+  "model_tag": "gemini-3.5-flash",
+  "runtime_config_fingerprint": "8bcb0d7177bc35216410108bda88b014848181a95b12bc09bf171866749f3057",
+  "runtime_parameters": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "prompt_sha256": "138e8eae8822fb96a655fd1cfb5c14873f5397fb4b5a09ed617defd5fc0e42e5",
+  "request_metadata": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "raw_response": "def generate(level=1, **kwargs):\n    dividend_coefficients = kwargs.get(\"dividend_coefficients\", [6, 4, 0])\n    divisor_coefficients = kwargs.get(\"divisor_coefficients\", [2, 0, 0])\n    \n    num = list(dividend_coefficients)\n    den = list(divisor_coefficients)\n    \n    while len(num) > 0 and num[0] == 0:\n        num.pop(0)\n    while len(den) > 0 and den[0] == 0:\n        den.pop(0)\n        \n    if not den:\n        raise ZeroDivisionError()\n        \n    if len(num) < len(den):\n        rem = num\n    else:\n        num = [float(x) for x in num]\n        den = [float(x) for x in den]\n        while len(num) >= len(den):\n            mult = num[0] / den[0]\n            for i in range(len(den)):\n                num[i] -= mult * den[i]\n            num.pop(0)\n        rem = [int(x) if x.is_integer() else x for x in num]\n        \n    while len(rem) > 0 and rem[0] == 0:\n        rem.pop(0)\n    if not rem:\n        rem = [0]\n        \n    def format_poly(coeffs):\n        n = len(coeffs)\n        if n == 0:\n            return \"0\"\n        terms = []\n        for i, c in enumerate(coeffs):\n            deg = n - 1 - i\n            if c == 0:\n                continue\n            \n            if c > 0:\n                sign = \" + \" if terms else \"\"\n            else:\n                sign = \" - \" if terms else \"-\"\n            \n            abs_c = abs(c)\n            if abs_c == 1 and deg > 0:\n                coeff_str = \"\"\n            else:\n                coeff_str = str(abs_c)\n                \n            if deg == 0:\n                term = f\"{sign}{abs_c}\"\n            elif deg == 1:\n                term = f\"{sign}{coeff_str}x\"\n            else:\n                term = f\"{sign}{coeff_str}x^{deg}\"\n            terms.append(term)\n        \n        if not terms:\n            return \"0\"\n        return \"\".join(terms)\n\n    dividend_str = format_poly(dividend_coefficients)\n    divisor_str = format_poly(divisor_coefficients)\n    remainder_str = format_poly(rem)\n    \n    question_text = f\"Find the remainder when \\\\({dividend_str}\\\\) is divided by \\\\({divisor_str}\\\\).\"\n    correct_answer = remainder_str\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": {\n            \"dividend_coefficients\": dividend_coefficients,\n            \"divisor_coefficients\": divisor_coefficients\n        }\n    }",
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T09:34:31.242908+00:00",
+  "completed_at_utc": "2026-07-21T09:34:52.677775+00:00",
+  "duration": 21.43486039992422,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "retryable": false,
+        "wall_clock_seconds": 21.434856300009415
+      }
+    ],
+    "provider_metadata": {}
+  }
+}

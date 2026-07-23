@@ -1,0 +1,35 @@
+{
+  "experiment_id": "math16_pilot02_full_gemini_freeze_v1",
+  "cell_id": "gemini_3_5_flash__ce111_q05_exact_fraction_expression__ab2d_spec__seed_2026072002",
+  "task_id": "ce111_q05_exact_fraction_expression",
+  "condition": "ab2d_spec",
+  "seed": 2026072002,
+  "model_tag": "gemini-3.5-flash",
+  "runtime_config_fingerprint": "8bcb0d7177bc35216410108bda88b014848181a95b12bc09bf171866749f3057",
+  "runtime_parameters": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "prompt_sha256": "47608b88957650ffd6c14d9d9f6cddc6d112a6d414d2ca7bd8e3b1c21e2036fc",
+  "request_metadata": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "raw_response": "# -*- coding: utf-8 -*-\nfrom core.prompts.domain_function_library import FractionOps\n\ndef generate(level=1, **kwargs):\n    f1 = FractionOps.create(9, 22)\n    f2 = FractionOps.create(11, 18)\n    f3 = FractionOps.create(23, 22)\n    f4 = FractionOps.create(7, 18)\n\n    term1 = FractionOps.add(f1, f2)\n    term2 = FractionOps.sub(f3, f4)\n    result = FractionOps.sub(term1, term2)\n\n    if isinstance(result, dict):\n        num = result[\"numerator\"]\n        den = result[\"denominator\"]\n    else:\n        num = result.numerator\n        den = result.denominator\n\n    try:\n        latex = FractionOps.to_latex(result)\n    except AttributeError:\n        latex = f\"\\\\frac{{{num}}}{{{den}}}\"\n\n    question_text = (\n        \"Evaluate the following expression:\\n\"\n        \"\\\\[ \\\\frac{9}{22} + \\\\frac{11}{18} - \\\\left(\\\\frac{23}{22} - \\\\frac{7}{18}\\\\right) \\\\]\"\n    )\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": {\n            \"numerator\": num,\n            \"denominator\": den,\n            \"canonical_latex\": latex,\n        },\n        \"oracle_payload\": {\n            \"expression\": \"9/22 + 11/18 - (23/22 - 7/18)\"\n        }\n    }",
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T10:07:29.558440+00:00",
+  "completed_at_utc": "2026-07-21T10:07:44.961002+00:00",
+  "duration": 15.402553000021726,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "retryable": false,
+        "wall_clock_seconds": 15.402549499995075
+      }
+    ],
+    "provider_metadata": {}
+  }
+}

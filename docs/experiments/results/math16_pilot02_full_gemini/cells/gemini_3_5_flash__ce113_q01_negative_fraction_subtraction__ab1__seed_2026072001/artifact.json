@@ -1,0 +1,35 @@
+{
+  "experiment_id": "math16_pilot02_full_gemini_freeze_v1",
+  "cell_id": "gemini_3_5_flash__ce113_q01_negative_fraction_subtraction__ab1__seed_2026072001",
+  "task_id": "ce113_q01_negative_fraction_subtraction",
+  "condition": "ab1",
+  "seed": 2026072001,
+  "model_tag": "gemini-3.5-flash",
+  "runtime_config_fingerprint": "8bcb0d7177bc35216410108bda88b014848181a95b12bc09bf171866749f3057",
+  "runtime_parameters": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "prompt_sha256": "d690b208e09d5f893ecd8b8abc38b4abb7d044968dc42c60dde3de96c0ad410d",
+  "request_metadata": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "raw_response": "```python\nfrom fractions import Fraction\n\ndef generate(level=1, **kwargs):\n    expression = kwargs.get(\"expression\", \"3/7 - (-1/4)\")\n    \n    parts = expression.split(' - ')\n    frac1_str = parts[0].strip()\n    frac2_str = parts[1].strip().strip('()')\n    \n    def format_frac(f_str):\n        f = Fraction(f_str)\n        num, den = f.numerator, f.denominator\n        if num < 0:\n            return f\"-\\\\frac{{{abs(num)}}}{{{den}}}\"\n        else:\n            return f\"\\\\frac{{{num}}}{{{den}}}\"\n            \n    f1_latex = format_frac(frac1_str)\n    f2_latex = format_frac(frac2_str)\n    expr_latex = f\"{f1_latex} - \\\\left({f2_latex}\\\\right)\"\n    \n    question_text = f\"Evaluate the following expression: \\\\({expr_latex}\\\\)\"\n    \n    ans = Fraction(frac1_str) - Fraction(frac2_str)\n    num = ans.numerator\n    den = ans.denominator\n    \n    if num < 0:\n        canonical_latex = f\"-\\\\frac{{{abs(num)}}}{{{den}}}\"\n    elif den == 1:\n        canonical_latex = f\"{num}\"\n    else:\n        canonical_latex = f\"\\\\frac{{{num}}}{{{den}}}\"\n        \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": {\n            \"numerator\": num,\n            \"denominator\": den,\n            \"canonical_latex\": canonical_latex\n        },\n        \"oracle_payload\": {\n            \"expression\": expression\n        }\n    }\n```",
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T10:11:57.149823+00:00",
+  "completed_at_utc": "2026-07-21T10:12:09.978069+00:00",
+  "duration": 12.828240500064567,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "retryable": false,
+        "wall_clock_seconds": 12.8282373000402
+      }
+    ],
+    "provider_metadata": {}
+  }
+}

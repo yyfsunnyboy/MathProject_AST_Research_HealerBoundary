@@ -1,0 +1,35 @@
+{
+  "experiment_id": "math16_pilot02_full_gemini_freeze_v1",
+  "cell_id": "gemini_3_5_flash__ce111_q02_polynomial_division_remainder__ab1__seed_2026072001",
+  "task_id": "ce111_q02_polynomial_division_remainder",
+  "condition": "ab1",
+  "seed": 2026072001,
+  "model_tag": "gemini-3.5-flash",
+  "runtime_config_fingerprint": "8bcb0d7177bc35216410108bda88b014848181a95b12bc09bf171866749f3057",
+  "runtime_parameters": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "prompt_sha256": "138e8eae8822fb96a655fd1cfb5c14873f5397fb4b5a09ed617defd5fc0e42e5",
+  "request_metadata": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "raw_response": "def generate(level=1, **kwargs):\n    from fractions import Fraction\n\n    dividend_coefficients = kwargs.get(\"dividend_coefficients\", [6, 4, 0])\n    divisor_coefficients = kwargs.get(\"divisor_coefficients\", [2, 0, 0])\n\n    def strip(lst):\n        while len(lst) > 1 and lst[0] == 0:\n            lst = lst[1:]\n        return lst\n\n    def poly_to_latex(coeffs):\n        coeffs = strip(list(coeffs))\n        if len(coeffs) == 1 and coeffs[0] == 0:\n            return \"0\"\n        \n        terms = []\n        deg = len(coeffs) - 1\n        for i, c in enumerate(coeffs):\n            if c == 0:\n                continue\n            power = deg - i\n            \n            # Sign and spacing\n            if c < 0:\n                sign = \" - \" if terms else \"-\"\n                val = -c\n            else:\n                sign = \" + \" if terms else \"\"\n                val = c\n                \n            # Coefficient string\n            is_one = (val == 1)\n            \n            if isinstance(val, Fraction):\n                if val.denominator == 1:\n                    val_num = val.numerator\n                    is_one = (val_num == 1)\n                    c_str = str(val_num)\n                else:\n                    c_str = f\"\\\\frac{{{val.numerator}}}{{{val.denominator}}}\"\n                    is_one = False\n            else:\n                c_str = str(val)\n                \n            if is_one and power > 0:\n                c_str = \"\"\n                \n            # Variable\n            if power == 0:\n                var_str = \"\"\n                if is_one:\n                    c_str = \"1\"\n            elif power == 1:\n                var_str = \"x\"\n            else:\n                var_str = f\"x^{power}\" if power < 10 else f\"x^{{{power}}}\"\n                \n            terms.append(f\"{sign}{c_str}{var_str}\")\n            \n        return \"\".join(terms)\n\n    dividend = strip([Fraction(x).limit_denominator() for x in dividend_coefficients])\n    divisor = strip([Fraction(x).limit_denominator() for x in divisor_coefficients])\n\n    if len(divisor) == 1 and divisor[0] == 0:\n        raise ZeroDivisionError(\"Division by zero polynomial.\")\n\n    remainder = list(dividend)\n    while len(remainder) >= len(divisor) and not (len(remainder) == 1 and remainder[0] == 0):\n        lead_rec = remainder[0]\n        lead_div = divisor[0]\n        factor = lead_rec / lead_div\n        \n        for i in range(len(divisor)):\n            remainder[i] -= factor * divisor[i]\n            \n        remainder = strip(remainder)\n\n    question_text = f\"Find the remainder when ${poly_to_latex(dividend_coefficients)}$ is divided by ${poly_to_latex(divisor_coefficients)}$.\"\n    correct_answer = poly_to_latex(remainder)\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": {\n            \"dividend_coefficients\": dividend_coefficients,\n            \"divisor_coefficients\": divisor_coefficients\n        }\n    }",
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T09:33:41.835693+00:00",
+  "completed_at_utc": "2026-07-21T09:34:10.645934+00:00",
+  "duration": 28.810231099952944,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "retryable": false,
+        "wall_clock_seconds": 28.810226899920963
+      }
+    ],
+    "provider_metadata": {}
+  }
+}

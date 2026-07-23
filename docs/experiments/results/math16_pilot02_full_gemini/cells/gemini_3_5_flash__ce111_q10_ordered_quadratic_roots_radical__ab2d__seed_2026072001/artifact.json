@@ -1,0 +1,35 @@
+{
+  "experiment_id": "math16_pilot02_full_gemini_freeze_v1",
+  "cell_id": "gemini_3_5_flash__ce111_q10_ordered_quadratic_roots_radical__ab2d__seed_2026072001",
+  "task_id": "ce111_q10_ordered_quadratic_roots_radical",
+  "condition": "ab2d",
+  "seed": 2026072001,
+  "model_tag": "gemini-3.5-flash",
+  "runtime_config_fingerprint": "8bcb0d7177bc35216410108bda88b014848181a95b12bc09bf171866749f3057",
+  "runtime_parameters": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "prompt_sha256": "79e4e1abeee04352b1acfd797ec10815f2614f37bd4c94f0090c6ffef957d2c6",
+  "request_metadata": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "raw_response": "import re\nfrom fractions import Fraction\nfrom core.prompts.domain_function_library import RadicalOps, FractionOps\n\ndef generate(level=1, **kwargs):\n    # Frozen parameters\n    equation = \"(x-2)^2=3\"\n    order = \"a>b\"\n    target = \"2a+b\"\n    \n    # Parse equation (x - h)^2 = d\n    match = re.match(r\"\\(x([+-]\\d+)\\)\\^2=(\\d+)\", equation)\n    if match:\n        h_sign_val = match.group(1)\n        h = -int(h_sign_val)\n        d = int(match.group(2))\n    else:\n        h = 2\n        d = 3\n        \n    # Roots are h + sqrt(d) and h - sqrt(d)\n    r_pos = (h, 1, d)\n    r_neg = (h, -1, d)\n    \n    if order == \"a>b\":\n        a_rat, a_coeff, a_rad = r_pos[0], r_pos[1], r_pos[2]\n        b_rat, b_coeff, b_rad = r_neg[0], r_neg[1], r_neg[2]\n    else:\n        a_rat, a_coeff, a_rad = r_neg[0], r_neg[1], r_neg[2]\n        b_rat, b_coeff, b_rad = r_pos[0], r_pos[1], r_pos[2]\n        \n    # Parse target\n    if target == \"2a+b\":\n        ca, cb = 2, 1\n    elif target == \"a+2b\":\n        ca, cb = 1, 2\n    elif target == \"a-b\":\n        ca, cb = 1, -1\n    elif target == \"b-a\":\n        ca, cb = -1, 1\n    elif target == \"a+b\":\n        ca, cb = 1, 1\n    else:\n        ca, cb = 2, 1\n        \n    res_rat = ca * a_rat + cb * b_rat\n    res_coeff = ca * a_coeff + cb * b_coeff\n    \n    # Simplify the radical term\n    simplified_coeff, simplified_radicand = RadicalOps.simplify_term(res_coeff, d)\n    \n    # Format expression\n    terms = {}\n    if res_rat != 0:\n        terms[1] = res_rat\n    if simplified_coeff != 0:\n        terms[simplified_radicand] = simplified_coeff\n        \n    canonical_latex = RadicalOps.format_expression(terms)\n    if not terms:\n        canonical_latex = \"0\"\n        \n    question_text = f\"Solve the equation \\\\({equation}\\\\) for \\\\(x\\\\). Let the roots be \\\\(a\\\\) and \\\\(b\\\\) such that \\\\({order}\\\\). Find the value of \\\\({target}\\\\).\"\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": {\n            \"result\": {\n                \"rational\": int(res_rat),\n                \"radical_coefficient\": int(simplified_coeff),\n                \"radicand\": int(simplified_radicand),\n                \"canonical_latex\": canonical_latex\n            }\n        },\n        \"oracle_payload\": {\n            \"equation\": equation,\n            \"order\": order,\n            \"target\": target\n        }\n    }",
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T09:54:43.627607+00:00",
+  "completed_at_utc": "2026-07-21T09:55:00.379356+00:00",
+  "duration": 16.751741799991578,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "retryable": false,
+        "wall_clock_seconds": 16.751738000079058
+      }
+    ],
+    "provider_metadata": {}
+  }
+}

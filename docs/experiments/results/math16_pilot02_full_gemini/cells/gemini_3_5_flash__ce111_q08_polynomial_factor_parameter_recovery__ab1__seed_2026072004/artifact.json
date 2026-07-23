@@ -1,0 +1,35 @@
+{
+  "experiment_id": "math16_pilot02_full_gemini_freeze_v1",
+  "cell_id": "gemini_3_5_flash__ce111_q08_polynomial_factor_parameter_recovery__ab1__seed_2026072004",
+  "task_id": "ce111_q08_polynomial_factor_parameter_recovery",
+  "condition": "ab1",
+  "seed": 2026072004,
+  "model_tag": "gemini-3.5-flash",
+  "runtime_config_fingerprint": "8bcb0d7177bc35216410108bda88b014848181a95b12bc09bf171866749f3057",
+  "runtime_parameters": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "prompt_sha256": "447f8b48f394c373b3fa8d7fa4d11932cdce5b411bbf27f61cc9e822b2670cd4",
+  "request_metadata": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "raw_response": "def generate(level=1, **kwargs):\n    factor_order_policy = \"strict_source_template\"\n    quadratic_coefficients = [39, 5, -14]\n    template_left_x_coefficient = 3\n    \n    A, B, C = quadratic_coefficients\n    k = template_left_x_coefficient\n    \n    c = A // k\n    \n    a_val = None\n    d_val = None\n    for a in range(-abs(C), abs(C) + 1):\n        if a == 0:\n            continue\n        if C % a == 0:\n            d = C // a\n            if k * d + a * c == B:\n                a_val = a\n                d_val = d\n                break\n                \n    if a_val is None:\n        raise ValueError(\"No solution found\")\n        \n    ans = a_val + 2 * c\n    \n    # Format polynomial\n    term1 = f\"{A}x^2\" if A != 1 else \"x^2\"\n    if A == -1:\n        term1 = \"-x^2\"\n    \n    if B > 0:\n        term2 = f\" + {B}x\" if B != 1 else \" + x\"\n    elif B < 0:\n        term2 = f\" - {-B}x\" if B != -1 else \" - x\"\n    else:\n        term2 = \"\"\n        \n    if C > 0:\n        term3 = f\" + {C}\"\n    elif C < 0:\n        term3 = f\" - {-C}\"\n    else:\n        term3 = \"\"\n        \n    poly_str = term1 + term2 + term3\n    \n    question_text = (\n        f\"The polynomial ${poly_str}$ can be factored into the form \"\n        f\"$({k}x + a)(cx + d)$ where $a$, $c$, and $d$ are integers. \"\n        f\"Find the value of $a + 2c$.\"\n    )\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": str(ans),\n        \"oracle_payload\": {\n            \"factor_order_policy\": factor_order_policy,\n            \"quadratic_coefficients\": quadratic_coefficients,\n            \"template_left_x_coefficient\": template_left_x_coefficient\n        }\n    }",
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T09:40:44.617626+00:00",
+  "completed_at_utc": "2026-07-21T09:40:57.815743+00:00",
+  "duration": 13.198108699987642,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "retryable": false,
+        "wall_clock_seconds": 13.198103800066747
+      }
+    ],
+    "provider_metadata": {}
+  }
+}

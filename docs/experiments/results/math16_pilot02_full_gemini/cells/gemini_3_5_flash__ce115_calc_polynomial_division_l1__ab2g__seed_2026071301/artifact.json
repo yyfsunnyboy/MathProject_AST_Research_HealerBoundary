@@ -1,0 +1,35 @@
+{
+  "experiment_id": "math16_pilot02_full_gemini_freeze_v1",
+  "cell_id": "gemini_3_5_flash__ce115_calc_polynomial_division_l1__ab2g__seed_2026071301",
+  "task_id": "ce115_calc_polynomial_division_l1",
+  "condition": "ab2g",
+  "seed": 2026071301,
+  "model_tag": "gemini-3.5-flash",
+  "runtime_config_fingerprint": "8bcb0d7177bc35216410108bda88b014848181a95b12bc09bf171866749f3057",
+  "runtime_parameters": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "prompt_sha256": "3d60a095612840e6d08496d68f759c891c049481c5af862609bd89ece29121b6",
+  "request_metadata": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "raw_response": "from fractions import Fraction\n\ndef poly_to_latex(coeffs):\n    n = len(coeffs)\n    if n == 0:\n        return \"0\"\n    terms = []\n    for i, c in enumerate(coeffs):\n        deg = n - 1 - i\n        if c == 0:\n            continue\n        # sign\n        sign = \"\"\n        if c < 0:\n            sign = \"-\"\n            val = -c\n        else:\n            if terms:\n                sign = \"+\"\n            val = c\n        \n        # coefficient string\n        if val == 1 and deg > 0:\n            c_str = \"\"\n        else:\n            c_str = str(val)\n            \n        # x part\n        if deg == 0:\n            x_str = str(val) if val == 1 and c_str == \"\" else c_str\n        elif deg == 1:\n            x_str = c_str + \"x\"\n        else:\n            x_str = c_str + f\"x^{deg}\"\n            \n        terms.append(f\"{sign}{x_str}\")\n    if not terms:\n        return \"0\"\n    res = \"\"\n    for i, t in enumerate(terms):\n        if i == 0:\n            res += t\n        else:\n            if t.startswith(\"+\"):\n                res += \" + \" + t[1:]\n            elif t.startswith(\"-\"):\n                res += \" - \" + t[1:]\n            else:\n                res += \" + \" + t\n    return res\n\ndef divide_polynomials(dividend, divisor):\n    while len(divisor) > 1 and divisor[0] == 0:\n        divisor = divisor[1:]\n    while len(dividend) > 1 and dividend[0] == 0:\n        dividend = dividend[1:]\n        \n    if len(divisor) == 1 and divisor[0] == 0:\n        raise ZeroDivisionError(\"Division by zero polynomial.\")\n        \n    dividend = [Fraction(x) for x in dividend]\n    divisor = [Fraction(x) for x in divisor]\n    \n    n = len(dividend) - 1\n    m = len(divisor) - 1\n    \n    if n < m:\n        return [Fraction(0)], dividend\n        \n    quotient = [Fraction(0)] * (n - m + 1)\n    remainder = list(dividend)\n    \n    for i in range(n - m + 1):\n        coeff = remainder[i] / divisor[0]\n        quotient[i] = coeff\n        for j in range(len(divisor)):\n            remainder[i + j] -= coeff * divisor[j]\n            \n    rem_coeffs = remainder[n - m + 1:]\n    while len(rem_coeffs) > 1 and rem_coeffs[0] == 0:\n        rem_coeffs = rem_coeffs[1:]\n    if not rem_coeffs:\n        rem_coeffs = [Fraction(0)]\n        \n    while len(quotient) > 1 and quotient[0] == 0:\n        quotient = quotient[1:]\n        \n    return quotient, rem_coeffs\n\ndef to_ints_if_possible(coeffs):\n    res = []\n    for x in coeffs:\n        if x.denominator == 1:\n            res.append(int(x))\n        else:\n            res.append(x)\n    return res\n\ndef generate(level=1, **kwargs):\n    # Frozen parameters\n    dividend_coefficients = [6, 0, 6]\n    divisor_coefficients = [1, -4]\n    \n    # Perform division\n    q_frac, r_frac = divide_polynomials(dividend_coefficients, divisor_coefficients)\n    \n    quotient_coefficients = to_ints_if_possible(q_frac)\n    remainder_coefficients = to_ints_if_possible(r_frac)\n    \n    quotient_latex = poly_to_latex(quotient_coefficients)\n    remainder_latex = poly_to_latex(remainder_coefficients)\n    \n    dividend_latex = poly_to_latex(dividend_coefficients)\n    divisor_latex = poly_to_latex(divisor_coefficients)\n    \n    question_text = f\"Find the quotient and remainder when the polynomial \\\\( {dividend_latex} \\\\) is divided by \\\\( {divisor_latex} \\\\).\"\n    \n    correct_answer = {\n        \"quotient_coefficients\": quotient_coefficients,\n        \"remainder_coefficients\": remainder_coefficients,\n        \"quotient_latex\": quotient_latex,\n        \"remainder_latex\": remainder_latex\n    }\n    \n    oracle_payload = {\n        \"dividend_coefficients\": dividend_coefficients,\n        \"divisor_coefficients\": divisor_coefficients\n    }\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T09:45:03.822856+00:00",
+  "completed_at_utc": "2026-07-21T09:45:24.126650+00:00",
+  "duration": 20.30378789990209,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "retryable": false,
+        "wall_clock_seconds": 20.30378440010827
+      }
+    ],
+    "provider_metadata": {}
+  }
+}

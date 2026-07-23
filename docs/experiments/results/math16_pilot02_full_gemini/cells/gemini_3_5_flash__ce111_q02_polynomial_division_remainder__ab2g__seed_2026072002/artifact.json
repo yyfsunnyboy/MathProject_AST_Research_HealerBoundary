@@ -1,0 +1,35 @@
+{
+  "experiment_id": "math16_pilot02_full_gemini_freeze_v1",
+  "cell_id": "gemini_3_5_flash__ce111_q02_polynomial_division_remainder__ab2g__seed_2026072002",
+  "task_id": "ce111_q02_polynomial_division_remainder",
+  "condition": "ab2g",
+  "seed": 2026072002,
+  "model_tag": "gemini-3.5-flash",
+  "runtime_config_fingerprint": "8bcb0d7177bc35216410108bda88b014848181a95b12bc09bf171866749f3057",
+  "runtime_parameters": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "prompt_sha256": "1cb912077ad2776904919f36b8947a00c6986c58c24c9311c1d8872dbc447e31",
+  "request_metadata": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "raw_response": "def generate(level=1, **kwargs):\n    dividend_coefficients = [6, 4, 0]\n    divisor_coefficients = [2, 0, 0]\n    \n    from fractions import Fraction\n    \n    def poly_div(dividend, divisor):\n        A = [Fraction(x) for x in dividend]\n        B = [Fraction(x) for x in divisor]\n        while len(A) > 0 and A[0] == 0:\n            A.pop(0)\n        while len(B) > 0 and B[0] == 0:\n            B.pop(0)\n        if len(B) == 0:\n            raise ZeroDivisionError()\n        if len(A) < len(B):\n            return [Fraction(0)], A\n        Q = [Fraction(0)] * (len(A) - len(B) + 1)\n        for i in range(len(Q)):\n            coeff = A[i] / B[0]\n            Q[i] = coeff\n            for j in range(len(B)):\n                A[i+j] -= coeff * B[j]\n        remainder = A[len(Q):]\n        while len(remainder) > 0 and remainder[0] == 0:\n            remainder.pop(0)\n        if not remainder:\n            remainder = [Fraction(0)]\n        return Q, remainder\n\n    def poly_to_latex(coeffs):\n        n = len(coeffs) - 1\n        terms = []\n        for i, c in enumerate(coeffs):\n            deg = n - i\n            if c == 0:\n                continue\n            if c.denominator == 1:\n                c_val = c.numerator\n                c_str = str(abs(c_val))\n            else:\n                c_str = f\"\\\\frac{{{abs(c.numerator)}}}{{{c.denominator}}}\"\n            sign = \"+\" if c > 0 else \"-\"\n            if deg == 0:\n                term = c_str\n            elif deg == 1:\n                if abs(c) == 1:\n                    term = \"x\"\n                else:\n                    term = f\"{c_str}x\"\n            else:\n                if abs(c) == 1:\n                    term = f\"x^{{{deg}}}\"\n                else:\n                    term = f\"{c_str}x^{{{deg}}}\"\n            terms.append((sign, term))\n        if not terms:\n            return \"0\"\n        res = \"\"\n        for i, (sign, term) in enumerate(terms):\n            if i == 0:\n                if sign == \"-\":\n                    res += \"-\" + term\n                else:\n                    res += term\n            else:\n                res += f\" {sign} {term}\"\n        return res\n\n    _, remainder_coeffs = poly_div(dividend_coefficients, divisor_coefficients)\n    remainder_latex = poly_to_latex(remainder_coeffs)\n    \n    dividend_latex = poly_to_latex([Fraction(x) for x in dividend_coefficients])\n    divisor_latex = poly_to_latex([Fraction(x) for x in divisor_coefficients])\n    \n    question_text = f\"Find the remainder when \\\\({dividend_latex}\\\\) is divided by \\\\({divisor_latex}\\\\).\"\n    correct_answer = remainder_latex\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": {\n            \"dividend_coefficients\": dividend_coefficients,\n            \"divisor_coefficients\": divisor_coefficients\n        }\n    }",
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T09:35:56.500399+00:00",
+  "completed_at_utc": "2026-07-21T09:36:16.910006+00:00",
+  "duration": 20.409601700026542,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "retryable": false,
+        "wall_clock_seconds": 20.409598400001414
+      }
+    ],
+    "provider_metadata": {}
+  }
+}

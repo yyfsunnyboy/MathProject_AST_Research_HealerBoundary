@@ -1,0 +1,35 @@
+{
+  "experiment_id": "math16_pilot02_full_gemini_freeze_v1",
+  "cell_id": "gemini_3_5_flash__ce115_calc_radical_simplification_l1__ab2g__seed_2026072002",
+  "task_id": "ce115_calc_radical_simplification_l1",
+  "condition": "ab2g",
+  "seed": 2026072002,
+  "model_tag": "gemini-3.5-flash",
+  "runtime_config_fingerprint": "8bcb0d7177bc35216410108bda88b014848181a95b12bc09bf171866749f3057",
+  "runtime_parameters": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "prompt_sha256": "a88ec9aa5f19dc7b5348cdd1cfdc9b503c1fbefcc0ad12889e21eeff5cb19621",
+  "request_metadata": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "raw_response": "def generate(level=1, **kwargs):\n    radicand_orig = kwargs.get(\"radicand\", 27)\n    \n    best_d = 1\n    for i in range(1, int(radicand_orig**0.5) + 1):\n        if radicand_orig % (i*i) == 0:\n            best_d = i\n    r = radicand_orig // (best_d * best_d)\n    \n    if best_d == 1:\n        canonical_latex = f\"\\\\sqrt{{{r}}}\"\n    else:\n        canonical_latex = f\"{best_d}\\\\sqrt{{{r}}}\"\n        \n    question_text = f\"Simplify the radical expression: $\\\\sqrt{{{radicand_orig}}}$\"\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": {\n            \"coefficient\": best_d,\n            \"radicand\": r,\n            \"canonical_latex\": canonical_latex\n        },\n        \"oracle_payload\": {\n            \"radicand\": radicand_orig\n        }\n    }",
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T10:02:54.371295+00:00",
+  "completed_at_utc": "2026-07-21T10:03:03.162848+00:00",
+  "duration": 8.79154660005588,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "retryable": false,
+        "wall_clock_seconds": 8.791543000028469
+      }
+    ],
+    "provider_metadata": {}
+  }
+}

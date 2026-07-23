@@ -1,0 +1,35 @@
+{
+  "experiment_id": "math16_pilot02_full_gemini_freeze_v1",
+  "cell_id": "gemini_3_5_flash__ce112_q04_radical_simplification__ab1__seed_2026072002",
+  "task_id": "ce112_q04_radical_simplification",
+  "condition": "ab1",
+  "seed": 2026072002,
+  "model_tag": "gemini-3.5-flash",
+  "runtime_config_fingerprint": "8bcb0d7177bc35216410108bda88b014848181a95b12bc09bf171866749f3057",
+  "runtime_parameters": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "prompt_sha256": "f696edca9ba89d8daf6ae0a01bef98c0098c508517ba9d6e631b287fa5764d53",
+  "request_metadata": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "raw_response": "def generate(level=1, **kwargs):\n    radicand_orig = kwargs.get(\"radicand\", 135)\n    \n    coeff = 1\n    temp = radicand_orig\n    d = 2\n    while d * d <= temp:\n        while temp % (d * d) == 0:\n            coeff *= d\n            temp //= (d * d)\n        d += 1\n    simplified_radicand = temp\n    \n    if coeff == 1:\n        canonical_latex = f\"\\\\sqrt{{{simplified_radicand}}}\"\n    elif simplified_radicand == 1:\n        canonical_latex = f\"{coeff}\"\n    else:\n        canonical_latex = f\"{coeff}\\\\sqrt{{{simplified_radicand}}}\"\n        \n    question_text = f\"Simplify the radical expression: $\\\\sqrt{{{radicand_orig}}}$.\"\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": {\n            \"coefficient\": coeff,\n            \"radicand\": simplified_radicand,\n            \"canonical_latex\": canonical_latex\n        },\n        \"oracle_payload\": {\n            \"radicand\": radicand_orig\n        }\n    }",
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T09:56:47.270943+00:00",
+  "completed_at_utc": "2026-07-21T09:56:55.789907+00:00",
+  "duration": 8.518957699998282,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "retryable": false,
+        "wall_clock_seconds": 8.518954299972393
+      }
+    ],
+    "provider_metadata": {}
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "experiment_id": "math16_pilot02_full_gemini_freeze_v1",
+  "cell_id": "gemini_3_5_flash__ce115_calc_exact_rational_expression_l1__ab2d_spec__seed_2026072001",
+  "task_id": "ce115_calc_exact_rational_expression_l1",
+  "condition": "ab2d_spec",
+  "seed": 2026072001,
+  "model_tag": "gemini-3.5-flash",
+  "runtime_config_fingerprint": "8bcb0d7177bc35216410108bda88b014848181a95b12bc09bf171866749f3057",
+  "runtime_parameters": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "prompt_sha256": "f46b8a30d79d77ca3811c9d7dc202a0b65b50302395ca871a24d3129a0f4e7c2",
+  "request_metadata": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "raw_response": "# -*- coding: utf-8 -*-\n\ntry:\n    from core.prompts.domain_function_library import FractionOps\nexcept ImportError:\n    from fractions import Fraction\n    class FractionOps:\n        @staticmethod\n        def create(val):\n            return Fraction(str(val))\n        @staticmethod\n        def add(a, b):\n            return a + b\n        @staticmethod\n        def sub(a, b):\n            return a - b\n        @staticmethod\n        def mul(a, b):\n            return a * b\n        @staticmethod\n        def div(a, b):\n            return a / b\n\ndef generate(level=1, **kwargs):\n    # Frozen sampled parameters\n    oracle_payload = {\n        \"products\": [\n            {\"left\": \"2.79\", \"right\": \"89.3\", \"sign\": 1},\n            {\"left\": \"-0.21\", \"right\": \"89.3\", \"sign\": -1}\n        ]\n    }\n    \n    products = oracle_payload[\"products\"]\n    \n    # Compute the exact result using FractionOps\n    p1_left = FractionOps.create(products[0][\"left\"])\n    p1_right = FractionOps.create(products[0][\"right\"])\n    p1 = FractionOps.mul(p1_left, p1_right)\n    if products[0][\"sign\"] == -1:\n        p1 = -p1\n        \n    p2_left = FractionOps.create(products[1][\"left\"])\n    p2_right = FractionOps.create(products[1][\"right\"])\n    p2 = FractionOps.mul(p2_left, p2_right)\n    if products[1][\"sign\"] == -1:\n        p2 = -p2\n        \n    result = p1 + p2\n    \n    num = result.numerator\n    den = result.denominator\n    val_str = f\"{num}/{den}\" if den != 1 else f\"{num}\"\n    latex_str = f\"\\\\frac{{{num}}}{{{den}}}\" if den != 1 else f\"{num}\"\n    \n    correct_answer = {\n        \"value\": val_str,\n        \"numerator\": num,\n        \"denominator\": den,\n        \"canonical_latex\": latex_str\n    }\n    \n    # Construct question text\n    terms = []\n    for i, prod in enumerate(products):\n        left = prod[\"left\"]\n        right = prod[\"right\"]\n        sign = prod[\"sign\"]\n        \n        # Format left\n        if float(left) < 0:\n            left_str = f\"({left})\"\n        else:\n            left_str = left\n            \n        # Format right\n        if float(right) < 0:\n            right_str = f\"({right})\"\n        else:\n            right_str = right\n            \n        term_str = f\"{left_str} \\\\times {right_str}\"\n        \n        if i == 0:\n            if sign == -1:\n                terms.append(f\"-{term_str}\")\n            else:\n                terms.append(term_str)\n        else:\n            if sign == -1:\n                terms.append(f\"- {term_str}\")\n            else:\n                terms.append(f\"+ {term_str}\")\n                \n    expr_latex = \" \".join(terms)\n    question_text = f\"Calculate the exact value of the expression: \\\\({expr_latex}\\\\).\"\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload,\n    }",
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T10:18:35.423487+00:00",
+  "completed_at_utc": "2026-07-21T10:18:58.651218+00:00",
+  "duration": 23.22772550000809,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "retryable": false,
+        "wall_clock_seconds": 23.227721900097094
+      }
+    ],
+    "provider_metadata": {}
+  }
+}

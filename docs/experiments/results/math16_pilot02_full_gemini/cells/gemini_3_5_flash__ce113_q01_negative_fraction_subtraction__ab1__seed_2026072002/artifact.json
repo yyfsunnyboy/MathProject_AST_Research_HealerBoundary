@@ -1,0 +1,35 @@
+{
+  "experiment_id": "math16_pilot02_full_gemini_freeze_v1",
+  "cell_id": "gemini_3_5_flash__ce113_q01_negative_fraction_subtraction__ab1__seed_2026072002",
+  "task_id": "ce113_q01_negative_fraction_subtraction",
+  "condition": "ab1",
+  "seed": 2026072002,
+  "model_tag": "gemini-3.5-flash",
+  "runtime_config_fingerprint": "8bcb0d7177bc35216410108bda88b014848181a95b12bc09bf171866749f3057",
+  "runtime_parameters": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "prompt_sha256": "d690b208e09d5f893ecd8b8abc38b4abb7d044968dc42c60dde3de96c0ad410d",
+  "request_metadata": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "raw_response": "import math\nimport re\n\n\ndef generate(level=1, **kwargs):\n    expression = kwargs.get(\"expression\", \"3/7 - (-1/4)\")\n\n    match = re.match(r\"(\\d+)/(\\d+)\\s*-\\s*\\(-\\s*(\\d+)/(\\d+)\\)\", expression)\n    if match:\n        a, b, c, d = map(int, match.groups())\n        num = a * d + b * c\n        den = b * d\n    else:\n        num, den = 19, 28\n        a, b, c, d = 3, 7, 1, 4\n\n    g = math.gcd(num, den)\n    num //= g\n    den //= g\n\n    if den < 0:\n        num = -num\n        den = -den\n\n    if den == 1:\n        canonical_latex = str(num)\n    elif num < 0:\n        canonical_latex = f\"-\\\\frac{{{abs(num)}}}{{{den}}}\"\n    else:\n        canonical_latex = f\"\\\\frac{{{num}}}{{{den}}}\"\n\n    latex_expr = f\"\\\\frac{{{a}}}{{{b}}} - \\\\left(-\\\\frac{{{c}}}{{{d}}}\\\\right)\"\n    question_text = f\"Evaluate the following expression:\\n\\\\[ {latex_expr} \\\\]\"\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": {\n            \"numerator\": num,\n            \"denominator\": den,\n            \"canonical_latex\": canonical_latex,\n        },\n        \"oracle_payload\": {\"expression\": expression},\n    }",
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T10:12:09.983047+00:00",
+  "completed_at_utc": "2026-07-21T10:12:18.961651+00:00",
+  "duration": 8.978597900015302,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "retryable": false,
+        "wall_clock_seconds": 8.978593999985605
+      }
+    ],
+    "provider_metadata": {}
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "experiment_id": "math16_pilot02_full_gemini_freeze_v1",
+  "cell_id": "gemini_3_5_flash__ce112_q12_independent_probability_fraction__ab2d__seed_2026072002",
+  "task_id": "ce112_q12_independent_probability_fraction",
+  "condition": "ab2d",
+  "seed": 2026072002,
+  "model_tag": "gemini-3.5-flash",
+  "runtime_config_fingerprint": "8bcb0d7177bc35216410108bda88b014848181a95b12bc09bf171866749f3057",
+  "runtime_parameters": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "prompt_sha256": "e0ceba6ddea69db946947e44372f0667b4445539f11857bbafa275c518a9506a",
+  "request_metadata": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "raw_response": "from core.prompts.domain_function_library import FractionOps\n\ndef generate(level=1, **kwargs):\n    p1 = [2, 6]\n    p2 = [1, 5]\n    \n    f1 = FractionOps.create(f\"{p1[0]}/{p1[1]}\")\n    f2 = FractionOps.create(f\"{p2[0]}/{p2[1]}\")\n    \n    ans = FractionOps.mul(f1, f2)\n    \n    p1_str = f\"\\\\frac{{{p1[0]}}}{{{p1[1]}}}\"\n    p2_str = f\"\\\\frac{{{p2[0]}}}{{{p2[1]}}}\"\n    \n    question_text = f\"If the probability of event $A$ occurring is ${p1_str}$ and the probability of event $B$ occurring is ${p2_str}$, and $A$ and $B$ are independent events, what is the probability that both events occur? Express your answer as a simplified fraction.\"\n    \n    correct_answer = {\n        \"numerator\": ans.numerator,\n        \"denominator\": ans.denominator,\n        \"canonical_latex\": FractionOps.to_latex(ans)\n    }\n    \n    oracle_payload = {\n        \"p1\": p1,\n        \"p2\": p2\n    }\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T10:10:10.336671+00:00",
+  "completed_at_utc": "2026-07-21T10:10:21.609333+00:00",
+  "duration": 11.272654799977317,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "retryable": false,
+        "wall_clock_seconds": 11.272651299950667
+      }
+    ],
+    "provider_metadata": {}
+  }
+}

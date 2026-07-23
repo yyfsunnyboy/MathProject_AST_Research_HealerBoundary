@@ -1,0 +1,35 @@
+{
+  "experiment_id": "math16_pilot02_full_gemini_freeze_v1",
+  "cell_id": "gemini_3_5_flash__ce115_calc_exact_rational_expression_l1__ab1__seed_2026072001",
+  "task_id": "ce115_calc_exact_rational_expression_l1",
+  "condition": "ab1",
+  "seed": 2026072001,
+  "model_tag": "gemini-3.5-flash",
+  "runtime_config_fingerprint": "8bcb0d7177bc35216410108bda88b014848181a95b12bc09bf171866749f3057",
+  "runtime_parameters": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "prompt_sha256": "c7bff96c64c0aa9785092575c7f89ece51cd11d03c72c8f801c6b629d791a0ec",
+  "request_metadata": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "raw_response": "from fractions import Fraction\n\ndef generate(level=1, **kwargs):\n    products = [\n        {\"left\": \"2.79\", \"right\": \"89.3\", \"sign\": 1},\n        {\"left\": \"-0.21\", \"right\": \"89.3\", \"sign\": -1}\n    ]\n    \n    latex_terms = []\n    for i, p in enumerate(products):\n        sign = p[\"sign\"]\n        left = p[\"left\"]\n        right = p[\"right\"]\n        \n        if i == 0:\n            op = \"\" if sign == 1 else \"-\"\n        else:\n            op = \" + \" if sign == 1 else \" - \"\n            \n        if left.startswith(\"-\"):\n            if i == 0 and sign == 1:\n                left_fmt = left\n            else:\n                left_fmt = f\"({left})\"\n        else:\n            left_fmt = left\n            \n        if right.startswith(\"-\"):\n            right_fmt = f\"({right})\"\n        else:\n            right_fmt = right\n            \n        latex_terms.append(f\"{op}{left_fmt} \\\\times {right_fmt}\")\n        \n    expr_latex = \"\".join(latex_terms)\n    question_text = f\"Evaluate the following expression:\\n\\\\[\\n{expr_latex}\\n\\\\]\"\n    \n    total = Fraction(0)\n    for p in products:\n        total += Fraction(p[\"left\"]) * Fraction(p[\"right\"]) * p[\"sign\"]\n        \n    if total.denominator == 1:\n        value_str = str(total.numerator)\n        canonical_latex = str(total.numerator)\n    else:\n        value_str = f\"{total.numerator}/{total.denominator}\"\n        if total.numerator < 0:\n            canonical_latex = f\"-\\\\frac{{{-total.numerator}}}{{{total.denominator}}}\"\n        else:\n            canonical_latex = f\"\\\\frac{{{total.numerator}}}{{{total.denominator}}}\"\n            \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": {\n            \"value\": value_str,\n            \"canonical_latex\": canonical_latex\n        },\n        \"oracle_payload\": {\n            \"products\": products\n        }\n    }",
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T10:14:35.283406+00:00",
+  "completed_at_utc": "2026-07-21T10:14:52.437728+00:00",
+  "duration": 17.154316199943423,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "retryable": false,
+        "wall_clock_seconds": 17.154312600032426
+      }
+    ],
+    "provider_metadata": {}
+  }
+}

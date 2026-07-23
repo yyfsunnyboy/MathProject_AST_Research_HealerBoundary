@@ -1,0 +1,35 @@
+{
+  "experiment_id": "math16_pilot02_full_gemini_freeze_v1",
+  "cell_id": "gemini_3_5_flash__ce115_calc_polynomial_division_l1__ab2d_spec__seed_2026072002",
+  "task_id": "ce115_calc_polynomial_division_l1",
+  "condition": "ab2d_spec",
+  "seed": 2026072002,
+  "model_tag": "gemini-3.5-flash",
+  "runtime_config_fingerprint": "8bcb0d7177bc35216410108bda88b014848181a95b12bc09bf171866749f3057",
+  "runtime_parameters": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "prompt_sha256": "aac0a64fb450e071435c5a4a1537bb5d9c1725f83c32044002263cfa175d7361",
+  "request_metadata": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "raw_response": "# -*- coding: utf-8 -*-\n\ndef generate(level=1, **kwargs):\n    dividend_coefficients = [6, 0, 6]\n    divisor_coefficients = [1, -4]\n    \n    def div_qr(dividend, divisor):\n        if len(divisor) == 0 or divisor == [0]:\n            raise ZeroDivisionError()\n        \n        while len(divisor) > 0 and divisor[0] == 0:\n            divisor = divisor[1:]\n        while len(dividend) > 0 and dividend[0] == 0:\n            dividend = dividend[1:]\n            \n        if len(dividend) < len(divisor):\n            return [0], dividend\n            \n        quot_len = len(dividend) - len(divisor) + 1\n        quot = [0] * quot_len\n        rem = list(dividend)\n        \n        for i in range(quot_len):\n            coeff = rem[i] / divisor[0]\n            quot[i] = coeff\n            for j in range(len(divisor)):\n                rem[i + j] -= coeff * divisor[j]\n                \n        rem = rem[quot_len:]\n        while len(rem) > 0 and rem[0] == 0:\n            rem = rem[1:]\n        if not rem:\n            rem = [0]\n            \n        quot = [int(x) if x == int(x) else x for x in quot]\n        rem = [int(x) if x == int(x) else x for x in rem]\n        return quot, rem\n\n    def to_latex(coeffs):\n        n = len(coeffs)\n        if n == 0 or coeffs == [0]:\n            return \"0\"\n        \n        terms = []\n        for i, c in enumerate(coeffs):\n            if c == 0:\n                continue\n            deg = n - 1 - i\n            \n            sign = \"\"\n            if c < 0:\n                sign = \"-\"\n                val = -c\n            else:\n                if len(terms) > 0:\n                    sign = \"+\"\n                val = c\n                \n            if val == 1 and deg > 0:\n                c_str = \"\"\n            else:\n                c_str = str(val)\n                \n            if deg == 0:\n                var_str = \"\"\n                if val == 1 and c_str == \"\":\n                    c_str = \"1\"\n            elif deg == 1:\n                var_str = \"x\"\n            else:\n                var_str = f\"x^{deg}\"\n                \n            terms.append(f\"{sign}{c_str}{var_str}\")\n            \n        latex_str = \"\"\n        for i, term in enumerate(terms):\n            if i == 0:\n                latex_str += term\n            else:\n                op = term[0]\n                rest = term[1:]\n                latex_str += f\" {op} {rest}\"\n        return latex_str\n\n    quotient_coefficients, remainder_coefficients = div_qr(dividend_coefficients, divisor_coefficients)\n    quotient_latex = to_latex(quotient_coefficients)\n    remainder_latex = to_latex(remainder_coefficients)\n    \n    dividend_latex = to_latex(dividend_coefficients)\n    divisor_latex = to_latex(divisor_coefficients)\n    \n    question_text = f\"Divide the polynomial \\\\({dividend_latex}\\\\) by \\\\({divisor_latex}\\\\). Find the quotient and the remainder.\"\n    \n    correct_answer = {\n        \"quotient_coefficients\": quotient_coefficients,\n        \"remainder_coefficients\": remainder_coefficients,\n        \"quotient_latex\": quotient_latex,\n        \"remainder_latex\": remainder_latex\n    }\n    \n    oracle_payload = {\n        \"dividend_coefficients\": dividend_coefficients,\n        \"divisor_coefficients\": divisor_coefficients\n    }\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T09:48:03.717460+00:00",
+  "completed_at_utc": "2026-07-21T09:48:23.324895+00:00",
+  "duration": 19.607427300070412,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "retryable": false,
+        "wall_clock_seconds": 19.60742380004376
+      }
+    ],
+    "provider_metadata": {}
+  }
+}

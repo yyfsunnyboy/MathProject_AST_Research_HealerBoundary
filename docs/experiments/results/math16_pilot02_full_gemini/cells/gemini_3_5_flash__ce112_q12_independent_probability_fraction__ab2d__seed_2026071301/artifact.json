@@ -1,0 +1,35 @@
+{
+  "experiment_id": "math16_pilot02_full_gemini_freeze_v1",
+  "cell_id": "gemini_3_5_flash__ce112_q12_independent_probability_fraction__ab2d__seed_2026071301",
+  "task_id": "ce112_q12_independent_probability_fraction",
+  "condition": "ab2d",
+  "seed": 2026071301,
+  "model_tag": "gemini-3.5-flash",
+  "runtime_config_fingerprint": "8bcb0d7177bc35216410108bda88b014848181a95b12bc09bf171866749f3057",
+  "runtime_parameters": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "prompt_sha256": "e0ceba6ddea69db946947e44372f0667b4445539f11857bbafa275c518a9506a",
+  "request_metadata": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "raw_response": "from core.prompts.domain_function_library import FractionOps\n\ndef generate(level=1, **kwargs):\n    # Frozen sampled parameters\n    p1 = [2, 6]\n    p2 = [1, 5]\n    \n    # Create fractions using FractionOps\n    p1_frac = FractionOps.create(f\"{p1[0]}/{p1[1]}\")\n    p2_frac = FractionOps.create(f\"{p2[0]}/{p2[1]}\")\n    \n    # Calculate the independent probability (product of the two probabilities)\n    ans_frac = FractionOps.mul(p1_frac, p2_frac)\n    \n    # Format LaTeX for the question\n    p1_latex = f\"\\\\frac{{{p1[0]}}}{{{p1[1]}}}\"\n    p2_latex = f\"\\\\frac{{{p2[0]}}}{{{p2[1]}}}\"\n    \n    question_text = (\n        f\"If the probability of event $A$ occurring is ${p1_latex}$ and the \"\n        f\"probability of independent event $B$ occurring is ${p2_latex}$, \"\n        f\"what is the probability that both events occur? Express your answer as a simplified fraction.\"\n    )\n    \n    correct_answer = {\n        \"numerator\": ans_frac.numerator,\n        \"denominator\": ans_frac.denominator,\n        \"canonical_latex\": FractionOps.to_latex(ans_frac)\n    }\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": {\n            \"p1\": p1,\n            \"p2\": p2\n        }\n    }",
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T10:09:49.175871+00:00",
+  "completed_at_utc": "2026-07-21T10:09:58.721468+00:00",
+  "duration": 9.54559010011144,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "retryable": false,
+        "wall_clock_seconds": 9.545587000087835
+      }
+    ],
+    "provider_metadata": {}
+  }
+}

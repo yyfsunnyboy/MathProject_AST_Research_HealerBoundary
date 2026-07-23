@@ -1,0 +1,35 @@
+{
+  "experiment_id": "math16_pilot02_full_gemini_freeze_v1",
+  "cell_id": "gemini_3_5_flash__ce111_q05_exact_fraction_expression__ab2g__seed_2026072002",
+  "task_id": "ce111_q05_exact_fraction_expression",
+  "condition": "ab2g",
+  "seed": 2026072002,
+  "model_tag": "gemini-3.5-flash",
+  "runtime_config_fingerprint": "8bcb0d7177bc35216410108bda88b014848181a95b12bc09bf171866749f3057",
+  "runtime_parameters": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "prompt_sha256": "9932c16c2dd3109a2f340ae98c4b0e51ef01fe9e024fbcc5f63bab49ef3ae965",
+  "request_metadata": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "raw_response": "import re\nfrom fractions import Fraction\n\ndef generate(level=1, **kwargs):\n    expression = kwargs.get(\"expression\", \"9/22 + 11/18 - (23/22 - 7/18)\")\n    \n    # Convert expression to LaTeX\n    latex_expr = re.sub(r'(\\d+)/(\\d+)', r'\\\\frac{\\1}{\\2}', expression)\n    latex_expr = latex_expr.replace('(', '\\\\left(').replace(')', '\\\\right)')\n    \n    # Evaluate expression safely using Fraction\n    eval_expr = re.sub(r'(\\d+)/(\\d+)', r'Fraction(\\1, \\2)', expression)\n    result = eval(eval_expr, {\"Fraction\": Fraction})\n    \n    numerator = result.numerator\n    denominator = result.denominator\n    \n    if denominator == 1:\n        canonical_latex = str(numerator)\n    else:\n        canonical_latex = f\"\\\\frac{{{numerator}}}{{{denominator}}}\"\n        \n    question_text = f\"Evaluate the following expression and write the result as an irreducible fraction:\\n\\n\\\\[ {latex_expr} \\\\]\"\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": {\n            \"numerator\": numerator,\n            \"denominator\": denominator,\n            \"canonical_latex\": canonical_latex\n        },\n        \"oracle_payload\": {\n            \"expression\": expression\n        }\n    }",
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T10:05:51.110208+00:00",
+  "completed_at_utc": "2026-07-21T10:06:00.799077+00:00",
+  "duration": 9.688863100018352,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "retryable": false,
+        "wall_clock_seconds": 9.688859299989417
+      }
+    ],
+    "provider_metadata": {}
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "experiment_id": "math16_pilot02_full_gemini_freeze_v1",
+  "cell_id": "gemini_3_5_flash__ce115_calc_polynomial_division_l1__ab2d_spec__seed_2026072003",
+  "task_id": "ce115_calc_polynomial_division_l1",
+  "condition": "ab2d_spec",
+  "seed": 2026072003,
+  "model_tag": "gemini-3.5-flash",
+  "runtime_config_fingerprint": "8bcb0d7177bc35216410108bda88b014848181a95b12bc09bf171866749f3057",
+  "runtime_parameters": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "prompt_sha256": "aac0a64fb450e071435c5a4a1537bb5d9c1725f83c32044002263cfa175d7361",
+  "request_metadata": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "raw_response": "# -*- coding: utf-8 -*-\n\ndef generate(level=1, **kwargs):\n    # Frozen parameters\n    dividend_coefficients = [6, 0, 6]\n    divisor_coefficients = [1, -4]\n\n    # Polynomial division algorithm\n    def div_qr(dividend, divisor):\n        dividend = list(dividend)\n        divisor = list(divisor)\n        while len(dividend) > 0 and dividend[0] == 0:\n            dividend.pop(0)\n        while len(divisor) > 0 and divisor[0] == 0:\n            divisor.pop(0)\n        if not divisor:\n            raise ZeroDivisionError()\n        if not dividend:\n            return [0], [0]\n        \n        quotient = []\n        while len(dividend) >= len(divisor):\n            lead_dividend = dividend[0]\n            lead_divisor = divisor[0]\n            q_coeff = lead_dividend // lead_divisor\n            quotient.append(q_coeff)\n            \n            for i in range(len(divisor)):\n                dividend[i] -= q_coeff * divisor[i]\n            dividend.pop(0)\n        \n        while len(dividend) > 0 and dividend[0] == 0:\n            dividend.pop(0)\n        if not dividend:\n            dividend = [0]\n        if not quotient:\n            quotient = [0]\n        return quotient, dividend\n\n    def poly_to_latex(coeffs):\n        n = len(coeffs)\n        if n == 0:\n            return \"0\"\n        terms = []\n        for i, c in enumerate(coeffs):\n            deg = n - 1 - i\n            if c == 0:\n                continue\n            sign = \"\"\n            if c > 0:\n                if terms:\n                    sign = \" + \"\n            else:\n                if terms:\n                    sign = \" - \"\n                    c = -c\n                else:\n                    sign = \"-\"\n            \n            if deg == 0:\n                term = f\"{c}\"\n            elif deg == 1:\n                if c == 1:\n                    term = \"x\"\n                else:\n                    term = f\"{c}x\"\n            else:\n                if c == 1:\n                    term = f\"x^{deg}\"\n                else:\n                    term = f\"{c}x^{deg}\"\n            terms.append(f\"{sign}{term}\")\n        if not terms:\n            return \"0\"\n        return \"\".join(terms)\n\n    quotient, remainder = div_qr(dividend_coefficients, divisor_coefficients)\n\n    dividend_latex = poly_to_latex(dividend_coefficients)\n    divisor_latex = poly_to_latex(divisor_coefficients)\n    quotient_latex = poly_to_latex(quotient)\n    remainder_latex = poly_to_latex(remainder)\n\n    question_text = f\"Divide the polynomial \\\\({dividend_latex}\\\\) by \\\\({divisor_latex}\\\\). Find the quotient and the remainder.\"\n\n    correct_answer = {\n        \"quotient_coefficients\": quotient,\n        \"remainder_coefficients\": remainder,\n        \"quotient_latex\": quotient_latex,\n        \"remainder_latex\": remainder_latex\n    }\n\n    oracle_payload = {\n        \"dividend_coefficients\": dividend_coefficients,\n        \"divisor_coefficients\": divisor_coefficients\n    }\n\n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T09:48:23.332011+00:00",
+  "completed_at_utc": "2026-07-21T09:48:33.964783+00:00",
+  "duration": 10.632764699985273,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "retryable": false,
+        "wall_clock_seconds": 10.632760799955577
+      }
+    ],
+    "provider_metadata": {}
+  }
+}

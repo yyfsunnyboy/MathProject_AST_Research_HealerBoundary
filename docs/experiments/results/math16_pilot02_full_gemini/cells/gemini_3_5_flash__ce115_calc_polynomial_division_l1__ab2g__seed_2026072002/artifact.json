@@ -1,0 +1,35 @@
+{
+  "experiment_id": "math16_pilot02_full_gemini_freeze_v1",
+  "cell_id": "gemini_3_5_flash__ce115_calc_polynomial_division_l1__ab2g__seed_2026072002",
+  "task_id": "ce115_calc_polynomial_division_l1",
+  "condition": "ab2g",
+  "seed": 2026072002,
+  "model_tag": "gemini-3.5-flash",
+  "runtime_config_fingerprint": "8bcb0d7177bc35216410108bda88b014848181a95b12bc09bf171866749f3057",
+  "runtime_parameters": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "prompt_sha256": "3d60a095612840e6d08496d68f759c891c049481c5af862609bd89ece29121b6",
+  "request_metadata": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "raw_response": "from fractions import Fraction\n\ndef generate(level=1, **kwargs):\n    # Frozen parameters\n    dividend_coefficients = [6, 0, 6]\n    divisor_coefficients = [1, -4]\n    \n    # Polynomial division\n    def poly_div(dividend, divisor):\n        def strip_leading_zeros(lst):\n            i = 0\n            while i < len(lst) and lst[i] == 0:\n                i += 1\n            return lst[i:] if i < len(lst) else [0]\n        \n        dividend = strip_leading_zeros(dividend)\n        divisor = strip_leading_zeros(divisor)\n        \n        if len(divisor) == 1 and divisor[0] == 0:\n            raise ZeroDivisionError()\n            \n        if len(dividend) < len(divisor):\n            return [0], dividend\n            \n        dividend = [Fraction(x) for x in dividend]\n        divisor = [Fraction(x) for x in divisor]\n        \n        quotient = []\n        remainder = list(dividend)\n        \n        len_div = len(divisor)\n        while len(remainder) >= len_div:\n            coeff = remainder[0] / divisor[0]\n            quotient.append(coeff)\n            for i in range(len_div):\n                remainder[i] -= coeff * divisor[i]\n            remainder.pop(0)\n            \n        def to_int_if_possible(lst):\n            res = []\n            for x in lst:\n                if x.denominator == 1:\n                    res.append(int(x))\n                else:\n                    res.append(x)\n            return res\n            \n        return to_int_if_possible(quotient), to_int_if_possible(remainder)\n\n    def format_coeff(c, is_leading):\n        if c < 0:\n            sign = \"-\"\n            abs_c = -c\n        else:\n            sign = \"\" if is_leading else \"+\"\n            abs_c = c\n            \n        if isinstance(abs_c, Fraction):\n            if abs_c.denominator == 1:\n                abs_c = abs_c.numerator\n            else:\n                abs_str = f\"\\\\frac{{{abs_c.numerator}}}{{{abs_c.denominator}}}\"\n                return sign, abs_str\n                \n        abs_str = str(abs_c)\n        return sign, abs_str\n\n    def poly_to_latex(coeffs, var='x'):\n        coeffs = [Fraction(c) for c in coeffs]\n        while len(coeffs) > 1 and coeffs[0] == 0:\n            coeffs.pop(0)\n        if len(coeffs) == 1 and coeffs[0] == 0:\n            return \"0\"\n            \n        n = len(coeffs) - 1\n        terms = []\n        is_leading = True\n        for i, c in enumerate(coeffs):\n            if c == 0:\n                continue\n            deg = n - i\n            sign, abs_str = format_coeff(c, is_leading)\n            \n            if abs_str == \"1\" and deg > 0:\n                coeff_part = \"\"\n            else:\n                coeff_part = abs_str\n                \n            if deg == 0:\n                term = f\"{sign}{coeff_part}\"\n            elif deg == 1:\n                term = f\"{sign}{coeff_part}{var}\"\n            else:\n                term = f\"{sign}{coeff_part}{var}^{{{deg}}}\"\n                \n            terms.append(term)\n            is_leading = False\n            \n        return \"\".join(terms)\n\n    q_coeffs, r_coeffs = poly_div(dividend_coefficients, divisor_coefficients)\n    \n    dividend_latex = poly_to_latex(dividend_coefficients)\n    divisor_latex = poly_to_latex(divisor_coefficients)\n    quotient_latex = poly_to_latex(q_coeffs)\n    remainder_latex = poly_to_latex(r_coeffs)\n    \n    question_text = f\"Divide the polynomial \\\\( {dividend_latex} \\\\) by \\\\( {divisor_latex} \\\\). Find the quotient and the remainder.\"\n    \n    correct_answer = {\n        \"quotient_coefficients\": q_coeffs,\n        \"remainder_coefficients\": r_coeffs,\n        \"quotient_latex\": quotient_latex,\n        \"remainder_latex\": remainder_latex\n    }\n    \n    oracle_payload = {\n        \"dividend_coefficients\": dividend_coefficients,\n        \"divisor_coefficients\": divisor_coefficients\n    }\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T09:45:45.583805+00:00",
+  "completed_at_utc": "2026-07-21T09:46:04.170921+00:00",
+  "duration": 18.587107800063677,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "retryable": false,
+        "wall_clock_seconds": 18.587104400037788
+      }
+    ],
+    "provider_metadata": {}
+  }
+}

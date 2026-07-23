@@ -1,0 +1,35 @@
+{
+  "experiment_id": "math16_pilot02_full_gemini_freeze_v1",
+  "cell_id": "gemini_3_5_flash__ce115_calc_polynomial_factor_roots_l1__ab2d__seed_2026072004",
+  "task_id": "ce115_calc_polynomial_factor_roots_l1",
+  "condition": "ab2d",
+  "seed": 2026072004,
+  "model_tag": "gemini-3.5-flash",
+  "runtime_config_fingerprint": "8bcb0d7177bc35216410108bda88b014848181a95b12bc09bf171866749f3057",
+  "runtime_parameters": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "prompt_sha256": "46eb44551fe48e5def0a14fdfe506b30e5987c44c0dee69f259bf42b90ab54a0",
+  "request_metadata": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "raw_response": "from core.prompts.domain_function_library import PolynomialOps, FractionOps\n\ndef generate(level=1, **kwargs):\n    # Frozen parameters\n    quadratic_coefficients = [1, 4, -12]\n    \n    a, b, c = quadratic_coefficients\n    \n    # Factor the quadratic\n    factors = PolynomialOps.factor_quadratic_exact(a, b, c)\n    \n    # Calculate roots and sort factors\n    factor_roots = []\n    for f in factors:\n        p = FractionOps.create(f['x_coefficient'])\n        q = FractionOps.create(f['constant'])\n        root = -q / p\n        factor_roots.append((root, f))\n        \n    # Sort by root ascending\n    factor_roots.sort(key=lambda x: x[0])\n    \n    # Extract sorted roots\n    sorted_roots = [fr[0] for fr in factor_roots]\n    \n    # Convert roots to int if they are integers, otherwise keep as Fraction or string\n    roots_val = []\n    for r in sorted_roots:\n        if r.denominator == 1:\n            roots_val.append(int(r.numerator))\n        else:\n            roots_val.append(f\"{r.numerator}/{r.denominator}\")\n            \n    # Format factorization_latex\n    def to_latex_frac(frac):\n        if frac.denominator == 1:\n            return str(frac.numerator)\n        else:\n            if frac.numerator < 0:\n                return f\"-\\\\frac{{{abs(frac.numerator)}}}{{{frac.denominator}}}\"\n            return f\"\\\\frac{{{frac.numerator}}}{{{frac.denominator}}}\"\n            \n    def format_factor_latex(f):\n        p = FractionOps.create(f['x_coefficient'])\n        q = FractionOps.create(f['constant'])\n        \n        if p == 1:\n            p_str = \"x\"\n        elif p == -1:\n            p_str = \"-x\"\n        else:\n            p_str = f\"{to_latex_frac(p)}x\"\n            \n        if q > 0:\n            return f\"({p_str} + {to_latex_frac(q)})\"\n        elif q < 0:\n            return f\"({p_str} - {to_latex_frac(-q)})\"\n        else:\n            return f\"({p_str})\"\n            \n    factorization_latex = \"\".join(format_factor_latex(fr[1]) for fr in factor_roots)\n    \n    # Format roots_latex\n    roots_latex_parts = []\n    for r in sorted_roots:\n        roots_latex_parts.append(to_latex_frac(r))\n    roots_latex = f\"x = {', '.join(roots_latex_parts)}\"\n    \n    # Format polynomial for question\n    def format_polynomial(a, b, c):\n        terms = []\n        if a == 1:\n            terms.append(\"x^2\")\n        elif a == -1:\n            terms.append(\"-x^2\")\n        elif a != 0:\n            terms.append(f\"{a}x^2\")\n            \n        if b == 1:\n            terms.append(\"+ x\")\n        elif b == -1:\n            terms.append(\"- x\")\n        elif b > 0:\n            terms.append(f\"+ {b}x\")\n        elif b < 0:\n            terms.append(f\"- {-b}x\")\n            \n        if c > 0:\n            terms.append(f\"+ {c}\")\n        elif c < 0:\n            terms.append(f\"- {-c}\")\n            \n        return \" \".join(terms).replace(\"+ -\", \"- \")\n        \n    poly_latex = format_polynomial(a, b, c)\n    \n    question_text = f\"Factor the polynomial ${poly_latex}$ and find its roots.\"\n    \n    correct_answer = {\n        \"roots\": roots_val,\n        \"factorization_latex\": factorization_latex,\n        \"roots_latex\": roots_latex\n    }\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": {\n            \"quadratic_coefficients\": quadratic_coefficients\n        }\n    }",
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T09:52:01.945605+00:00",
+  "completed_at_utc": "2026-07-21T09:52:25.486600+00:00",
+  "duration": 23.540989100001752,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "retryable": false,
+        "wall_clock_seconds": 23.54098549997434
+      }
+    ],
+    "provider_metadata": {}
+  }
+}

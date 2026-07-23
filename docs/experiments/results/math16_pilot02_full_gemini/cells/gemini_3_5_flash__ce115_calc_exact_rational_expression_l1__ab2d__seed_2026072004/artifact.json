@@ -1,0 +1,35 @@
+{
+  "experiment_id": "math16_pilot02_full_gemini_freeze_v1",
+  "cell_id": "gemini_3_5_flash__ce115_calc_exact_rational_expression_l1__ab2d__seed_2026072004",
+  "task_id": "ce115_calc_exact_rational_expression_l1",
+  "condition": "ab2d",
+  "seed": 2026072004,
+  "model_tag": "gemini-3.5-flash",
+  "runtime_config_fingerprint": "8bcb0d7177bc35216410108bda88b014848181a95b12bc09bf171866749f3057",
+  "runtime_parameters": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "prompt_sha256": "ccc56c41370e2b807299372da9b9af0d6807abf4dbae441990b16044d5108244",
+  "request_metadata": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "raw_response": "from core.prompts.domain_function_library import FractionOps\n\ndef generate(level=1, **kwargs):\n    products = kwargs.get(\"products\", [\n        {\"left\": \"2.79\", \"right\": \"89.3\", \"sign\": 1},\n        {\"left\": \"-0.21\", \"right\": \"89.3\", \"sign\": -1}\n    ])\n    \n    # Calculate exact value using FractionOps\n    total = FractionOps.create(\"0\")\n    for p in products:\n        left_frac = FractionOps.create(p[\"left\"])\n        right_frac = FractionOps.create(p[\"right\"])\n        prod_frac = FractionOps.mul(left_frac, right_frac)\n        sign_frac = FractionOps.create(str(p[\"sign\"]))\n        term_frac = FractionOps.mul(sign_frac, prod_frac)\n        total = FractionOps.add(total, term_frac)\n        \n    # Format question text\n    terms = []\n    for i, p in enumerate(products):\n        left_str = p[\"left\"]\n        right_str = p[\"right\"]\n        sign = p[\"sign\"]\n        \n        l_fmt = f\"({left_str})\" if left_str.startswith('-') else left_str\n        r_fmt = f\"({right_str})\" if right_str.startswith('-') else right_str\n        \n        if i == 0:\n            if sign == 1:\n                terms.append(f\"{l_fmt} \\\\times {r_fmt}\")\n            else:\n                terms.append(f\"- {l_fmt} \\\\times {r_fmt}\")\n        else:\n            if sign == 1:\n                terms.append(f\"+ {l_fmt} \\\\times {r_fmt}\")\n            else:\n                terms.append(f\"- {l_fmt} \\\\times {r_fmt}\")\n\n    expression = \" \".join(terms)\n    question_text = f\"Calculate the exact value of the following expression:\\n\\\\[\\n{expression}\\n\\\\]\"\n    \n    # Format correct answer\n    num = total.numerator\n    den = total.denominator\n    if den == 1:\n        canonical_latex = str(num)\n    else:\n        if num < 0:\n            canonical_latex = f\"-\\\\frac{{{-num}}}{{{den}}}\"\n        else:\n            canonical_latex = f\"\\\\frac{{{num}}}{{{den}}}\"\n            \n    correct_answer = {\n        \"value\": str(total),\n        \"canonical_latex\": canonical_latex\n    }\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": {\n            \"products\": products\n        }\n    }",
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T10:17:55.392643+00:00",
+  "completed_at_utc": "2026-07-21T10:18:14.177092+00:00",
+  "duration": 18.78444329998456,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "retryable": false,
+        "wall_clock_seconds": 18.78443989995867
+      }
+    ],
+    "provider_metadata": {}
+  }
+}

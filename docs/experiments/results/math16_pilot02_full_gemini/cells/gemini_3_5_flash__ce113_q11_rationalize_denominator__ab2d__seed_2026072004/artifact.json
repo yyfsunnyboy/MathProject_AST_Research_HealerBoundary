@@ -1,0 +1,35 @@
+{
+  "experiment_id": "math16_pilot02_full_gemini_freeze_v1",
+  "cell_id": "gemini_3_5_flash__ce113_q11_rationalize_denominator__ab2d__seed_2026072004",
+  "task_id": "ce113_q11_rationalize_denominator",
+  "condition": "ab2d",
+  "seed": 2026072004,
+  "model_tag": "gemini-3.5-flash",
+  "runtime_config_fingerprint": "8bcb0d7177bc35216410108bda88b014848181a95b12bc09bf171866749f3057",
+  "runtime_parameters": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "prompt_sha256": "9d3533f258e5c017845db746fbfb696ba432835385d9f38acf718a6bdff06514",
+  "request_metadata": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "raw_response": "from fractions import Fraction\nfrom core.prompts.domain_function_library import FractionOps\n\ndef generate(level=1, **kwargs):\n    denominator = \"4-sqrt(7)\"\n    numerator = 9\n    radicand = 7\n    \n    # Parse denominator\n    s = -1 if \"-\" in denominator else 1\n    d_str = denominator.replace(f\"-sqrt({radicand})\", \"\").replace(f\"+sqrt({radicand})\", \"\")\n    d = int(d_str)\n    \n    denom_conj = d**2 - radicand\n    a_val = Fraction(numerator * d, denom_conj)\n    b_val = Fraction(-numerator * s, denom_conj)\n    \n    # Use domain APIs\n    a_frac = FractionOps.create(a_val)\n    b_frac = FractionOps.create(b_val)\n    _ = FractionOps.add(a_frac, b_frac)\n    \n    correct_answer = int(a_val + b_val)\n    \n    latex_denominator = denominator.replace(\"sqrt(\", \"\\\\sqrt{\").replace(\")\", \"}\")\n    question_text = f\"Rationalize the denominator of $\\\\frac{{{numerator}}}{{{latex_denominator}}}$. If the simplified expression is of the form $a + b\\\\sqrt{{{radicand}}}$, what is the value of $a + b$?\"\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": {\n            \"denominator\": denominator,\n            \"numerator\": numerator,\n            \"radicand\": radicand\n        }\n    }",
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T10:01:10.187053+00:00",
+  "completed_at_utc": "2026-07-21T10:01:27.726136+00:00",
+  "duration": 17.53907669999171,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "retryable": false,
+        "wall_clock_seconds": 17.53907329996582
+      }
+    ],
+    "provider_metadata": {}
+  }
+}

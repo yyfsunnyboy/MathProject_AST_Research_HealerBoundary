@@ -1,0 +1,35 @@
+{
+  "experiment_id": "math16_pilot02_full_gemini_freeze_v1",
+  "cell_id": "gemini_3_5_flash__ce112_q04_radical_simplification__ab2g__seed_2026072004",
+  "task_id": "ce112_q04_radical_simplification",
+  "condition": "ab2g",
+  "seed": 2026072004,
+  "model_tag": "gemini-3.5-flash",
+  "runtime_config_fingerprint": "8bcb0d7177bc35216410108bda88b014848181a95b12bc09bf171866749f3057",
+  "runtime_parameters": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "prompt_sha256": "6d252e1058c14eee07326788693fec710a5247c404e7dd74f3d22156235a82f4",
+  "request_metadata": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "raw_response": "def generate(level=1, **kwargs):\n    radicand_input = kwargs.get(\"radicand\", 135)\n    \n    # Simplify the radical\n    coeff = 1\n    temp = radicand_input\n    d = 2\n    while d * d <= temp:\n        while temp % (d * d) == 0:\n            coeff *= d\n            temp //= (d * d)\n        d += 1\n        \n    if temp == 1:\n        canonical_latex = f\"{coeff}\"\n    elif coeff == 1:\n        canonical_latex = f\"\\\\sqrt{{{temp}}}\"\n    else:\n        canonical_latex = f\"{coeff}\\\\sqrt{{{temp}}}\"\n        \n    question_text = f\"Simplify the radical expression: $\\\\sqrt{{{radicand_input}}}$.\"\n    \n    correct_answer = {\n        \"coefficient\": coeff,\n        \"radicand\": temp,\n        \"canonical_latex\": canonical_latex\n    }\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": {\"radicand\": radicand_input}\n    }",
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T09:57:45.646179+00:00",
+  "completed_at_utc": "2026-07-21T09:57:52.834576+00:00",
+  "duration": 7.188389200018719,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "retryable": false,
+        "wall_clock_seconds": 7.188385699992068
+      }
+    ],
+    "provider_metadata": {}
+  }
+}

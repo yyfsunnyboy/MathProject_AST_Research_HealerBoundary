@@ -1,0 +1,35 @@
+{
+  "experiment_id": "math16_pilot02_full_gemini_freeze_v1",
+  "cell_id": "gemini_3_5_flash__ce115_calc_polynomial_division_l1__ab1__seed_2026072002",
+  "task_id": "ce115_calc_polynomial_division_l1",
+  "condition": "ab1",
+  "seed": 2026072002,
+  "model_tag": "gemini-3.5-flash",
+  "runtime_config_fingerprint": "8bcb0d7177bc35216410108bda88b014848181a95b12bc09bf171866749f3057",
+  "runtime_parameters": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "prompt_sha256": "fdf193cdb3bf18cbd3e37627168fd1824042198d278b2a45114ddc8bacd8ff86",
+  "request_metadata": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "raw_response": "from fractions import Fraction\n\ndef generate(level=1, **kwargs):\n    dividend_coefficients = kwargs.get(\"dividend_coefficients\", [6, 0, 6])\n    divisor_coefficients = kwargs.get(\"divisor_coefficients\", [1, -4])\n    \n    def poly_div(dividend, divisor):\n        dividend = [Fraction(x) for x in dividend]\n        divisor = [Fraction(x) for x in divisor]\n        \n        while len(dividend) > 0 and dividend[0] == 0:\n            dividend.pop(0)\n        while len(divisor) > 0 and divisor[0] == 0:\n            divisor.pop(0)\n            \n        if not divisor:\n            raise ZeroDivisionError(\"Division by zero polynomial.\")\n        if not dividend:\n            return [Fraction(0)], [Fraction(0)]\n            \n        quotient = []\n        remainder = list(dividend)\n        \n        while len(remainder) >= len(divisor):\n            lead_coeff = remainder[0] / divisor[0]\n            quotient.append(lead_coeff)\n            for i in range(len(divisor)):\n                remainder[i] -= lead_coeff * divisor[i]\n            remainder.pop(0)\n            \n        while len(remainder) > 0 and remainder[0] == 0:\n            remainder.pop(0)\n        if not remainder:\n            remainder = [Fraction(0)]\n        if not quotient:\n            quotient = [Fraction(0)]\n            \n        return quotient, remainder\n\n    quot, rem = poly_div(dividend_coefficients, divisor_coefficients)\n    \n    quot_coeffs = [int(x) if x.denominator == 1 else float(x) for x in quot]\n    rem_coeffs = [int(x) if x.denominator == 1 else float(x) for x in rem]\n    \n    def poly_to_latex(coeffs):\n        n = len(coeffs)\n        if n == 0:\n            return \"0\"\n        coeffs = [Fraction(c) for c in coeffs]\n        while len(coeffs) > 1 and coeffs[0] == 0:\n            coeffs.pop(0)\n        if len(coeffs) == 1 and coeffs[0] == 0:\n            return \"0\"\n            \n        terms = []\n        for i, c in enumerate(coeffs):\n            deg = len(coeffs) - 1 - i\n            if c == 0:\n                continue\n            if c < 0:\n                sign = \"-\"\n                abs_c = -c\n            else:\n                sign = \"+\" if len(terms) > 0 else \"\"\n                abs_c = c\n                \n            if abs_c.denominator == 1:\n                c_str = str(abs_c.numerator)\n            else:\n                c_str = f\"\\\\frac{{{abs_c.numerator}}}{{{abs_c.denominator}}}\"\n                \n            if deg == 0:\n                term = f\"{sign}{c_str}\"\n            elif deg == 1:\n                coeff_part = \"\" if abs_c == 1 else c_str\n                term = f\"{sign}{coeff_part}x\"\n            else:\n                coeff_part = \"\" if abs_c == 1 else c_str\n                term = f\"{sign}{coeff_part}x^{{{deg}}}\"\n            terms.append(term)\n            \n        res = \"\"\n        for i, t in enumerate(terms):\n            if i == 0:\n                res = t\n            else:\n                op = t[0]\n                val = t[1:]\n                res += f\" {op} {val}\"\n        return res\n\n    dividend_latex = poly_to_latex(dividend_coefficients)\n    divisor_latex = poly_to_latex(divisor_coefficients)\n    quotient_latex = poly_to_latex(quot)\n    remainder_latex = poly_to_latex(rem)\n    \n    question_text = f\"Divide the polynomial \\\\({dividend_latex}\\\\) by \\\\({divisor_latex}\\\\). Find the quotient and the remainder.\"\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": {\n            \"quotient_coefficients\": quot_coeffs,\n            \"remainder_coefficients\": rem_coeffs,\n            \"quotient_latex\": quotient_latex,\n            \"remainder_latex\": remainder_latex\n        },\n        \"oracle_payload\": {\n            \"dividend_coefficients\": dividend_coefficients,\n            \"divisor_coefficients\": divisor_coefficients\n        }\n    }",
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T09:44:05.170269+00:00",
+  "completed_at_utc": "2026-07-21T09:44:32.320429+00:00",
+  "duration": 27.15015320002567,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "retryable": false,
+        "wall_clock_seconds": 27.15014969999902
+      }
+    ],
+    "provider_metadata": {}
+  }
+}

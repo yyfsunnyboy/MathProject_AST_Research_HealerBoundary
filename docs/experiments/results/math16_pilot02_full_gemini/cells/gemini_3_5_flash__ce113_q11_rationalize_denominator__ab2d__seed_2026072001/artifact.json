@@ -1,0 +1,35 @@
+{
+  "experiment_id": "math16_pilot02_full_gemini_freeze_v1",
+  "cell_id": "gemini_3_5_flash__ce113_q11_rationalize_denominator__ab2d__seed_2026072001",
+  "task_id": "ce113_q11_rationalize_denominator",
+  "condition": "ab2d",
+  "seed": 2026072001,
+  "model_tag": "gemini-3.5-flash",
+  "runtime_config_fingerprint": "8bcb0d7177bc35216410108bda88b014848181a95b12bc09bf171866749f3057",
+  "runtime_parameters": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "prompt_sha256": "9d3533f258e5c017845db746fbfb696ba432835385d9f38acf718a6bdff06514",
+  "request_metadata": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576
+  },
+  "raw_response": "from core.prompts.domain_function_library import FractionOps\n\ndef generate(level=1, **kwargs):\n    denominator_str = \"4-sqrt(7)\"\n    numerator = 9\n    radicand = 7\n    \n    # The expression is 9 / (4 - sqrt(7))\n    # Rationalizing: 9 * (4 + sqrt(7)) / (16 - 7) = 9 * (4 + sqrt(7)) / 9 = 4 + sqrt(7)\n    # Thus, a = 4, b = 7\n    # We need to find a + b = 11\n    \n    a_val = FractionOps.create(4)\n    b_val = FractionOps.create(7)\n    ans_fraction = FractionOps.add(a_val, b_val)\n    correct_answer = int(ans_fraction)\n    \n    question_text = (\n        \"Rationalize the denominator of the expression \"\n        \"$\\\\frac{9}{4 - \\\\sqrt{7}}$. \"\n        \"If the simplified expression is written in the form $a + \\\\sqrt{b}$, \"\n        \"find the value of $a + b$.\"\n    )\n    \n    oracle_payload = {\n        \"denominator\": denominator_str,\n        \"numerator\": numerator,\n        \"radicand\": radicand\n    }\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }",
+  "attempt_count": 1,
+  "started_at_utc": "2026-07-21T10:00:34.460443+00:00",
+  "completed_at_utc": "2026-07-21T10:00:43.640911+00:00",
+  "duration": 9.180462400079705,
+  "persisted_complete": true,
+  "provenance": {
+    "api_attempts": [
+      {
+        "attempt": 1,
+        "status": "success",
+        "retryable": false,
+        "wall_clock_seconds": 9.180459000053816
+      }
+    ],
+    "provider_metadata": {}
+  }
+}
