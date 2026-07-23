@@ -2,7 +2,7 @@
 scripts/build_math16_appendix_c.py
 ===================================
 Builder script for Appendix C:
-《Math16 實驗題目、Prompt 與程式骨架展示附錄 v1》
+《Math16 實驗題目、Prompt 與程式骨架展示附錄 v1》 (Errata v1.1)
 
 Generates:
 1. artifacts/math16_tasks_prompts_and_program_skeletons_appendix_v1/task_index.csv
@@ -17,9 +17,12 @@ Generates:
 import csv
 import hashlib
 import json
+import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).parent.parent.resolve()
+sys.path.insert(0, str(REPO_ROOT))
+
 ARTIFACT_DIR = REPO_ROOT / "artifacts/math16_tasks_prompts_and_program_skeletons_appendix_v1"
 ARTIFACT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -28,9 +31,6 @@ def sha256_bytes(b: bytes) -> str:
 
 def sha256_file(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
-
-import sys
-sys.path.insert(0, str(REPO_ROOT))
 
 # Load tasks
 from agent_tools.finals_rebuild.math16_pool import tasks_by_id
@@ -43,7 +43,16 @@ plan_path = REPO_ROOT / "docs/experiments/manifests/math16_pilot02_qwen4b_cell_p
 with open(plan_path, encoding="utf-8") as f:
     cell_plan = json.load(f)
 
-# Six-cell tasks and forced task identification
+# Load preregistered difficulty from ab2d_spec manifest
+spec_manifest_path = REPO_ROOT / "docs/experiments/prompts/ab2d_spec/manifest.json"
+spec_manifest_data = json.loads(spec_manifest_path.read_text(encoding="utf-8"))
+preregistered_diff_map = {}
+for item in spec_manifest_data.get("tasks", []):
+    tid = item.get("task_id")
+    ass = item.get("assessment", {})
+    diff = ass.get("difficulty", "NOT_AVAILABLE")
+    preregistered_diff_map[tid] = diff
+
 SIX_CELL_TASKS = {
     "ce112_q04_radical_simplification",
     "ce113_q01_negative_fraction_subtraction",
@@ -61,21 +70,18 @@ for tid in sorted_tids:
     fam = family_map.get(tid, "unknown")
     api_policy = api_policy_map.get(tid, "unknown")
     otype = t.get("oracle_type", "unknown")
-    qtext = t.get("question_text", "")
 
     in_six_cell = tid in SIX_CELL_TASKS
     in_forced = tid == FORCED_TASK
     special_role = "Six-Cell Rescued" if in_six_cell else ("Forced Ambiguity" if in_forced else "Standard Benchmark")
 
-    # Difficulty level estimation (from task parameters or default 1)
-    diff = 1
-    if "level" in t:
-        diff = t["level"]
+    prereg_diff = preregistered_diff_map.get(tid, "NOT_AVAILABLE")
 
     task_rows.append({
         "task_id": tid,
         "family": fam,
-        "difficulty": diff,
+        "runtime_level": 1,
+        "preregistered_difficulty": prereg_diff,
         "api_policy": api_policy,
         "expected_output_type": otype,
         "frozen_source_path": "agent_tools/finals_rebuild/math16_pool.py",
@@ -148,7 +154,6 @@ for tid in rep_tids:
     t = tasks[tid]
     fam = family_map.get(tid)
 
-    # Get prompts across conditions
     cond_prompts = {}
     for cond in ["ab1", "ab2g", "ab2d", "ab2d_spec_v2"]:
         cell = prompt_cells[(tid, cond)]
@@ -172,6 +177,8 @@ for tid in rep_tids:
     rep_cases.append({
         "task_id": tid,
         "family": fam,
+        "runtime_level": 1,
+        "preregistered_difficulty": preregistered_diff_map.get(tid, "NOT_AVAILABLE"),
         "api_policy": api_policy_map.get(tid),
         "question_text": t.get("question_text", ""),
         "oracle_reference_data": {
@@ -192,60 +199,52 @@ print(f"Wrote representative cases to {rep_json_path}")
 # Build Evidence Index JSON
 evidence_items = [
     {
-        "claim": "Math16 16 題任務定義與題目參數完全凍結且可驗證",
-        "artifact_path": "agent_tools/finals_rebuild/math16_pool.py",
-        "artifact_sha256": sha256_file(REPO_ROOT / "agent_tools/finals_rebuild/math16_pool.py"),
-        "governing_manifest_path": "docs/experiments/manifests/math16_pilot02_qwen4b_cell_plan.json",
-        "governing_manifest_sha256": "d83451176a51d7d9bdda15266ab28c49c5d8d46faf85e093ed3d94df044dd570",
-        "supports": "16 題任務與參數定義權威單一來源"
-    },
-    {
-        "claim": "64 份 Prompt 檔案 100% 存在且文字完整可檢索",
-        "artifact_path": "artifacts/math16_tasks_prompts_and_program_skeletons_appendix_v1/prompt_index.csv",
-        "artifact_sha256": sha256_file(ARTIFACT_DIR / "prompt_index.csv"),
-        "governing_manifest_path": "docs/experiments/manifests/math16_pilot02_qwen4b_cell_plan.json",
-        "governing_manifest_sha256": "d83451176a51d7d9bdda15266ab28c49c5d8d46faf85e093ed3d94df044dd570",
-        "supports": "64 份 Prompt 之 SHA256 與長度權威索引"
-    },
-    {
-        "claim": "Four Prompt Conditions (Ab1, Ab2g, Ab2d, Ab2d_spec) 階層遞進定義凍結",
+        "claim": "16 題任務之 runtime_level=1 來源自執行介面預設參數",
         "artifact_path": "scripts/evaluate_math16_pilot02_full_v4.py",
         "artifact_sha256": sha256_file(REPO_ROOT / "scripts/evaluate_math16_pilot02_full_v4.py"),
         "governing_manifest_path": "docs/experiments/manifests/math16_pilot02_qwen4b_cell_plan.json",
         "governing_manifest_sha256": sha256_file(REPO_ROOT / "docs/experiments/manifests/math16_pilot02_qwen4b_cell_plan.json"),
-        "supports": "Prompt 組裝器層級結構定義"
+        "supports": "generate(level=1) 介面參數定義"
     },
     {
-        "claim": "Four Representative Cases 提供完整題目與 Prompt 對照卡",
-        "artifact_path": "artifacts/math16_tasks_prompts_and_program_skeletons_appendix_v1/representative_case_index.json",
-        "artifact_sha256": sha256_file(ARTIFACT_DIR / "representative_case_index.json"),
+        "claim": "16 題任務之 preregistered_difficulty 來源自預註冊 Spec Manifest",
+        "artifact_path": "docs/experiments/prompts/ab2d_spec/manifest.json",
+        "artifact_sha256": sha256_file(REPO_ROOT / "docs/experiments/prompts/ab2d_spec/manifest.json"),
         "governing_manifest_path": "docs/experiments/manifests/math16_pilot02_qwen4b_cell_plan.json",
         "governing_manifest_sha256": sha256_file(REPO_ROOT / "docs/experiments/manifests/math16_pilot02_qwen4b_cell_plan.json"),
-        "supports": "代表性案例權威索引 JSON"
+        "supports": "預註冊難度 (LOW / MEDIUM / HIGH) 評估來源"
     },
     {
-        "claim": "Six-Cell 救援前置特徵 AST 靜態確認數據完整存盤",
-        "artifact_path": "artifacts/math16_posthoc_six_cell_before_signature_confirmation_v1/before_signature_table.csv",
-        "artifact_sha256": sha256_file(REPO_ROOT / "artifacts/math16_posthoc_six_cell_before_signature_confirmation_v1/before_signature_table.csv"),
-        "governing_manifest_path": "docs/experiments/manifests/math16_posthoc_six_cell_before_signature_confirmation_v1_manifest.json",
-        "governing_manifest_sha256": sha256_file(REPO_ROOT / "docs/experiments/manifests/math16_posthoc_six_cell_before_signature_confirmation_v1_manifest.json"),
-        "supports": "6/6 回收真實 before 代碼 AST 靜態確認"
+        "claim": "附錄 A (六格 Healer 救援機制驗證附錄) 權威 Manifest 檔案與 SHA256",
+        "artifact_path": "docs/experiments/manifests/math16_six_cell_healer_mechanism_validation_appendix_v1_manifest.json",
+        "artifact_sha256": sha256_file(REPO_ROOT / "docs/experiments/manifests/math16_six_cell_healer_mechanism_validation_appendix_v1_manifest.json"),
+        "governing_manifest_path": "docs/experiments/manifests/math16_posthoc_six_cell_rescue_audit_v1_result_manifest.json",
+        "governing_manifest_sha256": sha256_file(REPO_ROOT / "docs/experiments/manifests/math16_posthoc_six_cell_rescue_audit_v1_result_manifest.json"),
+        "supports": "附錄 A 權威 Manifest 索引"
     },
     {
-        "claim": "Forced Ambiguity 案例轉譯前後原始碼與 Unified Diff 100% 配對存盤",
-        "artifact_path": "artifacts/math16_pilot02_qwen4b_unrestricted_stress_test_v11/formal/unified_diffs/qwen3_5_4b__ce111_q08_polynomial_factor_parameter_recovery__ab2d__seed_2026072004_forced.diff",
-        "artifact_sha256": sha256_file(REPO_ROOT / "artifacts/math16_pilot02_qwen4b_unrestricted_stress_test_v11/formal/unified_diffs/qwen3_5_4b__ce111_q08_polynomial_factor_parameter_recovery__ab2d__seed_2026072004_forced.diff"),
+        "claim": "附錄 B (Eligibility 與 Stress Test 驗證附錄) 權威 Manifest 檔案與 SHA256",
+        "artifact_path": "docs/experiments/manifests/math16_eligibility_and_unrestricted_stress_test_appendix_v1_manifest.json",
+        "artifact_sha256": sha256_file(REPO_ROOT / "docs/experiments/manifests/math16_eligibility_and_unrestricted_stress_test_appendix_v1_manifest.json"),
         "governing_manifest_path": "docs/experiments/manifests/math16_pilot02_qwen4b_unrestricted_stress_test_v11_result_manifest.json",
         "governing_manifest_sha256": sha256_file(REPO_ROOT / "docs/experiments/manifests/math16_pilot02_qwen4b_unrestricted_stress_test_v11_result_manifest.json"),
-        "supports": "Forced 歧義案例真實 diff 檔案"
+        "supports": "附錄 B 權威 Manifest 索引"
     },
     {
-        "claim": "Final Report v1.3 與 Evidence Complete 正式結果 100% 保持未變",
-        "artifact_path": "docs/experiments/reports/math16_pilot02_final_report_v13.md",
-        "artifact_sha256": sha256_file(REPO_ROOT / "docs/experiments/reports/math16_pilot02_final_report_v13.md"),
+        "claim": "上游 Six-Cell 救援稽核正式結果 Manifest 檔案與 SHA256",
+        "artifact_path": "docs/experiments/manifests/math16_posthoc_six_cell_rescue_audit_v1_result_manifest.json",
+        "artifact_sha256": sha256_file(REPO_ROOT / "docs/experiments/manifests/math16_posthoc_six_cell_rescue_audit_v1_result_manifest.json"),
         "governing_manifest_path": "docs/experiments/milestones/math16_pilot02_evidence_complete_v1/evidence_complete_manifest.json",
         "governing_manifest_sha256": sha256_file(REPO_ROOT / "docs/experiments/milestones/math16_pilot02_evidence_complete_v1/evidence_complete_manifest.json"),
-        "supports": "正式研究報告與里程碑雜湊未變"
+        "supports": "上游 Six-Cell 正式結果 Manifest"
+    },
+    {
+        "claim": "上游 Unrestricted Stress Test v1.1 正式結果 Manifest 檔案與 SHA256",
+        "artifact_path": "docs/experiments/manifests/math16_pilot02_qwen4b_unrestricted_stress_test_v11_result_manifest.json",
+        "artifact_sha256": sha256_file(REPO_ROOT / "docs/experiments/manifests/math16_pilot02_qwen4b_unrestricted_stress_test_v11_result_manifest.json"),
+        "governing_manifest_path": "docs/experiments/milestones/math16_pilot02_evidence_complete_v1/evidence_complete_manifest.json",
+        "governing_manifest_sha256": sha256_file(REPO_ROOT / "docs/experiments/milestones/math16_pilot02_evidence_complete_v1/evidence_complete_manifest.json"),
+        "supports": "上游 Stress Test v1.1 正式結果 Manifest"
     }
 ]
 
