@@ -6,6 +6,11 @@
 
 ---
 
+> **固定位階聲明 (Mandatory Disclaimer)：**
+> 本附錄為Evidence Complete凍結後之Post-hoc補充分析，不修改、取代或重新解釋既有Primary與正式Post-hoc結果。
+
+---
+
 > **摘要 (Abstract - 186字)：**
 > 本附錄針對 Math16 實驗中 6 個 Post-hoc 救援案例進行機制驗證。既有 Primary 報告救援 5 格，事後更正鏈修正 false-loop bug 後確認技術救回 6 格；差集唯一 cell 為 `...seed_2026071301`。6 格 100% 命中同一條 L2 規則 `L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP`，6/6 原始 before 代碼已完全回收並經 AST 靜態確認符合前置條件。本附錄提供規則層級證據，受限於既有檔案未留存逐字 after 代碼，不以示意碼冒充真實 diff。
 
@@ -23,7 +28,7 @@
   - **原則屬性**: 非新增規則、非新增 Prompt、非重新生成代碼、非 Oracle 輔助。
 
 ### 1.2 Prompt Condition 分布 (Condition Distribution)
-- **Ab1 (Native 8B Baseline)**: `0` 格
+- **Ab1（原始契約條件）**: `0` 格
 - **Ab2g (Scaffold General)**: `2` 格 (`ab2g`)
 - **Ab2d+api (Scaffold Domain API)**: `2` 格 (`ab2d`)
 - **Ab2d+spec-v2 (Scaffold Spec-v2)**: `2` 格 (`ab2d_spec_v2`)
@@ -43,7 +48,7 @@
 ### 2.1 根機制與命中規則 (Root Mechanism & Rule)
 - **Root Mechanism**: `L2_CONTRACT_SCHEMA_ENTRYPOINT` (契約 schema 介面修復)
 - **Hit Rule**: `100%` (6/6) 命中 `L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP`
-- **問題特徵**: 模型正確生成了題目與答案，但將 `oracle_payload` 誤包裝為單一 Key 字典，不符合執行器介面規範。
+- **問題特徵**: 在固定三欄回傳結構（`question_text`、`correct_answer`、`oracle_payload`）中，答案本體被額外包裝於唯一的`oracle_payload`欄位；Healer移除的是該payload層級的外包裝。
 
 ### 2.2 四大安全屬性 (Four Safety Properties)
 6 格修復案例 100% 滿足以下屬性判準：
@@ -80,20 +85,20 @@
 **答：** 因當初實驗 pipeline 的儲存策略為 `sha_only_not_committed_py`（僅留存 SHA256 雜湊與得分紀錄以節省空間）。我們選擇如實說明證據限制，絕不造假。
 
 ### Q6: safe candidate 是否代表一定 PASS？
-**答：** 不代表。`safe_repair_candidate` 僅代表該修改符合四項安全屬性且不會引入不安全副作用；修復後程式碼是否能順利通過 Evaluator 得分，仍取決於代碼本身的數學邏輯是否正確。
+**答：** SAFE_REPAIR_CANDIDATE表示修改前具備不看答案、唯一、局部、可離線驗證的安全依據，但不保證一定PASS，也不代表所有未知案例絕無副作用。
 
 ### Q7: 這 6 格能否代表所有題型？
 **答：** 不能。這 6 格主要集中於 Radical（4格）與 Fraction（2格），代表特定模型在鷹架導引下常見的介面包裝小瑕疵，不能推廣至所有題型。
 
 ### Q8: 這個實驗對研究主題有何意義？
-**答：** 證明了小型本地模型 (8B/4B) 產出的代碼常因語法或介面微小瑕疵而失敗，而工程化的語義 Healer 能在不偷看答案、不重跑 LLM 的前提下完成確定性修復。
+**答：** 本實驗顯示，在本次Qwen 3.5 4B Math16資料中，部分失敗來自可由確定性規則處理的契約或介面瑕疵，而不一定是完整數學推理錯誤。
 
 ---
 
 ## 5. 獨立證據索引 (Independent Evidence Index)
 
-| 主張 (Claim) | 檔案路徑 (Artifact Path) | Manifest 路徑 | SHA256 | 支持內容 |
-|---|---|---|---|---|
-| Primary 5 / Corrected 6 | `docs/experiments/results/math16_pilot02_qwen4b_healer_v4_posthoc_corrected_chain_r001/primary_vs_corrected_chain_comparison.json` | `docs/experiments/manifests/math16_posthoc_six_cell_rescue_audit_v1_result_manifest.json` | `e199110fa67459de663a60f5ca03085b6a1f42cba2c6a0bdd470f36c1ff2266a` | 比較表呈現 5 格與 6 格之差異 cell |
-| 6 格同一 L2 規則 | `artifacts/math16_posthoc_six_cell_rescue_audit_v1/formal/six_cell_audit_table.csv` | `docs/experiments/manifests/math16_posthoc_six_cell_rescue_audit_v1_result_manifest.json` | `97392be833786bab90bcd5f1cb9eb9b57edaffc681466bdda62650f29dda35de` | 6 格均標註為 `L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP` |
-| 6/6 Before AST 確認 | `artifacts/math16_posthoc_six_cell_before_signature_confirmation_v1/before_signature_table.csv` | `docs/experiments/manifests/math16_posthoc_six_cell_before_signature_confirmation_v1_manifest.json` | `1b52f0680a644f4637703dab2f7817b88e64e6fa87a667d22f237f4e0d2716ef` | 6/6 AST 靜態確認 100% 吻合前置條件 |
+| Claim | Artifact Path | Artifact SHA256 | Governing Manifest Path | Manifest SHA256 | Supports |
+|---|---|---|---|---|---|
+| Primary 5 / Corrected 6 | `docs/experiments/results/math16_pilot02_qwen4b_healer_v4_posthoc_corrected_chain_r001/primary_vs_corrected_chain_comparison.json` | `e199110fa67459de663a60f5ca03085b6a1f42cba2c6a0bdd470f36c1ff2266a` | `docs/experiments/manifests/math16_posthoc_six_cell_rescue_audit_v1_result_manifest.json` | `97392be833786bab90bcd5f1cb9eb9b57edaffc681466bdda62650f29dda35de` | 比較表呈現 5 格與 6 格之差異 cell |
+| 6 格同一 L2 規則 | `artifacts/math16_posthoc_six_cell_rescue_audit_v1/formal/six_cell_audit_table.csv` | `74b901bd0bf94d6b789e0eb97c97ef6d8f296f2e75b2129d3a590f8892879688` | `docs/experiments/manifests/math16_posthoc_six_cell_rescue_audit_v1_result_manifest.json` | `97392be833786bab90bcd5f1cb9eb9b57edaffc681466bdda62650f29dda35de` | 6 格均標註為 `L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP` |
+| 6/6 Before AST 確認 | `artifacts/math16_posthoc_six_cell_before_signature_confirmation_v1/before_signature_table.csv` | `293646ebca0a3e8b2c4f6cde56751e52a8b60fde6b0375e47fe015178f08d216` | `docs/experiments/manifests/math16_posthoc_six_cell_before_signature_confirmation_v1_manifest.json` | `1b52f0680a644f4637703dab2f7817b88e64e6fa87a667d22f237f4e0d2716ef` | 6/6 AST 靜態確認 100% 吻合前置條件 |

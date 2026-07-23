@@ -6,6 +6,11 @@
 
 ---
 
+> **固定位階聲明 (Mandatory Disclaimer)：**
+> 本附錄為Evidence Complete凍結後之Post-hoc補充分析，不修改、取代或重新解釋既有Primary與正式Post-hoc結果。
+
+---
+
 > **摘要 (Abstract - 188字)：**
 > 本附錄針對 Math16 Healer 之 Eligibility 資格閘門與 Unrestricted Stress Test v1.1 進行驗證。242 格 Baseline FAIL 母體中，231 格因無凍結規則可用而 Abstain，10 格為 Safe Candidate（救援 5 格 / post-hoc 6 格），僅 1 格為 Ambiguous Candidate。在強行取消閘門發動 Forced 探索後，該歧義格修剪後仍因 `missing_entry_point` 評估為 FAILED。這證實 Eligibility 範圍雖窄，但具備實質安全防禦價值。
 
@@ -60,6 +65,10 @@ Math16 Healer 具備嚴謹的三層分工架構：
 - **Outcome 分類**: `MODIFIED_STILL_FAIL`
 - **Accidental Rescue**: `false`
 - **New Failure / Regression**: `0` / `0`
+- **閘門防護語意**:
+  - `ambiguity_gate_prevented_unsafe_intervention = true`
+  - `ambiguity_gate_prevented_ineffective_intervention = true`
+  - `observed_harm_prevented = not_demonstrated`
 - **證據鏈**: Transformed 原始碼與 Unified Diff 100% 配對存盤於 `artifacts/math16_pilot02_qwen4b_unrestricted_stress_test_v11/formal/`。
 
 ---
@@ -67,12 +76,12 @@ Math16 Healer 具備嚴謹的三層分工架構：
 ## 4. 防禦價值與精確語意解讀 (Defense Value & Accurate Interpretation)
 
 > **正確嚴謹結論 (Mandatory Precision Statement)：**
-> 歧義閘門避免了一次無法預先證明安全、且實際未能救回程式的介入 (`ambiguity_gate_prevented_harm = True`)。
+> 歧義閘門避免了一次事前無法證明安全、且實際未能救回程式的介入。本案例未觀察到新增失敗或failure chain惡化，因此不能宣稱已證明避免實際傷害。
 
 ### 嚴格禁止的誇大表述：
-- ❌ **不得寫**：「已證明避免了實際毀損/破壞」（評估結果僅為 `missing_entry_point` 仍 FAIL，未產生新語法崩潰）。
-- ❌ **不得寫**：「所有歧義修復都一定會失敗」。
-- ❌ **不得寫**：「Eligibility 具備廣義的因果效果」。
+- ❌ **不得寫**：宣稱「已證明避免了實際毀損/破壞」。
+- ❌ **不得寫**：宣稱「所有歧義修復都一定會失敗」。
+- ❌ **不得寫**：宣稱「Eligibility 具備廣義的因果效果」。
 
 ---
 
@@ -97,7 +106,7 @@ Math16 Healer 具備嚴謹的三層分工架構：
 **答：** 因為該案例包含多個未隔離的 Entry Point 切割邊界，修剪 Prose 有截斷關鍵變數的結構風險，無法滿足離線可驗證性，故強制預分類為 `UNSAFE_MODIFICATION`。
 
 ### Q7: Forced 案例失敗代表什麼？
-**答：** 代表強行修剪 Prose 後，代碼中仍包含第二個未隔離片段，Evaluator 仍判定為 `missing_entry_point` 失敗。這證實當初 Eligibility 閘門將其擋下是正確的。
+**答：** 此案例支持原本Abstain決策具有合理性：強制放寬歧義限制沒有產生額外有效救援。
 
 ### Q8: 沒有 Regression 是否代表永遠安全？
 **答：** 不代表。沒有 Regression 僅代表在本實驗的特定測試案例中未引發得分倒退，不能保證在所有未知場景下皆絕對安全。
@@ -106,14 +115,14 @@ Math16 Healer 具備嚴謹的三層分工架構：
 **答：** 不能。Eligibility 僅能保證修復動作符合安全屬性且不破壞架構；修復後的代碼能否得滿分，仍取決於邏輯本身是否正確。
 
 ### Q10: 這個 Stress Test 最重要的結論是什麼？
-**答：** 最重大的結論是：Primary Eligibility 閘門非常精準地覆蓋了全部可安全救回的潛在窗口，且成功攔截了無效的歧義介入，兼具精準度與防禦價值。
+**答：** 在本次凍結規則集與242格FAIL母體中，Primary Eligibility涵蓋了所有已偵測到的唯一安全候選；沒有發現「唯一候選但遭安全閘門拒絕」的案例。
 
 ---
 
 ## 6. 獨立證據索引 (Independent Evidence Index)
 
-| 主張 (Claim) | 檔案路徑 (Artifact Path) | Manifest 路徑 | SHA256 | 支持內容 |
-|---|---|---|---|---|
-| 242 FAIL 互斥分層 (231/10/0/1/0) | `artifacts/math16_qwen4b_eligibility_semantics_audit_v1/candidate_strata_table.csv` | `docs/experiments/manifests/math16_qwen4b_eligibility_semantics_audit_v1_manifest.json` | `7384bca4790a5362fe200819591e358b087374d42ea7eafbb715782a7e99468c` | 語意稽核呈現完整 242 格分層帳目 |
-| Default 10 格與 Forced 1 格處置結果 | `artifacts/math16_pilot02_qwen4b_unrestricted_stress_test_v11/formal/disposition_summary.json` | `docs/experiments/manifests/math16_pilot02_qwen4b_unrestricted_stress_test_v11_result_manifest.json` | `7cfc9f8f4de8b1fbf56ef19afdedba5dc43fd3ee70fe35d72c46cfeff33cdcf0` | 處置摘要紀錄 10 格救援與 Forced 1 格 FAILED |
-| Forced 歧義格 Unified Diff 完整存盤 | `artifacts/math16_pilot02_qwen4b_unrestricted_stress_test_v11/formal/unified_diffs/qwen3_5_4b__ce111_q08_polynomial_factor_parameter_recovery__ab2d__seed_2026072004_forced.diff` | `docs/experiments/manifests/math16_pilot02_qwen4b_unrestricted_stress_test_v11_result_manifest.json` | `7cfc9f8f4de8b1fbf56ef19afdedba5dc43fd3ee70fe35d72c46cfeff33cdcf0` | Unified diff 存檔紀錄前置與修剪後代碼 |
+| Claim | Artifact Path | Artifact SHA256 | Governing Manifest Path | Manifest SHA256 | Supports |
+|---|---|---|---|---|---|
+| 242 FAIL 互斥分層 (231/10/0/1/0) | `artifacts/math16_qwen4b_eligibility_semantics_audit_v1/candidate_strata_table.csv` | `04e31a6f305c76101439085369c4711523089cf26660065f3f800ab82ce5274b` | `docs/experiments/manifests/math16_qwen4b_eligibility_semantics_audit_v1_manifest.json` | `7384bca4790a5362fe200819591e358b087374d42ea7eafbb715782a7e99468c` | 語意稽核呈現完整 242 格分層帳目 |
+| Default 10 格與 Forced 1 格處置結果 | `artifacts/math16_pilot02_qwen4b_unrestricted_stress_test_v11/formal/disposition_summary.json` | `54fd4a0849137e4bf2f2baf7b0b2ced9ed242ad4503c6a5f7c6feade2cf052e7` | `docs/experiments/manifests/math16_pilot02_qwen4b_unrestricted_stress_test_v11_result_manifest.json` | `7cfc9f8f4de8b1fbf56ef19afdedba5dc43fd3ee70fe35d72c46cfeff33cdcf0` | 處置摘要紀錄 10 格救援與 Forced 1 格 FAILED |
+| Forced 歧義格 Unified Diff 獨立存盤 | `artifacts/math16_pilot02_qwen4b_unrestricted_stress_test_v11/formal/unified_diffs/qwen3_5_4b__ce111_q08_polynomial_factor_parameter_recovery__ab2d__seed_2026072004_forced.diff` | `d8f0130d0d1d532ddfa78aba1b82eae4d9df1066f1ec09aec09345a82b350c24` | `docs/experiments/manifests/math16_pilot02_qwen4b_unrestricted_stress_test_v11_result_manifest.json` | `7cfc9f8f4de8b1fbf56ef19afdedba5dc43fd3ee70fe35d72c46cfeff33cdcf0` | Unified diff 獨立檔案紀錄前置與修剪後代碼差異 |
