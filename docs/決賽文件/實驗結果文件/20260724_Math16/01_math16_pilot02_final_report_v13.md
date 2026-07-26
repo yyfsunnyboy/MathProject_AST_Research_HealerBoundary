@@ -149,6 +149,16 @@ Deterministic AST Healer **不是第二個解題模型**，它不參與數學推
 
 上述7格中，6格verified rescue對應本節「Primary Rescue 5格、83/320」與「Post-hoc Total Rescue 6格、84/320」之全部來源；另1格repaired-still-fail不計入任何rescue統計，僅代表規則matcher/guard觸發、transform已套用，但healed後仍未通過完整G1–G4。
 
+7格對照Healer介入前4B／9B Tier1結果：6格屬BOTH_FAIL（Primary 4、Post-hoc 1、修復後仍FAIL 1），1格屬NINE_B_ONLY_PASS（Primary 1），皆未落在BOTH_PASS或FOUR_B_ONLY_PASS。多數案例即使4B提升至9B仍未自然轉為PASS，非僅見於4B落後9B案例。唯一NINE_B_ONLY_PASS案例中，Healer使4B由FAIL轉PASS，與9B同為PASS。僅屬post-hoc交叉標註，不動原Tier1統計與McNemar結果。
+
+| Baseline Tier 1象限 | Primary rescue | Post-hoc rescue | 修復後仍FAIL | 合計 |
+|---|---:|---:|---:|---:|
+| BOTH_FAIL | 4 | 1 | 1 | 6 |
+| NINE_B_ONLY_PASS | 1 | 0 | 0 | 1 |
+| 合計 | 5 | 1 | 1 | 7 |
+
+Tier 1象限均依Healer介入前的4B與9B Baseline結果判定；Healer後結果僅作案例交叉標註。
+
 ---
 
 ## 11. Primary／Post-hoc分帳
