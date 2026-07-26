@@ -127,6 +127,28 @@ Deterministic AST Healer **不是第二個解題模型**，它不參與數學推
 - **Post-hoc Total Rescue (事後驗證總救援)**：6 格 (Post-hoc Final = 84/320 格，相較 Primary 僅增加 1 個 PASS)
 - **Observed Regression (觀察倒退)**：0 格
 
+### 10.1 單一規則之實際作用範圍：L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP 七格
+
+規則L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP實際涉及7格：6格為verified rescue，另1格transform已套用但仍FAIL。6格中5格屬Primary rescue；另1格屬Post-hoc technical correction rescue，因primary時runner誤判假循環回退為no_op，經Post-hoc corrected chain修正後才通過完整G1–G4。規則僅改寫oracle_payload欄位之值表達式，不改correct_answer，不重新求解；規則命中不等於rescue，須重新通過完整G1–G4才算verified rescue。
+
+**6格verified rescue家族分布**（另附1格repaired-still-fail所屬家族）：
+
+| 家族 | Verified rescue | 修復後仍FAIL |
+|---|---|---|
+| Radical | 4 | 1 |
+| Fraction | 2 | 0 |
+| Integer | 0 | 0 |
+| Polynomial | 0 | 0 |
+
+**最小 before/after 範例**（僅改寫`oracle_payload`欄位之值表達式，`correct_answer`與其餘程式邏輯逐字不變）：
+
+```diff
+-        "oracle_payload": radicand
++        "oracle_payload": {"radicand": 27}
+```
+
+上述7格中，6格verified rescue對應本節「Primary Rescue 5格、83/320」與「Post-hoc Total Rescue 6格、84/320」之全部來源；另1格repaired-still-fail不計入任何rescue統計，僅代表規則matcher/guard觸發、transform已套用，但healed後仍未通過完整G1–G4。
+
 ---
 
 ## 11. Primary／Post-hoc分帳
