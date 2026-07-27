@@ -1,8 +1,12 @@
 # Math16 Pilot-02 交付文件與推薦閱讀順序指南 (Teacher Delivery Package & Reading Order)
 
 **專案／研究線：** Ivan 旺宏科學展 —— HealerBoundary (`MathProject_AST_Research_HealerBoundary`)
-**交付目錄：** `docs/決賽文件/實驗結果文件/20260722_Math16/`
+**交付目錄：** `docs/決賽文件/實驗結果文件/20260724_Math16/`
 **最後更新 UTC：** 2026-07-23
+
+---
+
+> **權威性交付聲明：** `20260724_Math16/` 為本研究唯一正式交付入口；`20260722_Math16/` 僅為 archived historical backup。正式報告、數字、圖表與口試依據均以 `20260724_Math16/` 為準。
 
 ---
 

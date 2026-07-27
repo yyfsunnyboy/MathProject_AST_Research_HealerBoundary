@@ -18,7 +18,7 @@ TASK_ROSTER = ROOT / "docs/experiments/manifests/math16_three_model_five_seed_ma
 EVIDENCE_MANIFEST = ROOT / "docs/experiments/milestones/math16_pilot02_evidence_complete_v1/evidence_complete_manifest.json"
 LIMITATIONS = ROOT / "docs/experiments/milestones/math16_pilot02_evidence_complete_v1/interpretation_limitations.md"
 INTEGRATED = ROOT / "docs/experiments/reports/math16_pilot02_integrated_results_report_v1.md"
-QA = ROOT / "docs/experiments/reports/math16_pilot02_jury_qa_final_v1.md"
+QA = ROOT / "docs/決賽文件/實驗結果文件/20260724_Math16/04_math16_pilot02_jury_qa_final_v1.md"
 FIG_DIR = ROOT / "docs/experiments/visualization/math16_pilot02_core_figures_v1"
 
 
