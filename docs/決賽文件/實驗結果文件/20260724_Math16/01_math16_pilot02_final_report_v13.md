@@ -15,7 +15,7 @@ IVAN_MACRONIX_SCIENCE_FAIR_OFFICIAL_REPORT
 
 本研究針對小參數在地化語言模型（Qwen 3.5 4B 與 9B）在 AI 生成數學解題程式的多層失敗，包含語法、契約、API、執行與語意層問題，實證劃定硬性工程干預機制（Deterministic AST Healer）的安全修復邊界。實驗 Protocol 採用 16 道 K12 數學題型（涵蓋 Integer 整數、Polynomial 多項式、Radical 根式與 Fraction 分數四大家族）、3 個模型（包含雲端強模型參照組 Gemini 3.5 Flash）、4 種 Prompt 引導條件（Ab1 Native 原生、Ab2g Generic 鷹架、Ab2d+api 領域 API 鷹架以及 Ab2d+spec 標準規範）與 5 個隨機種子，系統化構建全量 960 個測試單元（cells）之實證矩陣。整體評估流程嚴格分為 Baseline 評估、Active Healer 靜態 Eligibility 審查與 Tier 1 雙模型配對交叉分析。
 
-實驗結果顯示：Gemini 在最終有效規格 `Ab2d+spec-v2` 下，四條件總通過數為 306/320；其 Primary 研究歷程為 289/320 格 (90.31%)。Qwen 9B 通過 101/320 格 (31.56%)，Qwen 4B Baseline 通過 78/320 格 (24.38%)。針對 Qwen 4B 的 242 格 Baseline 失敗案例，Active Healer 執行靜態 Eligibility 審查，其中 10 格符合修法唯一且可靜態驗證之安全介入條件；verified rescue 共 6 格，通過數由 78/320 提升至 84/320，且實證觀察到零倒退 (Observed Regression = 0)。其中 5 格於 Primary run 確認（83/320），另 1 格經 post-hoc corrected-chain 確認。Gemini 與 Qwen 9B 因殘餘失敗案例未命中事前凍結之修復規則，系統依凍結規則選擇 Abstain (Eligible = 0)，呈現本研究所定義的安全介入邊界。
+實驗結果顯示：Gemini Primary 為 289/320 格 (90.31%)；Primary 的 `Ab2d+spec-v1` 為 63/80。後續 `Ab2d+spec-v2` 的 post-hoc inventory 為 80/80，與 Ab1 72/80、Ab2g 76/80、Ab2d+api 78/80 合計為四條件 post-hoc hybrid inventory 306/320，僅作機制／版本盤點，不作 Primary 正式比較。Qwen 9B 通過 101/320 格 (31.56%)，Qwen 4B Baseline 通過 78/320 格 (24.38%)。針對 Qwen 4B 的 242 格 Baseline 失敗案例，Active Healer 執行靜態 Eligibility 審查，其中 10 格符合修法唯一且可靜態驗證之安全介入條件；verified rescue 共 6 格，通過數由 78/320 提升至 84/320，且實證觀察到零倒退 (Observed Regression = 0)。其中 5 格於 Primary run 確認（83/320），另 1 格經 post-hoc corrected-chain 確認。Gemini 與 Qwen 9B 因殘餘失敗案例未命中事前凍結之修復規則，系統依凍結規則選擇 Abstain (Eligible = 0)，呈現本研究所定義的安全介入邊界。
 
 在 4B 與 9B 之 320 格 Tier 1 配對分析中，雙過 52 格、4B 獨過 26 格、9B 獨過 49 格、雙敗 193 格，淨增加 23 格 (RD = +7.1875%)。單元層級 Exact McNemar 檢定顯示顯著差異 ($p = 0.010582$)；然考量 16 個 Task 聚類效應之 Task-clustered Bootstrap 95% 信賴區間跨 0 (`[-0.94%, +14.38%]`)，顯示將結論外推至未知全新數學題型時仍具抽樣不確定性。在家族分層中，Fraction 家族 9B 淨勝 14 格 ($p = 0.012541$)，機制拆解顯示 21 格 NINE_B_ONLY 中有 15 格屬 L1–L4（涵蓋語法、契約、API 與執行問題），另 6 格屬 L5 語意層，不可解讀為純數學推理能力差距。此外，Polynomial 家族中 9B 表現偏低集中於單一題型與特定 LaTeX 組裝衝突。
 
@@ -72,8 +72,8 @@ Deterministic AST Healer **不是第二個解題模型**，它不參與數學推
 3. **`Ab2d+api` (Domain Scaffold + API)**：領域專用鷹架，注入 `IntegerOps`, `FractionOps` 等封裝工具類別。
 4. **`Ab2d+spec` (Domain Scaffold + Standard Spec)**：
    - Qwen 4B 與 9B 正式生成採用 `Ab2d+spec-v2`。
-   - Gemini 最終有效條件為 `Ab2d+spec-v2`，補齊 API 簽名卡後達 80/80。
-   - Gemini Primary 研究歷程採用 `Ab2d+spec-v1`，通過數為 63/80；此舊版本結果僅作版本歷程說明。
+   - Gemini Primary 採用 `Ab2d+spec-v1`，通過數為 63/80。
+   - 後續 `Ab2d+spec-v2` 補齊 API 簽名卡後的 post-hoc inventory 為 80/80；與其餘 Primary 條件合計為 post-hoc hybrid inventory 306/320，僅作機制／版本盤點，不作 Primary 正式比較。
 
 ---
 
@@ -213,13 +213,13 @@ execution rescue 格為 `ce115_calc_exact_rational_expression_l1 / Ab1 / seed 20
 
 為維護實證研究之嚴謹性，嚴格實施 Primary 與 Post-hoc 數據分帳：
 
-| 模型與項目 | Primary / Baseline | Eligible | Primary Rescue / Final | 最終有效規格結果 / Corrected Final | Observed Regression |
+| 模型與項目 | Primary / Baseline | Eligible | Primary Rescue / Final | Post-hoc hybrid inventory / Corrected Final | Observed Regression |
 |---|---|---|---|---|---|
 | **Qwen 4B** | 78/320 | 10 格 | **5 格 (83/320)** | 總救援 6 格 (84/320) | 0 格 |
 | **Qwen 9B** | 101 / 320 | 0 格 | **0 格 (101/320)** | 0 格 (101/320) | 0 格 |
-| **Gemini 3.5 Flash** | **Primary 289 / 320** | 0 格 | **0 格 (289/320)** | **最終有效規格結果 306/320** | 0 格 |
+| **Gemini 3.5 Flash** | **Primary 289 / 320** | 0 格 | **0 格 (289/320)** | **Post-hoc hybrid inventory 306/320** | 0 格 |
 
-- **分帳原則**：Qwen 4B 的 83/320 為事前預註冊 Protocol 唯一 Primary 正式認可數據；84/320 為 corrected-chain 總救援 6 格的事後技術分帳（相較 Primary 僅多 1 個 PASS）。Gemini 的 Primary 為 289/320；306/320 明確標示為 `Ab2d+spec-v2` 的最終有效規格結果，不得誤稱為 Gemini Primary。
+- **分帳原則**：Qwen 4B 的 83/320 為事前預註冊 Protocol 唯一 Primary 正式認可數據；84/320 為 corrected-chain 總救援 6 格的事後技術分帳（相較 Primary 僅多 1 個 PASS）。Gemini 的 Primary 為 289/320（`Ab2d+spec-v1` 為 63/80）；`Ab2d+spec-v2` 的 80/80 與其餘三條件合計為 post-hoc hybrid inventory 306/320，僅作機制／版本盤點，不得誤稱為 Gemini Primary 或正式比較結果。
 
 ---
 
@@ -291,7 +291,7 @@ Prompt 條件對三模型通過數之影響如下：
 | **Ab2d+spec-v2** | 80 / 80* | 36 / 80 | 40 / 80 |
 
 > **Figure 2 圖說與分帳特別聲明**：
-> - `Ab2d+spec-v2` 為最終有效規格版本；Gemini 在補齊 API 簽名卡後之該條件達 80/80。
+> - Gemini 的 `Ab2d+spec-v2` 為 post-hoc inventory；補齊 API 簽名卡後該條件達 80/80。
 > - Gemini 正式 Primary 生成採用 `Ab2d+spec-v1`，通過數為 63/80（屬研究歷程）。
 > - Qwen 4B 與 9B 採用 `Ab2d+spec-v2` 正式生成。
 > - 三模型提示版本不同，不得假裝為完全同條件之 Primary 直接推論。
@@ -333,7 +333,7 @@ Deterministic AST Healer 之安全介入架構概念如下：
 4. **Polynomial 9B 偏低為局部格式共現 (Polynomial Anomaly Localized Co-occurrence)**：9B 在 Polynomial 表現偏低集中於 `ce115_calc_polynomial_division_l1` 多項式除法單一題型與特定 LaTeX 組裝衝突，未建立因果關係，不可外推為 9B 全域能力失控。
 5. **Qwen 4B `Ab2d+api` 77.8% 語法錯誤侷限於診斷樣本 (4B Ab2d Anomaly Sample Bound)**：4B 在 `Ab2d+api` 下 77.8% (21/27) SyntaxError 結論僅適用於已剖析之 27 格診斷樣本，不可外推為全域失敗比例。
 6. **Gemini 作為 Tier 2 描述性參照 (Gemini as Tier 2 Reference Only)**：Gemini 3.5 Flash (289/320, 90.31%) 僅作強模型描述性基準參照，不可宣稱「證明大模型規模因果壓倒性勝出」。
-7. **Prompt 提示版本異質性 (Prompt Version Discrepancy)**：最終有效規格版本為 `Ab2d+spec-v2`（Gemini 補齊 API 簽名卡後達 80/80；Qwen 4B/9B 正式生成 36/80 與 40/80）。Gemini 正式 Primary 採用 `Ab2d+spec-v1` (63/80) 屬研究歷程。
+7. **Prompt 提示版本異質性 (Prompt Version Discrepancy)**：Gemini Primary 採用 `Ab2d+spec-v1` (63/80)；後續 `Ab2d+spec-v2` 補齊 API 簽名卡後為 80/80 的 post-hoc inventory，與其餘三條件形成 306/320 post-hoc hybrid inventory，僅作機制／版本盤點。Qwen 4B/9B 正式生成採用 `Ab2d+spec-v2`，通過數為 36/80 與 40/80。
 8. **`Regression = 0` 僅屬實證觀察 (Observed Zero Regression Only)**：`Observed Regression = 0` 僅代表本次 320 個單元及凍結規則下「觀察到零倒退」，不可宣稱「保證在任意情境下 100% 絕不倒退」。
 9. **`Eligible = 0` 不代表模型無失敗 (Eligibility Zero Scope)**：Gemini (31 FAIL) 與 9B (219 FAIL) 之 `Eligible = 0` 代表殘餘失敗未命中事前凍結規則，系統主動 Abstain，不代表生成無錯誤。
 10. **全域邊界與範疇受限 (Global Protocol Bound)**：本研究所有數字與結論，僅嚴格適用於本次測試之 16 道數學題型、3 個模型、4 種 Prompt 條件、5 個隨機種子與凍結規則。
