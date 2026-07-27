@@ -161,6 +161,51 @@ Tier 1象限均依Healer介入前的4B與9B Baseline結果判定；Healer後結�
 
 ---
 
+### 10.2 完整 10 格 eligible 帳與修復效果分層
+
+針對 Qwen 4B 242 格 Baseline FAIL，`decide_healer_eligibility()` 凍結規則審查後共 10 格符合事前凍結之安全介入條件。詳細母體與處置狀態來自 `docs/experiments/results/math16_pilot02_qwen4b_healer_v4_r001/eligible_execution_records.jsonl`（10 筆）與 `docs/experiments/results/math16_pilot02_qwen4b_healer_v4_posthoc_corrected_chain_r001/eligible_execution_records.jsonl`（corrected-chain 重放）。
+
+#### 10.2.1 按規則的 eligible 分帳
+
+| 規則 | 格數 |
+|---|---|
+| L1_CLOSE_UNBALANCED_PARENTHESIS | 1 |
+| L1_PROSE_RESIDUE_NARROW | 1 |
+| L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP | 7 |
+| L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP | 1 |
+| **合計** | **10** |
+
+#### 10.2.2 Corrected-chain 處置分帳
+
+| 處置 | 格數 | 說明 |
+|---|---|---|
+| verified rescue | 6 | 全部為 L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP，最終 PASS；其中 5 格屬 Primary、1 格屬 Post-hoc corrected-chain 技術修正 |
+| repaired-still-fail | 4 | 規則確實觸發並套用 transform，但 healed 後仍 FAIL |
+
+Primary 仍維持 5 格 rescue（83/320）；Post-hoc corrected-chain 為 6 格 rescue（84/320）。兩者嚴格分帳：83/320 為 Primary Protocol 正式認可數據，84/320 屬事後機制驗證。
+
+#### 10.2.3 修復效果分層
+
+| 分層 | 格數 | 規則 | 效果 |
+|---|---|---|---|
+| contract rescue | 6 | L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP | 修正契約 schema 介面（`oracle_payload` 包裝），最終通過完整 G1–G4 |
+| execution rescue | 1 | L1_CLOSE_UNBALANCED_PARENTHESIS | 由 parse failure（`g1_parse` FAIL）前進到可執行／可診斷，但 healed 後仍於 schema 層 FAIL（`g3s_output_schema` FAIL） |
+| 局部 transform、未達 PASS | 3 | L1_PROSE_RESIDUE_NARROW、L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP、L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP 各 1 格 | 有局部 transform，但未形成最終 PASS；依證據描述，不誇大 |
+
+execution rescue 格為 `ce115_calc_exact_rational_expression_l1 / Ab1 / seed 2026072004`，baseline 為 `g1_parse` FAIL（SyntaxError `'(' was never closed`），healed 後進展為 `g3s_output_schema` FAIL。
+
+#### 10.2.4 Triage leakage 稽核結論
+
+依 `docs/experiments/reports/qwen4b_l2_payload_wrap_eligibility_answer_leakage_audit_v1.md` 逐行追蹤：
+
+- 結論：**CLEAN_SCHEMA_ONLY**。
+- `L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP` 的 eligibility 僅檢視 AST 結構、schema 欄位存在性、凍結參數一致性與 `correct_answer` 欄位存在性；**不讀取 `correct_answer` 的實際答案數值**。
+- `classify_math16_response()` 中 schema 判定式於數值 oracle 比較前以 `return` 提早返回，因此 schema failure 在 `evaluate_math_task_oracle()` 執行前即被攔截。
+- 現行 Healer 腳本在 FAIL/PASS 節流層仍讀取 `cell_level_baseline.jsonl` 的 `base["final_status"]` 作為 FAIL 節流；此欄位對 schema_failure 格本身亦由答案盲的 schema 判定產生，因此不構成 oracle／答案數值洩漏。
+- 正確名稱為：**outcome-gated、answer-value-blind**；不得寫成完全 evaluator-blind。
+
+---
+
 ## 11. Primary／Post-hoc分帳
 
 為維護實證研究之嚴謹性，嚴格實施 Primary 與 Post-hoc 數據分帳：
@@ -341,3 +386,6 @@ Deterministic AST Healer 之安全介入架構概念如下：
 - **Six Core Figures v1**：`docs/experiments/visualization/math16_pilot02_core_figures_v1/`
 - **One-Pager v2.3 (Pairwise Collision-Free)**：`docs/experiments/presentation/math16_pilot02_one_pager_v23/`
 - **Final Report v1 (Base Version)**：`docs/experiments/reports/math16_pilot02_final_report_v1.md`
+- **Seven-Cell Tier 1 Crosswalk v1**：`docs/experiments/reports/math16_healer_seven_cell_tier1_crosswalk_v1.md`
+- **Post-hoc Six-Cell L2 Payload-Wrap Deep Audit v1**：`docs/experiments/reports/math16_posthoc_six_cell_l2_payload_wrap_deep_audit_v1.md`
+- **L2 Payload-Wrap Eligibility Answer Leakage Audit v1**：`docs/experiments/reports/qwen4b_l2_payload_wrap_eligibility_answer_leakage_audit_v1.md`
