@@ -118,14 +118,16 @@ Deterministic AST Healer **不是第二個解題模型**，它不參與數學推
 
 ![Figure 5 Eligibility／Rescue](../visualization/math16_pilot02_core_figures_v1/figure_05_healer_eligibility_boundary.png)
 
-### 修復數據彙整
-- **Baseline PASS**：78/320 格
-- **Baseline FAIL**：242 格
-- **Eligible (符合修復條件)**：10 格
-- **Primary Rescue (救援成功)**：5 格
-- **Primary Final (最終通過)**：83/320 格 (通過率 25.94%)
-- **Post-hoc Total Rescue (事後驗證總救援)**：6 格 (Post-hoc Final = 84/320 格，相較 Primary 僅增加 1 個 PASS)
-- **Observed Regression (觀察倒退)**：0 格
+### 修復數據彙整（主表）
+
+| 項目 | 數值 |
+|---|---|
+| Baseline PASS | 78/320 格 |
+| Healer verified rescue | 6 格 |
+| Post-hoc Final | 84/320 格（相較 Baseline +6 格） |
+| Observed Regression | 0 格 |
+
+> 完整事實：規則實際觸發 7 格；其中 6 格為 verified rescue（5 格於 Primary run 確認、1 格因 runner 誤判假循環回退為 no_op，經 post-hoc corrected-chain 校正後確認），另 1 格為 repaired-still-fail（局部結構問題已修正，但因獨立後續錯誤仍未 PASS）。詳細 10 格 eligible 帳與修復效果分層見 10.2 節。
 
 ### 10.1 單一規則之實際作用範圍：L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP 七格
 
@@ -285,11 +287,11 @@ Prompt 條件對三模型通過數之影響如下：
 | **Ab1** | 72 / 80 | 15 / 80 | 18 / 80 |
 | **Ab2g** | 76 / 80 | 19 / 80 | 27 / 80 |
 | **Ab2d+api** | 78 / 80 | 8 / 80 | 16 / 80 |
-| **Ab2d+spec** | 63 / 80 (spec-v1)* | 36 / 80 (spec-v2) | 40 / 80 (spec-v2) |
+| **Ab2d+spec-v2** | 80 / 80* | 36 / 80 | 40 / 80 |
 
 > **Figure 2 圖說與分帳特別聲明**：
-> - Gemini 在 `Ab2d+spec` 欄位顯示之 80/80 屬 Post-hoc 機制驗證（顯示在 API 簽名完整補齊後可達 80/80），非正式重新生成。
-> - Gemini 正式生成採用 `Ab2d+spec-v1`，通過數為 63/80。
+> - `Ab2d+spec-v2` 為最終有效規格版本；Gemini 在補齊 API 簽名卡後之該條件達 80/80。
+> - Gemini 正式 Primary 生成採用 `Ab2d+spec-v1`，通過數為 63/80（屬研究歷程）。
 > - Qwen 4B 與 9B 採用 `Ab2d+spec-v2` 正式生成。
 > - 三模型提示版本不同，不得假裝為完全同條件之 Primary 直接推論。
 
@@ -330,7 +332,7 @@ Deterministic AST Healer 之安全介入架構概念如下：
 4. **Polynomial 9B 偏低為局部格式共現 (Polynomial Anomaly Localized Co-occurrence)**：9B 在 Polynomial 表現偏低集中於 `ce115_calc_polynomial_division_l1` 多項式除法單一題型與特定 LaTeX 組裝衝突，未建立因果關係，不可外推為 9B 全域能力失控。
 5. **Qwen 4B `Ab2d+api` 77.8% 語法錯誤侷限於診斷樣本 (4B Ab2d Anomaly Sample Bound)**：4B 在 `Ab2d+api` 下 77.8% (21/27) SyntaxError 結論僅適用於已剖析之 27 格診斷樣本，不可外推為全域失敗比例。
 6. **Gemini 作為 Tier 2 描述性參照 (Gemini as Tier 2 Reference Only)**：Gemini 3.5 Flash (289/320, 90.31%) 僅作強模型描述性基準參照，不可宣稱「證明大模型規模因果壓倒性勝出」。
-7. **Prompt 提示版本異質性 (Prompt Version Discrepancy)**：Gemini 正式生成採用 `Ab2d+spec-v1` (63/80)；Qwen 4B/9B 採用 `Ab2d+spec-v2` (36/80 與 40/80)，兩者提示版本不同。
+7. **Prompt 提示版本異質性 (Prompt Version Discrepancy)**：最終有效規格版本為 `Ab2d+spec-v2`（Gemini 補齊 API 簽名卡後達 80/80；Qwen 4B/9B 正式生成 36/80 與 40/80）。Gemini 正式 Primary 採用 `Ab2d+spec-v1` (63/80) 屬研究歷程。
 8. **`Regression = 0` 僅屬實證觀察 (Observed Zero Regression Only)**：`Observed Regression = 0` 僅代表本次 320 個單元及凍結規則下「觀察到零倒退」，不可宣稱「保證在任意情境下 100% 絕不倒退」。
 9. **`Eligible = 0` 不代表模型無失敗 (Eligibility Zero Scope)**：Gemini (31 FAIL) 與 9B (219 FAIL) 之 `Eligible = 0` 代表殘餘失敗未命中事前凍結規則，系統主動 Abstain，不代表生成無錯誤。
 10. **全域邊界與範疇受限 (Global Protocol Bound)**：本研究所有數字與結論，僅嚴格適用於本次測試之 16 道數學題型、3 個模型、4 種 Prompt 條件、5 個隨機種子與凍結規則。

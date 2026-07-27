@@ -29,7 +29,7 @@
 | 入口檔名 | 檔案類型 | 功能說明 | 核心展示內容 |
 |---|---|---|---|
 | **`01_math16_pilot02_final_report_v13.md`** | 論文報告 | 正式完整研究報告 v1.3 | 完整背景、320-cell 矩陣對決、4 條件/3 家族分析、Healer 邊界、限制與結論 |
-| **`02_math16_pilot02_one_pager_v23.pdf`** | 簡報海報 | One-Pager 精華圖解 v2.3 | 高層次研究動機、核心發現 (289/320 vs 80/80)、圖表集萃 |
+| **`02_math16_pilot02_one_pager_v23.pdf`** | 簡報海報 | One-Pager 精華圖解 v2.3 | 高層次研究動機、核心發現 (Ab2d+spec-v2 80/80)、圖表集萃 |
 | **`03_math16_pilot02_poster_v11.pdf`** | 展示海報 | 口頭簡報海報 v1.1 | 視覺化流程圖、家族表現柱狀圖、Healer 救援機制運作邏輯 |
 | **`04_math16_pilot02_jury_qa_final_v1.md`** | 答辯文件 | Jury Q&A 攻防手冊 v1.0 | 收錄 19 題評審關鍵質疑 (如 289 vs 306 說法、Healer 0 救回原因、Evaluator v4 假陰性修復) |
 | **`05_math16_pilot02_appendices_v1.md`** | 附錄總冊 | 附錄 A+B+C 總冊 v1.0 | 附錄 A (六格救援驗證)、附錄 B (Eligibility 與壓力測試)、附錄 C (16 題題目與 64 Prompt) |
@@ -48,8 +48,8 @@
 
 ## 4. 數據誠信與嚴格對齊聲明 (Data Integrity & Boundary Statement)
 
-1. **正式 Primary 對決**：Gemini Math16 四條件 Pass 為 **289 / 320** (Ab1 72, Ab2g 76, Ab2d+api 78, Ab2d+spec-v1 63)。
-2. **Post-hoc 驗證**：Ab2d+spec-v2 補齊 API 檔案卡後為 **80 / 80 (+17)**，Hybrid Inventory 為 **306 / 320**（僅作機制驗證，不取代 Primary 計分）。
+1. **最終有效規格結果**：Gemini Math16 在 `Ab2d+spec-v2` 補齊 API 簽名卡後四條件 Pass 為 **306 / 320** (Ab1 72, Ab2g 76, Ab2d+api 78, Ab2d+spec-v2 80)。*Gemini 正式 Primary 採用 `Ab2d+spec-v1` 為 63/80，屬研究歷程。*
+2. **Qwen 正式 Primary**：`Ab2d+spec-v2` 四條件中 4B 36/80、9B 40/80；Healer 使 4B 由 78/320 提升至 83/320（Primary）／84/320（Post-hoc）。
 3. **Healer 救援數**：Gemini Cohort 為 **0**（Evaluator v4 修復假陰性 +24 屬評分契約修正，Spec-v2 +17 屬 Prompt/Spec 修補，皆非 Healer 算力介入）。
 
 
