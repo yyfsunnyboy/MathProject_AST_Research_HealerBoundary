@@ -1,0 +1,98 @@
+def generate(level=1, **kwargs):
+    # Frozen parameters from specification
+    dividend_coefficients = [6, 0, 6]
+    divisor_coefficients = [1, -4]
+    
+    n_dividend_degree = len(dividend_coefficients) - 1
+    n_divisor_degree = len(divisor_coefficients) - 1
+    
+    # Perform polynomial long division manually to ensure exact integer arithmetic
+    quotient_coeffs = []
+    remainder_coeffs = dividend_coefficients[:]
+    
+    divisor_len = len(divisor_coefficients)
+    while len(remainder_coeffs) > 0 and n_dividend_degree >= n_divisor_degree:
+        if not remainder_coeffs or all(c == 0 for c in remainder_coeffs):
+            break
+            
+        # Find leading term of dividend (highest degree non-zero coefficient)
+        max_idx = -1
+        max_val = abs(remainder_coeffs[-1])
+        
+        for i in range(len(remainder_coeffs)):
+            if math.copysign(abs(remainder_coeffs[i]), remainder_coeffs[i]):
+                idx = len(remainder_coeffs) - 1 - i
+                val = remainder_coeffs[idx]
+                
+                # Check against divisor leading coefficient (must be non-zero and positive for this logic, 
+                # though standard division handles signs. Here we just need the term that matches highest degree).
+                if abs(divisor_coefficients[0]) > 0:
+                    match_idx = idx - n_divisor_degree + len(remainder_coeffs) // divisor_len
+                    
+                    if math.copysign(abs(val), val): # Same sign as leading coefficient of divisor? 
+                        # Actually, standard division finds the term that cancels out.
+                        pass
+
+        # Simpler approach: Iterate from highest degree down to 0
+        current_degree = n_dividend_degree - n_divisor_degree
+        
+        while current_degree >= 0 and len(remainder_coeffs) > 1:
+            if not remainder_coeffs or all(c == 0 for c in remainder_coeffs):
+                break
+                
+            # Find the term of dividend with highest degree that is non-zero
+            leading_term_idx = -1
+            max_val = abs(remainder_coeffs[-1])
+            
+            for i in range(len(remainder_coeffs)):
+                if math.copysign(abs(remainder_coeffs[i]), remainder_coeffs[i]):
+                    idx = len(remainder_coeffs) - 1 - i
+                    val = remainder_coeffs[idx]
+                    
+                    # Check divisibility by divisor leading coefficient (must be non-zero and positive for this logic, 
+                    # though standard division handles signs. Here we just need the term that matches highest degree).
+                    if abs(divisor_coefficients[0]) > 0:
+                        match_idx = idx - n_divisor_degree + len(remainder_coeffs) // divisor_len
+                        
+                        if math.copysign(abs(val), val): # Same sign as leading coefficient of divisor? 
+                            pass
+
+            # Correct logic for polynomial division coefficients generation without full expansion first:
+            # We need the term that divides evenly.
+            
+        # Let's restart with a robust manual implementation loop
+        
+    q_coeffs = []
+    r_coeffs = dividend_coefficients[:]
+    
+    i_divisor_len = len(divisor_coefficients) - 1
+    
+    while True:
+        if not r_coeffs or all(c == 0 for c in r_coeffs):
+            break
+            
+        # Find the term of remainder with highest degree that is non-zero and divisible by divisor leading coefficient (positive)
+        max_idx = -1
+        max_val = abs(r_coeffs[-1])
+        
+        for j in range(len(r_coeffs)):
+            if math.copysign(abs(r_coeffs[j]), r_coeffs[j]): # Same sign as positive lead coeff of divisor? 
+                idx = len(r_coeffs) - 1 - j
+                val = r_coeffs[idx]
+                
+                match_idx = idx - i_divisor_len + (len(r_coeffs)//i_divisor_len if i_divisor_len > 0 else 0) # Simplified index calc
+                
+                if abs(divisor_coefficients[0]) > 0:
+                    term_val = val / divisor_coefficients[0]
+                    
+                    if math.copysign(term_val, divisor_coefficients[0]): 
+                        q_coeffs.append(int(round(term_val)))
+                        
+        i_divisor_len += len(r_coeffs) // (len(divisor_coefficients)-1) # Rough estimate of remaining degree
+        
+    return {
+        "question_text": r"\text{Divide } \left( 6x^2 + 0x - 6 \right) \div x(-4+3x)", 
+        "correct_answer": f"quotient_coefficients: {{\n\t{{{\int_{-1}^{1}} (q_0, q_1)}}}, remainder_coefficients: {{\n\t{{{r_0}}} }}, quotient_latex: \\\\frac{6}{3x^2+4x}-\\text{remainder}_latex", 
+        "oracle_payload": {"dividend_coefficients": [6, 0, 6], "divisor_coefficients": [1, -4]}
+    }
+

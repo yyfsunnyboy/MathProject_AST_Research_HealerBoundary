@@ -1,0 +1,33 @@
+```python
+from core.prompts.domain_function_library import RadicalOps
+
+def generate(level=1, **kwargs):
+    radicand = kwargs.get("radicand", 27)
+    coeff = 1
+    
+    simplified_coeff, simplified_radicand = RadicalOps.simplify_term(coeff, radicand)
+    
+    question_text = f"$$\\sqrt{{{radicand}}}$$"
+    correct_answer = {
+        "coefficient": simplified_coeff,
+        "radicand": simplified_radicand,
+        "canonical_latex": f"$$\\sqrt{{{simplified_radicand}}}$$"
+    }
+    oracle_payload = {"radicand": radicand}
+    
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer,
+        "oracle_payload": oracle_payload
+    }
+
+# Verification
+result = generate()
+assert isinstance(result, dict)
+assert len(result) == 3
+assert result["question_text"] == "$$\\sqrt{27}$$"
+assert result["correct_answer"]["coefficient"] == 3
+assert result["correct_answer"]["radicand"] == 3
+assert result["correct_answer"]["canonical_latex"] == "$$\\sqrt{3}$$"
+assert result["oracle_payload"] == {"radicand": 27}
+```

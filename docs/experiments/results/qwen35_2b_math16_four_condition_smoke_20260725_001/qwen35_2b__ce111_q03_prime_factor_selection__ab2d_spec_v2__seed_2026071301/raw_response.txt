@@ -1,0 +1,40 @@
+```python
+# -*- coding: utf-8 -*-
+
+def generate(level=1, **kwargs):
+    # Rules:
+    # - Do not read frozen parameters from kwargs or external state.
+    # - Use native Python arithmetic, %, **, //, loops, and comparisons.
+    
+    candidates = [11, 12, 13, 14]
+    n = 156
+    
+    correct_answer = None
+    question_text = ""
+    oracle_payload = {}
+
+    for candidate in candidates:
+        if is_prime(candidate) and (n % candidate == 0):
+            correct_answer = int(candidate)
+            
+            # Construct the formal LaTeX text with math delimiters
+            latex_question = r"$\text{Select a prime factor of } n=156 \text{ from } \{{}{}\}$.".format(
+                ", ".join(map(str, candidates))
+            )
+            question_text = f"Question: {latex_question}"
+
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer,
+        "oracle_payload": oracle_payload
+    }
+
+
+def is_prime(num):
+    if num < 2:
+        return False
+    for i in range(2, int(num**0.5) + 1):
+        if num % i == 0:
+            return False
+    return True
+```

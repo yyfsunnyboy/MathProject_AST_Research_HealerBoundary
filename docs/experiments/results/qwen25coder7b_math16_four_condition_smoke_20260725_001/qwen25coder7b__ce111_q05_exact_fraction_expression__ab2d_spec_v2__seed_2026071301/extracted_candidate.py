@@ -1,0 +1,35 @@
+# -*- coding: utf-8 -*-
+
+from core.prompts.domain_function_library import FractionOps
+
+def generate(level=1, **kwargs):
+    # Define frozen parameters directly. Do not read kwargs.
+    expression = "9/22 + 11/18 - (23/22 - 7/18)"
+
+    # Compute the exact result using FractionOps
+    fraction_1 = FractionOps.create("9/22")
+    fraction_2 = FractionOps.create("11/18")
+    fraction_3 = FractionOps.create("23/22")
+    fraction_4 = FractionOps.create("7/18")
+
+    sub_result = FractionOps.sub(fraction_3, fraction_4)
+    add_result = FractionOps.add(fraction_1, fraction_2)
+    final_result = FractionOps.sub(add_result, sub_result)
+
+    correct_answer = {
+        "numerator": final_result.numerator,
+        "denominator": final_result.denominator,
+        "canonical_latex": f"\\frac{{{final_result.numerator}}}{{{final_result.denominator}}}"
+    }
+
+    question_text = r"$9/22 + 11/18 - (23/22 - 7/18) = ?$"
+
+    oracle_payload = {
+        "expression": expression
+    }
+
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer,
+        "oracle_payload": oracle_payload,
+    }

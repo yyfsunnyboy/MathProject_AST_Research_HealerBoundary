@@ -1,0 +1,15 @@
+def generate(level=1, **kwargs):
+    expression = "9/22 + 11/18 - (23/22 - 7/18)"
+    correct_answer_numerator = 40
+    correct_answer_denominator = 99
+    canonical_latex = r"\frac{40}{99}"
+    
+    return {
+        "question_text": f"\\( {expression} = \\)",
+        "correct_answer": {
+            "numerator": correct_answer_numerator,
+            "denominator": correct_answer_denominator,
+            "canonical_latex": canonical_latex
+        },
+        "oracle_payload": {"expression": expression}
+    }

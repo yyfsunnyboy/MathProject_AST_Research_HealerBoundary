@@ -1,0 +1,29 @@
+from core.prompts.domain_function_library import IntegerOps
+
+def generate(level=1, **kwargs):
+    candidates = [11, 12, 13, 14]
+    n = 156
+    
+    # Find the prime factors of n
+    prime_factors = []
+    for candidate in candidates:
+        while IntegerOps.is_divisible(n, candidate):
+            prime_factors.append(candidate)
+            n //= candidate
+    
+    correct_answer = len(prime_factors)
+    
+    question_text = r"""
+    \textbf{Question:} How many distinct prime factors does $n = 156$ have? Select from the candidates $\{11, 12, 13, 14\}$.
+    """
+    
+    oracle_payload = {
+        "candidates": [11, 12, 13, 14],
+        "n": 156
+    }
+    
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer,
+        "oracle_payload": oracle_payload
+    }

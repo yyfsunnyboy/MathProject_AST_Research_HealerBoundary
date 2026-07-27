@@ -1,0 +1,54 @@
+# -*- coding: utf-8 -*-
+
+from core.prompts.domain_function_library import FractionOps
+
+
+def generate(level=1, **kwargs):
+    # Rules:
+    # - Do not read frozen parameters from kwargs or external state.
+    # - For API-only / mixed tasks, import and use FractionOps.
+    # - For native-only tasks, use native Python arithmetic.
+    # - Do not use eval, exec, safe_eval, files, network, or fabricated helpers.
+    # - Return exactly question_text, correct_answer, and oracle_payload.
+    
+    # 1. Import FractionOps if needed (only for API-only / mixed tasks)
+    from core.prompts.domain_function_library import FractionOps
+
+    # 2. Define frozen parameters directly. Do not read kwargs.
+    expression = "9/22 + 11/18 - (23/22 - 7/18)"
+
+    # 3. Compute the exact result using FractionOps or native code.
+    term1 = FractionOps.create(expression.split()[0])
+    term2 = FractionOps.create(expression.split()[1].split('+')[1])
+    
+    inner_term_1 = FractionOps.create("23/22")
+    inner_term_2 = FractionOps.create("7/18")
+    bracket_result = (inner_term_1 - inner_term_2)
+
+    final_result = term1 + term2 - bracket_result
+    
+    # Format the result as a string for display in question_text and correct_answer, 
+    # but keep internal logic using Fractions. The prompt asks to return canonical_latex
+    # which implies we need to format it nicely. However, standard FractionOps returns a fraction object.
+    # We will construct the answer based on the simplified result of our computation.
+
+    final_frac = final_result.numerator / final_result.denominator
+    
+    question_text = f"\\frac{{{final_frac.numerator}}}{{{final_frac.denominator}}}"
+    
+    correct_answer_str = str(final_frac)  # e.g., "9/20" or "-13/48" depending on simplification logic if needed, but here we just return the fraction string. 
+                                   # Wait, standard FractionOps returns a simplified object. Let's ensure it is canonicalized by calling simplify().
+    final_frac = final_result.simplify()
+
+    question_text_latex = f"{final_frac.numerator} / {final_frac.denominator}"
+    
+    correct_answer = str(final_frac)  # e.g., "9/20" or "-13/48". The prompt asks for numerator, denominator, and canonical_latex. 
+                                   # Usually in these tasks, the answer is just the fraction string like "num/den".
+                                   
+    oracle_payload = expression
+
+    return {
+        "question_text": question_text_latex,
+        "correct_answer": correct_answer,
+        "oracle_payload": oracle_payload,
+    }

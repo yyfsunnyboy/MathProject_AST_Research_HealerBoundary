@@ -1,0 +1,24 @@
+def generate(level=1, **kwargs):
+    candidates = kwargs.get("candidates", [11, 12, 13, 14])
+    n = kwargs.get("n", 156)
+    
+    # Find the prime factors of n
+    prime_factors = []
+    for candidate in candidates:
+        while n % candidate == 0:
+            prime_factors.append(candidate)
+            n //= candidate
+    
+    # The correct answer is the product of the prime factors
+    correct_answer = 1
+    for factor in prime_factors:
+        correct_answer *= factor
+    
+    question_text = r"Given $n = \text{" + str(n) + r"}$, select the prime factors from the candidates $\{\text{" + ", ".join(map(str, candidates)) + r"}\}$."
+    oracle_payload = {"candidates": candidates, "n": n}
+    
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer,
+        "oracle_payload": oracle_payload
+    }

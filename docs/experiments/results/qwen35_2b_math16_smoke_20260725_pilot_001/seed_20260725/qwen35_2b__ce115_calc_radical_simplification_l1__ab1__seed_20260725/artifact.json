@@ -1,0 +1,64 @@
+{
+  "cell_id": "qwen35_2b__ce115_calc_radical_simplification_l1__ab1__seed_20260725",
+  "task_id": "ce115_calc_radical_simplification_l1",
+  "condition": "ab1",
+  "seed": 20260725,
+  "model": "qwen3.5:2b",
+  "status": "executed",
+  "outcome": "runtime_failure",
+  "raw_response_length": 1942,
+  "candidate_extracted": "import math\nfrom typing import Dict, Any\n\ndef generate(level=1, **kwargs):\n    radicand = kwargs.get(\"radicand\", 27)\n    \n    # Calculate the square root of the radicand for simplification context (Level 1 implies basic integer roots if perfect squares)\n    sqrt_val = math.sqrt(radicand)\n    \n    # For Level 1, we assume a simple case where the radical is simplified to an integer or standard form. \n    # Given radicand=27 and level=1 often targets specific simplification rules in this context (e.g., perfect squares).\n    # However, without explicit instruction on which root to take for 'simplification', we default to a clean representation of the square root if it's an integer or handle non-integers by keeping them under radical. \n    # But looking at \"radical_simplification\" tasks in this format usually imply finding sqrt(27) = 3*sqrt(3).\n    \n    simplified_sqrt_str = str(sqrt_val)\n    \n    question_text = f\"{math16_radical_simplification} (level {level})\\nSimplify the radical: \\\\sqrt{{{radicand}}}\"\n    \n    # Correct answer format requires coefficient, radicand, and canonical latex. \n    # For sqrt(27), simplified is 3*sqrt(3). Coefficient=3, Radicand=3 (inside root in final form) or just the number under radical?\n    # Standard simplification: a * b^(1/2) -> coefficient 'a', radicand 'b'. \n    # So coeff = 3, new_radicand = 3. Canonical latex for sqrt(9*3) is \\\\sqrt{9\\\\cdot 3} or similar canonical form.\n    \n    correct_answer = {\n        \"coefficient\": 3,\n        \"radicand\": 3,\n        \"canonical_latex\": \"\\\\sqrt{{{3}\\\\times 3}}\" # Canonical representation of the simplified radical term usually keeps structure clear for grading systems expecting specific formats like \\\\sqrt{9\\\\cdot 3} or similar. \n    }\n\n    oracle_payload = {\"radicand\": radicand}\n    \n    return {\n        \"question_text\": question_text,\n        \"correct_answer\": correct_answer,\n        \"oracle_payload\": oracle_payload\n    }\n",
+  "evaluation_details": {
+    "runtime_error": "NameError: name 'math16_radical_simplification' is not defined",
+    "exception_type": "NameError",
+    "exception_message": "name 'math16_radical_simplification' is not defined",
+    "timeout": false,
+    "ledger_stage": "observed",
+    "actual_question_text": null,
+    "evaluation_gates": {
+      "g1_evaluability": {
+        "status": "PASS",
+        "reason": "evaluability_passed",
+        "raw_output_present": true,
+        "extraction_succeeded": true,
+        "candidate_nonempty": true,
+        "parse_succeeded": true,
+        "required_entry_point_present": true
+      },
+      "g2_executability": {
+        "status": "FAIL",
+        "reason": "runtime_failure",
+        "load_succeeded": true,
+        "entry_point_called": true,
+        "timeout": false,
+        "exception_type": "NameError",
+        "exception_message": "name 'math16_radical_simplification' is not defined",
+        "return_value_produced": false
+      },
+      "g3_contract_compliance": {
+        "status": "NOT_ASSESSED",
+        "reason": "g2_not_passed"
+      },
+      "g4_semantic_correctness": {
+        "status": "NOT_ASSESSED",
+        "reason": "g2_not_passed"
+      },
+      "g5_problem_presentation": {
+        "status": "NOT_OBSERVED",
+        "reason": "actual_question_text_unavailable",
+        "question_present": false
+      },
+      "g6_math_notation": {
+        "status": "NOT_OBSERVED",
+        "reason": "actual_question_text_unavailable",
+        "uses_latex": false
+      }
+    },
+    "composite_outcomes": {
+      "technical_pass": "FAIL",
+      "presentation_pass": "NOT_OBSERVED",
+      "full_pass": "FAIL"
+    }
+  },
+  "timestamp": 1784965055.4122324
+}

@@ -1,0 +1,55 @@
+{
+  "cell_id": "qwen35_2b__ce115_calc_polynomial_division_l1__ab1__seed_20260725",
+  "task_id": "ce115_calc_polynomial_division_l1",
+  "condition": "ab1",
+  "seed": 20260725,
+  "model": "qwen3.5:2b",
+  "status": "executed",
+  "outcome": "parse_minor",
+  "raw_response_length": 4861,
+  "candidate_extracted": "def generate(level=1, **kwargs):\n    # Frozen parameters from specification\n    dividend_coefficients = [6, 0, 6]\n    divisor_coefficients = [1, -4]\n    \n    n_dividend_degree = len(dividend_coefficients) - 1\n    n_divisor_degree = len(divisor_coefficients) - 1\n    \n    # Perform polynomial long division manually to ensure exact integer arithmetic\n    quotient_coeffs = []\n    remainder_coeffs = dividend_coefficients[:]\n    \n    divisor_len = len(divisor_coefficients)\n    while len(remainder_coeffs) > 0 and n_dividend_degree >= n_divisor_degree:\n        if not remainder_coeffs or all(c == 0 for c in remainder_coeffs):\n            break\n            \n        # Find leading term of dividend (highest degree non-zero coefficient)\n        max_idx = -1\n        max_val = abs(remainder_coeffs[-1])\n        \n        for i in range(len(remainder_coeffs)):\n            if math.copysign(abs(remainder_coeffs[i]), remainder_coeffs[i]):\n                idx = len(remainder_coeffs) - 1 - i\n                val = remainder_coeffs[idx]\n                \n                # Check against divisor leading coefficient (must be non-zero and positive for this logic, \n                # though standard division handles signs. Here we just need the term that matches highest degree).\n                if abs(divisor_coefficients[0]) > 0:\n                    match_idx = idx - n_divisor_degree + len(remainder_coeffs) // divisor_len\n                    \n                    if math.copysign(abs(val), val): # Same sign as leading coefficient of divisor? \n                        # Actually, standard division finds the term that cancels out.\n                        pass\n\n        # Simpler approach: Iterate from highest degree down to 0\n        current_degree = n_dividend_degree - n_divisor_degree\n        \n        while current_degree >= 0 and len(remainder_coeffs) > 1:\n            if not remainder_coeffs or all(c == 0 for c in remainder_coeffs):\n                break\n                \n            # Find the term of dividend with highest degree that is non-zero\n            leading_term_idx = -1\n            max_val = abs(remainder_coeffs[-1])\n            \n            for i in range(len(remainder_coeffs)):\n                if math.copysign(abs(remainder_coeffs[i]), remainder_coeffs[i]):\n                    idx = len(remainder_coeffs) - 1 - i\n                    val = remainder_coeffs[idx]\n                    \n                    # Check divisibility by divisor leading coefficient (must be non-zero and positive for this logic, \n                    # though standard division handles signs. Here we just need the term that matches highest degree).\n                    if abs(divisor_coefficients[0]) > 0:\n                        match_idx = idx - n_divisor_degree + len(remainder_coeffs) // divisor_len\n                        \n                        if math.copysign(abs(val), val): # Same sign as leading coefficient of divisor? \n                            pass\n\n            # Correct logic for polynomial division coefficients generation without full expansion first:\n            # We need the term that divides evenly.\n            \n        # Let's restart with a robust manual implementation loop\n        \n    q_coeffs = []\n    r_coeffs = dividend_coefficients[:]\n    \n    i_divisor_len = len(divisor_coefficients) - 1\n    \n    while True:\n        if not r_coeffs or all(c == 0 for c in r_coeffs):\n            break\n            \n        # Find the term of remainder with highest degree that is non-zero and divisible by divisor leading coefficient (positive)\n        max_idx = -1\n        max_val = abs(r_coeffs[-1])\n        \n        for j in range(len(r_coeffs)):\n            if math.copysign(abs(r_coeffs[j]), r_coeffs[j]): # Same sign as positive lead coeff of divisor? \n                idx = len(r_coeffs) - 1 - j\n                val = r_coeffs[idx]\n                \n                match_idx = idx - i_divisor_len + (len(r_coeffs)//i_divisor_len if i_divisor_len > 0 else 0) # Simplified index calc\n                \n                if abs(divisor_coefficients[0]) > 0:\n                    term_val = val / divisor_coefficients[0]\n                    \n                    if math.copysign(term_val, divisor_coefficients[0]): \n                        q_coeffs.append(int(round(term_val)))\n                        \n        i_divisor_len += len(r_coeffs) // (len(divisor_coefficients)-1) # Rough estimate of remaining degree\n        \n    return {\n        \"question_text\": r\"\\text{Divide } \\left( 6x^2 + 0x - 6 \\right) \\div x(-4+3x)\", \n        \"correct_answer\": f\"quotient_coefficients: {{\\n\\t{{{\\int_{-1}^{1}} (q_0, q_1)}}}, remainder_coefficients: {{\\n\\t{{{r_0}}} }}, quotient_latex: \\\\\\\\frac{6}{3x^2+4x}-\\\\text{remainder}_latex\", \n        \"oracle_payload\": {\"dividend_coefficients\": [6, 0, 6], \"divisor_coefficients\": [1, -4]}\n    }\n\n",
+  "evaluation_details": {
+    "parse_error": "unexpected character after line continuation character (<unknown>, line 95)",
+    "ledger_stage": "observed",
+    "actual_question_text": null,
+    "evaluation_gates": {
+      "g1_evaluability": {
+        "status": "FAIL",
+        "reason": "parse_minor",
+        "raw_output_present": true,
+        "extraction_succeeded": true,
+        "candidate_nonempty": true,
+        "parse_succeeded": false,
+        "required_entry_point_present": false
+      },
+      "g2_executability": {
+        "status": "NOT_ASSESSED",
+        "reason": "g1_not_passed"
+      },
+      "g3_contract_compliance": {
+        "status": "NOT_ASSESSED",
+        "reason": "g1_not_passed"
+      },
+      "g4_semantic_correctness": {
+        "status": "NOT_ASSESSED",
+        "reason": "g1_not_passed"
+      },
+      "g5_problem_presentation": {
+        "status": "NOT_OBSERVED",
+        "reason": "actual_question_text_unavailable",
+        "question_present": false
+      },
+      "g6_math_notation": {
+        "status": "NOT_OBSERVED",
+        "reason": "actual_question_text_unavailable",
+        "uses_latex": false
+      }
+    },
+    "composite_outcomes": {
+      "technical_pass": "FAIL",
+      "presentation_pass": "NOT_OBSERVED",
+      "full_pass": "FAIL"
+    }
+  },
+  "timestamp": 1784965038.6213005
+}

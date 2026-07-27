@@ -1,0 +1,64 @@
+{
+  "cell_id": "qwen35_2b__ce111_q05_exact_fraction_expression__ab1__seed_20260725",
+  "task_id": "ce111_q05_exact_fraction_expression",
+  "condition": "ab1",
+  "seed": 20260725,
+  "model": "qwen3.5:2b",
+  "status": "executed",
+  "outcome": "runtime_failure",
+  "raw_response_length": 3042,
+  "candidate_extracted": "import json\nfrom typing import Dict, Any\n\ndef generate(level=1, **kwargs) -> Dict[str, str]:\n    \"\"\"\n    Generates a math problem involving exact fraction arithmetic based on the provided frozen parameters.\n    \n    Args:\n        level (int): Difficulty level for formatting or complexity adjustments if needed.\n        kwargs: Additional keyword arguments passed to the underlying expression generator logic.\n               In this specific task, these are expected to be empty as per \"Frozen sampled parameters\".\n\n    Returns:\n        Dict[str, str]: A dictionary containing 'question_text', 'correct_answer', and 'oracle_payload'.\n                         - question_text: Formal LaTeX string for the math problem.\n                         - correct_answer: Tuple of (numerator_str, denominator_str) representing an irreducible fraction in canonical form.\n                                         Also includes a full latex representation if applicable based on level/formatting rules implied by \"canonical_latex\".\n                         - oracle_payload: The exact frozen parameters passed to this function call.\n\n    Note: Since the task specifies returning 'correct_answer' with numerator, denominator, and canonical_latex for an irreducible fraction, \n          we will construct a tuple containing these components directly from the expression evaluation result without level-dependent formatting logic\n          that might alter the core mathematical truth required by \"exact_fraction_expression\". The prompt asks to return this specific structure.\n\n    \"\"\"\n    \n    # 1. Parse and evaluate the frozen expression using Python's Fraction for exact arithmetic\n    import fractions\n    \n    try:\n        fraction_obj = fractions.Fraction(kwargs['expression'])\n        \n        numerator_str = str(fraction_obj.numerator)\n        denominator_str = str(fraction_obj.denominator)\n        \n        # Ensure canonical form (numerator < 0 if denom > 0, etc.) and irreducibility is handled by Fraction constructor.\n        # The prompt asks for \"canonical_latex\" which typically implies a specific LaTeX representation of the fraction itself \n        # rather than just text strings like \\frac{a}{b}. We will format it as standard math mode if level > 0, otherwise plain or simple latex.\n        \n        canonical_latex = f\"\\\\\\\\frac{{{numerator_str}}}{{{denominator_str}}}\"\n\n    except ZeroDivisionError:\n        # Handle edge case where denominator is zero (though unlikely in valid inputs)\n        raise ValueError(\"Invalid expression with division by zero.\")\n\n    return {\n        \"question_text\": r\"$\\frac{9}{22} + \\frac{11}{18} - (\\frac{23}{22} - \\frac{7}{18})$\", \n        # Note: The prompt asks for formal LaTeX delimiters. We use standard math mode syntax inside the string or raw r-string with $...$.\n        \"correct_answer\": (numerator_str, denominator_str), \n        \"oracle_payload\": kwargs\n    }\n\n# Example usage to verify structure matches requirements before final output block if needed:\n# result = generate()\n",
+  "evaluation_details": {
+    "runtime_error": "KeyError: 'expression'",
+    "exception_type": "KeyError",
+    "exception_message": "'expression'",
+    "timeout": false,
+    "ledger_stage": "observed",
+    "actual_question_text": null,
+    "evaluation_gates": {
+      "g1_evaluability": {
+        "status": "PASS",
+        "reason": "evaluability_passed",
+        "raw_output_present": true,
+        "extraction_succeeded": true,
+        "candidate_nonempty": true,
+        "parse_succeeded": true,
+        "required_entry_point_present": true
+      },
+      "g2_executability": {
+        "status": "FAIL",
+        "reason": "runtime_failure",
+        "load_succeeded": true,
+        "entry_point_called": true,
+        "timeout": false,
+        "exception_type": "KeyError",
+        "exception_message": "'expression'",
+        "return_value_produced": false
+      },
+      "g3_contract_compliance": {
+        "status": "NOT_ASSESSED",
+        "reason": "g2_not_passed"
+      },
+      "g4_semantic_correctness": {
+        "status": "NOT_ASSESSED",
+        "reason": "g2_not_passed"
+      },
+      "g5_problem_presentation": {
+        "status": "NOT_OBSERVED",
+        "reason": "actual_question_text_unavailable",
+        "question_present": false
+      },
+      "g6_math_notation": {
+        "status": "NOT_OBSERVED",
+        "reason": "actual_question_text_unavailable",
+        "uses_latex": false
+      }
+    },
+    "composite_outcomes": {
+      "technical_pass": "FAIL",
+      "presentation_pass": "NOT_OBSERVED",
+      "full_pass": "FAIL"
+    }
+  },
+  "timestamp": 1784965049.546903
+}

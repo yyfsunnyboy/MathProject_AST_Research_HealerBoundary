@@ -1,0 +1,55 @@
+```python
+import json
+from typing import Dict, Any
+
+def generate(level=1, **kwargs) -> Dict[str, str]:
+    """
+    Generates a math problem involving exact fraction arithmetic based on the provided frozen parameters.
+    
+    Args:
+        level (int): Difficulty level for formatting or complexity adjustments if needed.
+        kwargs: Additional keyword arguments passed to the underlying expression generator logic.
+               In this specific task, these are expected to be empty as per "Frozen sampled parameters".
+
+    Returns:
+        Dict[str, str]: A dictionary containing 'question_text', 'correct_answer', and 'oracle_payload'.
+                         - question_text: Formal LaTeX string for the math problem.
+                         - correct_answer: Tuple of (numerator_str, denominator_str) representing an irreducible fraction in canonical form.
+                                         Also includes a full latex representation if applicable based on level/formatting rules implied by "canonical_latex".
+                         - oracle_payload: The exact frozen parameters passed to this function call.
+
+    Note: Since the task specifies returning 'correct_answer' with numerator, denominator, and canonical_latex for an irreducible fraction, 
+          we will construct a tuple containing these components directly from the expression evaluation result without level-dependent formatting logic
+          that might alter the core mathematical truth required by "exact_fraction_expression". The prompt asks to return this specific structure.
+
+    """
+    
+    # 1. Parse and evaluate the frozen expression using Python's Fraction for exact arithmetic
+    import fractions
+    
+    try:
+        fraction_obj = fractions.Fraction(kwargs['expression'])
+        
+        numerator_str = str(fraction_obj.numerator)
+        denominator_str = str(fraction_obj.denominator)
+        
+        # Ensure canonical form (numerator < 0 if denom > 0, etc.) and irreducibility is handled by Fraction constructor.
+        # The prompt asks for "canonical_latex" which typically implies a specific LaTeX representation of the fraction itself 
+        # rather than just text strings like \frac{a}{b}. We will format it as standard math mode if level > 0, otherwise plain or simple latex.
+        
+        canonical_latex = f"\\\\frac{{{numerator_str}}}{{{denominator_str}}}"
+
+    except ZeroDivisionError:
+        # Handle edge case where denominator is zero (though unlikely in valid inputs)
+        raise ValueError("Invalid expression with division by zero.")
+
+    return {
+        "question_text": r"$\frac{9}{22} + \frac{11}{18} - (\frac{23}{22} - \frac{7}{18})$", 
+        # Note: The prompt asks for formal LaTeX delimiters. We use standard math mode syntax inside the string or raw r-string with $...$.
+        "correct_answer": (numerator_str, denominator_str), 
+        "oracle_payload": kwargs
+    }
+
+# Example usage to verify structure matches requirements before final output block if needed:
+# result = generate()
+```

@@ -1,0 +1,123 @@
+{
+  "manifest_id": "math16_smoke_qwen35_2b_20260725_v1",
+  "run_id": "qwen35_2b_math16_smoke_20260725_pilot_001",
+  "model": "qwen3.5:2b",
+  "model_tag": "qwen3.5:2b",
+  "think": false,
+  "conditions": ["ab1"],
+  "seeds": [20260725],
+  "domain_distribution": {
+    "PolynomialOps": 1,
+    "IntegerOps": 1,
+    "FractionOps": 1,
+    "RadicalOps": 1
+  },
+  "cells_planned": 4,
+  "pool_id": "Math16-LaTeX-v1",
+  "pool_reference": "docs/experiments/manifests/math16_latex_v1_pool_manifest.json",
+  "cells": [
+    {
+      "cell_id": "qwen35_2b__ce115_calc_polynomial_division_l1__ab1__seed_20260725",
+      "task_id": "ce115_calc_polynomial_division_l1",
+      "condition": "ab1",
+      "domain": "polynomials",
+      "domain_ops": "PolynomialOps",
+      "seed": 20260725,
+      "model": "qwen3.5:2b",
+      "oracle_type": "math16_polynomial_division_general",
+      "family": "math16_polynomial_division_general",
+      "frozen_parameters": {
+        "dividend_coefficients": [6, 0, 6],
+        "divisor_coefficients": [1, -4]
+      },
+      "oracle_payload": {
+        "dividend_coefficients": [6, 0, 6],
+        "divisor_coefficients": [1, -4]
+      },
+      "expected_answer": {
+        "quotient_coefficients": [6, 24],
+        "remainder_coefficients": [102],
+        "quotient_latex": "6x+24",
+        "remainder_latex": "102"
+      },
+      "math16_question_text": "將多項式\n\\[\n6x^2+6\n\\]\n除以\n\\[\nx-4,\n\\]\n求商式與餘式。",
+      "healer": 0,
+      "first_attempt_only": true
+    },
+    {
+      "cell_id": "qwen35_2b__ce111_q03_prime_factor_selection__ab1__seed_20260725",
+      "task_id": "ce111_q03_prime_factor_selection",
+      "condition": "ab1",
+      "domain": "integers",
+      "domain_ops": "IntegerOps",
+      "seed": 20260725,
+      "model": "qwen3.5:2b",
+      "oracle_type": "integer_exact_single_digit",
+      "family": "math16_prime_factor_selection",
+      "frozen_parameters": {
+        "prime_factors_of_n": [2, 3, 13],
+        "selected": 13
+      },
+      "oracle_payload": {
+        "prime_factors_of_n": [2, 3, 13],
+        "selected": 13
+      },
+      "expected_answer": 13,
+      "math16_question_text": "下列整數 \\(11,12,13,14\\) 中，哪一個是 \\(156\\) 的質因數？",
+      "healer": 0,
+      "first_attempt_only": true
+    },
+    {
+      "cell_id": "qwen35_2b__ce111_q05_exact_fraction_expression__ab1__seed_20260725",
+      "task_id": "ce111_q05_exact_fraction_expression",
+      "condition": "ab1",
+      "domain": "rational_arithmetic",
+      "domain_ops": "FractionOps",
+      "seed": 20260725,
+      "model": "qwen3.5:2b",
+      "oracle_type": "math16_exact_fraction_expression",
+      "family": "math16_exact_fraction_expression",
+      "frozen_parameters": {
+        "expression": "9/22 + 11/18 - (23/22 - 7/18)"
+      },
+      "oracle_payload": {
+        "expression": "9/22 + 11/18 - (23/22 - 7/18)"
+      },
+      "expected_answer": {
+        "numerator": 4,
+        "denominator": 11,
+        "canonical_latex": "\\frac{4}{11}"
+      },
+      "math16_question_text": "精確計算\n\\[\n\\frac{9}{22}+\\frac{11}{18}\n-\\left(\\frac{23}{22}-\\frac{7}{18}\\right).\n\\]\n答案須化為最簡分數。",
+      "healer": 0,
+      "first_attempt_only": true
+    },
+    {
+      "cell_id": "qwen35_2b__ce115_calc_radical_simplification_l1__ab1__seed_20260725",
+      "task_id": "ce115_calc_radical_simplification_l1",
+      "condition": "ab1",
+      "domain": "radicals",
+      "domain_ops": "RadicalOps",
+      "seed": 20260725,
+      "model": "qwen3.5:2b",
+      "oracle_type": "math16_radical_simplification",
+      "family": "math16_radical_simplification",
+      "frozen_parameters": {
+        "radicand": 27
+      },
+      "oracle_payload": {
+        "radicand": 27
+      },
+      "expected_answer": {
+        "coefficient": 3,
+        "radicand": 3,
+        "canonical_latex": "3\\sqrt{3}"
+      },
+      "math16_question_text": "將\n\\[\n\\sqrt{27}\n\\]\n化為最簡根式 \\(a\\sqrt{b}\\)，其中 \\(a\\) 為正整數，且 \\(b\\) 不含大於 \\(1\\) 的完全平方因數。",
+      "healer": 0,
+      "first_attempt_only": true
+    }
+  ],
+  "notes": "4-cell smoke pilot for qwen3.5:2b with think=false. Ab1 condition only. Single seed: 20260725.",
+  "output_directory": "docs/experiments/results/qwen35_2b_math16_smoke_20260725_pilot_001/seed_20260725"
+}

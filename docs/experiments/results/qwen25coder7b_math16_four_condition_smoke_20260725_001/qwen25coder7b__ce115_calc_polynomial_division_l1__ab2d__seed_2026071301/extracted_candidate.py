@@ -1,0 +1,25 @@
+from core.prompts.domain_function_library import PolynomialOps
+
+def generate(level=1, **kwargs):
+    dividend_coefficients = [6, 0, 6]
+    divisor_coefficients = [1, -4]
+
+    quotient, remainder = PolynomialOps.div_qr(dividend_coefficients, divisor_coefficients)
+
+    quotient_latex = ' + '.join([f'{coeff}x^{i}' if i > 0 else f'{coeff}' for i, coeff in enumerate(quotient) if coeff != 0])
+    remainder_latex = ' + '.join([f'{coeff}x^{i}' if i > 0 else f'{coeff}' for i, coeff in enumerate(remainder) if coeff != 0])
+
+    return {
+        "question_text": r"\[ \frac{" + ' + '.join([f"{coeff}x^{i}" if i > 0 else f"{coeff}" for i, coeff in enumerate(dividend_coefficients)]) + r"}{"
+                         + ' + '.join([f"{coeff}x^{i}" if i > 0 else f"{coeff}" for i, coeff in enumerate(divisor_coefficients)]) + r"} \]",
+        "correct_answer": {
+            "quotient_coefficients": quotient,
+            "remainder_coefficients": remainder,
+            "quotient_latex": quotient_latex,
+            "remainder_latex": remainder_latex
+        },
+        "oracle_payload": {
+            "dividend_coefficients": dividend_coefficients,
+            "divisor_coefficients": divisor_coefficients
+        }
+    }
