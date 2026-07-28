@@ -15,7 +15,7 @@ IVAN_MACRONIX_SCIENCE_FAIR_OFFICIAL_REPORT
 
 本研究針對小參數在地化語言模型（Qwen 3.5 4B 與 9B）在 AI 生成數學解題程式的多層失敗，包含語法、契約、API、執行與語意層問題，實證劃定硬性工程干預機制（Deterministic AST Healer）的安全修復邊界。實驗 Protocol 採用 16 道 K12 數學題型（涵蓋 Integer 整數、Polynomial 多項式、Radical 根式與 Fraction 分數四大家族）、3 個模型（包含雲端強模型參照組 Gemini 3.5 Flash）、4 種 Prompt 引導條件（Ab1 Native 原生、Ab2g Generic 鷹架、Ab2d+api 領域 API 鷹架以及 Ab2d+spec 標準規範）與 5 個隨機種子，系統化構建全量 960 個測試單元（cells）之實證矩陣。整體評估流程嚴格分為 Baseline 評估、Active Healer 靜態 Eligibility 審查與 Tier 1 雙模型配對交叉分析。
 
-實驗結果顯示：Gemini Primary 為 289/320 格 (90.31%)；Primary 的 `Ab2d+spec-v1` 為 63/80。後續 `Ab2d+spec-v2` 的 post-hoc inventory 為 80/80，與 Ab1 72/80、Ab2g 76/80、Ab2d+api 78/80 合計為四條件 post-hoc hybrid inventory 306/320，僅作機制／版本盤點，不作 Primary 正式比較。Qwen 9B 通過 101/320 格 (31.56%)，Qwen 4B Baseline 通過 78/320 格 (24.38%)。針對 Qwen 4B 的 242 格 Baseline 失敗案例，Active Healer 執行靜態 Eligibility 審查，其中 10 格符合修法唯一且可靜態驗證之安全介入條件；verified rescue 共 6 格，通過數由 78/320 提升至 84/320，且實證觀察到零倒退 (Observed Regression = 0)。其中 5 格於 Primary run 確認（83/320），另 1 格經 post-hoc corrected-chain 確認。Gemini 與 Qwen 9B 因殘餘失敗案例未命中事前凍結之修復規則，系統依凍結規則選擇 Abstain (Eligible = 0)，呈現本研究所定義的安全介入邊界。
+實驗結果顯示：Gemini Primary 為 289/320 格 (90.31%)；Primary 的 `Ab2d+spec-v1` 為 63/80。後續 `Ab2d+spec-v2` 的 post-hoc inventory 為 80/80，與 Ab1 72/80、Ab2g 76/80、Ab2d+api 78/80 合計為四條件 post-hoc hybrid inventory 306/320，僅作機制／版本盤點，不作 Primary 正式比較。Qwen 9B 通過 101/320 格 (31.56%)，Qwen 4B Baseline 通過 78/320 格 (24.38%)。針對 Qwen 4B 的 242 格 Baseline 失敗案例，Active Healer 執行靜態 Eligibility 審查，其中 10 格符合修法唯一且可靜態驗證之安全介入條件；verified rescue 共 6 格，通過數由 78/320 提升至 84/320。其中 5 格於 Primary run 確認（83/320），另 1 格經 post-hoc corrected-chain 確認。Method 1 未對 Baseline PASS cells 執行 Healer，因此 Regression not measured；Method 2 對全部 320 格完成 Raw／Final 雙路評分，Regression measured = 0/320。Gemini 與 Qwen 9B 因殘餘失敗案例未命中事前凍結之修復規則，系統依凍結規則選擇 Abstain (Eligible = 0)，呈現本研究所定義的安全介入邊界。
 
 在 4B 與 9B 之 320 格 Tier 1 配對分析中，雙過 52 格、4B 獨過 26 格、9B 獨過 49 格、雙敗 193 格，淨增加 23 格 (RD = +7.1875%)。單元層級 Exact McNemar 檢定顯示顯著差異 ($p = 0.010582$)；然考量 16 個 Task 聚類效應之 Task-clustered Bootstrap 95% 信賴區間跨 0 (`[-0.94%, +14.38%]`)，顯示將結論外推至未知全新數學題型時仍具抽樣不確定性。在家族分層中，Fraction 家族 9B 淨勝 14 格 ($p = 0.012541$)，機制拆解顯示 21 格 NINE_B_ONLY 中有 15 格屬 L1–L4（涵蓋語法、契約、API 與執行問題），另 6 格屬 L5 語意層，不可解讀為純數學推理能力差距。此外，Polynomial 家族中 9B 表現偏低集中於單一題型與特定 LaTeX 組裝衝突。
 
@@ -35,7 +35,7 @@ IVAN_MACRONIX_SCIENCE_FAIR_OFFICIAL_REPORT
 1. **修復視窗與能力劃分**：AI 生成程式失敗時，哪些錯誤型態可由 Deterministic AST Healer 安全修復？哪些錯誤必須主動 Abstain？
 2. **小模型與工程干預之協同**：經工程干預 (Scaffold + Healer) 之 4B 小模型，能否在特定語法瑕疵視窗內達成確定性救援？
 3. **規模與家族分層影響**：Qwen 4B 與 9B 在四個數學家族（Integer, Polynomial, Radical, Fraction）中的配對表現有何差異？
-4. **安全防禦與零倒退**：Deterministic AST Healer 能否在救援失敗案例的同時，保持觀察到零倒退 (Observed Regression = 0)？
+4. **安全防禦與倒退量測**：Method 1 未量測 Regression；Method 2 對全部 320 格 Raw／Final 雙路評分後，實際量測之 Regression 是否為 0/320？
 
 ---
 
@@ -126,7 +126,7 @@ Deterministic AST Healer **不是第二個解題模型**，它不參與數學推
 | Baseline PASS | 78/320 格 |
 | Healer verified rescue | 6 格 |
 | Post-hoc Final | 84/320 格（相較 Baseline +6 格） |
-| Observed Regression | 0 格 |
+| Method 1 Regression | Not measured |
 
 > 完整事實：規則實際觸發 7 格；其中 6 格為 verified rescue（5 格於 Primary run 確認、1 格因 runner 誤判假循環回退為 no_op，經 post-hoc corrected-chain 校正後確認），另 1 格為 repaired-still-fail（局部結構問題已修正，但因獨立後續錯誤仍未 PASS）。詳細 10 格 eligible 帳與修復效果分層見 10.2 節。
 
@@ -213,11 +213,11 @@ execution rescue 格為 `ce115_calc_exact_rational_expression_l1 / Ab1 / seed 20
 
 為維護實證研究之嚴謹性，嚴格實施 Primary 與 Post-hoc 數據分帳：
 
-| 模型與項目 | Primary / Baseline | Eligible | Primary Rescue / Final | Post-hoc hybrid inventory / Corrected Final | Observed Regression |
+| 模型與項目 | Primary / Baseline | Eligible | Primary Rescue / Final | Post-hoc hybrid inventory / Corrected Final | Method 1 Regression |
 |---|---|---|---|---|---|
-| **Qwen 4B** | 78/320 | 10 格 | **5 格 (83/320)** | 總救援 6 格 (84/320) | 0 格 |
-| **Qwen 9B** | 101 / 320 | 0 格 | **0 格 (101/320)** | 0 格 (101/320) | 0 格 |
-| **Gemini 3.5 Flash** | **Primary 289 / 320** | 0 格 | **0 格 (289/320)** | **Post-hoc hybrid inventory 306/320** | 0 格 |
+| **Qwen 4B** | 78/320 | 10 格 | **5 格 (83/320)** | 總救援 6 格 (84/320) | Not measured |
+| **Qwen 9B** | 101 / 320 | 0 格 | **0 格 (101/320)** | 0 格 (101/320) | Not measured |
+| **Gemini 3.5 Flash** | **Primary 289 / 320** | 0 格 | **0 格 (289/320)** | **Post-hoc hybrid inventory 306/320** | Not measured |
 
 - **分帳原則**：Qwen 4B 的 83/320 為事前預註冊 Protocol 唯一 Primary 正式認可數據；84/320 為 corrected-chain 總救援 6 格的事後技術分帳（相較 Primary 僅多 1 個 PASS）。Gemini 的 Primary 為 289/320（`Ab2d+spec-v1` 為 63/80）；`Ab2d+spec-v2` 的 80/80 與其餘三條件合計為 post-hoc hybrid inventory 306/320，僅作機制／版本盤點，不得誤稱為 Gemini Primary 或正式比較結果。
 
@@ -239,6 +239,16 @@ execution rescue 格為 `ce115_calc_exact_rational_expression_l1 / Ab1 / seed 20
 > - 70 格救援為 0 與既有 split 結構及 Generic Core 已知命中分布一致，不寫成新發現。
 
 詳細結果與切分說明見：[Math16 Method 1 — 依 Development 40／Evaluation 120 切分成果報告](../../../experiments/reports/math16_method1_40_120_split_results_report_v1.md)。
+
+### Method 2 All-Cell 正式結果
+
+| Raw PASS | Final PASS | 淨增 | Verified rescue | Regression | Preserved pass | Still failed |
+|---:|---:|---:|---:|---:|---:|---:|
+| 79/320 | 85/320 | 6 | 6 | 0 | 79 | 235 |
+
+> Method 2 對全部 320 格 raw source 先執行 Eligibility，Eligible 11 格才套用 frozen Healer；完成 source decision 後，再以同一 pinned Evaluator 分別評分 Raw 與 Final。Eligible 11 格為 6 格 rescue、5 格 still failed。Method 2 的 `Regression measured = 0/320` 為全 320 格 Raw／Final 雙路評分之實際量測結果；Method 1 則為 `Regression not measured`。
+
+詳細流程、eligible 逐格帳與 rule_id 分帳見：[Math16 Method 2 All-Cell 正式結果報告](../../../experiments/reports/math16_method2_all_cell_results_report_v1.md)。
 
 ---
 
@@ -353,7 +363,7 @@ Deterministic AST Healer 之安全介入架構概念如下：
 5. **Qwen 4B `Ab2d+api` 77.8% 語法錯誤侷限於診斷樣本 (4B Ab2d Anomaly Sample Bound)**：4B 在 `Ab2d+api` 下 77.8% (21/27) SyntaxError 結論僅適用於已剖析之 27 格診斷樣本，不可外推為全域失敗比例。
 6. **Gemini 作為 Tier 2 描述性參照 (Gemini as Tier 2 Reference Only)**：Gemini 3.5 Flash (289/320, 90.31%) 僅作強模型描述性基準參照，不可宣稱「證明大模型規模因果壓倒性勝出」。
 7. **Prompt 提示版本異質性 (Prompt Version Discrepancy)**：Gemini Primary 採用 `Ab2d+spec-v1` (63/80)；後續 `Ab2d+spec-v2` 補齊 API 簽名卡後為 80/80 的 post-hoc inventory，與其餘三條件形成 306/320 post-hoc hybrid inventory，僅作機制／版本盤點。Qwen 4B/9B 正式生成採用 `Ab2d+spec-v2`，通過數為 36/80 與 40/80。
-8. **`Regression = 0` 僅屬實證觀察 (Observed Zero Regression Only)**：`Observed Regression = 0` 僅代表本次 320 個單元及凍結規則下「觀察到零倒退」，不可宣稱「保證在任意情境下 100% 絕不倒退」。
+8. **Regression 分帳與範圍**：Method 1 未對 Baseline PASS cells 執行 Healer，因此 `Regression not measured`；Method 2 的 `Regression measured = 0/320` 僅代表本次 320 個單元及凍結規則下的實際量測結果，不可宣稱「保證在任意情境下 100% 絕不倒退」。
 9. **`Eligible = 0` 不代表模型無失敗 (Eligibility Zero Scope)**：Gemini (31 FAIL) 與 9B (219 FAIL) 之 `Eligible = 0` 代表殘餘失敗未命中事前凍結規則，系統主動 Abstain，不代表生成無錯誤。
 10. **全域邊界與範疇受限 (Global Protocol Bound)**：本研究所有數字與結論，僅嚴格適用於本次測試之 16 道數學題型、3 個模型、4 種 Prompt 條件、5 個隨機種子與凍結規則。
 
@@ -394,7 +404,7 @@ Deterministic AST Healer 之安全介入架構概念如下：
 ### 結論
 本研究結果支持以下定位：Deterministic AST Healer 具備精確價值與安全介入邊界。實證顯示：
 1. AST Healer 不扮演第二個解題模型，而在可驗證之特定語法瑕疵窗口發揮確定性救援功能（4B verified rescue 共 6 格，通過數由 78/320 提升至 84/320）。技術分帳上，Primary 救援 5 格、final 83/320；另 1 格由 corrected-chain 確認，且另有 1 格 repaired-still-fail 不計入 rescue。
-2. 在命中凍結規則之修復案例中，實證觀察到 `Regression = 0`。
+2. Regression 嚴格分帳：Method 1 為 `Regression not measured`；Method 2 對全部 320 格 Raw／Final 雙路評分後為 `Regression measured = 0/320`。
 3. 面臨無確定修法之失敗時，系統依凍結規則選擇 Abstain，降低盲目修改帶來之風險並維持整體架構之可解釋性。
 
 ### 後續工作
