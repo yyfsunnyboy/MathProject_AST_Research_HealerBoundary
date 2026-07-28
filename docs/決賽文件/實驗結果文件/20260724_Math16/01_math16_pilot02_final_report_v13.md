@@ -221,6 +221,25 @@ execution rescue 格為 `ce115_calc_exact_rational_expression_l1 / Ab1 / seed 20
 
 - **分帳原則**：Qwen 4B 的 83/320 為事前預註冊 Protocol 唯一 Primary 正式認可數據；84/320 為 corrected-chain 總救援 6 格的事後技術分帳（相較 Primary 僅多 1 個 PASS）。Gemini 的 Primary 為 289/320（`Ab2d+spec-v1` 為 63/80）；`Ab2d+spec-v2` 的 80/80 與其餘三條件合計為 post-hoc hybrid inventory 306/320，僅作機制／版本盤點，不得誤稱為 Gemini Primary 或正式比較結果。
 
+### Method 1 依 Development 40／Evaluation 120 切分結果
+
+| 範圍 | Baseline PASS | 最終技術修正結果 PASS | 救回 |
+|---|---:|---:|---:|
+| 官方 320 格 | 78/320 | 84/320 | 6 |
+| Contract-Aware 160 格 | 44/160 | 48/160 | 4 |
+| Development 40 格 | 11/40 | 11/40 | 0 |
+| Evaluation 120 格 | 33/120 | 37/120 | 4 |
+| 敏感度 70 格 | 21/70 | 21/70 | 0 |
+
+> **表下注記：**
+> - Primary 正式結果為 83/320；84/320 為 corrected-chain 技術修正結果。
+> - Method 1 未對 Baseline PASS cells 執行 Healer。Regression: Not measured under Method 1。
+> - Evaluation 120 格是主要結果。
+> - 70 格只是排除 5 個 `cohort_level_provenance_uncertain` 任務後的敏感度分析，不得取代 120 格。
+> - 70 格救援為 0 與既有 split 結構及 Generic Core 已知命中分布一致，不寫成新發現。
+
+詳細結果與切分說明見：[Math16 Method 1 — 依 Development 40／Evaluation 120 切分成果報告](../../../experiments/reports/math16_method1_40_120_split_results_report_v1.md)。
+
 ---
 
 ## 12. Qwen 4B與9B配對分析
