@@ -1,0 +1,127 @@
+{
+  "manifest_id": "math16_method2_all_cell_protocol_v1",
+  "protocol_status": "FROZEN_NOT_EXECUTED",
+  "frozen_at": "2026-07-28",
+  "method": "Method 2 all-cell eligibility-first zero-model replay",
+  "population": {
+    "model": "qwen3.5:4b",
+    "dataset": "CE115_Math16",
+    "tasks": 16,
+    "conditions": 4,
+    "seeds_per_task_condition": 5,
+    "expected_cells": 320
+  },
+  "inputs": {
+    "cell_plan": "docs/experiments/manifests/math16_pilot02_qwen4b_cell_plan.json",
+    "raw_response_name": "raw_response.txt",
+    "raw_source_extraction": "agent_tools/finals_rebuild/extraction.py::extract_code",
+    "baseline_results_forbidden": true
+  },
+  "decision_order": [
+    "extract_raw_source",
+    "eligibility_all_cells",
+    "healer_if_eligible",
+    "freeze_final_source",
+    "evaluate_raw_and_final_separately",
+    "derive_transition"
+  ],
+  "healer": {
+    "runner": "agent_tools/finals_rebuild/ce115_research_healer_runner.py::MathHealerRunner",
+    "eligibility": "rule.is_applicable + rule.is_triggered over the frozen RULE_ALLOWLIST",
+    "rule_allowlist": [
+      "L1_CLOSE_UNBALANCED_PARENTHESIS",
+      "L1_CLOSE_UNBALANCED_DELIMITER_EXTENDED",
+      "L1_PROSE_RESIDUE_NARROW",
+      "L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP",
+      "L2_KWARGS_EMPTY_BAG_INLINE_UNIQUE_PARAM",
+      "L2_CORRECT_ANSWER_JSON_DUMPS_UNWRAP"
+    ],
+    "max_passes": 3,
+    "noneligible_policy": "final_source_equals_raw_source",
+    "no_new_rules": true,
+    "semantic_changes_forbidden": true
+  },
+  "blinding": {
+    "eligibility_inputs_allowed": [
+      "raw_source",
+      "frozen_task_parameters"
+    ],
+    "eligibility_inputs_forbidden": [
+      "baseline_final_status",
+      "raw_status",
+      "correct_answer_value",
+      "classifier_outcome",
+      "evaluator_result",
+      "evaluation_gates"
+    ],
+    "acceptance_or_rollback_must_not_read_evaluator": true
+  },
+  "evaluation": {
+    "status": "NOT_EXECUTED_THIS_FREEZE",
+    "evaluator": "scripts/evaluate_math16_pilot02_full_v4.py",
+    "raw_and_final_evaluated_separately": true,
+    "allowed_statuses": [
+      "PASSED",
+      "FAILED"
+    ],
+    "transition_map": {
+      "FAILED->PASSED": "verified_rescue",
+      "PASSED->FAILED": "regression",
+      "PASSED->PASSED": "preserved_pass",
+      "FAILED->FAILED": "still_failed"
+    }
+  },
+  "outputs": {
+    "root": "docs/experiments/results/math16_method2_all_cell_replay_v1",
+    "raw_source_directory": "docs/experiments/results/math16_method2_all_cell_replay_v1/raw_sources",
+    "final_source_directory": "docs/experiments/results/math16_method2_all_cell_replay_v1/final_sources",
+    "eligibility_journal": "docs/experiments/results/math16_method2_all_cell_replay_v1/eligibility_journal.jsonl",
+    "transition_journal": "docs/experiments/results/math16_method2_all_cell_replay_v1/transition_journal.jsonl"
+  },
+  "journal": {
+    "required_fields": [
+      "cell_identity",
+      "raw_source_sha256",
+      "eligibility_checked",
+      "eligible",
+      "rule_id",
+      "rule_triggered",
+      "source_changed",
+      "final_source_sha256",
+      "raw_status",
+      "final_status",
+      "transition"
+    ],
+    "transition_enum": [
+      "verified_rescue",
+      "regression",
+      "preserved_pass",
+      "still_failed"
+    ],
+    "pre_evaluation_null_fields": [
+      "raw_status",
+      "final_status",
+      "transition"
+    ]
+  },
+  "frozen_sha256": {
+    "agent_tools/finals_rebuild/ce115_research_healer_runner.py": "38453d1294382f061efe149484f5a3059a47d085d2aeef358874a954e37adebf",
+    "agent_tools/finals_rebuild/ce115_research_healer_protocol.py": "bdb4121ee266f91bfa116019a334cf4a528da0d71629b96540a5f763826aff39",
+    "agent_tools/finals_rebuild/ce115_research_healer_rules_l1_paren_close.py": "f13c3297dca82e414adb3335b463f38737cb0d1cef0c1bfea3743412a9c26d31",
+    "agent_tools/finals_rebuild/ce115_research_healer_rules_l1_delimiter_extended.py": "f40f7ea0a63849e40868f62971f9244f8b2f6eba4bd0e1cb449bc1770f3a7768",
+    "agent_tools/finals_rebuild/ce115_research_healer_rules_l1_prose_narrow.py": "ae1da323b961a0fa6d41ab6b1e4a66a96bb4450c17aa55cc7fd2e08bbbdbfdd8",
+    "agent_tools/finals_rebuild/ce115_research_healer_rules_l2.py": "011616eefc973874fa22b027e216fc5cbdeb9a70281336b0655b05bcb4c832c5",
+    "agent_tools/finals_rebuild/ce115_research_healer_rules_l2_kwargs_bag_inline.py": "cd127c427861112de4deb91a66e3ab7ea50efbcf04c6865e917c0cb9a28fbef6",
+    "agent_tools/finals_rebuild/ce115_research_healer_rules_l2_json_dumps_unwrap.py": "2ed7e845877dcc561a6a15688bc479022097643291dd6e0fb124c4c8c529459f",
+    "agent_tools/finals_rebuild/extraction.py": "a59da1c0a76fe24e868a51481306a5ea09d8d8977c92aab38a6c0c4dc38feccf",
+    "agent_tools/finals_rebuild/math16_pool.py": "406965451600809fb0abb771073b90080eb2bc195fb4aabb8339413d42734a59",
+    "docs/experiments/manifests/math16_pilot02_qwen4b_cell_plan.json": "51f62341ebdd6c759ad1d160cbf1d8862fca037cb15db15b5229e4f107dc4aa7",
+    "scripts/evaluate_math16_pilot02_full_v4.py": "2cca19f2258d4ba6134ff10d4e9bcff925e2441c32820fcbc151cb6b1dd740bc"
+  },
+  "this_round": {
+    "model_rerun": false,
+    "formal_healer_replay": false,
+    "evaluator_run": false,
+    "method1_modified": false
+  }
+}
