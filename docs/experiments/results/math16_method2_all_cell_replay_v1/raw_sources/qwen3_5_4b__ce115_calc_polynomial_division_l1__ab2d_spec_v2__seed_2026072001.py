@@ -1,0 +1,49 @@
+# -*- coding: utf-8 -*-
+
+def generate(level=1, **kwargs):
+    # Frozen sampled parameters as per task specification
+    frozen_params = {
+        "dividend_coefficients": [6, 0, 6],
+        "divisor_coefficients": [1, -4]
+    }
+
+    from core.prompts.domain_function_library import PolynomialOps
+    
+    dividend_coeffs = frozen_params["dividend_coefficients"]
+    divisor_coeffs = frozen_params["divisor_coefficients"]
+    
+    # Perform polynomial division using the domain API
+    quotient, remainder = PolynomialOps.div_qr(dividend_coeffs, divisor_coeffs)
+
+    def format_latex(coeffs):
+        if not coeffs:
+            return "0"
+        
+        terms = []
+        for i, c in enumerate(reversed(coeffs)):
+            if c == 0 and len(terms) > 1: # Skip leading zeros but keep structure if needed, though div_qr usually handles this
+                continue
+            
+            term_str = f"{c}x^{len(coeffs)-i-1}"
+            terms.append(term_str)
+        
+        return "+".join(reversed([t for t in reversed(terms)]))
+
+    quotient_latex = format_latex(quotient) if len(quotient) > 0 else "0"
+    remainder_latex = format_latex(remainder) if len(remainder) > 0 else "0"
+
+    correct_answer = {
+        "quotient_coefficients": quotient,
+        "remainder_coefficients": remainder,
+        "quotient_latex": f"{quotient_latex}",
+        "remainder_latex": f"{remainder_latex}"
+    }
+
+    question_text = r"""Perform polynomial division of \( 6x^2 + 0x + 6 \) by \( x - 4 \). 
+Find the quotient and remainder coefficients, then express them in LaTeX format."""
+
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer,
+        "oracle_payload": frozen_params
+    }

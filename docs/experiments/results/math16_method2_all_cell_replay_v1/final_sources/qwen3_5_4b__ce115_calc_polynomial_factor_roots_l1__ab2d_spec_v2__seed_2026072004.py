@@ -1,0 +1,54 @@
+# -*- coding: utf-8 -*-
+
+def generate(level=1, **kwargs):
+    # Frozen sampled parameters defined directly here as per specification
+    frozen_params = {"quadratic_coefficients": [1, 4, -12]}
+    
+    a, b, c = frozen_params["quadratic_coefficients"]
+    
+    # Compute discriminant: D = b^2 - 4ac
+    d = b * b - 4 * a * c
+    
+    # Since coefficients are integers and result is integer roots (verified by problem type), 
+    # we can compute exact roots using native arithmetic.
+    sqrt_d = int(d ** 0.5) if d >= 0 else None
+    
+    # Roots: (-b ± sqrt(D)) / (2a)
+    root1_num = -b + sqrt_d
+    root2_num = -b - sqrt_d
+    denominator = 2 * a
+    
+    r1 = root1_num // denominator
+    r2 = root2_num // denominator
+    
+    # Ensure exact integer division and correct ordering
+    if r1 > r2:
+        roots_list = [r2, r1]
+    else:
+        roots_list = [r1, r2]
+    
+    # Factorization in form a(x - r1)(x - r2) -> x^2 + 4x - 12 factors to (x+6)(x-2)
+    # Check signs for factorization latex construction: 
+    # If roots are integers R, then polynomial is product of (x-R).
+    # For [r1=2, r2=-6], factors are (x-r1), (x-r2) -> (x-2)(x+6) or ordered by root value.
+    
+    factorization_latex = f"({f'x-{roots_list[0]}' if roots_list[0]!=0 else 'x'}}, {f'x-{roots_list[1]}' if roots_list[1]!=0 else 'x'})"
+
+    # Construct LaTeX for roots list: r_1, r_2
+    roots_latex = f"{roots_list[0]}, {roots_list[1]}"
+
+    question_text = r"\text{Factor the quadratic polynomial } x^2 + 4x - 12 \text{ and find its roots.}"
+    
+    correct_answer = {
+        "roots": [r1, r2],
+        "factorization_latex": factorization_latex,
+        "roots_latex": f"\\left( \\frac{-b + \\sqrt{D}}{2a}, \\frac{-b - \\sqrt{D}}{2a} \\right) = ({roots_list[0]}, {roots_list[1]})"
+    }
+
+    oracle_payload = frozen_params
+    
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer,
+        "oracle_payload": oracle_payload
+    }

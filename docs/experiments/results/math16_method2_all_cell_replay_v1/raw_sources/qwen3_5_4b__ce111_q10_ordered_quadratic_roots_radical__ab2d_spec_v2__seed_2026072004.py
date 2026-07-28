@@ -1,0 +1,56 @@
+# -*- coding: utf-8 -*-
+
+def generate(level=1, **kwargs):
+    # Frozen sampled parameters as per task specification
+    frozen_params = {
+        "equation": "(x-2)^2=3", 
+        "order": "a>b", 
+        "target": "2a+b"
+    }
+
+    import math
+    
+    # Solve the quadratic equation (x-2)^2 = 3
+    # x - 2 = sqrt(3) or x - 2 = -sqrt(3)
+    # x1 = 2 + sqrt(3), x2 = 2 - sqrt(3)
+    
+    a_val = 2.0
+    b_val = math.sqrt(3)
+    
+    root_a = a_val + b_val
+    root_b = a_val - b_val
+    
+    # Order roots such that a > b (already satisfied here since sqrt(3) is positive)
+    if root_a <= root_b:
+        final_root_a, final_root_b = root_b, root_a
+    else:
+        final_root_a, final_root_b = root_a, root_b
+    
+    # Compute target 2a + b
+    result_value = 2 * final_root_a + final_root_b
+    
+    # Construct the answer components for canonical representation
+    # The expression is (4(3)^(1/2)) + (6 - 2*sqrt(3))? 
+    # Let's re-evaluate: a = 2+√3, b=2-√3. Target = 2a+b = 2(2+√3)+(2-√3)
+    # = 4 + 2√3 + 2 - √3 = 6 + √3
+    
+    rational_part = 6
+    radical_coefficient = 1
+    radicand = 3
+    
+    canonical_latex = r"6+\sqrt{3}"
+
+    correct_answer_obj = {
+        "rational": rational_part, 
+        "radical_coefficient": radical_coefficient, 
+        "radicand": radicand, 
+        "canonical_latex": canonical_latex
+    }
+
+    question_text = r"\text{Solve the quadratic equation $(x-2)^2=3$. Let $a$ and $b$ be the roots such that $a>b$. Compute $2a+b$."
+
+    return {
+        "question_text": question_text, 
+        "correct_answer": correct_answer_obj, 
+        "oracle_payload": frozen_params
+    }

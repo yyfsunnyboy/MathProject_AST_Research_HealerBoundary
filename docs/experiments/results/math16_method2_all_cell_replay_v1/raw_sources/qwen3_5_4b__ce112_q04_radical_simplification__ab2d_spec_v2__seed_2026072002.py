@@ -1,0 +1,28 @@
+# -*- coding: utf-8 -*-
+
+def generate(level=1, **kwargs):
+    # Frozen sampled parameters for this task instance
+    frozen_params = {"radicand": 135}
+
+    from core.prompts.domain_function_library import RadicalOps
+    
+    radicand_input = frozen_params["radicand"]
+    
+    coeff, simplified_radicand = RadicalOps.simplify_term(0, radicand_input)
+    
+    # Construct the canonical LaTeX representation: a\sqrt{b}
+    latex_str = f"{coeff}\\sqrt{{{simplified_radicand}}}"
+
+    correct_answer = {
+        "coefficient": coeff,
+        "radicand": simplified_radicand,
+        "canonical_latex": latex_str
+    }
+
+    question_text = r"$$\text{Simplify the radical: }\sqrt{\overline{\text{{frozen\_params}}['radicand']}}$$"
+
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer,
+        "oracle_payload": frozen_params
+    }

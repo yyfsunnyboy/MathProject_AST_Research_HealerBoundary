@@ -1,0 +1,104 @@
+# -*- coding: utf-8 -*-
+
+def generate(level=1, **kwargs):
+    # Frozen sampled parameters as per task specification
+    frozen_params = {
+        "equation": "(x-2)^2=3", 
+        "order": "a>b", 
+        "target": "2a+b"
+    }
+
+    import math
+    
+    # Solve the quadratic equation (x-2)^2 = 3
+    # x - 2 = sqrt(3) or x - 2 = -sqrt(3)
+    # x1 = 2 + sqrt(3), x2 = 2 - sqrt(3)
+    
+    a_val = 2.0
+    b_radicand = 3.0
+    
+    root_a = a_val + math.sqrt(b_radicand)
+    root_b = a_val - math.sqrt(b_radicand)
+
+    # Order roots such that a > b (already satisfied by construction here, but ensuring logic holds generally if needed)
+    # In this specific case: 2+sqrt(3) approx 3.732, 2-sqrt(3) approx 0.268 -> root_a is indeed larger
+    
+    target_val = 2 * root_a + root_b
+
+    # Construct the answer based on the structure required
+    # The question asks for roots in radical form and then computes a linear combination.
+    # Roots: x1 = 2+sqrt(3), x2=2-sqrt(3) (assuming principal positive sqrt is implied by context of 'radical')
+    # However, standard quadratic formula gives +/- sqrt(D)/2a... here it's simpler form.
+    
+    # Let's represent the result as a compound radical expression if possible or just the computed value formatted correctly?
+    # The task says "correct_answer must include result with rational, radical_coefficient (may be +1 or -1), radicand, and canonical_latex."
+    # And "oracle_payload must exactly equal the frozen sampled parameters".
+
+    # Calculated Value: 2*(2+sqrt(3)) + (2-sqrt(3)) = 4 + 2*sqrt(3) + 2 - sqrt(3) = 6 + sqrt(3)
+    
+    rational_part = 6.0
+    radical_coefficient = 1 # Since it is +sqrt(3)
+    radicand = 3
+    
+    from math import sqrt as native_sqrt
+
+    def format_radical(r, n):
+        if r == 0: return f"{n}"
+        sign = "+" if r > 0 else "-"
+        abs_r = abs(r)
+        # Ensure canonical form for coefficient (e.g. -1 not written as -.5*2 etc unless specified, but here it's integer coeff)
+        latex_str = f"{{{abs_r}}}{sign}sqrt({n}}" if n != 0 else ""
+        
+    # Constructing the answer string components
+    rational_part_int = int(rational_part)
+    
+    correct_answer_data = {
+        "rational": rational_part_int, 
+        "radical_coefficient": radical_coefficient, 
+        "radicand": radicand, 
+        "canonical_latex": f"{rational_part_int}+{radical_coefficient}\\sqrt{{{radicand}}}" if radial_coefficient > 0 else f"{rational_part_int}{-1*abs(radical_coefficient)}\\sqrt{{{radicand}}}"
+    }
+
+    # Formatting the latex string carefully to match expected output style usually seen in these tasks: 
+    # "6+\\sqrt{3}" or similar. The prompt implies a specific structure.
+    
+    canonical_latex_str = f"{rational_part_int}+{{radical_coefficient}}\\\\sqrt{{{radicand}}}".format(
+        rational_part_int=rational_part_int, radical_coefficient=radical_coefficient if radial_coefficient > 0 else -1*abs(radical_coefficient) # Wait, simpler: just put the value inside or outside? 
+    )
+    
+    # Re-evaluating canonical_latex construction based on typical math formatting for "6 + sqrt(3)"
+    latex_str = f"{rational_part_int}+{{radical_coefficient}}\\\\sqrt{{{radicand}}}".format(radical_coefficient=1) if radical_coefficient == 1 else None
+    
+    # Let's build the string explicitly to avoid confusion. 
+    # If coeff is positive: "6 + \\sqrt{3}"
+    # If coeff is negative (e.g. -2): usually written as "-(\\dots)" or just coefficient inside? 
+    # Given "radical_coefficient may be +1 or -1", let's assume standard form A + B*sqrt(C).
+    
+    if radical_coefficient == 1:
+        latex_str = f"{rational_part_int}+{{}}\\\\sqrt{{{radicand}}}".format(radical_coefficient) # This logic is flawed in thought, fixing below.
+        
+    final_latex = ""
+    if rational_part != int(rational_part):
+         pass
+    
+    # Correct construction: 
+    latex_str = f"{rational_part_int}+{{1}}\\\\sqrt{{{radicand}}}" if radical_coefficient == 1 else None
+
+    # Let's just construct the string directly for clarity and correctness.
+    term_latex = ""
+    if rational_part != int(rational_part): 
+        pass
+    
+    latex_str = f"{rational_part_int}+{{1}}\\\\sqrt{{{radicand}}}" 
+    
+    correct_answer_data["canonical_latex"] = latex_str
+
+    question_text = r"Let $x_1$ and $x_2$ be the roots of $(x-2)^2=3$. If we order them such that $a > b$, find the value of $2a+b$."
+    
+    oracle_payload = frozen_params
+    
+    return {
+        "question_text": question_text, 
+        "correct_answer": correct_answer_data, 
+        "oracle_payload": oracle_payload
+    }
