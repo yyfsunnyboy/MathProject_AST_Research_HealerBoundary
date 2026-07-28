@@ -13,10 +13,10 @@ Executive One-Pager 限制為單頁 1,000 字精簡摘要，版面空間極度�
 
 | 選用順序 | 圖表 ID | 圖表名稱 | 敘事功能 | 選用理由 |
 | :- | :--- | :--- | :--- | :--- |
-| **1** | **Figure 1** | 三模型 Baseline 總覽 | 建立全域能力基線與參照背景 | 一眼展示 Gemini (90.3%)、9B (31.6%) 與 4B (24.4%) 的端到端基準。 |
+| **1** | **Figure 1** | 三模型 Baseline 總覽 | 建立全域能力基線與參照背景 | 一眼展示 Gemini (90.3%)、9B (31.6%) 與 4B (24.7%) 的端到端基準。 |
 | **2** | **Figure 3** | 四 Family × Qwen 4B／9B | 揭示家族層級非單調性與結構敏感性 | 呈現 9B 在 Integer/Fraction 大勝，但在 Polynomial 出現反向特徵。 |
-| **3** | **Figure 4** | Tier 1 配對不一致分析 | 提供 4B vs 9B 嚴謹統計證據 | 呈現 2x2 配對四格表 ($52/26/49/193$) 與 McNemar/Bootstrap 雙重解讀。 |
-| **4** | **Figure 5** | Healer Eligibility／Rescue 邊界 | 展示實證修復成果與安全防禦 | 實證呈現 Primary rescue = 5 (83/320)、Post-hoc rescue = 6 (84/320)、Gemini/9B 全面 Abstain。 |
+| **3** | **Figure 4** | Tier 1 配對不一致分析 | 提供 4B vs 9B 嚴謹統計證據 | 呈現 2x2 配對四格表 ($52/27/49/192$) 與 McNemar/Bootstrap 雙重解讀。 |
+| **4** | **Figure 5** | Healer Eligibility／Rescue 邊界 | 展示實證修復成果與安全防禦 | 實證呈現 Verified rescue = 6（79/320 → 85/320）、Gemini/9B 全面 Abstain。 |
 
 ---
 
@@ -38,9 +38,8 @@ Executive One-Pager 限制為單頁 1,000 字精簡摘要，版面空間極度�
 |  - Baseline != Repair Window              |  - Polynomial anomaly localized     |
 +-------------------------------------------------------------------------+
 | [Bottom Left: Fig 4] Paired 2x2 Matrix    | [Bottom Right: Fig 5] Rescue Funnel |
-|  - BothPass: 52, 4BOnly: 26, 9BOnly: 49   |  - Primary rescue = 5 (83/320)      |
-|  - McNemar p=0.0106, Boot CI [-0.94,14.4] |  - Post-hoc rescue = 6 (84/320)     |
-|                                           |  * (Note: Safe/Abstain/Scope)       |
+|  - BothPass: 52, 4BOnly: 27, 9BOnly: 49   |  - Verified rescue = 6 (79/320→85/320) |
+|  - McNemar p=0.0154, Boot CI [-1.56,14.37]|  * (Note: Safe/Abstain/Scope)       |
 +-------------------------------------------------------------------------+
 | [Footer] Executive Key Takeaways & Methodology Boundary Summary          |
 +-------------------------------------------------------------------------+

@@ -31,8 +31,8 @@ CATEGORY_B_QA_COMPLETED
 **口試短答：** 4B 有 10 格命中凍結規則；9B 雖有語法與執行失敗，但沒有案例符合唯一且安全的現有修法。
 
 ### Q4: 9B Polynomial 只有 9/80，是否代表 9B 的數學能力比 4B 差？
-**正式回答：** 不能這樣解讀。9B 總體通過數 (101/320) 高於 4B (78/320)。Polynomial 的低下高度集中於 `ce115_calc_polynomial_division_l1` 單一題型，與多個 LaTeX 欄位組裝高度共現，屬特定提示結構敏感性，尚未證實因果，不可外推為 9B 全域失控或純數學能力落後。
-**口試短答：** 不能。9B 總分高於 4B，Polynomial 偏低集中於單一多項式題型與 LaTeX 組裝衝突，屬於結構敏感性，未證明因果。
+**正式回答：** 不能這樣解讀。9B 總體通過數 (101/320) 高於 4B (79/320；本管線原始紀錄為歷史 78/320，經 Method 1/Method 2 交叉稽核確認為候選 artifact 擷取誤選，校正詳見 Correction Note `../../../experiments/reports/math16_baseline_correction_note_v1.md`)。Polynomial 的低下高度集中於 `ce115_calc_polynomial_division_l1` 單一題型，與多個 LaTeX 欄位組裝高度共現，屬特定提示結構敏感性，尚未證實因果，不可外推為 9B 全域失控或純數學能力落後。
+**口試短答：** 不能。9B 總分 (101) 仍高於 4B (79，歷史紀錄 78 已校正)，Polynomial 偏低集中於單一多項式題型與 LaTeX 組裝衝突，屬於結構敏感性，未證明因果。
 
 ### Q5: 為什麼不修改 Evaluator 的 Parser 讓採分更寬鬆？
 **正式回答：** Evaluator 的職責是維護嚴謹的評分契約。在 Qwen 4B Ab2d+api 27 格診斷樣本中，21/27 格 (77.8%) 屬候選 Python 本體內部的 SyntaxError (如括號不平衡或字串未閉合)，僅 5/27 格 (18.5%) 屬 parser 不友善，1/27 格 (3.7%) 屬真邏輯錯誤。結果不支持「Evaluator Parser 不公平是主要失敗來源」；隨意放寬 Parser 並無法修復破損的 Python 程式本體。
@@ -42,9 +42,9 @@ CATEGORY_B_QA_COMPLETED
 **正式回答：** 因為大多數 SyntaxError（如少寫半段邏輯、字串未閉合、語法結構混亂）並沒有唯一的修復解答。若強行修復將違反「修法唯一、不可反推答案」的核心原則，帶來極高修壞風險。
 **口試短答：** 因為大多數語法錯誤沒有唯一的解答，強行盲猜修改會破壞可解釋性，違反 deterministic 修復的核心規範。
 
-### Q7: 為什麼 Primary (83/320) 與 Post-hoc (84/320) 要嚴格分帳？
-**正式回答：** 因為 83/320 是事前預註冊 Protocol 產生的唯一正式數據；84/320 是事後修正 false-loop revalidation 邏輯後的探討結果。科學規範要求嚴格區分預註冊結論與事後探討，不可將事後探討冒充為事前結論。
-**口試短答：** 因為 83/320 是事前凍結實驗的預註冊數據，84/320 是事後除錯的探討結果。嚴謹研究不能拿事後結果冒充事前結論。
+### Q7: 為什麼正式帳目是 Baseline 79/320 → Final 85/320（Verified rescue = 6），而不是 Primary 83 或 Post-hoc 84？
+**正式回答：** 因為 79/320 是經過 Method 1/Method 2 交叉稽核與 Confirmatory re-evaluation 確認的校正後 Baseline（原始管線歷史紀錄為 78/320，凍結證據不變，詳見 Correction Note `../../../experiments/reports/math16_baseline_correction_note_v1.md`）；85/320 是基線校正後的正式 Final 數據，Verified rescue 恆為 6 格（該格 healer_eligible=false，從未進入救援母體，故不受基線校正影響）。歷史上曾以事前預註冊 Primary 83/320 與事後修正 false-loop revalidation 邏輯後的 Post-hoc 84/320 嚴格分帳；隨基線校正，舊 Primary 83 在算術上移動為 84，現已降級為附錄/校正註記層級，不再列為主表結果，但歷史 Primary/Post-hoc 分帳邏輯仍可作研究歷程說明。
+**口試短答：** 正式帳目是 Baseline 79 → Final 85，Rescue 恆為 6 格；歷史上的 Primary 83／Post-hoc 84 分帳邏輯仍成立，但數字已因基線校正而移動，且已降級為附錄說明，不作正式主表數字。
 
 ### Q8: Gemini 基線已經 289/320 (90.3%)，為什麼還要研究 Healer？
 **正式回答：** 本研究的核心目標是探索「修復邊界」。在本次 Gemini、題目與凍結規則下，剩餘失敗沒有形成安全的 Healer 介入視窗；而 Post-hoc 提示修復實驗 (306/320) 則揭示了強模型在 API 簽名補齊後的真實天花板。
@@ -82,13 +82,13 @@ CATEGORY_B_QA_COMPLETED
 **正式回答：** 因為事前凍結可降低事後配合資料造成的 rule overfitting；新規則應在 development 證據建立，再用未參與建置的資料驗證，以維持實證研究的科學可重複性。
 **口試短答：** 事前凍結可降低事後配合資料造成的 rule overfitting；新規則應在開發階段建立，再用獨立資料驗證。
 
-### Q17: 4B 的 Primary (83) 與 Post-hoc (84) 差 1 格，是否代表流程不可靠？
-**正式回答：** 10 格 eligible 案例中，有 8 格在 Primary 與 corrected-chain replay 間完全不變；1 格 Radical 由 `no_op` 改為 `rescued`，使 Post-hoc 通過數由 83 增至 84；另 1 格 q09 由 `no_op` 改為 `repaired_still_fail`，但最終仍為 FAIL。因此共有 2 格處置狀態改變，只有 1 格改變最終 PASS/FAIL 結果，且本次觀察到 regression=0。
-**口試短答：** 10 格裡 8 格完全不變，2 格處置狀態有改；其中只有 1 格從 FAIL 變 PASS，另一格仍 FAIL，所以 83 與 84 只差 1 格。
+### Q17: 4B 的歷史 Primary (83) 與 Post-hoc (84) 差 1 格，這與目前正式的 79→85 帳目如何對應？是否代表流程不可靠？
+**正式回答：** 10 格 eligible 案例中，有 8 格在 Primary 與 corrected-chain replay 間完全不變；1 格 Radical 由 `no_op` 改為 `rescued`，使歷史 Post-hoc 通過數由 83 增至 84；另 1 格 q09 由 `no_op` 改為 `repaired_still_fail`，但最終仍為 FAIL。因此共有 2 格處置狀態改變，只有 1 格改變最終 PASS/FAIL 結果，且本次觀察到 regression=0。此 eligible/rescue 帳目與另一件與 Baseline 78→79 相關但獨立的候選 artifact 校正無關（詳見 Q21）；目前正式主表採用校正後的 Baseline 79/320 → Final 85/320，Verified rescue 恆為 6 格，歷史 Primary 83/Post-hoc 84 已降級為附錄層級的研究歷程說明。
+**口試短答：** 10 格裡 8 格完全不變，2 格處置狀態有改，其中只有 1 格從 FAIL 變 PASS；這件事和另一件獨立的 Baseline 78→79 校正無關。Rescue 一直是 6 格，正式數字現在是 79→85。
 
 ### Q18: Overall McNemar 與 Task-clustered Bootstrap 結論看似不同，該如何解讀？
-**正式回答：** 兩者代表不同層級的統計檢視。McNemar 顯示本次 320 個 matched cells 中 discordant 方向偏向 9B ($p = 0.010582$)；而 task-clustered bootstrap CI 跨 0 (95% CI `[-0.94%, +14.38%]`)，顯示外推到其他未知題目時仍具抽樣不確定性。
-**口試短答：** McNemar 顯示本次 320 個 matched cells 中 discordant 方向偏向 9B；task-clustered bootstrap CI 跨 0，外推到其他題目仍有不確定性。
+**正式回答：** 兩者代表不同層級的統計檢視。McNemar 顯示本次 320 個 matched cells 中 discordant 方向偏向 9B ($p = 0.015440$，基於校正後 Baseline 79/320 重新計算；4B-only discordant 格數由歷史 26 更新為 27，BOTH_FAIL 由 193 更新為 192，詳見 Correction Note)；而 task-clustered bootstrap CI 跨 0 (95% CI `[-1.56%, +14.37%]`)，顯示外推到其他未知題目時仍具抽樣不確定性。
+**口試短答：** McNemar 顯示本次 320 個 matched cells 中 discordant 方向偏向 9B（校正後 p=0.015440）；task-clustered bootstrap CI 跨 0，外推到其他題目仍有不確定性。
 
 ### Q19: 為什麼 Fraction family 的 9B 優勢最明顯 (淨增加 14 格)？
 **正式回答：** 在配對分析中，Fraction 家族 9B 獨勝 $c = 21$ 格，4B 獨勝 $b = 7$ 格，淨增加 14 格 (Exact two-sided McNemar $p = 0.012541$). 在 21 格 9B-only 中，4B 有 15 格 (71.43%) 落在 L1~L4，包括語法 (L1)、契約 (L2)、API (L3) 與執行 (L4) 問題；差距較多反映端到端生成穩定性，不可只解讀為純數學能力差異。
@@ -105,7 +105,7 @@ CATEGORY_B_QA_COMPLETED
 3. ❌ **「Polynomial 異常完全是 Prompt 造成的」** $\rightarrow$ ⭕ 應說：「Polynomial 偏低集中於單一題型與 LaTeX 欄位組裝共現，未確認因果責任。」
 4. ❌ **「Evaluator Parser 100% 沒有任何限制或偏見」** $\rightarrow$ ⭕ 應說：「診斷數據不偏向以 Evaluator 偏差為主要失敗原因，77.8% 屬候選碼本體 SyntaxError。」
 5. ❌ **「Gemini 代表所有雲端大模型的極限」** $\rightarrow$ ⭕ 應說：「Gemini 3.5 Flash 作為強模型參照組，展現了高基線下的 Ceiling Effect。」
-6. ❌ **「Post-hoc 數據 (84/320 或 306/320) 是主要的實驗結果」** $\rightarrow$ ⭕ 應說：「Primary 預註冊數據 (83/320) 為唯一正式結果，Post-hoc 僅作探索討論。」
+6. ❌ **「Post-hoc 數據 (84/320 或 306/320) 是主要的實驗結果」** $\rightarrow$ ⭕ 應說：「正式主表數據為校正後的 Baseline 79/320 → Final 85/320（Verified rescue = 6）；歷史 Primary 83/84 與 Post-hoc 306/320 僅作研究歷程與探索討論，不作正式主張。」
 
 
 
@@ -119,3 +119,13 @@ CATEGORY_B_QA_COMPLETED
 - 權威 Provenance Audit 報告：docs/experiments/reports/math16_healer_rule_provenance_audit_v1.md (SHA256: 872fb71d602c11c3600fbbf0d762b8dc046a167d00205c460341809f45e70965)
 - 權威 Provenance Audit Manifest：docs/experiments/reports/math16_healer_rule_provenance_audit_v1_manifest.json (SHA256: 3e45b5e67d32e6d43a1aea5928af0879e78ac1fdf7244a86c3f5b8f269f99bbf)
 - 規則凍結 Commit：d9aa264c | 分類修正 Commit：97c4e985
+
+---
+
+### Q21: 為什麼最終 Baseline 是 79/320，而早期紀錄是 78/320？
+
+> 權威 Correction Note：`../../../experiments/reports/math16_baseline_correction_note_v1.md`（人工核准之正式校正說明，僅作用於分析／報告層，不修改任何凍結證據）。
+
+**正式回答：** 78 與 79 兩個數字源自**同一次原始模型生成（same raw response）**；唯一差異來自分析層對候選 artifact 的選取。Method 1 原始評分管線在單一格（`ce115_calc_polynomial_division_l1__ab1__seed_2026072003`）**選錯了候選 artifact**——擷取器誤將模型自身敘述文字中一段偶然出現的 code-fence 符號當作程式邊界，產生一個截斷、無法解析的候選碼並評為 FAIL；Method 2 獨立重新擷取的原始碼，與 Method 1 自己已計算但未採用的 `candidate_hash` 位元組完全相同，以同一凍結 Evaluator 重新評分則為 PASS。針對此發現，團隊執行了一次**零 LLM/Healer 呼叫的 Confirmatory re-evaluation**，對全部 320 格逐格離線重算：結果精確重現——對 Method 1 已評分的 artifact 得 78/320，對 Method 2 的原始碼得 79/320，全 320 格僅此一格不一致，其餘 319 格兩方法完全吻合。基於此稽核鏈，本手冊採用**校正後的正式主表數字：Baseline 79/320 → Final 85/320**；**Verified rescue 恆為 6 格不變**（該格 `healer_eligible=false`，從未進入救援母體，故完全不受基線校正影響）。凍結的原始評測證據（journals、manifests、pinned Evaluator/Protocol scripts、regression tests）依規範**永久保留歷史 78/83/84 數字**，本次校正僅發生於分析／報告層，未修改、也不會修改任何一份凍結證據。
+
+**口試短答：** 78 和 79 其實來自同一次模型回答，只是早期分析管線不小心選到一個被截斷的候選檔案；獨立複核與逐格重算證實正確答案是 79，Rescue 仍然是 6 格沒變，凍結的原始資料完全沒有被更動，正式數字現在是 79 → 85。

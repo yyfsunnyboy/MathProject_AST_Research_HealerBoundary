@@ -5,6 +5,7 @@
 報告日期：2026-07-28
 資料來源：既有 Method 1（Qwen 3.5 4B）結果，全程未重跑模型／Healer／Evaluator
 Split Manifest SHA-256: `c0ff7e8a31d713a92670aed1a03bc71429955c406036affdd8d9e216f1c9edc7`
+更正說明：本報告官方 320 格總結果已依 [`math16_baseline_correction_note_v1.md`](math16_baseline_correction_note_v1.md) 更新為分析/報告層更正後數值（Baseline 79/320，corrected-chain Final 85/320）；40／120 切分子集數字（本更正之單一 cell 屬 `ab1` 條件，不在本切分之 `ab2d`／`ab2d_spec_v2` 範圍內）不受影響，維持不變。
 
 ---
 
@@ -12,13 +13,13 @@ Split Manifest SHA-256: `c0ff7e8a31d713a92670aed1a03bc71429955c406036affdd8d9e21
 
 本報告完全基於既有 Method 1（Qwen 3.5 4B）評估與 Healer 結果進行切分整理與統計聚合，全程不重跑模型、Healer 或 Evaluator，不新增結果判定。
 
-### 官方 320 格總結果（Baseline vs 最終技術修正結果）
+### 官方 320 格總結果（Baseline vs 最終技術修正結果，分析/報告層更正後）
 
 | | Baseline PASS | 最終技術修正結果 PASS | 共救回格數 | PASS rate |
 |---|---|---|---|---|
-| 官方 320 格 (Qwen 4B) | 78 / 320 | 84 / 320 | 6 格 | 24.38% → 26.25% |
+| 官方 320 格 (Qwen 4B，更正後) | 79 / 320 | 85 / 320 | 6 格 | 24.69% → 26.56% |
 
-> 最終技術修正結果採 corrected-chain（事後機制驗證）結果。Primary 正式結果為 83／320；84／320 為 corrected-chain 技術修正結果，完整分帳見附錄。Regression: Not measured under Method 1（Method 1 未對 Baseline PASS cells 執行 Healer，因此不能量測 PASS→FAIL regression）。
+> 最終技術修正結果採 corrected-chain（事後機制驗證）結果。依 [`math16_baseline_correction_note_v1.md`](math16_baseline_correction_note_v1.md)，分析/報告層 Baseline 由 78/320 更正為 79/320（+1 格，root cause 詳見該文件），Primary 正式結果對應由 83/320 更正為 84/320（現列為歷史中繼值，demoted，不再作為主表標題數字），corrected-chain 最終結果由 84/320 更正為 85/320；共救回格數維持 6 格不變。**凍結管線歷史輸出 Baseline 78/320、Primary 83/320、corrected-chain 84/320 永久保留於凍結證據檔內，不因本更正而修改**，完整分帳見附錄 A。Regression: Not measured under Method 1（Method 1 未對 Baseline PASS cells 執行 Healer，因此不能量測 PASS→FAIL regression）。
 
 ### Contract-Aware 160 格切分總覽（僅 ab2d + ab2d_spec_v2）
 
@@ -43,18 +44,19 @@ Split Manifest SHA-256: `c0ff7e8a31d713a92670aed1a03bc71429955c406036affdd8d9e21
 
 ## 2. 320 格官方總結果 (Official 320-Cell Results)
 
-以下數字直接取自既有 Method 1 正式凍結結果（Qwen 3.5 4B，320 cells = 16 題 × 4 條件 × 5 種子），未經任何重新計算或重跑。
+以下數字取自既有 Method 1 正式凍結結果（Qwen 3.5 4B，320 cells = 16 題 × 4 條件 × 5 種子），未經任何重新計算或重跑；表中數值為分析/報告層更正後版本（依 [`math16_baseline_correction_note_v1.md`](math16_baseline_correction_note_v1.md)），凍結證據檔本身仍永久保留原始 78/83/84 數值（見表下注記與附錄 A）。
 
 | 項目 | Baseline PASS | 最終技術修正結果 PASS (corrected-chain) | 共救回格數 | PASS rate |
 |---|---|---|---|---|
-| **Qwen 3.5 4B (320 cells)** | **78 / 320** | **84 / 320** | **6 格** | **24.38% → 26.25%** |
+| **Qwen 3.5 4B (320 cells，更正後)** | **79 / 320** | **85 / 320** | **6 格** | **24.69% → 26.56%** |
 
 ![Figure 1 — Official 320-Cell: Baseline vs Final Healer PASS](./figures/math16_method1_40_120/figure_1_baseline_vs_final_320.png)
 
 ### 表下注記
 
 - 「最終技術修正結果」欄位採用 corrected-chain（事後機制驗證後的最終結果），非 Primary 原始 5 格救援。
-- Primary 正式預註冊結果為 83/320（rescue = 5 格），Corrected-chain 事後驗證再增加 1 格（84/320，rescue 共 6 格）。Primary／corrected-chain 之詳細分帳與技術修正歷史，見附錄 A。
+- **凍結管線歷史輸出（永久不變，見附錄 A）**：Baseline 78/320；Primary 正式預註冊結果 83/320（rescue = 5 格）；corrected-chain 事後驗證再增加 1 格達 84/320（rescue 共 6 格）。
+- **分析/報告層更正後（依 Correction Note，本表採用）**：Baseline 79/320（+1 格，單一 cell 之候選程式擷取錨定錯誤，root cause 見 Correction Note）；Primary 對應為 84/320（歷史中繼值，demoted，不再作主表標題）；corrected-chain Final 85/320（rescue 仍為 6 格，該更正 cell 非 Eligible，不影響 rescue 計數）。Primary／corrected-chain 之詳細分帳與技術修正歷史，見附錄 A。
 - Method 1（Deterministic AST Healer）僅針對 Baseline FAIL 案例執行 Eligibility 審查與修復介入。Regression: Not measured under Method 1（Method 1 未對 Baseline PASS cells 執行 Healer，因此不能量測 PASS→FAIL regression）。
 
 ---
@@ -194,7 +196,7 @@ Rescue rate among Baseline FAIL: 3.45%（116 格 Baseline FAIL 中，4 格被救
 
 基於既有 Method 1（Qwen 3.5 4B）結果之 Contract-Aware 40/120 切分整理，本報告得出以下結論：
 
-- 官方 320 格結果維持不變：Baseline 78/320 (24.38%) → 最終技術修正結果（corrected-chain）84/320 (26.25%)，共救回 6 格。Regression: Not measured under Method 1。
+- 官方 320 格結果（分析/報告層更正後）：Baseline 79/320 (24.69%) → 最終技術修正結果（corrected-chain）85/320 (26.56%)，共救回 6 格。凍結管線歷史輸出 Baseline 78/320、Primary 83/320、corrected-chain 84/320 永久保留不變，詳見 [`math16_baseline_correction_note_v1.md`](math16_baseline_correction_note_v1.md) 與附錄 A。Regression: Not measured under Method 1。
 - Contract-Aware 160 格切分（僅 ab2d + ab2d_spec_v2）中，Development 40 格 Baseline PASS 11/40 (27.5%)，最終技術修正結果 PASS 同為 11/40 (27.5%)，救援效果為 0；Evaluation 120 格 Baseline PASS 33/120 (27.5%) → 最終技術修正結果 PASS 37/120 (30.83%)，救援 4 格。
 - Development 40 格中，全部 29 個 Baseline FAIL 案例之 Rule-precondition matched 皆為 0（No applicable frozen rule），未觸發任何凍結規則；此支持 Development 集合作為規則／Guard 設計參考證據，而非泛化成效指標的定位。
 - Evaluation 120 格為主要結果；排除 5 個 cohort_level_provenance_uncertain 任務後之 70 格敏感度分析顯示，全部 4 格救援效果均集中於該 5 題內，標準基準 7 題（70 格）救援效果為 0。
@@ -212,11 +214,13 @@ Rescue rate among Baseline FAIL: 3.45%（116 格 Baseline FAIL 中，4 格被救
 
 | 項目 | Baseline | Eligible | Primary Rescue/Final | Post-hoc Rescue/Final |
 |---|---|---|---|---|
-| Qwen 4B (320 cells) | 78/320 | 10 格 | 5 格 (83/320) | 6 格 (84/320) |
+| Qwen 4B（凍結管線歷史輸出，永久保留） | 78/320 | 10 格 | 5 格 (83/320) | 6 格 (84/320) |
 
-分帳原則：83/320 為事前預註冊 Protocol 唯一正式認可數據（Primary）。Post-hoc corrected-chain 84/320（相較 Primary 僅多 1 個 PASS）屬事後機制探索與 false-loop rollback bug 修正結果，不得冒充為 Primary 正式結果，但因屬正式結果揭露後的技術重算，可作為「最終技術修正結果」呈現於主文（依本次任務指示）。
+分帳原則（凍結歷史語意）：83/320 為事前預註冊 Protocol 唯一正式認可數據（Primary）。Post-hoc corrected-chain 84/320（相較 Primary 僅多 1 個 PASS）屬事後機制探索與 false-loop rollback bug 修正結果，不得冒充為 Primary 正式結果。
 
 技術修正細節：在 10 個 Eligible 案例重放中，8 個處置狀態完全不變；2 個處置狀態改變（1 格由 no_op 改為 rescued 使 PASS 增加 1 格，1 格由 no_op 改為 repaired_still_fail 仍為 FAIL）。因此僅 1 格改變最終 PASS/FAIL 結果（83→84）。
+
+> **分析/報告層更正後對應值（見 [`math16_baseline_correction_note_v1.md`](math16_baseline_correction_note_v1.md)）**：上表為凍結管線歷史輸出，永久保留、不予修改。經 Method 1／Method 2 差異 audit 確認一格獨立於 Eligibility 之外的 Baseline 擷取錯誤（`qwen3_5_4b__ce115_calc_polynomial_division_l1__ab1__seed_2026072003`，非 Eligible）後，分析/報告層對應更正為：Baseline 79/320、Eligible 10 格（不變）、Primary 84/320（歷史中繼值，demoted）、corrected-chain Final 85/320（rescue 仍為 6 格）。
 
 ### 附錄 B：ce111_q08 Forced Ambiguity 案例（Development 任務）
 

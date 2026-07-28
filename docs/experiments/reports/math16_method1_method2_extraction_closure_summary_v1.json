@@ -1,0 +1,116 @@
+{
+  "audit_id": "math16_method1_method2_extraction_closure_320_v1",
+  "audit_date": "2026-07-28",
+  "scope": "Full 320-cell crosswalk extending math16_method1_method2_78_79_discrepancy_audit_v1.md from the single known cell to all 320 cells.",
+  "inputs": {
+    "method1_baseline": "docs/experiments/results/math16_pilot02_qwen4b_evaluation_v4_r001/cell_level_baseline.jsonl",
+    "method1_eligibility": "docs/experiments/results/math16_pilot02_qwen4b_healer_v4_r001/eligibility_inventory.jsonl",
+    "method2_eligibility_journal": "docs/experiments/results/math16_method2_all_cell_replay_v1/eligibility_journal.jsonl",
+    "method2_transition_journal": "docs/experiments/results/math16_method2_all_cell_replay_v1/transition_journal.jsonl",
+    "method2_raw_sources_dir": "docs/experiments/results/math16_method2_all_cell_replay_v1/raw_sources/",
+    "original_generation_artifacts_dir": "docs/experiments/results/math16_pilot02_qwen4b/cells/",
+    "evaluator_pinned": "scripts/evaluate_math16_pilot02_full_v4.py + scripts/run_math16_latex_v1_gemini_live.py::classify_math16_response (same evaluator_hash referenced by both methods: 2cca19f2258d4ba6134ff10d4e9bcff925e2441c32820fcbc151cb6b1dd740bc)"
+  },
+  "population_checks": {
+    "cell_count_method1": 320,
+    "cell_count_method2": 320,
+    "cell_id_set_symmetric_difference": 0,
+    "all_320_cell_ids_unique_and_1to1_matched": true,
+    "original_response_corpus_identical": "verified per-cell via original_response_sha256 recomputed from artifact.json raw_response and cross-checked against method1_raw_response_sha256 for all 320 cells (no mismatch found)",
+    "evaluator_hash_identical_both_methods": true,
+    "task_condition_seed_identical_both_methods": true
+  },
+  "classification_counts": {
+    "status_changing": 1,
+    "eligibility_only": 1,
+    "equivalent_extraction": 239,
+    "normalization_only": 70,
+    "extraction_abstain_difference": 9,
+    "no_difference": 0,
+    "wrong_block_selection_beyond_known_cell": 0,
+    "suspicious_truncation_beyond_known_cell": 0,
+    "unresolved": 0,
+    "total": 320
+  },
+  "classification_definitions": {
+    "status_changing": "Method1 evaluated-artifact final_status differs from Method2 raw_status for this cell.",
+    "eligibility_only": "PASS/FAIL status agrees, but Method1 healer_eligible/matched_rule_probe disagrees with Method2 eligible/rule_id (bookkeeping only, restricted to the 242 cells that FAILED under Method1 baseline, since Method1's eligibility inventory only covers FAILED cells).",
+    "equivalent_extraction": "Method1's scored artifact hash differs from Method2's raw source hash (and from Method1's own candidate_hash), but both sides parse successfully (g1_parse=PASS / parses_ok) and reach the same final PASS/FAIL status -- two independently-implemented extractors landing on functionally equivalent candidate text.",
+    "normalization_only": "Both Method1's scored artifact and Method2's raw source fail to parse (agree there is no usable code, e.g. non-code / nonchoice prose-answer tasks) and both are FAILED -- differing hash values are just two different non-code text spans, not an extraction bug.",
+    "extraction_abstain_difference": "One side's source parses and the other's does not, but this divergence did NOT change the final PASS/FAIL status for the cell (both still land on FAILED via different gates/subtypes).",
+    "wrong_block_selection_beyond_known_cell": "Reserved for cells matching the known-bug signature (Method2 parses fine, Method1's scored artifact does not) where status still agreed -- none found beyond the one already-status-changing cell.",
+    "no_difference": "Method1's scored artifact hash equals Method2's raw source hash exactly -- none found; raw_artifact_sha256 and candidate_hash are, by Method1's schema, always distinct fields even when semantically equivalent."
+  },
+  "known_status_changing_cell": {
+    "cell_id": "qwen3_5_4b__ce115_calc_polynomial_division_l1__ab1__seed_2026072003",
+    "method1_final_status": "FAILED",
+    "method2_raw_status": "PASSED",
+    "root_cause": "Method1's v4 baseline pipeline scored an incorrectly-bounded candidate (raw_artifact_sha256=698fc868...) anchored on a spurious in-prose triple-backtick occurrence, instead of its own correctly-extracted candidate_hash=6adedeb6f2039ecef9273927464ee460bcd0167b08981669d5c09b866fb53c37, which is byte-identical to Method2's canonical raw_sources file for this cell and to Method2's raw_source_sha256.",
+    "healer_eligibility_status": "healer_eligible: false / noneligible, eligibility_reason: 'No extractable candidate source for frozen healer.' -- this cell was NEVER considered by Method1's healer/rescue pipeline (it never entered the 242-cell eligibility population's rescue path). Its correction is a pure baseline-extraction fix, orthogonal to the rescue mechanism.",
+    "root_cause_status": "formally closed -- confirmed by (1) three-way hash/byte diff of original response vs Method1 artifact vs Method1 candidate_hash vs Method2 raw source, (2) fence-position analysis of the original raw_response (7 occurrences of ``` , only the 7th is the real code fence), (3) confirmatory re-evaluation reproducing FAILED for Method1's scored text and PASSED for Method2's/Method1's-candidate text under the identical pinned evaluator, with zero mismatches against recorded status across all 320 cells in both directions."
+  },
+  "known_eligibility_only_cell": {
+    "cell_id": "qwen3_5_4b__ce112_q09_divisor_multiple_intersection__ab2d__seed_2026072003",
+    "method1_healer_eligible": false,
+    "method1_matched_rule_probe": null,
+    "method2_eligible": true,
+    "method2_rule_id": "L1_PROSE_RESIDUE_NARROW",
+    "raw_source_identical_between_methods": true,
+    "final_status_both_methods": "FAILED (still_failed)",
+    "conclusion": "Confirmed a separate root cause from the 78/79 gap: an extraction-method coverage difference (Method2's plain_text extraction path succeeded where Method1's frozen v4 healer extractor abstained). Affects only eligibility/rule-hit bookkeeping, not any PASS/FAIL count."
+  },
+  "confirmatory_reevaluation": {
+    "method": "Re-invoked the pinned evaluator's post-extraction scoring logic (ast.parse -> entry-point check -> _execute_generate_all_ops -> schema check -> oracle check, reusing the exact imported functions from scripts/run_math16_latex_v1_gemini_live.py and scripts/evaluate_math16_pilot02_full_v4.py) directly against pre-extracted candidate source strings, since the given inputs for this step are already-extracted candidate texts rather than raw model responses.",
+    "method1_evaluated_artifact_source": "cell_level_baseline.jsonl['classifier_source'] field (present for 316/320 cells; the remaining 4 have no persisted candidate text because Method1 recorded a parse failure with no stored source -- these were scored FAILED without re-execution, consistent with their recorded g1_parse=FAIL)",
+    "method2_raw_source": "docs/experiments/results/math16_method2_all_cell_replay_v1/raw_sources/*.py (all 320 present)",
+    "zero_llm_calls": true,
+    "zero_healer_invocations": true,
+    "output_location_new_scratch_only": "docs/experiments/reports/_scratch_confirmatory_reeval_320/{m1_evaluated_artifact_reeval.json, m2_raw_source_reeval.json, confirmatory_reeval_summary.json}",
+    "no_existing_files_modified": true,
+    "reproduced_method1_baseline_78_320": true,
+    "reproduced_method2_raw_79_320": true,
+    "method1_reeval_pass_count": 78,
+    "method2_reeval_pass_count": 79,
+    "mismatches_vs_recorded_status_method1": 0,
+    "mismatches_vs_recorded_status_method2": 0
+  },
+  "answers": {
+    "cells_with_any_source_difference": 320,
+    "cells_normalization_only": 70,
+    "cells_suspicious_extraction_issues_beyond_known_cell": 0,
+    "cells_that_change_pass_fail": 1,
+    "cells_that_change_only_eligibility_rule_hit": 1,
+    "confirmed_only_one_cell_causes_78_79_gap": true,
+    "should_79_become_corrected_baseline": "Proposed yes, pending human sign-off -- confirmatory re-evaluation independently reproduces 79/320 for Method2's raw sources (and reproduces 78/320 for Method1's own originally-scored, incorrectly-bounded artifacts, confirming Method1's number is internally consistent with what it actually scored, not with what it should have scored). Not applied to any official file by this audit.",
+    "should_primary_move_83_to_84_and_corrected_chain_84_to_85": "Proposed yes, pending human sign-off -- the affected cell was healer_eligible=false / noneligible ('No extractable candidate source for frozen healer'), so it never entered the 10-cell eligible-rescue population. Its correction is additive to Primary and corrected-chain independently of the rescue mechanism: Primary 83/320 -> 84/320, corrected-chain 84/320 -> 85/320, both by +1, with the rescue count itself unaffected.",
+    "is_rescue_count_still_5_6": true,
+    "rescue_count_rationale": "The one status-changing cell was never eligible for the healer/rescue pipeline; rescue counts (5 Primary / 6 corrected-chain) are unaffected by this baseline-extraction correction.",
+    "files_that_would_need_correction_if_79_320_is_adopted_PROPOSED_ONLY": [
+      "docs/experiments/results/math16_pilot02_qwen4b_evaluation_v4_r001/cell_level_baseline.jsonl (one row: qwen3_5_4b__ce115_calc_polynomial_division_l1__ab1__seed_2026072003 -- raw_artifact_sha256 should be re-extracted to match candidate_hash / Method2 raw source; final_status FAILED -> PASSED)",
+      "docs/experiments/results/math16_pilot02_qwen4b_evaluation_v4_r001/baseline_summary.json (78/320 -> 79/320 and dependent percentages)",
+      "docs/experiments/results/math16_pilot02_qwen4b_evaluation_v4_r001/overall_summary.json",
+      "docs/experiments/results/math16_pilot02_qwen4b_evaluation_v4_r001/condition_summary.json / family_summary.json / task_summary.json / seed_summary.json (ab1 / polynomial / ce115_calc_polynomial_division_l1 / seed 2026072003 breakdowns)",
+      "docs/experiments/results/math16_pilot02_qwen4b_evaluation_v4_r001/failure_taxonomy_summary.json (remove this cell from PARSE_ERROR/catastrophic_truncation counts)",
+      "docs/experiments/results/math16_pilot02_qwen4b_evaluation_v4_r001/report.md",
+      "docs/experiments/reports/math16_method1_40_120_split_results_report_v1.md (Baseline 78/320 -> 79/320; Primary 83/320 -> 84/320; corrected-chain 84/320 -> 85/320; Appendix A dependent tables/percentages; the 'API-only'/L1 failure-subtype breakdown table)",
+      "docs/experiments/results/math16_pilot02_qwen4b_healer_v4_r001/eligibility_inventory.jsonl (no content change expected -- cell remains noneligible -- but should be footnoted as excluded-from-rescue-by-design once the baseline itself is corrected)",
+      "docs/experiments/reports/math16_method2_all_cell_results_report_v1.md (cross-reference note: Method1 Baseline now matches Method2 Raw at 79/320 for this cell; any place that currently narrates a residual 78-vs-79 discrepancy)",
+      "docs/experiments/reports/20260728_math16_method1_method2_progress_handoff.md (status update)",
+      "Any chart/figure (if present in docs/experiments/reports or a slides/dashboard asset) that visualizes Baseline 78/320, Primary 83/320, or corrected-chain 84/320 for Qwen 4B"
+    ]
+  },
+  "constraints_honored": {
+    "no_existing_report_or_results_or_journal_files_modified": true,
+    "no_healer_or_eligibility_or_extractor_or_evaluator_or_protocol_or_manifest_files_modified": true,
+    "no_model_or_llm_calls_made": true,
+    "no_healer_executed": true,
+    "confirmatory_evaluator_output_written_to_new_location_only": "docs/experiments/reports/_scratch_confirmatory_reeval_320/",
+    "no_git_commit_made": true,
+    "this_is_a_proposal_pending_human_sign_off_not_a_correction": true
+  },
+  "deliverables": {
+    "updated_report": "docs/experiments/reports/math16_method1_method2_78_79_discrepancy_audit_v1.md",
+    "new_csv": "docs/experiments/reports/math16_method1_method2_extraction_closure_320.csv",
+    "new_json": "docs/experiments/reports/math16_method1_method2_extraction_closure_summary_v1.json"
+  }
+}

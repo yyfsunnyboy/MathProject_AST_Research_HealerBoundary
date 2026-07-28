@@ -14,7 +14,7 @@ LAYOUT_CONSTRAINTS_ENFORCED
 1. **Primary 與 Post-hoc 嚴格視覺與文字分帳**：
    - **Primary 數據**（預註冊事前凍結 Protocol 數據）使用實線、飽和色、主要直條柱狀 (Solid Main Bars)。
    - **Post-hoc 數據**（事後除錯探討或機制驗證數據）僅能以虛線框 (Dashed Outline)、灰階/半透明柱、旁註 (Footnotes) 或獨立標記呈現，**嚴禁**與 Primary 畫成同級正式 Bar。
-   - **分帳數據精確標示**：Figure 5 中必須明確標示 `Primary rescue = 5` (83/320) 與 `Post-hoc corrected-chain rescue = 6` (84/320)。**嚴禁使用模糊範圍描述**（即不得將兩者混寫為單一模糊範圍或斜線組合）。
+   - **分帳數據精確標示**：Figure 5 中必須明確標示單一 Headline `Verified rescue = 6`（Baseline 79/320 → Final 85/320）。修正前之雙軌分帳 `Primary rescue = 5` (83/320) 與 `Post-hoc corrected-chain rescue = 6` (84/320) 已依 Baseline 79/320 修正案降級為歷史對照註腳，不得再作為主表 Headline 呈現。**嚴禁使用模糊範圍描述**（即不得將 Verified rescue 與已降級之 Primary/Post-hoc 數字混寫為單一模糊範圍或斜線組合）。
 
 2. **載體核心圖表數量硬性約束 (Strict Per-Carrier Figure Count Constraints)**：
    - **Executive One-Pager**：`exactly_4_core_figures = true`。包含 Figure 1, Figure 3, Figure 4, Figure 5。Figure 6 不得作為獨立圖，僅化為 Figure 5 旁之 3 行文字概念註解。
@@ -22,14 +22,14 @@ LAYOUT_CONSTRAINTS_ENFORCED
    - **口頭簡報 (Oral Slides)**：最多 5 張核心圖表 (Figure 1, Figure 2, Figure 4, Figure 5, Figure 6)。
 
 3. **禁止因果與能力過度解讀 (Forbidden Interpretations)**：
-   - Gemini (289/320) 與 Qwen 4B (78/320)、9B (101/320) 之比較屬 **Tier 2 描述性參照**，不得宣稱「證明大模型數學能力全面碾壓」或「純參數規模效果」。
+   - Gemini (289/320) 與 Qwen 9B (101/320)、4B (79/320) 之比較屬 **Tier 2 描述性參照**，不得宣稱「證明大模型數學能力全面碾壓」或「純參數規模效果」。
    - Pass rate 係「端到端生成與執行成功率」，包含 Python 語法、JSON 包裝與 API 呼叫，不等於「純數學能力」。
    - `Regression = 0` 必須明確註記為「**在本次 320 個測試單元與凍結規則中觀察到**」，不得宣稱「保證絕不倒退」或「100% 安全」。
 
 4. **雙層統計同時呈現規範**：
    - 包含統計檢定之圖表（如 Tier 1 配對分析 Figure 4），必須**同時呈現**：
-     - 細胞層級獨立性證據：Exact McNemar $p = 0.010582$
-     - 題目群集外推不確定性：Task-clustered Bootstrap 95% CI `[-0.94%, +14.38%]`
+     - 細胞層級獨立性證據：Exact McNemar $p = 0.015440$
+     - 題目群集外推不確定性：Task-clustered Bootstrap 95% CI `[-1.56%, +14.37%]`
    - 不得單獨寫「統計顯著」而忽略 Bootstrap CI 跨 0 之全域外推不確定性。
 
 5. **圖表類型限制 (Chart Type Restrictions)**：
@@ -44,14 +44,14 @@ LAYOUT_CONSTRAINTS_ENFORCED
 ### 1. Figure 1: Baseline Overall Performance across Three Models
 * **圖型**: 單組垂直直條圖 (Vertical Bar Chart)。
 * **視覺分層**:
-  - Qwen 3.5 4B (78/320, 24.4%) 與 Qwen 3.5 9B (101/320, 31.6%) 為 **Tier 1 Matched Comparison**。
+  - Qwen 3.5 9B (101/320, 31.6%) 與 Qwen 3.5 4B (79/320, 24.7%) 為 **Tier 1 Matched Comparison**。
   - Gemini 3.5 Flash (289/320, 90.3%) 標示為 **Tier 2 Descriptive Reference**。
 * ** mandatory 註記**: "Pass rate represents end-to-end Python/JSON execution success, not pure mathematical reasoning."
 
 ### 2. Figure 2: Four Prompt Conditions across Three Models
 * **圖型**: 分組直條圖 (Grouped Bar Chart)，X 軸為 4 個條件 (Ab1, Ab2g, Ab2d+api, Ab2d+spec)。
 * **視覺分層**:
-  - Gemini 的 `Ab2d+spec` 標示為 **`spec-v1` (63/80)**；Qwen 4B 與 9B 的 `Ab2d+spec` 標示為 **`spec-v2` (36/80 與 40/80)**。
+  - Gemini 的 `Ab2d+spec` 標示為 **`spec-v1` (63/80)**；Qwen 9B 與 4B 的 `Ab2d+spec` 標示為 **`spec-v2` (40/80 與 36/80)**。
   - Gemini Post-hoc 提示修復數據 (80/80) **不得** 畫在 `Ab2d+spec` 主柱上；僅能以虛線框 (Dashed Box) 疊加或在旁註說明。
 * ** mandatory 註記**: "Gemini primary tested spec-v1; Qwen models tested spec-v2. Gemini Post-hoc 80/80 is mechanism verification only."
 
@@ -61,17 +61,17 @@ LAYOUT_CONSTRAINTS_ENFORCED
 * ** mandatory 註記**: "Polynomial localized drop in 9B is tied to template formatting (ce115) and cannot be extrapolated to overall math capability."
 
 ### 4. Figure 4: Tier 1 Paired 2x2 Contingency and Discordant Analysis
-* **圖型**: 2x2 熱力矩陣圖 (Contingency Matrix) 或 兩柱不一致配對條形圖 (Discordant Bar Chart: 4B-only 26 vs 9B-only 49)。
-* **視覺呈現**: 矩陣四格填入 `BOTH_PASS=52`, `4B_ONLY=26`, `9B_ONLY=49`, `BOTH_FAIL=193`。
-* ** mandatory 註記**: 並列標示 `Exact McNemar p = 0.010582` 與 `Cluster Bootstrap 95% CI = [-0.94%, +14.38%]`.
+* **圖型**: 2x2 熱力矩陣圖 (Contingency Matrix) 或 兩柱不一致配對條形圖 (Discordant Bar Chart: 4B-only 27 vs 9B-only 49)。
+* **視覺呈現**: 矩陣四格填入 `BOTH_PASS=52`, `4B_ONLY=27`, `9B_ONLY=49`, `BOTH_FAIL=192`。
+* ** mandatory 註記**: 並列標示 `Exact McNemar p = 0.015440` 與 `Cluster Bootstrap 95% CI = [-1.56%, +14.37%]`.
 
 ### 5. Figure 5: Healer Eligibility and Rescue Boundary across Three Models
 * **圖型**: 階梯漏斗圖 (Stepped Funnel) 或 分層直條圖 (Layered Bar Chart)。
 * **分帳數據與視覺標記**:
-  - **Primary Rescue**: 4B 實體柱繪製 `Primary rescue = 5` (Primary final = 83/320)。
-  - **Post-hoc Rescue**: 4B `Post-hoc corrected-chain rescue = 6` (Post-hoc final = 84/320) 僅能以虛線框 (Dashed Overlay) 疊加標示。
-  - **文字標示**: 嚴禁使用模糊範圍或斜線組合，必須明確標示 Primary rescue = 5 與 Post-hoc rescue = 6。
-* ** mandatory 註記**: "Primary rescue = 5 (83/320); Post-hoc rescue = 6 (84/320). Observed regression = 0 in tested cells."
+  - **Verified Rescue (Headline)**: 4B 實體柱繪製單一 `Verified rescue = 6`（Baseline 79/320 → Final 85/320）。
+  - **歷史降級註記**: 修正前之 `Primary rescue = 5` (83/320) 與 `Post-hoc rescue = 6` (84/320) 雙軌分帳已依 Baseline 79/320 修正案降級，僅能以灰階旁註或歷史對照腳註呈現，不得再繪成同級正式 Bar。
+  - **文字標示**: 嚴禁使用模糊範圍或斜線組合，必須明確標示 `Verified rescue = 6`。
+* ** mandatory 註記**: "Verified rescue = 6 (79/320 → 85/320). Pre-correction Primary/Post-hoc split (83/320 / 84/320) is demoted to historical footnote only, not a main-table headline. Observed regression = 0 in tested cells."
 
 ### 6. Figure 6: Healer Boundary 3-Zone Conceptual Model
 * **圖型**: 三區域示意概念圖 (3-Zone Structural Concept Diagram)。

@@ -34,20 +34,20 @@ CATEGORY_B_FIGURE_SPEC_COMPLETED
 1. ** Primary 與 Post-hoc 嚴格分帳與精確數字**：
    - 所有實體 Bar 僅能繪製事前預註冊 Primary 數據。
    - Post-hoc 事後探討數據（如 Gemini 80/80 或 4B Post-hoc rescue = 6）僅能以虛線框 (Dashed Box)、灰色旁註或半透明疊層標示，**嚴禁**繪成同級正式 Bar。
-   - **Figure 5 分帳標示**: 明確寫出 `Primary rescue = 5` (Primary final = 83/320) 與 `Post-hoc corrected-chain rescue = 6` (Post-hoc final = 84/320)。嚴禁將兩者混寫為單一模糊範圍或斜線組合。
+   - **Figure 5 分帳標示**: 明確寫出單一 Headline `Verified rescue = 6`（Baseline 79/320 → Final 85/320）。修正前之 `Primary rescue = 5` (83/320) 與 `Post-hoc corrected-chain rescue = 6` (84/320) 雙軌分帳已依 Baseline 79/320 修正案降級為歷史對照註腳，嚴禁再混寫為單一模糊範圍或斜線組合。
 
 2. **載體核心圖表數量硬性約束 (Per-Carrier Figure Count Constraints)**：
    - **Executive One-Pager**：`exactly_4_core_figures = true`。包含 Figure 1, Figure 3, Figure 4, Figure 5。Figure 6 不得作為獨立圖、子圖或側邊欄，僅化為 Figure 5 旁之 3 行文字概念註解。
    - **競賽展板 (Poster)**：`exactly_5_core_figures = true`。左欄 (Figure 1, Figure 2)、中央主視覺 (Figure 6)、右欄 (Figure 4, Figure 5)。Figure 3 嚴禁放入主展板（不內嵌、不縮成表格），移至報告書與 Backup slide。
 
 3. **雙重統計證據並列**：
-   - Figure 4 必須同時標註 **細胞層級 Exact McNemar $p = 0.010582$** 與 **題目層級 Task-clustered Bootstrap 95% CI `[-0.94%, +14.38%]`**。
+   - Figure 4 必須同時標註 **細胞層級 Exact McNemar $p = 0.015440$** 與 **題目層級 Task-clustered Bootstrap 95% CI `[-1.56%, +14.37%]`**。
    - 禁止僅寫「統計顯著」而忽略 Bootstrap CI 跨 0 之全域外推不確定性。
 
 4. **禁止圖型與視覺約束**：
    - 嚴禁 3D 圖、圓餅圖 (Pie Chart)、雷達圖 (Radar Chart)、雙 Y 軸圖 (Dual Y-axis Chart)。
    - 所有 Bar Chart Y 軸起點必須為 **0**。
-   - 數值標籤必須保留分子與分母 (如 `289/320`, `78/320`, `101/320`)。
+   - 數值標籤必須保留分子與分母 (如 `289/320`, `101/320`, `79/320`)。
 
 ---
 

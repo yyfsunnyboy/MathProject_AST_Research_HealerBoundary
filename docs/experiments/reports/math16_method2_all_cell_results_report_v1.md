@@ -6,6 +6,8 @@
 
 母體：320 cells（16 題 × 4 條件 × 5 seeds）
 
+更正說明：Method 2 本身之 Raw／Final 數字（79/320、85/320、rescue 6、regression 0）為既有正式凍結證據，不受任何更正影響。Method 1 之 Baseline 78/320 經 audit 確認獨立擷取錯誤後，分析/報告層更正為 79/320，與 Method 2 Raw PASS 79/320 一致；詳見 [`math16_baseline_correction_note_v1.md`](math16_baseline_correction_note_v1.md) 及 [`math16_method1_method2_78_79_discrepancy_audit_v1.md`](math16_method1_method2_78_79_discrepancy_audit_v1.md)。
+
 ## 1. 方法與範圍
 
 Method 2 採 all-cell eligibility-first 流程：
@@ -83,9 +85,10 @@ Eligible 11 格合計為 6 格 `verified_rescue`、5 格 `still_failed`、0 格 
 | Baseline PASS cells 是否執行 Healer | 否 | 先執行 Eligibility；僅 Eligible 才執行 Healer |
 | Raw／Final 評分 | 未形成全 320 格雙路評分 | Raw 320 與 Final 320 分別獨立評分 |
 | Regression | **Not measured** | **Measured = 0/320** |
-| 正式結果分帳 | Primary 83/320；corrected-chain 技術結果 84/320 | Raw 79/320；Final 85/320 |
+| 正式結果分帳（凍結管線歷史輸出，永久不變） | Baseline 78/320；Primary 83/320；corrected-chain 技術結果 84/320 | Raw 79/320；Final 85/320 |
+| 正式結果分帳（分析/報告層更正後，見 Correction Note） | Baseline 79/320；Primary 84/320（歷史中繼值，demoted）；corrected-chain Final 85/320 | Raw 79/320；Final 85/320（不變） |
 
-兩種方法的程序與正式分帳不同；Method 2 數字不得回寫或取代 Method 1 結果。Method 1 未對 Baseline PASS cells 執行 Healer，因此 `Regression not measured`；Method 2 完成全 320 格 Raw／Final 雙路評分，因此 `Regression measured = 0/320`。
+兩種方法的程序與正式分帳不同；Method 2 數字不得回寫或取代 Method 1 結果。Method 1 未對 Baseline PASS cells 執行 Healer，因此 `Regression not measured`；Method 2 完成全 320 格 Raw／Final 雙路評分，因此 `Regression measured = 0/320`。Method 1 之凍結管線歷史輸出（Baseline 78/320）本身不予修改；經 audit 確認獨立於 Eligibility 之外的單一 Baseline 擷取錯誤後，分析/報告層更正為 79/320，與 Method 2 Raw PASS 79/320 一致，詳見 [`math16_baseline_correction_note_v1.md`](math16_baseline_correction_note_v1.md)。
 
 ## 7. 正式證據
 
@@ -94,3 +97,5 @@ Eligible 11 格合計為 6 格 `verified_rescue`、5 格 `still_failed`、0 格 
 - Phase A／B Results：[`math16_method2_all_cell_replay_v1`](../results/math16_method2_all_cell_replay_v1/)
 - Phase B 320-cell journal：[`transition_journal.jsonl`](../results/math16_method2_all_cell_replay_v1/transition_journal.jsonl)
 - Phase B journal SHA-256：`5d11fb404930c5387f0f91b7dcc69c621ef477f4a22d0419a8afe2493068ae52`
+- Correction Note（Method 1 Baseline 78→79 分析/報告層更正）：[`math16_baseline_correction_note_v1.md`](math16_baseline_correction_note_v1.md)
+- Method 1／Method 2 差異 Audit：[`math16_method1_method2_78_79_discrepancy_audit_v1.md`](math16_method1_method2_78_79_discrepancy_audit_v1.md)

@@ -33,8 +33,9 @@ from PIL import Image
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 ROOT = Path(__file__).resolve().parents[1]
-MILESTONE_DIR = ROOT / "docs/experiments/milestones/math16_pilot02_evidence_complete_v1"
-FROZEN_CLAIMS_PATH = MILESTONE_DIR / "frozen_numeric_claims.json"
+PRESENTATION_CLAIMS_PATH = (
+    ROOT / "docs/experiments/visualization/math16_pilot02_amendment_layer_v1/presentation_claims_v1.json"
+)
 ORIG_FIG_DIR = ROOT / "docs/experiments/visualization/math16_pilot02_core_figures_v1"
 OUT_DIR = ROOT / "docs/experiments/presentation/math16_pilot02_one_pager_v23"
 ASSETS_DIR = OUT_DIR / "assets"
@@ -71,10 +72,13 @@ C = {
 }
 
 PROTECTED_SHAS = {
-    "figure_01_baseline_overall.png":            "5bc0c714769c987710dd124b7f126a53a4c77f96ccd578fbff4a0c82bdb52db2",
-    "figure_03_family_breakdown.png":            "f164edc807659c45628cbab4711074879af58d3beaa825f59aaf2ebce4c9fb79",
-    "figure_04_tier1_paired_analysis.png":       "f18bbb774e9a75c51da364f080281172e7c35c4a5b2e30245142de0993565fdf",
-    "figure_05_healer_eligibility_boundary.png": "5887f0b829797ab63f30a096ec2e27c80530c1f988dcc16e3bead4bd7feb9885",
+    # Current amended canonical core figures (Batch 3 + Fig2 posthoc correction)
+    "figure_01_baseline_overall.png":            "c5e091eedd82c4a39c78b596b970cd538d6503022546315b7832f3df4ba8d684",
+    "figure_02_prompt_conditions.png":           "8b72c42e4e8590a0fd67388a3b1c30317d174521fc9469beff1d6fae25ddae5f",
+    "figure_03_family_breakdown.png":            "2d225e069a62529d3657aec629a0b90df10ba63df9f68c927e81ab35e5b729c2",
+    "figure_04_tier1_paired_analysis.png":       "0daa7d332941709708f021b6f20bbb2d180f41a7ab7a36cc4f4c1572a7ac6da9",
+    "figure_05_healer_eligibility_boundary.png": "05b81728393037f0657a42af34de883bbc860e44eccdfbfbf40553e86e6f1849",
+    # Historical one-pager versions (immutable)
     "one_pager_v1.png":  "1998988aabcb0b61e37c257e51e35008db56ab51abe0e43540789355cbb8d234",
     "one_pager_v1.pdf":  "adc5b870cdcdbd7595dbcaa79efb44b08423196893bd544f3ab10d18d262cd21",
     "one_pager_v2.png":  "7e582554e2a1c2e27aa86199ec759f583fcd498e6fd6a1bd9ef9da50467fbefc",
@@ -84,6 +88,11 @@ PROTECTED_SHAS = {
     "one_pager_v22.png": "1da5a383d8b606fc6a9677d61ed4df58751a007f9320fd6e4bcfb07e27df802b",
     "one_pager_v22.pdf": "64398864cc5929d34a5c825e6ac07db6693acb571d9919e6634801a1c9305da3",
 }
+
+FIG2_STAR_NOTE = (
+    "* Gemini 3.5 Flash 的 Ab2d+spec 採 Post-hoc spec-v2，結果為 80/80；"
+    "原 Primary spec-v1 為 63/80。"
+)
 
 
 def sha256(filepath: Path) -> str:
@@ -97,6 +106,7 @@ def sha256(filepath: Path) -> str:
 def verify_all_protected_shas():
     paths = {
         "figure_01_baseline_overall.png":            ORIG_FIG_DIR / "figure_01_baseline_overall.png",
+        "figure_02_prompt_conditions.png":           ORIG_FIG_DIR / "figure_02_prompt_conditions.png",
         "figure_03_family_breakdown.png":            ORIG_FIG_DIR / "figure_03_family_breakdown.png",
         "figure_04_tier1_paired_analysis.png":       ORIG_FIG_DIR / "figure_04_tier1_paired_analysis.png",
         "figure_05_healer_eligibility_boundary.png": ORIG_FIG_DIR / "figure_05_healer_eligibility_boundary.png",
@@ -118,15 +128,45 @@ def verify_all_protected_shas():
 
 
 def load_claims() -> dict:
-    with open(FROZEN_CLAIMS_PATH, encoding="utf-8") as f:
-        c = json.load(f)
-    assert c["gemini_primary"]["baseline_pass"] == 289
-    assert c["qwen_4b"]["baseline_pass"] == 78
-    assert c["qwen_4b"]["primary_rescue"] == 5
-    assert c["qwen_4b"]["posthoc_rescue"] == 6
-    assert c["qwen_9b"]["baseline_pass"] == 101
-    assert c["tier1_overall"]["exact_mcnemar_p"] == 0.010582
-    return c
+    """Load presentation-only claims (never frozen_numeric_claims / results/**)."""
+    with open(PRESENTATION_CLAIMS_PATH, encoding="utf-8") as f:
+        raw = json.load(f)
+    assert raw.get("status") == "presentation_only_amendment"
+    totals = raw["three_model_totals"]
+    assert totals["gemini"]["pass"] == 289
+    assert totals["qwen9b"]["pass"] == 101
+    assert totals["qwen4b"]["pass"] == 79
+    hp = raw["headline_presentation"]
+    assert hp["baseline"]["pass"] == 79
+    assert hp["final"]["pass"] == 85
+    assert hp["verified_rescue"] == 6
+    assert raw["three_model_fail_ordered"]["fail_counts"] == [31, 219, 241]
+    t1 = raw["tier1_overall_amended_4b_vs_9b"]
+    assert t1["matrix"] == {
+        "BOTH_PASS": 52,
+        "FOUR_B_ONLY_PASS": 27,
+        "NINE_B_ONLY_PASS": 49,
+        "BOTH_FAIL": 192,
+    }
+    # Compact renderers expect a tier1_overall-like block
+    return {
+        "raw": raw,
+        "tier1_overall": {
+            "BOTH_PASS": t1["matrix"]["BOTH_PASS"],
+            "FOUR_B_ONLY": t1["matrix"]["FOUR_B_ONLY_PASS"],
+            "NINE_B_ONLY": t1["matrix"]["NINE_B_ONLY_PASS"],
+            "BOTH_FAIL": t1["matrix"]["BOTH_FAIL"],
+            "exact_mcnemar_p": t1["exact_two_sided_mcnemar_p"],
+            "paired_rd_pct": t1["paired_risk_difference"]["pct"],
+            "bootstrap_ci": t1["task_clustered_bootstrap_95_ci"]["ci"],
+        },
+        "family_qwen4b": raw["figure_03_family_pass_counts"]["qwen4b"],
+        "family_qwen9b": raw["figure_03_family_pass_counts"]["qwen9b"],
+        "fail_ordered": raw["three_model_fail_ordered"]["fail_counts"],
+        "verified_rescue": hp["verified_rescue"],
+        "baseline_4b": hp["baseline"]["pass"],
+        "final_4b": hp["final"]["pass"],
+    }
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -134,21 +174,22 @@ def load_claims() -> dict:
 # ─────────────────────────────────────────────────────────────────────────────
 
 def render_fig1_v23(claims: dict, path: Path):
-    """Baseline bar chart – no long footnote, taller figure for right column."""
+    """Baseline bar chart – G→9B→4B; presentation 79/320 for 4B."""
     fig, ax = plt.subplots(figsize=(4.0, 2.8), dpi=220)
     fig.patch.set_facecolor("#FFFFFF")
     ax.set_facecolor("#FFFFFF")
 
-    passes = [289, 78, 101]
-    colors = [C["gemini"], C["qwen4b"], C["qwen9b"]]
+    # Presentation order: Gemini → 9B → 4B
+    passes = [289, 101, claims["baseline_4b"]]
+    colors = [C["gemini"], C["qwen9b"], C["qwen4b"]]
     bars = ax.bar([0, 1, 2], passes, color=colors, width=0.52,
                   edgecolor="#1F2937", linewidth=0.9, zorder=3)
     ax.set_xticks([0, 1, 2])
-    ax.set_xticklabels(["Gemini\n3.5 Flash", "Qwen\n4B", "Qwen\n9B"],
+    ax.set_xticklabels(["Gemini\n3.5 Flash", "Qwen\n9B", "Qwen\n4B"],
                        fontsize=9.5, fontweight="bold")
     ax.set_ylabel("通過 / 320", fontsize=9, fontweight="bold")
     ax.set_ylim(0, 340)
-    ax.set_title("Baseline 通過率", fontsize=11, fontweight="bold", pad=5)
+    ax.set_title("Baseline 通過率（G→9B→4B）", fontsize=11, fontweight="bold", pad=5)
     ax.grid(axis="y", linestyle="--", alpha=0.4, zorder=0)
     ax.tick_params(axis="y", labelsize=9)
     ax.spines[["top", "right"]].set_visible(False)
@@ -166,8 +207,10 @@ def render_fig1_v23(claims: dict, path: Path):
 def render_fig3_v23(claims: dict, path: Path):
     """Family mini-bar table – compact height, no external footnote."""
     families = ["Integer", "Polynomial", "Radical", "Fraction"]
-    q4b = [30, 16, 15, 17]
-    q9b = [42,  9, 19, 31]
+    q4b = claims["family_qwen4b"]
+    q9b = claims["family_qwen9b"]
+    assert q4b == [30, 17, 15, 17]
+    assert q9b == [42, 9, 19, 31]
     max_val = 80
 
     fig, ax = plt.subplots(figsize=(4.0, 2.4), dpi=220)
@@ -273,11 +316,11 @@ def render_fig4_v23(claims: dict, path: Path):
         ("", 0.79, 8.5, False),
         (f"9B-only: {no} 格", 0.73, 9.0, False),
         (f"4B-only: {fo} 格", 0.62, 9.0, False),
-        (f"Net: +{no - fo} 格 (+7.19%)", 0.51, 9.0, False),
+        (f"Net: +{no - fo} 格 (+6.88%)", 0.51, 9.0, False),
         ("McNemar:", 0.37, 9.0, False),
-        ("p = 0.010582 *", 0.27, 11.0, True),
+        ("p = 0.015440 *", 0.27, 11.0, True),
         ("Bootstrap CI:", 0.18, 9.0, False),
-        ("[-0.94%, +14.38%]", 0.08, 11.0, True),
+        ("[-1.56%, +14.37%]", 0.08, 11.0, True),
     ]
     for text, y, size, bold in stats:
         ax_s.text(0.10, y, text, fontsize=size,
@@ -291,25 +334,25 @@ def render_fig4_v23(claims: dict, path: Path):
 
 
 def render_fig5_v23(claims: dict, path: Path):
-    """Safety window bars – footnote moved inside margins, no external overflow."""
+    """Safety window bars – G→9B→4B; Verified rescue=6 (no Primary 84 main track)."""
     fig, ax = plt.subplots(figsize=(4.0, 2.8), dpi=220)
     fig.patch.set_facecolor("#FFFFFF")
     ax.set_facecolor("#FFFFFF")
 
-    fails   = [31, 242, 219]
-    elig    = [0,   10,   0]
-    rescues = [0,    5,   0]
+    fails = claims["fail_ordered"]  # [31, 219, 241]
+    elig = [0, 0, 10]
+    rescues = [0, 0, claims["verified_rescue"]]
     x, w = [0, 1, 2], 0.22
 
     r1 = ax.bar([i - w for i in x], fails, w, label="Baseline FAIL",
                 color=C["fail"], edgecolor="#9CA3AF", linewidth=0.8, zorder=3)
     r2 = ax.bar(x, elig, w, label="Eligible",
                 color=C["eligible"], edgecolor="#6B7280", linewidth=0.8, zorder=3)
-    r3 = ax.bar([i + w for i in x], rescues, w, label="Primary Rescue",
+    r3 = ax.bar([i + w for i in x], rescues, w, label="Verified Rescue",
                 color=C["rescue"], edgecolor=C["rescue_dk"], linewidth=0.9, zorder=3)
 
     ax.set_xticks(x)
-    ax.set_xticklabels(["Gemini", "Qwen 4B", "Qwen 9B"], fontsize=9.5, fontweight="bold")
+    ax.set_xticklabels(["Gemini", "Qwen 9B", "Qwen 4B"], fontsize=9.5, fontweight="bold")
     ax.set_ylabel("Cell 數 / 320", fontsize=8.5, fontweight="bold")
     ax.set_ylim(0, 275)
     ax.set_title("安全修復窗口", fontsize=11, fontweight="bold", pad=5)
@@ -318,25 +361,15 @@ def render_fig5_v23(claims: dict, path: Path):
     ax.tick_params(axis="y", labelsize=8.5)
     ax.spines[["top", "right"]].set_visible(False)
 
-    for r in r1:
+    for r in list(r1) + list(r2) + list(r3):
         h = r.get_height()
         if h > 0:
             ax.text(r.get_x() + r.get_width() / 2, h + 4, str(int(h)),
                     ha="center", va="bottom", fontsize=8.5, fontweight="bold")
-    for r in r2:
-        h = r.get_height()
-        if h > 0:
-            ax.text(r.get_x() + r.get_width() / 2, h + 4, str(int(h)),
-                    ha="center", va="bottom", fontsize=8.5, fontweight="bold")
-    for r in r3:
-        h = r.get_height()
-        if h > 0:
-            ax.text(r.get_x() + r.get_width() / 2, h + 4, str(int(h)),
-                    ha="center", va="bottom", fontsize=8.5, fontweight="bold", color=C["rescue_dk"])
 
-    # Footnote placed inside the axes (not outside) so it cannot bleed past the figure frame
     ax.text(0.5, -0.18,
-            "Primary=5格(83/320)；Post-hoc=6格(84/320)；Regression=0",
+            f"Verified rescue={claims['verified_rescue']}（"
+            f"{claims['baseline_4b']}/320 → {claims['final_4b']}/320）；Regression=0",
             ha="center", fontsize=7, color=C["text_lt"], style="italic",
             transform=ax.transAxes)
 
@@ -380,40 +413,43 @@ RIGHT_X  = LEFT_W + 2 * MARGIN   # 0.565
 RIGHT_W  = 1.0 - RIGHT_X - MARGIN  # ≈ 0.425
 
 # --- Caption bands ---
-# Each figure (left + 3 right) gets its OWN caption band immediately above it.
-# These bands are SEPARATE; right-column captions are stacked individually.
-CAP_H = 0.022   # caption band height in normalised coords (~17pt)
+# Each figure (left + 4 right) gets its OWN caption band immediately above it.
+CAP_H = 0.018   # caption band height in normalised coords
 
 # --- Left: Fig4 caption band and figure area ---
-F4_CAP_Y0 = FIG_TOTAL_Y1 - CAP_H          # caption top = HDR_Y0, bottom = HDR_Y0 - CAP_H
+F4_CAP_Y0 = FIG_TOTAL_Y1 - CAP_H
 F4_CAP_Y1 = FIG_TOTAL_Y1
 F4_FIG_Y0 = FIG_TOTAL_Y0
 F4_FIG_Y1 = F4_CAP_Y0
 F4_FIG_H  = F4_FIG_Y1 - F4_FIG_Y0
 
-# --- Right column: stack from top, each slot = caption_band + figure_band ---
-# Three right-column figures divide the right space evenly, each with its own caption band.
-# Total right height = FIG_TOTAL_H = 0.640
-# Each slot = (FIG_TOTAL_H - 3*CAP_H) / 3  for the figure, plus CAP_H for caption
-R_SLOT_H     = FIG_TOTAL_H / 3            # total height per slot (incl caption)
-R_FIG_H      = R_SLOT_H - CAP_H          # figure height within slot
-GAP          = 0.003                       # 3-point gap between bottom of caption and top of figure below
+# --- Right column: 4 slots Fig1 → Fig2 → Fig5 → Fig3 (G→9→4 narrative + Fig2 80/80*) ---
+R_SLOT_H     = FIG_TOTAL_H / 4
+R_FIG_H      = R_SLOT_H - CAP_H
+GAP          = 0.002
 
-# Fig1 (top-right slot)
-R_F1_SLOT_Y0 = FIG_TOTAL_Y0 + 2 * R_SLOT_H
+# Fig1 (top-right)
+R_F1_SLOT_Y0 = FIG_TOTAL_Y0 + 3 * R_SLOT_H
 R_F1_CAP_Y0  = R_F1_SLOT_Y0 + R_FIG_H + GAP
 R_F1_CAP_Y1  = R_F1_SLOT_Y0 + R_SLOT_H
 R_F1_FIG_Y0  = R_F1_SLOT_Y0
 R_F1_FIG_H   = R_FIG_H
 
-# Fig5 (middle-right slot)
+# Fig2 (second-right; canonical PNG copy — shows Gemini Ab2d+spec 80/80*)
+R_F2_SLOT_Y0 = FIG_TOTAL_Y0 + 2 * R_SLOT_H
+R_F2_CAP_Y0  = R_F2_SLOT_Y0 + R_FIG_H + GAP
+R_F2_CAP_Y1  = R_F2_SLOT_Y0 + R_SLOT_H
+R_F2_FIG_Y0  = R_F2_SLOT_Y0
+R_F2_FIG_H   = R_FIG_H
+
+# Fig5 (third-right)
 R_F5_SLOT_Y0 = FIG_TOTAL_Y0 + R_SLOT_H
 R_F5_CAP_Y0  = R_F5_SLOT_Y0 + R_FIG_H + GAP
 R_F5_CAP_Y1  = R_F5_SLOT_Y0 + R_SLOT_H
 R_F5_FIG_Y0  = R_F5_SLOT_Y0
 R_F5_FIG_H   = R_FIG_H
 
-# Fig3 (bottom-right slot)
+# Fig3 (bottom-right)
 R_F3_SLOT_Y0 = FIG_TOTAL_Y0
 R_F3_CAP_Y0  = R_F3_SLOT_Y0 + R_FIG_H + GAP
 R_F3_CAP_Y1  = R_F3_SLOT_Y0 + R_SLOT_H
@@ -427,19 +463,16 @@ CONC_X0  = MARGIN
 CONC_X1  = 0.490
 
 # --- Header card geometry ---
-# Cards live entirely within Header (y=[HDR_Y0, 1.0])
-# In ax_hdr transAxes (0..1 maps to HDR_Y0..1.0):
-#   card bottom edge = 0.03 * (1 - HDR_Y0) + HDR_Y0 = HDR_Y0 + 0.03*(1-HDR_Y0)
-CARD_AX_Y0 = 0.03   # in ax_hdr transAxes
-CARD_AX_Y1 = 0.38   # in ax_hdr transAxes
-HDR_HEIGHT = 1.0 - HDR_Y0   # normalised height of header
+CARD_AX_Y0 = 0.03
+CARD_AX_Y1 = 0.38
+HDR_HEIGHT = 1.0 - HDR_Y0
 CARD_FIG_Y0 = HDR_Y0 + CARD_AX_Y0 * HDR_HEIGHT
 CARD_FIG_Y1 = HDR_Y0 + CARD_AX_Y1 * HDR_HEIGHT
 
 CARDS_SPEC = [
-    ("card_gemini",  0.14, "Gemini Baseline",  "289/320",        C["card_g"],  "#1D4ED8", C["card_g_bd"]),
-    ("card_4b",      0.50, "Qwen 4B Primary",  "83/320（+5格）", C["card_4b"], "#065F46", C["card_4b_bd"]),
-    ("card_9b",      0.86, "Qwen 9B Baseline", "101/320",        C["card_9b"], "#92400E", C["card_9b_bd"]),
+    ("card_gemini",  0.14, "Gemini Baseline",  "289/320",              C["card_g"],  "#1D4ED8", C["card_g_bd"]),
+    ("card_9b",      0.50, "Qwen 9B Baseline", "101/320",              C["card_9b"], "#92400E", C["card_9b_bd"]),
+    ("card_4b",      0.86, "Qwen 4B Final",    "85/320（rescue=6）",   C["card_4b"], "#065F46", C["card_4b_bd"]),
 ]
 CARD_HALF_W_AX = 0.135  # half-width in ax_hdr transAxes
 
@@ -474,7 +507,7 @@ def build_canvas(claims: dict, out_dir: Path):
                 style="italic", transform=ax_hdr.transAxes)
 
     ax_hdr.text(0.5, 0.55,
-                "16題 × 3模型 × 4條件 × 5 seeds = 960 cells  ｜  Primary 與 Post-hoc 嚴格分帳",
+                "16題 × 3模型 × 4條件 × 5 seeds = 960 cells  ｜  呈現序 Gemini→9B→4B  ｜  Baseline 79→Final 85",
                 ha="center", va="top", fontsize=8.6, color="#94A3B8",
                 transform=ax_hdr.transAxes)
 
@@ -495,51 +528,52 @@ def build_canvas(claims: dict, out_dir: Path):
     # ── Figure image axes ──────────────────────────────────────────────────────
     fig4_img = mpimg.imread(ASSETS_DIR / "fig4_compact_v23.png")
     fig1_img = mpimg.imread(ASSETS_DIR / "fig1_compact_v23.png")
+    fig2_img = mpimg.imread(ASSETS_DIR / "fig2_compact_v23.png")
     fig5_img = mpimg.imread(ASSETS_DIR / "fig5_compact_v23.png")
     fig3_img = mpimg.imread(ASSETS_DIR / "fig3_compact_table_v23.png")
 
-    # Fig4: left panel spans full figure height zone [F4_FIG_Y0, F4_FIG_Y1]
     ax4 = fig.add_axes([MARGIN, F4_FIG_Y0, LEFT_W, F4_FIG_H], zorder=5)
     ax4.imshow(fig4_img, aspect="auto")
     ax4.axis("off")
 
-    # Fig1: top-right slot
     ax1 = fig.add_axes([RIGHT_X, R_F1_FIG_Y0, RIGHT_W, R_F1_FIG_H], zorder=5)
     ax1.imshow(fig1_img, aspect="auto")
     ax1.axis("off")
 
-    # Fig5: middle-right slot
+    ax2 = fig.add_axes([RIGHT_X, R_F2_FIG_Y0, RIGHT_W, R_F2_FIG_H], zorder=5)
+    ax2.imshow(fig2_img, aspect="auto")
+    ax2.axis("off")
+
     ax5 = fig.add_axes([RIGHT_X, R_F5_FIG_Y0, RIGHT_W, R_F5_FIG_H], zorder=5)
     ax5.imshow(fig5_img, aspect="auto")
     ax5.axis("off")
 
-    # Fig3: bottom-right slot
     ax3 = fig.add_axes([RIGHT_X, R_F3_FIG_Y0, RIGHT_W, R_F3_FIG_H], zorder=5)
     ax3.imshow(fig3_img, aspect="auto")
     ax3.axis("off")
 
-    for ax_f in [ax4, ax1, ax5, ax3]:
+    for ax_f in [ax4, ax1, ax2, ax5, ax3]:
         for sp in ax_f.spines.values():
             sp.set_visible(True)
             sp.set_edgecolor("#E2E8F0")
             sp.set_linewidth(0.6)
 
-    # ── Captions — each anchored to ITS OWN figure's caption band ─────────────
-    # fig.text y-coord = bottom of each figure's caption band (va="bottom" so text grows up)
     cap_texts = {}
     cap_specs = [
-        ("cap_fig4", MARGIN + LEFT_W / 2,       F4_CAP_Y0 + 0.003,
-         "Fig.4  Qwen 4B/9B 配對分析（McNemar p=0.011，CI=[-0.94%,+14.38%]）"),
-        ("cap_fig1", RIGHT_X + RIGHT_W / 2, R_F1_CAP_Y0 + 0.003,
-         "Fig.1  Baseline 通過率"),
-        ("cap_fig5", RIGHT_X + RIGHT_W / 2, R_F5_CAP_Y0 + 0.003,
-         "Fig.5  安全修復窗口（Primary 救回5格）"),
-        ("cap_fig3", RIGHT_X + RIGHT_W / 2, R_F3_CAP_Y0 + 0.003,
-         "Fig.3  Family 差異（探索性）"),
+        ("cap_fig4", MARGIN + LEFT_W / 2, F4_CAP_Y0 + 0.002,
+         "Fig.4  Qwen 4B/9B 配對分析（McNemar p=0.015440，CI=[-1.56%,+14.37%]）"),
+        ("cap_fig1", RIGHT_X + RIGHT_W / 2, R_F1_CAP_Y0 + 0.002,
+         "Fig.1  Baseline 通過率（Gemini→9B→4B）"),
+        ("cap_fig2", RIGHT_X + RIGHT_W / 2, R_F2_CAP_Y0 + 0.002,
+         "Fig.2  Prompt 條件（Gemini Ab2d+spec = 80/80*）"),
+        ("cap_fig5", RIGHT_X + RIGHT_W / 2, R_F5_CAP_Y0 + 0.002,
+         "Fig.5  安全修復窗口（Verified rescue=6）"),
+        ("cap_fig3", RIGHT_X + RIGHT_W / 2, R_F3_CAP_Y0 + 0.002,
+         "Fig.3  Family 差異（探索性；Polynomial 4B=17/80）"),
     ]
     for cap_id, cx, cy, cap_str in cap_specs:
         t = fig.text(cx, cy, cap_str,
-                     ha="center", va="bottom", fontsize=7.5, color="#475569",
+                     ha="center", va="bottom", fontsize=6.8, color="#475569",
                      style="italic", fontweight="bold", zorder=6)
         cap_texts[cap_id] = t
 
@@ -549,8 +583,7 @@ def build_canvas(claims: dict, out_dir: Path):
     ax_bot.axis("off")
     ax_bot.axhline(y=0.97, xmin=0.01, xmax=0.99, color=C["bot_bd"], linewidth=0.8)
 
-    # Left column: 3 conclusions + metaphor
-    # Use ax transAxes to stay inside [CONC_X0/1.0, CONC_X1/1.0] x range
+    # Left column: 3 conclusions + metaphor + Fig.2 star note
     concl_texts = {}
     concls = [
         "conclusion_1",
@@ -559,39 +592,45 @@ def build_canvas(claims: dict, out_dir: Path):
     ]
     concl_lines = [
         "① Healer 只在修法唯一、局部、可驗證的窄小窗口介入；其餘情況主動 Abstain。",
-        "② 4B Primary 救回 5格（83/320）；Post-hoc 機制驗證額外 6格（84/320）；Regression=0。",
-        "③ 9B cell-level 方向偏優（+23格），但 task-clustered CI 跨 0，跨題外推具不確定性。",
+        "② 4B：79/320 → 85/320；Verified rescue=6；Regression=0（Primary 84 不作主表）。",
+        "③ 9B cell-level 正向偏優（+22格），但 task-clustered CI 跨 0，跨題外推具不確定性。",
     ]
-    # x in ax_bot transAxes: CONC_X0 through CONC_X1
     for k, (cid, line) in enumerate(zip(concls, concl_lines)):
-        t = ax_bot.text(CONC_X0, 0.85 - k * 0.22, line,
-                        fontsize=9.0, fontweight="bold", color=C["text_dk"],
+        t = ax_bot.text(CONC_X0, 0.90 - k * 0.20, line,
+                        fontsize=8.4, fontweight="bold", color=C["text_dk"],
                         va="top", transform=ax_bot.transAxes)
         concl_texts[cid] = t
 
-    ax_bot.text(CONC_X0, 0.85 - 3 * 0.22,
+    ax_bot.text(CONC_X0, 0.90 - 3 * 0.20,
                 "   Healer 像球場最遠邊界的小柵欄，不代替球員重新比賽。",
-                fontsize=8.2, color=C["text_lt"], style="italic", va="top",
+                fontsize=7.6, color=C["text_lt"], style="italic", va="top",
                 transform=ax_bot.transAxes)
+
+    star_note_txt = ax_bot.text(
+        CONC_X0, 0.08, FIG2_STAR_NOTE,
+        fontsize=6.6, color=C["text_mid"], va="bottom",
+        transform=ax_bot.transAxes,
+    )
 
     # Right column: stats callout box (strictly right of x=0.50)
     ax_bot.add_patch(FancyBboxPatch(
-        (STATS_X0, 0.10), STATS_X1 - STATS_X0, 0.83,
+        (STATS_X0, 0.18), STATS_X1 - STATS_X0, 0.74,
         boxstyle="round,pad=0.02,rounding_size=0.03",
         facecolor="#F1F5F9", edgecolor="#94A3B8", linewidth=0.9,
         transform=ax_bot.transAxes, clip_on=False))
 
     stat_lines = [
         "【統計摘要與限制】",
-        "• Exact McNemar:  p = 0.010582 *",
-        "• Task-clustered Bootstrap 95% CI:  [-0.94%, +14.38%]",
-        "• Primary (5格) 與 Post-hoc (6格) 嚴格分帳；Gemini & 9B Eligible=0",
+        "• Exact McNemar:  p = 0.015440 *",
+        "• Task-clustered Bootstrap 95% CI:  [-1.56%, +14.37%]",
+        "• Verified rescue=6；呈現序 G→9B→4B",
+        "• Fig.2：Gemini Ab2d+spec = 80/80*",
         "• Family 差異屬 Post-hoc 探索性，不可外推",
     ]
     stats_ref_text = None
     for m, sline in enumerate(stat_lines):
-        t = ax_bot.text(STATS_X0 + 0.012, 0.84 - m * 0.15, sline,
-                        fontsize=7.8 if m > 0 else 8.4,
+        t = ax_bot.text(STATS_X0 + 0.012, 0.86 - m * 0.12, sline,
+                        fontsize=7.2 if m > 0 else 8.0,
                         fontweight="bold" if m in (0, 1, 2) else "normal",
                         color=C["text_dk"] if m in (0, 1, 2) else C["text_mid"],
                         va="top", transform=ax_bot.transAxes)
@@ -635,24 +674,25 @@ def build_canvas(claims: dict, out_dir: Path):
     for cap_id, cap_txt in cap_texts.items():
         measured[cap_id] = px_to_fig(cap_txt.get_window_extent(renderer=renderer))
 
-    # 4 Figure boxes: axes positions
-    for fig_id, ax_f in [("box_fig4", ax4), ("box_fig1", ax1),
+    # Figure boxes: axes positions
+    for fig_id, ax_f in [("box_fig4", ax4), ("box_fig1", ax1), ("box_fig2", ax2),
                           ("box_fig5", ax5), ("box_fig3", ax3)]:
         measured[fig_id] = ax_pos_to_fig(ax_f)
 
-    # 3 Conclusion texts: renderer-measured
+    # Conclusion texts: renderer-measured
     for cid, ct in concl_texts.items():
         measured[cid] = px_to_fig(ct.get_window_extent(renderer=renderer))
 
-    # Stats box: renderer-measured from first line text object's bbox
+    measured["fig2_star_note"] = px_to_fig(star_note_txt.get_window_extent(renderer=renderer))
+
+    # Stats box
     if stats_ref_text is not None:
-        # stats box spans from STATS_X0 to STATS_X1 in ax_bot axes coords
         bot_pos = ax_bot.get_position()
         measured["stats_box"] = {
             "xmin": bot_pos.x0 + STATS_X0 * bot_pos.width,
-            "ymin": bot_pos.y0 + 0.10 * bot_pos.height,
+            "ymin": bot_pos.y0 + 0.18 * bot_pos.height,
             "xmax": bot_pos.x0 + STATS_X1 * bot_pos.width,
-            "ymax": bot_pos.y0 + 0.93 * bot_pos.height,
+            "ymax": bot_pos.y0 + 0.92 * bot_pos.height,
         }
 
     # Save bbox JSON
@@ -728,7 +768,7 @@ def main():
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     ASSETS_DIR.mkdir(parents=True, exist_ok=True)
 
-    print("Loading frozen claims...")
+    print("Loading presentation claims...")
     claims = load_claims()
 
     print("Verifying protected SHAs...")
@@ -739,11 +779,18 @@ def main():
     render_fig3_v23(claims, ASSETS_DIR / "fig3_compact_table_v23.png")
     render_fig4_v23(claims, ASSETS_DIR / "fig4_compact_v23.png")
     render_fig5_v23(claims, ASSETS_DIR / "fig5_compact_v23.png")
+    # Fig2: byte-copy latest canonical PNG (no re-rasterize)
+    import shutil
+    fig2_src = ORIG_FIG_DIR / "figure_02_prompt_conditions.png"
+    fig2_dst = ASSETS_DIR / "fig2_compact_v23.png"
+    shutil.copy2(fig2_src, fig2_dst)
+    assert sha256(fig2_dst) == PROTECTED_SHAS["figure_02_prompt_conditions.png"]
 
     asset_shas = {
         k: sha256(ASSETS_DIR / k)
-        for k in ["fig1_compact_v23.png", "fig3_compact_table_v23.png",
-                  "fig4_compact_v23.png", "fig5_compact_v23.png"]
+        for k in ["fig1_compact_v23.png", "fig2_compact_v23.png",
+                  "fig3_compact_table_v23.png", "fig4_compact_v23.png",
+                  "fig5_compact_v23.png"]
     }
 
     print("Building One-Pager v2.3 canvas...")
@@ -758,7 +805,7 @@ def main():
     # Manifest
     manifest = {
         "manifest_id": "math16_pilot02_one_pager_v23_manifest",
-        "version": "1.0.0",
+        "version": "1.1.0-presentation-amendment",
         "project": "Ivan旺宏科學展 HealerBoundary",
         "generated_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "python_version": sys.version,
@@ -766,23 +813,25 @@ def main():
         "page_format": "A4 landscape (297mm x 210mm)",
         "dpi": DPI,
         "page_count": 1,
-        "layout_version": "v2.3_renderer_measured_pairwise_collision_free",
+        "layout_version": "v2.3_presentation_claims_G94_baseline79",
+        "model_order": ["Gemini 3.5 Flash", "Qwen3.5 9B", "Qwen3.5 4B"],
         "named_elements": meta["element_names"],
         "element_count": meta["element_count"],
         "total_pairs": meta["total_pairs"],
         "collision_count": meta["collision_count"],
         "compact_asset_shas": asset_shas,
-        "input_milestone_sha256": sha256(FROZEN_CLAIMS_PATH),
+        "presentation_claims_sha256": sha256(PRESENTATION_CLAIMS_PATH),
         "protected_shas": PROTECTED_SHAS,
-        "primary_posthoc_accounting": {
-            "qwen4b_primary_rescue": "5 cells → 83/320 (Primary)",
-            "qwen4b_posthoc_rescue": "6 cells → 84/320 [Post-hoc]",
-            "gemini_eligible": 0, "qwen9b_eligible": 0, "observed_regression": 0,
+        "headline_presentation": {
+            "baseline_4b": "79/320",
+            "final_4b": "85/320",
+            "verified_rescue": 6,
+            "note": "Primary 84 demoted; not shown as main-table headline",
         },
         "key_statistics": {
-            "nine_b_only": 49, "four_b_only": 26,
-            "exact_mcnemar_p": 0.010582,
-            "task_clustered_bootstrap_95ci": "[-0.94%, +14.38%]",
+            "nine_b_only": 49, "four_b_only": 27,
+            "exact_mcnemar_p": 0.015440,
+            "task_clustered_bootstrap_95ci": "[-1.56%, +14.37%]",
         },
         "outputs": {
             "png": {"filename": "math16_pilot02_one_pager_v23.png", "sha256": meta["png_sha256"]},
