@@ -1,0 +1,102 @@
+# -*- coding: utf-8 -*-
+
+def generate(level=1, **kwargs):
+    # Frozen sampled parameters as per task specification
+    frozen_params = {
+        "equation": "(x-2)^2=3",
+        "order": "a>b",
+        "target": "2a+b"
+    }
+
+    import math
+    
+    # Parse the equation (x-2)^2 = 3 to find roots
+    # Expansion: x^2 - 4x + 4 = 3 => x^2 - 4x + 1 = 0
+    a_coeff = 1.0
+    b_coeff = -4.0
+    c_coeff = 1.0
+    
+    discriminant = b_coeff**2 - 4*a_coeff*c_coeff
+    sqrt_discriminant = math.sqrt(discriminant)
+    
+    # Calculate roots using quadratic formula: (-b +/- sqrt(D)) / (2a)
+    root_a = (-b_coeff + sqrt_discriminant) / (2 * a_coeff)
+    root_b = (-b_coeff - sqrt_discriminant) / (2 * a_coeff)
+    
+    # Ensure order is a > b as per frozen params "order": "a>b"
+    if root_a < root_b:
+        temp = root_a
+        root_a = root_b
+        root_b = temp
+        
+    # Compute target 2a + b
+    result_value = 2 * root_a + root_b
+    
+    # Format the radical part for canonical_latex and rational/coeff/radicand structure
+    # The term is (sqrt(13) / 4). 
+    # We need to represent this as a coefficient times sqrt(radicand), potentially scaled.
+    # Let's express result_value in terms of radicals if possible, or just the float representation?
+    # Task says: "correct_answer must include result with rational, radical_coefficient (may be +1 or -1), radicand, and canonical_latex."
+    
+    # The exact value is 2 * ((4+sqrt(13))/2) + ((4-sqrt(13))/2) 
+    # = 4 + sqrt(13) + 2 - (sqrt(13)/2)
+    # Wait, let's recompute carefully.
+    # x^2 - 4x + 1 = 0
+    # Roots: (4 +/- sqrt(16-4)) / 2 = (4 +/- sqrt(12)) / 2 = (4 +/- 2*sqrt(3)) / 2 = 2 +/- sqrt(3)
+    
+    # Re-evaluating roots for x^2 - 4x + 1 = 0:
+    # D = (-4)^2 - 4(1)(1) = 16 - 4 = 12.
+    # sqrt(D) = sqrt(12) = 2*sqrt(3).
+    # x = (4 +/- 2*sqrt(3)) / 2 = 2 +/- sqrt(3).
+    
+    root_a_exact = 2 + math.sqrt(3)   # Since a > b, we take the positive one for 'a' if they are symmetric around mean? 
+                                        # Mean is -(-4)/2 = 2. So roots are 2+sqrt(3) and 2-sqrt(3).
+    root_b_exact = 2 - math.sqrt(3)
+    
+    # Verify order: a > b => (2 + sqrt(3)) > (2 - sqrt(3)). Correct.
+    result_value_check = 2 * root_a_exact + root_b_exact
+    
+    # Simplify the expression for correct_answer structure
+    # Result = 2*(2+sqrt(3)) + (2-sqrt(3)) 
+    #        = 4 + 2*sqrt(3) + 2 - sqrt(3)
+    #        = 6 + sqrt(3)
+    
+    rational_part = 6.0
+    radical_coefficient = 1.0
+    radicand = 3
+    
+    canonical_latex = r"6+\sqrt{3}"
+
+    correct_answer_dict = {
+        "rational": int(rational_part), # Convert to int if whole, or keep float? Task implies structure. Let's use int for rational part of mixed number usually, but here it is integer 6.
+        "radical_coefficient": radical_coefficient,
+        "radicand": radicand,
+        "canonical_latex": canonical_latex
+    }
+
+    # Construct question_text with formal LaTeX delimiters
+    equation_tex = r"(x-2)^{2}=3"
+    roots_a_b = f"{root_a_exact:.10f} > {root_b_exact:.10f}" 
+    target_expr = "2a+b"
+    
+    question_text = (
+        rf"Solve the quadratic equation: \n\n"
+        r"$\text{{Equation}}$:\n{equation_tex}\n\n"
+        r"\nFind the roots $x_a, x_b$ such that $x_a > x_b$. "
+        r"Compute the value of the expression defined by $\text{{Target}}$: \n{target_expr}.\n\n"
+        rf"The exact result is represented as a rational part plus a radical term."
+    )
+
+    # Ensure JSON serializability and correct types
+    final_correct_answer = {
+        "rational": int(rational_part), 
+        "radical_coefficient": float(radical_coefficient), 
+        "radicand": int(radicand), 
+        "canonical_latex": canonical_latex
+    }
+
+    return {
+        "question_text": question_text,
+        "correct_answer": final_correct_answer,
+        "oracle_payload": frozen_params
+    }
