@@ -83,7 +83,7 @@ The single canonical, official main report for this experiment is:
 
 ## 9. Per-figure and per-document amendment specification
 
-Detailed per-figure literal-text/value changes (Figures 1, 3, 4, 5) are specified separately in `docs/experiments/reports/math16_baseline_79_figure_amendment_spec_v1.md`. No SVG, chart, or generator script is modified by this note or by that spec — both are specification-only.
+Detailed per-figure literal-text/value changes (Figures 1, 3, 4, 5) are specified separately in `docs/experiments/reports/math16_baseline_79_figure_amendment_spec_v1.md`. Figure 1、3、4、5 已完成更正後重繪，現行正式圖檔位於 `figures/`。
 
 ## 10. Presentation-order adjustment (not a data correction)
 

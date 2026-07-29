@@ -6,7 +6,7 @@ DETERMINISTIC_AST_HEALER_BOUNDARY_RESEARCH_LINE
 IVAN_MACRONIX_SCIENCE_FAIR_OFFICIAL_REPORT
 ```
 
-> **⚠ 更正說明 (Correction Notice, 2026-07-28)**：Method 1／Method 2 交叉稽核發現單一 cell（`ce115_calc_polynomial_division_l1 / ab1 / seed 2026072003`）之候選程式擷取錨定錯誤（非模型能力差異），已依分析／報告層更正本文所有主要敘述與數據表：Qwen 4B Baseline **78/320 → 79/320 (24.69%)**；Final（corrected-chain verified rescue）**84/320 → 85/320**（Verified rescue 維持 6 格不變）；Primary 中繼值（原 83/320）依更正基準連動為 84/320，已下修為附註、不再列為主表標題數字。三模型呈現順序統一調整為 Gemini 3.5 Flash → Qwen 3.5 9B → Qwen 3.5 4B（僅為展示順序調整，不影響任何數值或研究結論）。**凍結證據（raw evaluation results、Healer/Eligibility journals、manifests、pinned Evaluator/Protocol scripts、regression tests）永久保留原始 78/83/84 數值，不受本更正影響、不被修改**。本輪僅更正文字敘述與數據表，Figure 1/3/4/5 之 PNG 圖檔尚未於本批次同步重新產出，可能仍顯示更正前數值，正式圖檔重繪另案處理。完整稽核鏈見：[Math16 Baseline Correction Note v1](05_math16_baseline_correction_note_v1.md)。
+> **⚠ 更正說明 (Correction Notice, 2026-07-28)**：Method 1／Method 2 交叉稽核發現單一 cell（`ce115_calc_polynomial_division_l1 / ab1 / seed 2026072003`）之候選程式擷取錨定錯誤（非模型能力差異），已依分析／報告層更正本文所有主要敘述與數據表：Qwen 4B Baseline **78/320 → 79/320 (24.69%)**；Final（corrected-chain verified rescue）**84/320 → 85/320**（Verified rescue 維持 6 格不變）；Primary 中繼值（原 83/320）依更正基準連動為 84/320，已下修為附註、不再列為主表標題數字。三模型呈現順序統一調整為 Gemini 3.5 Flash → Qwen 3.5 9B → Qwen 3.5 4B（僅為展示順序調整，不影響任何數值或研究結論）。**凍結證據（raw evaluation results、Healer/Eligibility journals、manifests、pinned Evaluator/Protocol scripts、regression tests）永久保留原始 78/83/84 數值，不受本更正影響、不被修改**。本輪僅更正文字敘述與數據表，Figure 1、3、4、5 已完成更正後重繪，現行正式圖檔位於 `figures/`。完整稽核鏈見：[Math16 Baseline Correction Note v1](05_math16_baseline_correction_note_v1.md)。
 >
 > **研究聲明**：
 > Deterministic AST Healer 不是第二個解題模型，而是只在修法唯一、局部、可驗證的窄小窗口介入；其餘情況主動 Abstain。
@@ -430,7 +430,7 @@ Deterministic AST Healer 之安全介入架構概念如下：
 ### 正式證據與產物索引
 - **Evidence Complete Milestone v1**：`docs/experiments/milestones/math16_pilot02_evidence_complete_v1/`
 - **Integrated Results Report v1**：`docs/experiments/reports/math16_pilot02_integrated_results_report_v1.md`
-- **正式 Jury Q&A Defense Manual v1（20260724 唯一正式交付入口）**：`docs/決賽文件/實驗結果文件/20260724_Math16/04_math16_pilot02_jury_qa_final_v1.md`
+- **正式 Jury Q&A Defense Manual v1**：`docs/決賽文件/實驗結果文件/Math16/04_math16_pilot02_jury_qa_final_v1.md`
 - **Six Core Figures v1**：`docs/experiments/visualization/math16_pilot02_core_figures_v1/`
 - **One-Pager v2.3 (Pairwise Collision-Free)**：`docs/experiments/presentation/math16_pilot02_one_pager_v23/`
 - **Final Report v1 (Base Version)**：`docs/experiments/reports/math16_pilot02_final_report_v1.md`
