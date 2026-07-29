@@ -79,6 +79,8 @@ Deterministic AST Healer **不是第二個解題模型**，它不參與數學推
    - Gemini Primary 採用 `Ab2d+spec-v1`，通過數為 63/80。
    - 後續 `Ab2d+spec-v2` 補齊 API 簽名卡後的 post-hoc inventory 為 80/80；與其餘 Primary 條件合計為 post-hoc hybrid inventory 306/320，僅作機制／版本盤點，不作 Primary 正式比較。
 
+Ab2d 工具契約與模型遵守性另經補充稽核；結果不改變既有分數與 Healer 統計，但限制條件層級的機制解釋，詳見附錄。
+
 ---
 
 ## 7. 960-cell實驗矩陣

@@ -129,3 +129,11 @@ CATEGORY_B_QA_COMPLETED
 **正式回答：** 78 與 79 兩個數字源自**同一次原始模型生成（same raw response）**；唯一差異來自分析層對候選 artifact 的選取。Method 1 原始評分管線在單一格（`ce115_calc_polynomial_division_l1__ab1__seed_2026072003`）**選錯了候選 artifact**——擷取器誤將模型自身敘述文字中一段偶然出現的 code-fence 符號當作程式邊界，產生一個截斷、無法解析的候選碼並評為 FAIL；Method 2 獨立重新擷取的原始碼，與 Method 1 自己已計算但未採用的 `candidate_hash` 位元組完全相同，以同一凍結 Evaluator 重新評分則為 PASS。針對此發現，團隊執行了一次**零 LLM/Healer 呼叫的 Confirmatory re-evaluation**，對全部 320 格逐格離線重算：結果精確重現——對 Method 1 已評分的 artifact 得 78/320，對 Method 2 的原始碼得 79/320，全 320 格僅此一格不一致，其餘 319 格兩方法完全吻合。基於此稽核鏈，本手冊採用**校正後的正式主表數字：Baseline 79/320 → Final 85/320**；**Verified rescue 恆為 6 格不變**（該格 `healer_eligible=false`，從未進入救援母體，故完全不受基線校正影響）。凍結的原始評測證據（journals、manifests、pinned Evaluator/Protocol scripts、regression tests）依規範**永久保留歷史 78/83/84 數字**，本次校正僅發生於分析／報告層，未修改、也不會修改任何一份凍結證據。
 
 **口試短答：** 78 和 79 其實來自同一次模型回答，只是早期分析管線不小心選到一個被截斷的候選檔案；獨立複核與逐格重算證實正確答案是 79，Rescue 仍然是 6 格沒變，凍結的原始資料完全沒有被更動，正式數字現在是 79 → 85。
+
+---
+
+### Q22: 你們如何確認 Ab2d+api／Ab2d+spec 真的照設計運作？
+
+**正式回答：** 我們另外稽核了 32 個題目條件與 422 個既有正式輸出。系統契約有 29/32 正確，另外 2 處 prompt 內部矛盾與 1 處未明確指定 method，均已標記並排除於後續契約型 Healer 候選。模型端有 20/422（4.7%）雖然答對，但未完全依約使用指定工具，因此我們不把所有 PASS 都解釋成 API 使用成功。我們再抽樣 30 格，涵蓋兩處系統契約缺陷、一處未指定 method，以及 compliant、noncompliant 與其他失敗類別；兩種抽取路徑下的 compliance 標籤 30/30 完全一致。這些補充結果不改變既有 Baseline、Healer rescue 與 Tier 1 統計，但 Ab2d 條件應解讀為系統工具選擇與 prompt 暴露設計的比較，而非所有模型都百分之百依約。
+
+**口試短答：** 32 個條件裡 29 個契約正確、2 個 prompt 矛盾與 1 個 method 未指定已排除；422 格中有 20 格答對但未完全依約。抽樣 30 格兩種抽取路徑標籤全一致；分數與 Healer 統計不變，Ab2d 要比的是工具與 prompt 設計。
