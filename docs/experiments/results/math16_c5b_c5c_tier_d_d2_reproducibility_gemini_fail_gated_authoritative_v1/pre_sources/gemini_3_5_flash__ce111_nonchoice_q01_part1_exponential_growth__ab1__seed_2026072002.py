@@ -1,0 +1,28 @@
+def generate(level=1, **kwargs):
+    # Frozen sampled parameters
+    days = 15
+    hours_per_generation = 20
+    initial = 1
+    split_factor = 4
+
+    # Calculate the number of generations
+    total_hours = days * 24
+    generations = total_hours // hours_per_generation
+
+    # Construct the question text with formal LaTeX delimiters
+    question_text = (
+        f"A population of bacteria starts with ${initial}$ cell and splits into "
+        f"${split_factor}$ cells every ${hours_per_generation}$ hours. "
+        f"How many generations will have passed after ${days}$ days?"
+    )
+
+    return {
+        "question_text": question_text,
+        "correct_answer": {"k": generations},
+        "oracle_payload": {
+            "days": days,
+            "hours_per_generation": hours_per_generation,
+            "initial": initial,
+            "split_factor": split_factor,
+        },
+    }

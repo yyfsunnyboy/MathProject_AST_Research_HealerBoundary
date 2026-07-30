@@ -1,0 +1,45 @@
+from fractions import Fraction
+
+def generate(level=1, **kwargs):
+    expression = kwargs.get("expression", "3/7 - (-1/4)")
+    
+    parts = expression.split(' - ')
+    frac1_str = parts[0].strip()
+    frac2_str = parts[1].strip().strip('()')
+    
+    def format_frac(f_str):
+        f = Fraction(f_str)
+        num, den = f.numerator, f.denominator
+        if num < 0:
+            return f"-\\frac{{{abs(num)}}}{{{den}}}"
+        else:
+            return f"\\frac{{{num}}}{{{den}}}"
+            
+    f1_latex = format_frac(frac1_str)
+    f2_latex = format_frac(frac2_str)
+    expr_latex = f"{f1_latex} - \\left({f2_latex}\\right)"
+    
+    question_text = f"Evaluate the following expression: \\({expr_latex}\\)"
+    
+    ans = Fraction(frac1_str) - Fraction(frac2_str)
+    num = ans.numerator
+    den = ans.denominator
+    
+    if num < 0:
+        canonical_latex = f"-\\frac{{{abs(num)}}}{{{den}}}"
+    elif den == 1:
+        canonical_latex = f"{num}"
+    else:
+        canonical_latex = f"\\frac{{{num}}}{{{den}}}"
+        
+    return {
+        "question_text": question_text,
+        "correct_answer": {
+            "numerator": num,
+            "denominator": den,
+            "canonical_latex": canonical_latex
+        },
+        "oracle_payload": {
+            "expression": expression
+        }
+    }

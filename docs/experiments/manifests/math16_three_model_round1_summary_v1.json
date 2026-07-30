@@ -1,0 +1,165 @@
+{
+  "status": "math16_three_model_round1_summary_v1",
+  "verdict": "THREE_MODEL_ROUND1_COMPARISON_ARCHIVED",
+  "round": 1,
+  "round_role": "PRIMARY_FORMAL_ANALYSIS",
+  "round2_status": "NOT_EXECUTED",
+  "round2_policy": {
+    "if_executed": "post_hoc_iterative_replay_only",
+    "must_not_overwrite_round1_primary_tables": true
+  },
+  "protocol": {
+    "gating": "FAIL_ONLY_CUMULATIVE",
+    "rounds": 1,
+    "deterministic": true,
+    "frozen_rules": true,
+    "model_calls": 0
+  },
+  "head_at_archive": "e6ceffbd5601605d116a3a28ff38aa4b7542fc20",
+  "display_order": [
+    "gemini",
+    "qwen9b",
+    "qwen4b"
+  ],
+  "models": {
+    "qwen4b": {
+      "label": "Qwen 4B",
+      "display_order": 3,
+      "baseline_pass": 79,
+      "baseline_fail": 241,
+      "final_pass": 88,
+      "final_fail": 232,
+      "verified_rescue": 9,
+      "regression": 0,
+      "pass_pass_modified": 0,
+      "pass_curve": {
+        "C0": 79,
+        "C1": 85,
+        "C2": 86,
+        "C3": 86,
+        "C4": 86,
+        "C5a": 88,
+        "C5b": 88,
+        "C5c": 88
+      },
+      "authority_note": "4B cumulative FAIL-only Round 1 (Method2／Development closures under _v1); headline from sealed handoff",
+      "sources": [
+        "docs/決賽文件/實驗結果文件/Math16/06_math16_aggressive_healer_current_handoff_v1.md",
+        "docs/experiments/manifests/math16_c5a_final_source_closure_v1.json"
+      ],
+      "rescue_rate_pct_of_baseline_fail": 3.73,
+      "rescue_over_baseline_fail": "9/241",
+      "total_cells": 320
+    },
+    "qwen9b": {
+      "label": "Qwen 9B",
+      "display_order": 2,
+      "baseline_pass": 101,
+      "baseline_fail": 219,
+      "final_pass": 102,
+      "final_fail": 218,
+      "verified_rescue": 1,
+      "regression": 0,
+      "pass_pass_modified": 0,
+      "pass_curve": {
+        "C0": 101,
+        "C1": 101,
+        "C2": 102,
+        "C3": 102,
+        "C4": 102,
+        "C5a": 102,
+        "C5b": 102,
+        "C5c": 102
+      },
+      "authority_note": "qwen9b_fail_gated_authoritative_v1 FAIL-only C0→C5c",
+      "sources": [
+        "docs/experiments/manifests/math16_c0_c4_fail_gated_authoritative_chain_qwen9b_fail_gated_authoritative_v1.json",
+        "docs/experiments/manifests/math16_c5a_c5c_tier_d_d5_d2_chain_qwen9b_fail_gated_authoritative_v1.json",
+        "docs/決賽文件/實驗結果文件/Math16/07_math16_qwen9b_aggressive_healer_round1_handoff_v1.md"
+      ],
+      "rescue_rate_pct_of_baseline_fail": 0.46,
+      "rescue_over_baseline_fail": "1/219",
+      "total_cells": 320
+    },
+    "gemini": {
+      "label": "Gemini 3.5 Flash",
+      "display_order": 1,
+      "baseline_pass": 289,
+      "baseline_fail": 31,
+      "final_pass": 289,
+      "final_fail": 31,
+      "verified_rescue": 0,
+      "regression": 0,
+      "pass_pass_modified": 0,
+      "pass_curve": {
+        "C0": 289,
+        "C1": 289,
+        "C2": 289,
+        "C3": 289,
+        "C4": 289,
+        "C5a": 289,
+        "C5b": 289,
+        "C5c": 289
+      },
+      "authority_note": "gemini_fail_gated_authoritative_v1 FAIL-only C0→C5c",
+      "sources": [
+        "docs/experiments/manifests/math16_cumulative_summary_gemini_fail_gated_authoritative_v1.json",
+        "docs/experiments/manifests/math16_c5a_c5c_tier_d_d5_d2_chain_gemini_fail_gated_authoritative_v1.json"
+      ],
+      "rescue_rate_pct_of_baseline_fail": 0.0,
+      "rescue_over_baseline_fail": "0/31",
+      "total_cells": 320
+    }
+  },
+  "headline_table": [
+    {
+      "model": "Gemini 3.5 Flash",
+      "baseline_pass": 289,
+      "final_pass": 289,
+      "verified_rescue": 0,
+      "baseline_fail": 31,
+      "rescue_rate_pct": 0.0,
+      "regression": 0
+    },
+    {
+      "model": "Qwen 9B",
+      "baseline_pass": 101,
+      "final_pass": 102,
+      "verified_rescue": 1,
+      "baseline_fail": 219,
+      "rescue_rate_pct": 0.46,
+      "regression": 0
+    },
+    {
+      "model": "Qwen 4B",
+      "baseline_pass": 79,
+      "final_pass": 88,
+      "verified_rescue": 9,
+      "baseline_fail": 241,
+      "rescue_rate_pct": 3.73,
+      "regression": 0
+    }
+  ],
+  "formal_conclusion_zh": "在同一套凍結、FAIL-only、單輪 Deterministic Healer 下，Qwen 4B、Qwen 9B 與 Gemini 分別獲得 9、1、0 格 verified rescue；以 Baseline FAIL 為分母，修復率分別為 3.73%、0.46% 與 0%。在本次三模型與 16 題實驗範圍內，Baseline 表現較高的模型，其殘餘失敗較少命中現有 frozen rules 的安全修復窗口。此結果顯示 Healer 效益與 residual failure type 及規則適配程度密切相關，但不宣稱模型規模與修復率存在普遍因果關係。三模型 regression 均為 0。",
+  "figures": {
+    "baseline_vs_final": "docs/決賽文件/實驗結果文件/Math16/figures/figure_07_round1_baseline_vs_final.svg",
+    "verified_rescue": "docs/決賽文件/實驗結果文件/Math16/figures/figure_08_round1_verified_rescue.svg",
+    "pass_curves": "docs/決賽文件/實驗結果文件/Math16/figures/figure_09_round1_pass_curves.svg",
+    "rescue_rate": "docs/決賽文件/實驗結果文件/Math16/figures/figure_10_round1_rescue_rate.svg",
+    "chart_data": "docs/決賽文件/實驗結果文件/Math16/figures/round1_chart_data_v1.json"
+  },
+  "declarations": [
+    "round1_is_primary_formal_analysis",
+    "round2_not_executed",
+    "no_causal_claim_model_scale_vs_rescue_rate",
+    "no_modification_of_prior_model_artifacts",
+    "no_model_calls"
+  ],
+  "figure_sha256": {
+    "docs/決賽文件/實驗結果文件/Math16/figures/figure_07_round1_baseline_vs_final.svg": "c5524ac4851a05e2620bc6da67da5dd92858f8357a40897d06a8e18b7dfe8015",
+    "docs/決賽文件/實驗結果文件/Math16/figures/figure_08_round1_verified_rescue.svg": "c301ea30c162fc6308af58a8308b299c86d0e0c8795b734dda2950cdfae2514b",
+    "docs/決賽文件/實驗結果文件/Math16/figures/figure_09_round1_pass_curves.svg": "e1e9e6bc7f0329a4d0ff93a455fa45286c94929e5c01efd264e9321c3a3b0997",
+    "docs/決賽文件/實驗結果文件/Math16/figures/figure_10_round1_rescue_rate.svg": "77702fc917a9820b7d04ed7d46dabba741cac360cb42294d3cfa7eb2cd8c25dd",
+    "docs/決賽文件/實驗結果文件/Math16/figures/round1_chart_data_v1.json": "ad2ee96e8fc905c91ff89eebd211feb7dc6dd0625e60feffd4cba11b8a45377c"
+  }
+}
