@@ -1,0 +1,175 @@
+{
+  "manifest_id": "math16_qwen4b_cellwise_fixpoint_replay_protocol_v1",
+  "protocol_status": "FROZEN_PROTOCOL_NOT_EXECUTED",
+  "verdict": "QWEN4B_CELLWISE_FIXPOINT_REPLAY_PROTOCOL_FROZEN",
+  "protocol_document": "docs/experiments/design/math16_qwen4b_cellwise_fixpoint_replay_protocol_v1.md",
+  "focused_test": "tests/finals_rebuild/test_math16_qwen4b_cellwise_fixpoint_replay_protocol_v1.py",
+  "frozen_at": "2026-07-30",
+  "head_at_authoring": "328001b2f7aa0a1474d126de9686852257326e75",
+  "origin_main_at_authoring": "328001b2f7aa0a1474d126de9686852257326e75",
+  "positioning": {
+    "model": "qwen3.5:4b",
+    "model_group": "qwen4b",
+    "role": "post_hoc_4b_only_mechanism_pilot",
+    "round1_role": "PRIMARY_FORMAL_ANALYSIS_SEALED",
+    "this_protocol_role": "post_hoc_cellwise_deterministic_fixpoint_replay_spec",
+    "cross_model_fixpoint_forbidden": [
+      "qwen9b",
+      "gemini",
+      "qwen2b"
+    ]
+  },
+  "population": {
+    "total_cells": 320,
+    "round1_final_pass_n": 88,
+    "round1_final_fail_n": 232,
+    "fixpoint_active_n": 232,
+    "permanently_excluded_pass_n": 88,
+    "identity_check": "88 + 232 == 320",
+    "pass_exclusion_policy": "NEVER_SCAN_NEVER_MODIFY",
+    "round1_authorities": {
+      "three_model_summary": "docs/experiments/manifests/math16_three_model_round1_summary_v1.json",
+      "c5a_final_source_closure": "docs/experiments/manifests/math16_c5a_final_source_closure_v1.json",
+      "handoff": "docs/決賽文件/實驗結果文件/Math16/06_math16_aggressive_healer_current_handoff_v1.md"
+    },
+    "round1_final_source_policy": {
+      "default": "c5a_final_source_for_fail_cells",
+      "d5_override_still_fail": "docs/experiments/manifests/math16_c5a_tier_d_d5_development_replay_v1.json",
+      "d2_override_still_fail": "docs/experiments/manifests/math16_c5a_tier_d_d2_development_replay_v1.json",
+      "sha_history_origin": "round1_final_source_sha256"
+    }
+  },
+  "fixed_sequence": "A→B→C1→C2→D3→D1→D5→D2",
+  "layer_order": [
+    "tier_a",
+    "tier_b",
+    "tier_c1",
+    "tier_c2",
+    "tier_d3",
+    "tier_d1",
+    "tier_d5",
+    "tier_d2"
+  ],
+  "freeze_checks": {
+    "no_rule_mutation": true,
+    "no_guard_threshold_order_changes": true,
+    "no_new_rules": true,
+    "tier_b_rule_order": [
+      "core.normalize_fullwidth_python_punctuation",
+      "TIER_A_UNIQUE_MISSING_DELIMITER_REPAIR_V1",
+      "TIER_A_EMPTY_SUITE_INSERT_PASS_V1",
+      "TIER_A_UNIQUE_IMPORT_BINDING_REPAIR_V1"
+    ],
+    "d5_min_score": 8,
+    "d5_min_margin": 2,
+    "rule_ids": {
+      "c1": "TIER_B_EXPLICIT_DOMAIN_METHOD_BINDING_REPAIR_V1",
+      "c2": "TIER_B_DOMAIN_SIGNATURE_FORM_REPAIR_V1",
+      "d3": "TIER_D_SYNTAX_RESIDUE_QUARANTINE_V1",
+      "d1": "TIER_D_OPS_SHADOW_REMOVAL_V1",
+      "d5": "TIER_D_RANKED_DOMAIN_METHOD_BINDING_V1",
+      "d2": "TIER_D_DUPLICATE_DEFINITION_SELECTION_V1"
+    }
+  },
+  "execution_model": {
+    "unit": "cell_wise",
+    "batch_resync_forbidden": true,
+    "only_active_fail_cells_advance": true,
+    "max_round": 8,
+    "cycle_index_base": 1
+  },
+  "termination": {
+    "judgment_order": [
+      "ITERATIVE_RESCUE",
+      "ZERO_CHANGE_CONVERGENCE",
+      "CYCLE_DETECTED",
+      "MAX_ROUND_NON_CONVERGENT",
+      "CONTINUE_SAME_CELL_ONLY"
+    ],
+    "enum": [
+      "ITERATIVE_RESCUE",
+      "ZERO_CHANGE_CONVERGENCE",
+      "CYCLE_DETECTED",
+      "MAX_ROUND_NON_CONVERGENT"
+    ],
+    "rules": {
+      "ITERATIVE_RESCUE": "PASS after full cycle -> stop; record rescue_cycle and rescue_rule_id",
+      "ZERO_CHANGE_CONVERGENCE": "still FAIL and round_end_source == round_start_source -> stop",
+      "CYCLE_DETECTED": "still FAIL and source changed and round_end_sha already in full_sha_history -> stop; do not append",
+      "MAX_ROUND_NON_CONVERGENT": "still FAIL after append-or-zero-path and cycle_index == max_round -> stop",
+      "CONTINUE_SAME_CELL_ONLY": "otherwise only that cell enters next cycle"
+    }
+  },
+  "sha_history": {
+    "origin": "Round 1 final source SHA",
+    "initial": [
+      "round1_final_source_sha256"
+    ],
+    "append_when": "still FAIL, source_changed, and round_end_sha not in history",
+    "cycle_detection_before_append": true,
+    "zero_change_is_not_cycle_detected": true
+  },
+  "rescue_attribution": {
+    "rescue_cycle": "cycle_index where final evaluation becomes PASS",
+    "rescue_rule_id": "last rule in the rescue cycle that modified source (post_sha != pre_sha) and after which final evaluation is PASS",
+    "retain_full_rule_trace": true
+  },
+  "blinding": {
+    "evaluator_may_observe_for_termination_classification": true,
+    "evaluator_must_not_accept_or_rollback_source": true,
+    "evaluator_must_not_reorder_or_skip_rules": true,
+    "outcome_guided_acceptance_forbidden": true,
+    "no_rule_adjustment_from_pass_fail": true
+  },
+  "journal": {
+    "required_fields": [
+      "cell_id",
+      "cycle_index",
+      "round_start_sha",
+      "per_rule_pre_sha",
+      "per_rule_post_sha",
+      "rule_id",
+      "eligible",
+      "modified",
+      "abstained",
+      "round_end_sha",
+      "source_changed",
+      "full_sha_history",
+      "newly_eligible",
+      "enabling_prior_rule",
+      "iterative_partial_repair",
+      "rescue_cycle",
+      "rescue_rule_id",
+      "convergence_cycle_count",
+      "termination_reason",
+      "regression",
+      "cycle_detected",
+      "max_round_reached"
+    ]
+  },
+  "outputs_reserved_not_created_this_round": {
+    "results_root": "docs/experiments/results/math16_qwen4b_cellwise_fixpoint_replay_v1",
+    "future_run_manifest": "docs/experiments/manifests/math16_qwen4b_cellwise_fixpoint_replay_v1.json"
+  },
+  "this_round": {
+    "formal_fixpoint_replay": false,
+    "model_calls": false,
+    "frozen_rules_modified": false,
+    "round1_artifacts_modified": false,
+    "commit": false,
+    "push": false
+  },
+  "declarations": [
+    "protocol_freeze_only",
+    "no_fixpoint_replay_executed",
+    "no_model_calls",
+    "no_frozen_rule_changes",
+    "no_round1_overwrite",
+    "4b_only",
+    "no_9b_gemini_2b_fixpoint",
+    "pass_88_never_scanned",
+    "residual_fail_232_only",
+    "max_round_8",
+    "cell_wise_not_batch"
+  ]
+}
