@@ -83,26 +83,54 @@
 
 ---
 
-## 5. 分帳與待補證據
+## 5. 分帳與 2B exploratory lower-bound（已完成）
 
 | 項目 | 狀態 |
 |---|---|
-| FAIL-only、single-pass Round 1 | **正式主分析** |
+| FAIL-only、single-pass Round 1 | **正式主分析**（三模型主表不變） |
 | Round 2 | **尚未執行**；若做，僅 post-hoc iterative replay |
 | Development 40／Evaluation 120 | Method 1 contract-aware 切分另帳（Evaluation 120 為該切分主要結果）；與 Round 1 全量 320 headline **分帳** |
-| Qwen 3.5 2B smoke | 四條件 16 格 **0/16 PASS**；**尚未**做完整 frozen Healer replay → 列為 **待補 exploratory lower-bound evidence**（Round 2 前優先補作） |
+| Qwen 3.5 2B | smoke **0/16 PASS**；**已完成** 16-cell exploratory lower-bound frozen Healer replay：**0/16 → 0/16**（rescue 0、regression 0）；**不納入**三模型正式主表，**不估計**一般修復率 |
 | Abstain 的意義 | 安全邊界：不猜修 → 保護 regression=0 |
 | Regression=0 的意義 | 本次三模型 Round 1 觀察到無 PASS→FAIL；不宣稱任意情境保證 |
 
+### 2B 密封摘要（exploratory only）
+
+| 指標 | 數值 |
+|---|---|
+| Baseline → Final | **0/16 → 0/16** |
+| verified rescue／regression | **0／0** |
+| Tier A | eligible 2、modified 2、parse gain 1、blocker-removal-only 1 |
+| D3 | eligible 1、modified 1、modified-still-failed 1 |
+| D1 | eligible 1、modified 1、modified-still-failed 1 |
+| 主要失敗 | runtime 7、catastrophic truncation 5、parse minor 2、schema 1、answer incorrect 1 |
+
 ---
 
-## 6. 展示提醒
+## 6. 四模型探索性「可修復窗口」（非正式同等比較）
+
+> **老師版一句話：** 「太弱，錯得太深；太強，現有安全規則無處可修；Healer 最有價值的，是模型已接近成功、只差一道小柵欄的中間地帶。」
+
+四模型結果呈現一個探索性的可修復窗口圖像：2B 的失敗雖可被局部修正，但多數仍距完整 PASS 較遠；Gemini 的 residual FAIL 未命中現有 frozen rules；介於兩者之間的 4B 與 9B 出現較多 deterministic rules 可介入案例，其中 4B 的 verified rescue 最明顯。這支持一項機制性假說：Healer 的施力空間可能集中在模型已具備主要解題骨架、但仍殘留局部、唯一、可驗證結構瑕疵的中間區間。
+
+**限制（口試必講）：**
+- 2B 僅 16 cells；4B／9B／Gemini 各 320 cells。
+- 僅屬 exploratory mechanism hypothesis。
+- 不作正式相關、因果或普遍化主張。
+- 不寫「Gemini 幾乎無結構性失敗」。
+- 不寫「9B 多數已是語意層」。
+- **不得**把本段畫成與第 2 節三模型正式主表同等的統計比較。
+
+---
+
+## 7. 展示提醒
 
 1. 先講 **安全邊界 ≠ 能力邊界**，並用口號 **「先求不修壞，再求修得好」**。
-2. 再秀 **Baseline→Final** 與 **rescue／Baseline FAIL**。
+2. 再秀 **Baseline→Final** 與 **rescue／Baseline FAIL**（僅三模型正式主表）。
 3. 補一句 **partial repair 有價值但不等於 rescue**。
 4. 被問 Gemini 0 rescue：答「安全邊界命中為 0，不是系統壞掉」。
-5. 被問 2B：答「有做 16 格 smoke＝0/16；尚未做完整 Healer replay，已列待補」。
+5. 被問 2B：答「已做完 16 格 Healer exploratory：0→0；有局部修正，但沒 rescue，不算正式主表」。
+6. 若提四模型窗口：先講老師版一句話，立刻補樣本異質與「探索假說、非因果」限制。
 
 ## 建議展示圖
 

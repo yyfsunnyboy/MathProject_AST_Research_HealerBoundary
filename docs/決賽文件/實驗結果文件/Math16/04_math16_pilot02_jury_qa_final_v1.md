@@ -112,7 +112,9 @@ THREE_MODEL_ROUND1_ACCOUNTS_SEPARATED
 8. ❌ **「Gemini rescue=0 代表 Healer 無效」** $\rightarrow$ ⭕ 應說：「代表殘餘失敗未命中安全修法窗口，系統 Abstain；這是安全邊界結果，不是系統失效。」
 9. ❌ **「Partial repair 也算 verified rescue」** $\rightarrow$ ⭕ 應說：「Partial repair 不計入 verified rescue；它表示 blocker 已移除並進入可診斷狀態。」
 10. ❌ **「Round 2 已完成／可覆寫 Round 1」** $\rightarrow$ ⭕ 應說：「Round 2 尚未執行；若執行，僅 post-hoc iterative replay，不得覆寫 Round 1 主表。」
-11. ❌ **「2B 已完成 320 格與完整 Healer 正式帳」** $\rightarrow$ ⭕ 應說：「2B 僅有四條件 smoke 0/16 PASS；尚未做完整 frozen Healer replay，屬待補 exploratory lower-bound evidence。」
+11. ❌ **「2B 已完成 320 格與完整 Healer 正式帳／可估計一般修復率」** $\rightarrow$ ⭕ 應說：「2B 已完成 16-cell exploratory lower-bound frozen Healer replay（0/16→0/16，rescue 0、regression 0）；非正式主表，不估計一般修復率，不納入三模型 Round 1 主表。」
+12. ❌ **「四模型可修復窗口已是正式統計／因果結論」** $\rightarrow$ ⭕ 應說：「僅屬 exploratory mechanism hypothesis；2B＝16、4B／9B／Gemini＝各 320，不得作同等正式比較，不作相關／因果／普遍化主張。」
+13. ❌ **「Gemini 幾乎無結構性失敗」／「9B 多數已是語意層」** $\rightarrow$ ⭕ 應說：「只描述已封存殘餘失敗與規則命中情況；不作該類概括。」
 
 
 
@@ -150,16 +152,16 @@ THREE_MODEL_ROUND1_ACCOUNTS_SEPARATED
 ## 三、 Round 1／安全邊界／Partial repair／2B 補充題（Category C）
 
 ### Q23: 有沒有跑更小的模型（例如 2B）？
-**正式回答：** 有。Qwen 3.5 2B 已完成四條件 smoke：`qwen35_2b_math16_four_condition_smoke_20260725_001`，結果為 **0/16 PASS**。此為 exploratory lower-bound／基礎設施驗證證據，**不是** 320 格正式主表，亦**尚未**完成完整 frozen Healer replay。
-**口試短答：** 有跑 2B 的 16 格四條件 smoke，結果 0/16 PASS；還沒做完整 Healer，也不算 320 正式主表。
+**正式回答：** 有。Qwen 3.5 2B 已完成四條件 smoke：`qwen35_2b_math16_four_condition_smoke_20260725_001`，結果為 **0/16 PASS**；並已完成 namespace `qwen2b_16cell_exploratory_lower_bound_v1` 之 16-cell exploratory lower-bound frozen Healer 零模型 replay：**0/16 → 0/16**（verified rescue **0**、regression **0**）。此為 exploratory lower-bound 證據，**不是** 320 格正式主表，**不納入**三模型 Round 1 主表，**不估計**一般修復率。
+**口試短答：** 有跑 2B：smoke 0/16，Healer exploratory replay 也是 0/16→0/16；屬探索下界，不算 320 正式主表。
 
 ### Q24: 為什麼 2B 沒有擴到 320 格？
-**正式回答：** 2B 屬於探索性下界探針，目的是確認更小模型在相同 Math16 契約下是否已具可用 Baseline。在 16 格四條件皆 0 PASS 的情況下，優先保留算力於 4B／9B／Gemini 正式 320 格與 Round 1 Healer 主分析；將 2B 擴至 320 並非本輪正式主表必要條件。
-**口試短答：** 2B 先做 16 格探針就全掛，正式主表仍以 4B／9B／Gemini 的 320 格為準，沒有為了湊數硬擴。
+**正式回答：** 2B 屬於探索性下界探針，目的是確認更小模型在相同 Math16 契約下是否已具可用 Baseline，並以既有 16-cell raw 完成 frozen Healer exploratory replay。在 16 格四條件皆 0 PASS、且 Healer 亦無 verified rescue 的情況下，優先保留算力於 4B／9B／Gemini 正式 320 格與 Round 1 Healer 主分析；將 2B 擴至 320 並非本輪正式主表必要條件。
+**口試短答：** 2B 先做 16 格探針就全掛，Healer 也救不起 PASS；正式主表仍以 4B／9B／Gemini 的 320 格為準，沒有為了湊數硬擴。
 
 ### Q25: 2B 有沒有實際用 Healer 修？
-**正式回答：** **尚未**對 2B 執行完整 frozen Healer replay。現況僅有 Baseline smoke（0/16 PASS）。此項已列為 Round 2 前優先補作之 exploratory lower-bound evidence；補作後仍屬探索帳，不得覆寫 Round 1 三模型主表。
-**口試短答：** 還沒。現在只有 0/16 的 Baseline smoke；完整 Healer 列在 Round 2 前優先補作，而且仍是探索帳。
+**正式回答：** **已完成** 16-cell exploratory lower-bound frozen Healer 零模型 replay（FAIL-only、single-pass、不改規則）。結果：**0/16 → 0/16**；verified rescue **0**、regression **0**。局部進展：Tier A eligible 2／modified 2／parse gain 1／blocker-removal-only 1；D3 eligible 1／modified 1／modified-still-failed 1；D1 eligible 1／modified 1／modified-still-failed 1。主要失敗：runtime failure 7、catastrophic truncation 5、parse minor 2、schema 1、answer incorrect 1。仍屬探索帳，**不得覆寫** Round 1 三模型主表，**不估計**一般修復率。
+**口試短答：** 有做完 16 格 frozen Healer；結果仍是 0→0，只有局部 partial repair，不算正式主表、也不推一般修復率。
 
 ### Q26: 有沒有把後段修好的程式回頭重跑（多輪迭代）？
 **正式回答：** **Round 1 為固定 single-pass 正式主分析**：每一層只承接上一層 final source，僅對仍 FAIL 的格子套用下一層規則，不做以 evaluator 結果回頭改寫流程的多輪搜尋。**Round 2 尚未執行**；若未來執行，僅定位為 post-hoc iterative replay，必須獨立分帳，**不得覆寫 Round 1 主表**。
@@ -176,3 +178,7 @@ THREE_MODEL_ROUND1_ACCOUNTS_SEPARATED
 ### Q29: Development 40／Evaluation 120 與 Round 1 320 格如何分帳？
 **正式回答：** Development 40／Evaluation 120 屬 Method 1 contract-aware 切分另帳（Evaluation 120 為該切分主要結果）。三模型 Aggressive Healer Round 1 以全量 **320** 格 FAIL-only cumulative 為正式比較 headline。兩套帳目並存，**不得互相覆寫或加總混報**。
 **口試短答：** 40／120 是 Method 1 的切分另帳；Round 1 三模型比較用全量 320，兩套數字不能混在一起講。
+
+### Q30: 四模型（2B／4B／9B／Gemini）能不能畫成同等「可修復窗口」正式比較？
+**正式回答：** **不能。** 可討論的探索性圖像是：2B 的失敗雖可被局部修正，但多數仍距完整 PASS 較遠；Gemini 的 residual FAIL 未命中現有 frozen rules；介於兩者之間的 4B 與 9B 出現較多 deterministic rules 可介入案例，其中 4B 的 verified rescue 最明顯。這支持一項**機制性假說**：Healer 的施力空間可能集中在模型已具備主要解題骨架、但仍殘留局部、唯一、可驗證結構瑕疵的中間區間。**限制：** 2B 僅 16 cells、4B／9B／Gemini 各 320 cells；僅屬 exploratory mechanism hypothesis；不作正式相關、因果或普遍化主張；不寫「Gemini 幾乎無結構性失敗」、不寫「9B 多數已是語意層」。
+**口試短答：** 可以講探索性假說——太弱修不動到 PASS、太強規則無處可修、中間地帶最有價值；但不能當正式四模型同等統計，也不講因果。

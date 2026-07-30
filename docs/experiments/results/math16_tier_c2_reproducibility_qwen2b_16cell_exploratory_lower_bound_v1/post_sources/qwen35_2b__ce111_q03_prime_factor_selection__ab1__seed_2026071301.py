@@ -1,0 +1,16 @@
+def generate(level=1, **kwargs):
+    candidates = kwargs.get("candidates", [11, 12, 13, 14])
+    n = kwargs["n"]
+    
+    correct_answer = None
+    
+    for candidate in candidates:
+        if (candidate * candidate) <= n and ((n // candidate) % candidate == 0):
+            correct_answer = candidate
+            break
+            
+    return {
+        "question_text": r"The integer $x$ is a prime factor of the number $\sqrt{n}$ such that $x^2 \leq n$. Given the set of candidates $\{11, 12, 13, 14\}$ and $n = 156$, what is the correct value for $x$?",
+        "correct_answer": int(correct_answer),
+        "oracle_payload": {"candidates": [11, 12, 13, 14], "n": 156}
+    }

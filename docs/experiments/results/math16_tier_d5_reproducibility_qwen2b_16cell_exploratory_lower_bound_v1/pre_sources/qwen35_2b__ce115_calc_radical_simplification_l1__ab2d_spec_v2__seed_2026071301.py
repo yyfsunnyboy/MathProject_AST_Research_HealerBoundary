@@ -1,0 +1,30 @@
+# -*- coding: utf-8 -*-
+
+import math
+
+def generate(level=1, **kwargs):
+    # Rules:
+    # - Do not read frozen parameters from kwargs or external state.
+    #   (The task specification provides the value 27 as a constraint for this specific instance).
+    
+    # Define frozen parameter directly based on task spec constraints.
+    radicand = 27
+    
+    # Simplify radical expression: sqrt(27) -> sqrt(9 * 3) -> 3*sqrt(3)
+    coefficient = 3
+    simplified_radical_str = "3\\sqrt{3}"
+
+    correct_answer_text = f"{coefficient}\\sqrt{{{radicand}}}" # Format as requested in spec context, though canonical latex is preferred. 
+                                        # Re-reading spec: "correct_answer must include coefficient, radicand, and canonical_latex".
+                                        # Let's construct the string representation of that info clearly.
+    correct_answer_str = f"{coefficient}\\sqrt{{{radicand}}}"
+
+    question_text = r"""Simplify $\sqrt{27}$ into its simplest radical form."""
+
+    oracle_payload = {"radicand": 27} # Must exactly equal frozen sampled parameters.
+
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer_str,
+        "oracle_payload": oracle_payload
+    }
