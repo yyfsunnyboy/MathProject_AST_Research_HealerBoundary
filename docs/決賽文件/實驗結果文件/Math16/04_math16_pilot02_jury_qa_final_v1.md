@@ -77,8 +77,8 @@ THREE_MODEL_ROUND1_ACCOUNTS_SEPARATED
 **口試短答：** Eligibility 與修法不依賴正確答案反推，也不依 PASS/FAIL 反覆試修；修復後評估只用於記錄結果。
 
 ### Q15: 你們如何確保 Healer 不會把原本寫對的程式改壞 (Regression)？
-**正式回答：** 通過兩道防線：(1) Eligibility 審查僅允許失敗模式明確且修法唯一的案例；(2) Revalidation 機制在修復後重新執行靜態檢核。在本次 320 個測試單元中，實際執行修復的案例均觀察到 Regression=0。
-**口試短答：** 我們嚴格限制只修復有唯一答案的語法瑕疵，並在修改後再次自動檢核。本次實驗中觀察到 zero regression。
+**正式回答：** 通過多層防線：(1) Round 1 FAIL-gated——只對 FAIL cells 正式修復，PASS 不進修復流程；(2) Eligibility 僅允許修法唯一、局部、可驗證之案例；(3) 三模型 481-cell Fixpoint 與 960-cell Safety Benchmark 顯示 source-validated PASS 全數 preserved、regression＝0。Regression＝0 是**本研究樣本中未觀察到**，不得寫成任意情境絕對保證。
+**口試短答：** 先只修 FAIL、再靠 Eligibility；再加上 481 格 fixpoint 與 960 格 safety，這次沒看到 PASS 被改壞。這是樣本觀察，不是絕對保證。
 
 ### Q16: 為什麼不新增更多修復規則來救援 9B 的 219 個失敗？
 **正式回答：** 因為事前凍結可降低事後配合資料造成的 rule overfitting；新規則應在 development 證據建立，再用未參與建置的資料驗證，以維持實證研究的科學可重複性。
@@ -118,7 +118,8 @@ THREE_MODEL_ROUND1_ACCOUNTS_SEPARATED
 13. ❌ **「Gemini 幾乎無結構性失敗」／「9B 多數已是語意層」** $\rightarrow$ ⭕ 應說：「只描述已封存殘餘失敗與規則命中情況；不作該類概括。」
 14. ❌ **「fixpoint 輪的 regression=0 是新的安全性證明」** $\rightarrow$ ⭕ 應說：「本輪未掃描 88 個 PASS cells，不能用 fixpoint 重估 regression；正式 regression 證據仍來自 Round 1／Method 2。」
 15. ❌ **「Development 40 完全沒見過／因此零污染」** $\rightarrow$ ⭕ 應說：「Development 40 用於理解失敗模式；該切分 rescue 全在 Evaluation 120、Dev rescue＝0，只支持非題目客製化，不宣稱零污染風險。」
-16. ❌ **「Aggressive 320-cell safety benchmark 已完成／等同 Method 2／Round 2／fixpoint」** $\rightarrow$ ⭕ 應說：「`Aggressive Healer full 320-cell safety benchmark`（同時掃描原始 PASS／FAIL；量測 rescue、preserved pass、PASS→FAIL regression、net PASS change）**尚未執行**，列為後續工作；不得與 Method 2、Round 2、fixpoint 混稱。」
+16. ❌ **「Aggressive 320-cell safety benchmark 等同 Method 2／Round 2／fixpoint，或保證任意情境零 regression」** $\rightarrow$ ⭕ 應說：「三模型 960-cell safety **已執行**（source-validated PASS 478／478 preserved、regression＝0）；屬三重安全性驗證之一層，**不得**與 Method 2、Round 2、fixpoint 混稱；regression＝0 僅為本研究樣本觀察，非絕對保證。」
+17. ❌ **「單輪架構就是真實 fixpoint」** $\rightarrow$ ⭕ 應說：「三模型 residual 481 在最多兩輪內收斂且無新增 rescue；這是操作收斂證據，不得寫成單輪＝真實 fixpoint。」
 
 
 
@@ -198,3 +199,7 @@ THREE_MODEL_ROUND1_ACCOUNTS_SEPARATED
 ### Q33: Aggressive Round 1 為什麼有時講 88／9、有時講 87／8？
 **正式回答：** **frozen archive**（C5a／Round1 summary／journals）永久保留 Final **88**、rescue **9**。**分析 overlay**（2026-07-30 Correction Note）因單一 cell `…ce112_q04…seed_2026072003` 的 source–label promotion mismatch（密封 source＝`FAILED／parse_minor`，manifest＝`PASS／PRIOR_PASS_PRESERVED`）改為 Final **87**、rescue **8**、修復率 **8／241＝3.32%**。真 rescue＝Tier A 6＋D1 active-shadow 2；C2 +1 為幽靈帳。Conservative 79→85／6 **不受影響**。三模型 Final PASS sealed-source 重評 **478／479** 一致（唯一 mismatch＝本格；9B／Gemini 0；非系統性）。口試／主表以 overlay 為準，並聲明 frozen 數字未覆寫。
 **口試短答：** 88／9 是凍結封存；87／8 是分析更正。那一格程式其實 parse 失敗卻被標成 PASS，所以少算一格真 rescue。
+
+### Q34: 為何能主張 Healer 安全？
+**正式回答：** 主張建立在三層證據，而非單一指標：(1) **Round 1 FAIL-gated**——只對 FAIL cells 正式修復，PASS 不進修復流程；(2) **481-cell Fixpoint Replay**（4B 232＋9B 218＋Gemini 31）——最多兩輪內收斂，rescue＝0、cycle＝0、max-round exhaustion＝0；(3) **960-cell full Safety Benchmark**（三模型各 320）——source-validated PASS **478／478 preserved**，regression＝**0**，modified＝20（修改≠rescue／regression）。Safety 表口徑：4B PASS／preserved 採 sealed-source corrected（87／87）；9B／Gemini 採 frozen label 且與 sealed-source 重評一致（102／102、289／289）；479-cell audit 僅 4B 一格 mismatch、其餘 478 一致。Regression＝0 僅表示**本研究樣本中未觀察到** PASS→FAIL，**不得**寫成任意情境絕對保證。
+**口試短答：** 三層：只修 FAIL、481 格再跑會收斂且沒多救、960 格 safety 沒看到 PASS 被改壞。這是這次樣本的觀察，不是保證永遠安全。

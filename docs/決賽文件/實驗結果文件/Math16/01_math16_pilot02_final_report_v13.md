@@ -392,6 +392,52 @@ Protocol／結果：`math16_qwen4b_cellwise_fixpoint_replay_protocol_v1`；`docs
 
 ---
 
+## 11C. 三重安全性驗證
+
+> **定位：** 整合 Round 1 FAIL-gated、三模型 cell-wise Fixpoint Replay、與三模型 320-cell Safety Benchmark 的安全性證據層。**不**覆寫第 10–11 節 Conservative／Primary 帳，亦**不**覆寫第 11B 節 Aggressive Round 1 主表。主報告科學口徑採 corrected account：Conservative **+6**；Aggressive 額外 **+2**；Aggressive Final **79→87**（verified rescue **8**）。
+
+### 11C.1 Round 1 FAIL-gated
+
+Round 1 正式修復流程**只對 FAIL cells** 套用凍結規則；**PASS cells 不進入**正式修復流程。此為第一層防禦：避免對已通過單元做不必要修改。
+
+### 11C.2 Cell-wise Fixpoint Replay
+
+Protocol：固定規則序 `A→B→C1→C2→D3→D1→D5→D2`；`max_round=8`；不呼叫模型。母體＝各模型 Round 1 後 residual FAIL。
+
+| 模型 | residual FAIL | 第1輪收斂 | 第2輪收斂 | rescue | cycle | max-round exhaustion |
+|---|---:|---:|---:|---:|---:|---:|
+| Qwen 4B | 232 | 232 | 0 | 0 | 0 | 0 |
+| Qwen 9B | 218 | 215 | 3 | 0 | 0 | 0 |
+| Gemini | 31 | 31 | 0 | 0 | 0 | 0 |
+| **合計** | **481** | **478** | **3** | **0** | **0** | **0** |
+
+**正式解讀：** 三模型皆在最多兩輪內收斂；固定規則反覆執行**未產生**新增 verified rescue。此為操作收斂證據，**不得**寫成「單輪架構是真實 fixpoint」。
+
+結果根目錄：`math16_qwen4b_cellwise_fixpoint_replay_v1/`、`math16_qwen9b_cellwise_fixpoint_replay_v1/`、`math16_gemini_cellwise_fixpoint_replay_v1/`。
+
+### 11C.3 320-cell Safety Benchmark
+
+Protocol：對完整 320 cells（含 source-validated PASS 與 FAIL）執行同一固定規則序之單輪 safety scan；量測 preserved pass、regression、modified。科學口徑採 **corrected／source-validated** PASS 母體（4B＝**87**）。
+
+| 模型 | cells | source-validated PASS | preserved | regression | modified |
+|---|---:|---:|---:|---:|---:|
+| Qwen 4B | 320 | 87 | 87 | 0 | 2 |
+| Qwen 9B | 320 | 102 | 102 | 0 | 13 |
+| Gemini | 320 | 289 | 289 | 0 | 5 |
+| **合計** | **960** | **478** | **478** | **0** | **20** |
+
+> **口徑註記：** 4B 的 PASS／preserved 採 sealed-source corrected account（87／87）；9B 與 Gemini 採 frozen label，且其 sealed-source 重評皆與 frozen label 一致（102／102、289／289）。三模型 479-cell audit 僅發現 4B 一格 label／source mismatch，其餘 478 格一致。
+
+**正式解讀：** 三模型所有 source-validated PASS 均 preserved，**未觀察到** PASS→FAIL regression。Modified 表示 source 被規則修改，**不等於** rescue／regression。
+
+結果根目錄：`math16_qwen4b_aggressive_320_safety_benchmark_v1/`、`math16_qwen9b_aggressive_320_safety_benchmark_v1/`、`math16_gemini_aggressive_320_safety_benchmark_v1/`。
+
+### 11C.4 Gemini 補充
+
+Gemini 的 5 個 modified cells 全部由 `TIER_D_OPS_SHADOW_REMOVAL_V1` 修改，原本與修改後皆 PASS；顯示高通過率模型仍可能存在可安全移除的 Ops shadow binding，提供 D1 類規則跨模型安全性的補充證據。
+
+---
+
 ## 12. Qwen 4B與9B配對分析
 
 在 320 個完全相同題目與條件配對單元中，對 Qwen 4B 與 9B 進行一對一 Tier 1 配對分析（本節為 4B vs 9B 兩模型配對統計結構，維持原有排序，不套用三模型呈現順序規則）：
@@ -566,8 +612,8 @@ Deterministic AST Healer 之安全介入架構概念如下：
 2. **Aggressive Healer Round 1（三模型正式主分析，另帳）：** 4B／9B／Gemini corrected overlay 分別 **79→87（rescue 8）／101→102（rescue 1）／289→289（rescue 0）**；修復率 **3.32%**／0.46%／0%（frozen 4B 仍為 79→88／9／3.73%）。只描述本次關聯，不宣稱規模因果；Gemini 0 rescue 代表安全窗口未命中（Abstain），不代表 Healer 無效。
 3. Regression 嚴格分帳：Method 1 為 `Regression not measured`；Method 2 對全部 320 格 Raw／Final 雙路評分後為 `Regression measured = 0/320`；Round 1 三模型 cumulative 亦觀察到 regression＝0。
 4. 面臨無確定修法之失敗時，系統依凍結規則選擇 Abstain；partial repair 另帳，不計入 verified rescue。
-5. 三模型 Round 2 尚未執行。4B-only cell-wise fixpoint 已完成（frozen 232 全 `ZERO_CHANGE_CONVERGENCE`、additional rescue＝0），屬 post-hoc 機制探針，不得覆寫 Round 1 主表；亦不得以未掃描 PASS cells 重估 regression；**不得**將該結果外推為涵蓋 corrected residual FAIL＝233。
-6. **`Aggressive Healer full 320-cell safety benchmark`（已執行；見 results root）：** frozen-label primary＝preserved 88／regression 0／rescue 0；sealed-source sensitivity＝preserved 87／regression 0／rescue 1（EMPTY_SUITE；D1＝dead-shadow cleanup）；**不得**與 Method 2、Round 2、fixpoint 混稱。
+5. 三模型 Round 2 尚未執行。三模型 cell-wise Fixpoint Replay 已完成（residual 481：第1輪 478／第2輪 3；rescue＝0；見第 11C 節），屬 post-hoc 機制探針，不得覆寫 Round 1 主表；**不得**寫成「單輪架構是真實 fixpoint」。
+6. **三重安全性驗證（第 11C 節）：** FAIL-gated ＋ 481-cell fixpoint ＋ 960-cell safety；source-validated PASS 478／478 preserved、regression＝0（本研究樣本中未觀察到，非絕對保證）；**不得**與 Method 2、Round 2 混稱。
 7. Qwen 3.5 2B 四條件 smoke 為 0/16 PASS，且**已完成** 16-cell exploratory lower-bound frozen Healer replay：**0/16 → 0/16**（rescue 0、regression 0）；不估計一般修復率，不納入三模型正式主表。四模型「可修復窗口」僅作探索性機制假說（見第 11B.4 節）。
 8. Development 40／Evaluation 120：Dev rescue＝0、Eval rescue＝4；只支持非題目客製化，不宣稱零污染。舊版 `core/healers` 不進 Round 1 正式決策（見 provenance §7）。
 
@@ -576,8 +622,8 @@ Deterministic AST Healer 之安全介入架構概念如下：
 2. 2B 若擴樣，須另開協議；不得把 16-cell exploratory 帳寫成 320 正式主表。
 3. 擴充預註冊修復規則庫時，須以獨立驗證集驗證，禁止事後配合資料改規則。
 4. 引入多 Task 跨領域擴展測試，縮減 Task-clustered Bootstrap 信賴區間不確定性。
-5. 不以 4B fixpoint＝zero-change 放寬 frozen rules；不以未掃描 PASS cells 改寫 regression 安全敘事；fixpoint v1 不涵蓋 corrected residual FAIL＝233。
-6. **`Aggressive Healer full 320-cell safety benchmark`：** 保留 frozen-label primary 與 sealed-source sensitivity 雙帳；**不得**與 Method 2、Round 2、fixpoint 混稱。
+5. 不以 fixpoint 收斂放寬 frozen rules；不以「單輪＝真實 fixpoint」改寫敘事。
+6. **三重安全性驗證／320-cell safety：** 主報告採 corrected／source-validated 口徑；**不得**與 Method 2、Round 2 混稱；regression＝0 僅為樣本觀察。
 
 ### 正式證據與產物索引
 - **Evidence Complete Milestone v1**：`docs/experiments/milestones/math16_pilot02_evidence_complete_v1/`
@@ -587,7 +633,7 @@ Deterministic AST Healer 之安全介入架構概念如下：
 - **老師展示摘要**：`docs/決賽文件/實驗結果文件/Math16/09_math16_three_model_round1_teacher_brief_v1.md`
 - **Round 1 summary JSON**：`docs/experiments/manifests/math16_three_model_round1_summary_v1.json`
 - **2B exploratory lower-bound cumulative**：`docs/experiments/results/math16_cumulative_qwen2b_16cell_exploratory_lower_bound_v1/summary.json`
-- **4B cell-wise fixpoint replay**：`docs/experiments/results/math16_qwen4b_cellwise_fixpoint_replay_v1/`
+- **三重安全性驗證（§11C）**：三模型 Fixpoint＋320-cell Safety results roots（`math16_{qwen4b,qwen9b,gemini}_cellwise_fixpoint_replay_v1/`；`math16_{qwen4b,qwen9b,gemini}_aggressive_320_safety_benchmark_v1/`）
 - **Healer provenance audit（含世代切割／40–120／fixpoint）**：`docs/experiments/reports/math16_healer_rule_provenance_audit_v1.md`
 - **Six Core Figures v1**：`docs/experiments/visualization/math16_pilot02_core_figures_v1/`
 - **One-Pager v2.3 (Pairwise Collision-Free)**：`docs/experiments/presentation/math16_pilot02_one_pager_v23/`

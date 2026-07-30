@@ -82,7 +82,30 @@
 
 ---
 
-## 5. Fixpoint／320-cell safety（口試一句話）
+## 5. 三重安全性驗證（精簡總表）
 
-- Fixpoint v1：232／232 zero-change **只對 frozen 88／232 成立**；corrected residual FAIL＝233 含未掃描格。
-- Aggressive 320：primary preserved 88／rescue 0；sensitivity rescue 1（EMPTY_SUITE），不得與 D1 active-shadow 1301／2002 混稱。
+### Fixpoint（residual FAIL）
+
+| 模型 | residual | 第1輪 | 第2輪 | rescue | cycle | max-round |
+|---|---:|---:|---:|---:|---:|---:|
+| 4B | 232 | 232 | 0 | 0 | 0 | 0 |
+| 9B | 218 | 215 | 3 | 0 | 0 | 0 |
+| Gemini | 31 | 31 | 0 | 0 | 0 | 0 |
+| **合計** | **481** | **478** | **3** | **0** | **0** | **0** |
+
+### Safety（320×3＝960）
+
+| 模型 | PASS | preserved | regression | modified |
+|---|---:|---:|---:|---:|
+| 4B（source-validated） | 87 | 87 | 0 | 2 |
+| 9B | 102 | 102 | 0 | 13 |
+| Gemini | 289 | 289 | 0 | 5 |
+| **合計** | **478** | **478** | **0** | **20** |
+
+> 4B＝sealed-source corrected（87／87）；9B／Gemini＝frozen label 且與 sealed-source 一致（102／102、289／289）。479-cell audit 僅 4B 一格 mismatch。
+
+### 三句結論
+
+1. Round 1 只修 FAIL；PASS 不進正式修復流程。
+2. 三模型 residual 481 最多兩輪收斂、無新增 rescue；不得說「單輪＝真實 fixpoint」。
+3. 960-cell safety：source-validated PASS 全 preserved、regression＝0（樣本觀察，非絕對保證）。
