@@ -248,6 +248,7 @@ execution rescue 格為 `ce115_calc_exact_rational_expression_l1 / Ab1 / seed 20
 > - Evaluation 120 格是主要結果。
 > - 70 格只是排除 5 個 `cohort_level_provenance_uncertain` 任務後的敏感度分析，不得取代 120 格。
 > - 70 格救援為 0 與既有 split 結構及 Generic Core 已知命中分布一致，不寫成新發現。
+> - **資料分帳治理／Contract-Aware 定義：** Round 1 全量＝**16題 × 4條件 × 5 seeds = 320**。本切分為 Contract-Aware 子集，**僅含** `ab2d` + `ab2d_spec_v2`＝**16題 × 2條件 × 5 seeds = 160**（Development：`4×2×5=40`；Evaluation：`12×2×5=120`；**40+120=160**，只是 320 子集）。`ab1`／`ab2g` 仍在 320 總體，但因無 domain API／function contract 不納入此 split；**不得**推論一般 Healer 完全不能作用於 `ab1`／`ab2g`。Development 40 用於理解失敗模式，不宣稱完全未見；該切分內 verified rescue **全部**在 Evaluation 120，Development 40 verified rescue＝**0**。結論只支持**非題目客製化**，不宣稱完全無污染風險。後續 Aggressive 規則採通用 AST／結構 pattern，development influence 仍以 frozen-rule benchmark 控制。Method 1 之 Dev／Eval rescue **不得**與 Round 1 79→88 混稱。
 
 詳細結果與切分說明見：[Math16 Method 1 — 依 Development 40／Evaluation 120 切分成果報告](../../../experiments/reports/math16_method1_40_120_split_results_report_v1.md)。
 
@@ -260,6 +261,33 @@ execution rescue 格為 `ce115_calc_exact_rational_expression_l1 / Ab1 / seed 20
 > Method 2 對全部 320 格 raw source 先執行 Eligibility，Eligible 11 格才套用 frozen Healer；完成 source decision 後，再以同一 pinned Evaluator 分別評分 Raw 與 Final。Eligible 11 格為 6 格 rescue、5 格 still failed。Method 2 的 `Regression measured = 0/320` 為全 320 格 Raw／Final 雙路評分之實際量測結果；Method 1 則為 `Regression not measured`。
 
 詳細流程、eligible 逐格帳與 rule_id 分帳見：[Math16 Method 2 All-Cell 正式結果報告](../../../experiments/reports/math16_method2_all_cell_results_report_v1.md)。
+
+### Healer 世代切割與 4B cell-wise fixpoint（A／C 同步）
+
+#### Healer 世代切割（方法／provenance）
+
+舊版工程 Healer（`core/healers`）目標是盡量恢復可執行；Math16 正式 Healer 重新建立 deterministic、evaluator-blind、保守拒修與固定證據紀錄。舊系統僅作歷史來源，**不參與** Round 1 正式修補決策。若共用 parser／AST 等基礎設施，僅能主張「修補決策模組獨立重寫」，不得宣稱整套完全不共用程式碼。詳見權威 provenance：`docs/experiments/reports/math16_healer_rule_provenance_audit_v1.md` §7–§9。
+
+#### Qwen 4B cell-wise deterministic fixpoint replay（已封存）
+
+> **定位：** 4B-only post-hoc mechanism pilot。**不得**覆寫 Round 1 三模型主表；**不是**三模型 Round 2 正式覆寫。
+
+Protocol／結果：`math16_qwen4b_cellwise_fixpoint_replay_protocol_v1`；`docs/experiments/results/math16_qwen4b_cellwise_fixpoint_replay_v1/`。
+
+| 指標 | 數值 |
+|---|---|
+| 輸入 | Round 1 final 後仍 FAIL **232** cells |
+| 永久排除 | Round 1 final 已 PASS **88** cells（本輪未掃描） |
+| 規則順序 | `A→B→C1→C2→D3→D1→D5→D2`；`max_round=8` |
+| `ZERO_CHANGE_CONVERGENCE` | **232**（全部第一輪 zero-change） |
+| `ITERATIVE_RESCUE` | **0** |
+| `CYCLE_DETECTED` | **0** |
+| `MAX_ROUND_NON_CONVERGENT` | **0** |
+| model calls | **0** |
+
+**結論：** 現有凍結 Healer 在 Round 1 後對 4B residual FAIL 已達**操作上的 fixpoint**（再跑完整一輪 stack 無 source 變更、無額外 verified rescue）。
+
+**限制：** 本輪**未掃描** 88 個 PASS cells，**不得**把本輪 regression＝0 當新安全性證據；正式 regression 證據仍來自 Round 1／Method 2 等已封存帳。
 
 ---
 
@@ -424,15 +452,21 @@ Deterministic AST Healer 之安全介入架構概念如下：
 1. AST Healer 不扮演第二個解題模型，而在可驗證之特定語法瑕疵窗口發揮確定性救援功能（4B verified rescue 共 6 格，通過數由 **79/320** 提升至 **85/320**，已依 [更正說明](../../../experiments/reports/math16_baseline_correction_note_v1.md) 自原 78→84/320 更正）。技術分帳上，Primary 救援 5 格、final 對應 84/320（原 83/320，中繼值，demoted）；另 1 格由 corrected-chain 確認方達最終 85/320，且另有 1 格 repaired-still-fail 不計入 rescue。
 2. Regression 嚴格分帳：Method 1 為 `Regression not measured`；Method 2 對全部 320 格 Raw／Final 雙路評分後為 `Regression measured = 0/320`。
 3. 面臨無確定修法之失敗時，系統依凍結規則選擇 Abstain，降低盲目修改帶來之風險並維持整體架構之可解釋性。
+4. 4B-only cell-wise fixpoint 已完成（232 全 `ZERO_CHANGE_CONVERGENCE`、additional rescue＝0），屬 post-hoc 機制探針，不得覆寫 Round 1 主表；亦不得以本輪未掃描 88 PASS cells 重估 regression。
+5. Development 40／Evaluation 120：Dev rescue＝0、Eval rescue＝4；只支持非題目客製化，不宣稱零污染。舊版 `core/healers` 不進 Round 1 正式決策（見 provenance §7）。
 
 ### 後續工作
 1. 擴充預註冊修復規則庫，針對 9B 語法瑕疵開發獨立驗證集。
 2. 引入多 Task 跨領域擴展測試，縮減 Task-clustered Bootstrap 信賴區間不確定性。
+3. 不以 4B fixpoint＝zero-change 放寬 frozen rules；不以未掃描 PASS cells 改寫 regression 安全敘事。
+4. **`Aggressive Healer full 320-cell safety benchmark`（尚未執行）：** 同時掃描原始 PASS／FAIL，量測 rescue、preserved pass、PASS→FAIL regression、net PASS change；**不得**與 Method 2、Round 2、fixpoint 混稱。
 
 ### 正式證據與產物索引
 - **Evidence Complete Milestone v1**：`docs/experiments/milestones/math16_pilot02_evidence_complete_v1/`
 - **Integrated Results Report v1**：`docs/experiments/reports/math16_pilot02_integrated_results_report_v1.md`
 - **正式 Jury Q&A Defense Manual v1（20260724 唯一正式交付入口）**：`docs/決賽文件/實驗結果文件/20260724_Math16/04_math16_pilot02_jury_qa_final_v1.md`
+- **4B cell-wise fixpoint replay**：`docs/experiments/results/math16_qwen4b_cellwise_fixpoint_replay_v1/`
+- **Healer provenance audit（含世代切割／40–120／fixpoint）**：`docs/experiments/reports/math16_healer_rule_provenance_audit_v1.md`
 - **Six Core Figures v1**：`docs/experiments/visualization/math16_pilot02_core_figures_v1/`
 - **One-Pager v2.3 (Pairwise Collision-Free)**：`docs/experiments/presentation/math16_pilot02_one_pager_v23/`
 - **Final Report v1 (Base Version)**：`docs/experiments/reports/math16_pilot02_final_report_v1.md`

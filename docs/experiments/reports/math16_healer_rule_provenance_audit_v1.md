@@ -117,3 +117,82 @@
 1. **同批資料規則發現風險 (Discovery Cohort Risk)**：規則原型雖然在 4B 實驗前凍結，但早期開發曾參考同系列開發數據。
 2. **獨立驗證尚未執行 (No External Independent Validation)**：本研究尚未於完全獨立之新 Task 數據庫驗證通用效度。
 3. **Runner 邏輯對救援結果之敏感性**：Runner 迴圈機制修正可影響極端邊界 cell (如第 6 格)，凸顯執行器規格嚴謹性之重要性。
+
+---
+
+## 7. Healer 世代切割：舊版工程 Healer vs Math16 Conservative Healer
+
+| 世代 | 路徑／定位 | 目標與治理 |
+|---|---|---|
+| 舊版工程 Healer | `core/healers`（regex／AST／unified cleanup 等歷史庫） | **工程導向**：優先恢復可執行／可解析；含較寬鬆或探索性修復路徑 |
+| Math16 正式 Healer | `agent_tools/finals_rebuild/ce115_research_healer_rules_*.py` 等凍結規則＋FAIL-only runner | **研究導向**：deterministic、evaluator-blind、保守拒修（Abstain）、固定 eligibility／journal 證據 |
+
+**強制切割聲明：**
+
+1. 舊版 `core/healers` **只作為歷史來源／盤點對象**，**不參與** Math16 Round 1 正式修補決策。
+2. Math16 Conservative／Aggressive cumulative 規則之 **detector／eligibility／abstain／transform／acceptance** 為獨立重寫之修補決策模組；正式決策鏈不以舊版工程 Healer 輸出為準。
+3. 若存在共用底層能力（例如 Python 標準庫 `ast.parse`、通用字串／檔案工具），僅屬基礎設施共用；**不得**宣稱「整套 Healer 與舊系統完全不共用任何程式碼」，也**不得**反過來說「舊系統仍在做正式修補」。
+4. 可主張範圍：本節界定 **lineage／決策邊界**；不改寫既有 Primary／Corrected／Round 1 數字帳。
+
+---
+
+## 8. Development 40／Evaluation 120 資料分帳與可主張範圍
+
+權威切分數值見 `docs/experiments/reports/math16_method1_40_120_split_results_report_v1.md` 與 Final Report 第 11 節（Contract-Aware 160 子集）。
+
+**矩陣與切分定義（必須明示）：**
+
+1. Round 1 全量：**16題 × 4條件 × 5 seeds = 320**。
+2. Contract-Aware 子集**僅含** `ab2d` + `ab2d_spec_v2`：**16題 × 2條件 × 5 seeds = 160**。
+3. Development：**4×2×5=40**；Evaluation：**12×2×5=120**；**40+120=160**，只是 320 的子集，非新實驗。
+4. `ab1`／`ab2g` **仍在** 320 總體結果中，但因**無 domain API／function contract**，不納入此 Contract-Aware split；**不得**推論為一般 Healer 完全不能作用於 `ab1`／`ab2g`。
+
+| 範圍 | Baseline → Final | verified rescue |
+|---|---|---:|
+| Development 40 | 11/40 → 11/40 | **0** |
+| Evaluation 120 | 33/120 → 37/120 | **4**（該切分內全部 rescue） |
+
+**治理措辭（口試／報告必須遵守）：**
+
+1. Development 40 用於理解失敗模式與規則／Guard 設計討論；**不宣稱**「開發集完全未見」或零資訊外洩。
+2. 該切分內 **全部 verified rescue 落在獨立 Evaluation 120**；Development 40 verified rescue＝**0**。
+3. 結論只能寫成：**支持非題目客製化**（規則未在 Development 40 刷出 PASS）；**不得**宣稱完全無污染風險。
+4. 後續 Aggressive／Tier B–D 規則採通用 AST／結構 pattern；development influence 仍以 **frozen-rule benchmark**（固定規則、FAIL-only、journal）控制，不得把開發觀察直接升格為正式泛化保證。
+5. Development 40／Evaluation 120 與三模型 Round 1 全量 320 headline **分帳**，不得加總混報；Method 1 之 Dev rescue＝0／Eval rescue＝4 **不得**與 Round 1 79→88 混稱。
+
+---
+
+## 9. Qwen 4B cell-wise fixpoint replay（post-hoc 機制結果）
+
+權威結果：`docs/experiments/results/math16_qwen4b_cellwise_fixpoint_replay_v1/summary.json`
+Protocol：`docs/experiments/design/math16_qwen4b_cellwise_fixpoint_replay_protocol_v1.md`
+
+| 項目 | 值 |
+|---|---|
+| 輸入 | Round 1 final 後仍 FAIL 的 **232** cells |
+| 永久排除 | Round 1 final 已 PASS 的 **88** cells（本輪未掃描） |
+| `ZERO_CHANGE_CONVERGENCE` | **232**（全部於第一輪 zero-change） |
+| `ITERATIVE_RESCUE` | **0**（additional verified rescue＝0） |
+| `CYCLE_DETECTED` | **0** |
+| `MAX_ROUND_NON_CONVERGENT` | **0** |
+| model calls | **0** |
+
+**可主張：**
+
+1. 在現有凍結規則與固定順序 `A→B→C1→C2→D3→D1→D5→D2` 下，Round 1 後殘餘 FAIL 再跑完整一輪 stack，**全部第一輪即無 source 變更** → 現有 Healer 對 4B residual 已達**操作上的 fixpoint**。
+2. 此為 **4B-only post-hoc mechanism pilot**，**不得覆寫** Round 1 三模型主表；亦**不是**三模型協定所稱之「Round 2 正式主分析覆寫」。
+
+**不可主張：**
+
+1. **不得**把本輪觀察到的 regression＝0（或 journal 內 regression 欄位）當作**新的安全性證據**：本輪**未掃描** 88 個 PASS cells。
+2. 正式 regression 證據仍來自 Round 1／Method 2 等已封存帳（例如 Method 2 measured regression＝0/320；Round 1 三模型 regression＝0）。
+
+---
+
+## 10. Aggressive Healer full 320-cell safety benchmark（尚未執行）
+
+**定義：** `Aggressive Healer full 320-cell safety benchmark`＝對全量 320 cells **同時掃描原始 PASS／FAIL**，量測 verified rescue、preserved pass、PASS→FAIL regression、net PASS change。
+
+**狀態：** **尚未執行**；列為**後續工作**。
+
+**不得混稱：** 本 benchmark **不是** Method 2（已封存之 Raw／Final 雙路評分）、**不是**三模型 Round 2 正式覆寫、**也不是** 4B-only fixpoint（僅掃 232 FAIL、排除 88 PASS）。fixpoint 不得冒充本 benchmark 之 regression 安全證明。

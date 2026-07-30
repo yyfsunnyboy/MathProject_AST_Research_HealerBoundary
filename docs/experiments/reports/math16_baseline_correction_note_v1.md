@@ -79,6 +79,8 @@ The single canonical, official main report for this experiment is:
 
 **`docs/決賽文件/實驗結果文件/20260724_Math16/01_math16_pilot02_final_report_v13.md`**
 
+**Working mirror（非第三份 Final Report）：** `docs/決賽文件/實驗結果文件/Math16/01_math16_pilot02_final_report_v13.md` 為編輯工作副本；可暫時含超前草稿，但 A／B／C 等交付主張必須同步回上述 canonical，且不以 working mirror 取代 protected-SHA 交付正文。
+
 **`docs/決賽文件/實驗結果文件/20260722_Math16/**` (the entire directory) is excluded completely from this correction note and from all correction work of any kind associated with this effort**: no edit, no sync, no link, no chart regeneration, ever. It is treated as an immutable historical archive of an earlier process snapshot, separate from and not to be conflated with the canonical `20260724_Math16/` copy.
 
 ## 9. Per-figure and per-document amendment specification
@@ -101,3 +103,12 @@ This section is a **presentation consistency rule**, not a claim that prior mode
 ## 11. File modification confirmation
 
 This note originated as analysis/reporting documentation only. Batch 0 of the combined amendment may append Section 10 (presentation-order rule) without altering Sections 1–9 settled numbers or frozen-evidence scope. No frozen evidence, results, journal, Healer, Eligibility, Evaluator, Protocol, Manifest, or test file is touched by this note. No git commit is made by Batch 0.
+
+## 12. Delivery Final Report protected-SHA refresh（文件完整性治理）
+
+針對 `tests/test_math16_delivery_provenance_alignment.py` 之 `FROZEN_SHA_FINAL_REPORT_V13_DELIVERY`（對應 canonical `20260724_Math16/01_math16_pilot02_final_report_v13.md`）：
+
+1. Pin 建立於 commit `e7cb0431`（2026-07-27，Gemini post-hoc inventory labeling）。
+2. 自 commit `daeb581991`（2026-07-28，Method 1 Development 40／Evaluation 120 合法正文整合）起，pin 與現行正文開始不一致。
+3. 其後多次授權文件更新均已進入 Git，但 delivery protected-SHA pin 未同步刷新。
+4. 本次刷新 pin 僅對齊**現行 canonical 交付正文**（含 A／B／C 段落級同步後之 raw-byte SHA），**不代表**回復舊版正文，亦**不改寫** raw evidence、journals、protocol、runner、Healer rules 或 evaluator 輸出。

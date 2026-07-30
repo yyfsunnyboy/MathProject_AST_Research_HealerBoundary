@@ -111,10 +111,13 @@ THREE_MODEL_ROUND1_ACCOUNTS_SEPARATED
 7. ❌ **「模型越大／Baseline 越高，Healer 修復率一定越高」** $\rightarrow$ ⭕ 應說：「本次三模型 Round 1 觀察到修復率 3.73%／0.46%／0% 的遞減關聯；只描述本次範圍，不宣稱普遍因果。核心是 residual failure type／rule fit。」
 8. ❌ **「Gemini rescue=0 代表 Healer 無效」** $\rightarrow$ ⭕ 應說：「代表殘餘失敗未命中安全修法窗口，系統 Abstain；這是安全邊界結果，不是系統失效。」
 9. ❌ **「Partial repair 也算 verified rescue」** $\rightarrow$ ⭕ 應說：「Partial repair 不計入 verified rescue；它表示 blocker 已移除並進入可診斷狀態。」
-10. ❌ **「Round 2 已完成／可覆寫 Round 1」** $\rightarrow$ ⭕ 應說：「Round 2 尚未執行；若執行，僅 post-hoc iterative replay，不得覆寫 Round 1 主表。」
+10. ❌ **「Round 2 已完成／可覆寫 Round 1」** $\rightarrow$ ⭕ 應說：「三模型 Round 2 正式覆寫尚未執行。4B-only cell-wise fixpoint 屬 post-hoc 機制探針（232 格全 zero-change、rescue 0），不得覆寫 Round 1 主表。」
 11. ❌ **「2B 已完成 320 格與完整 Healer 正式帳／可估計一般修復率」** $\rightarrow$ ⭕ 應說：「2B 已完成 16-cell exploratory lower-bound frozen Healer replay（0/16→0/16，rescue 0、regression 0）；非正式主表，不估計一般修復率，不納入三模型 Round 1 主表。」
 12. ❌ **「四模型可修復窗口已是正式統計／因果結論」** $\rightarrow$ ⭕ 應說：「僅屬 exploratory mechanism hypothesis；2B＝16、4B／9B／Gemini＝各 320，不得作同等正式比較，不作相關／因果／普遍化主張。」
 13. ❌ **「Gemini 幾乎無結構性失敗」／「9B 多數已是語意層」** $\rightarrow$ ⭕ 應說：「只描述已封存殘餘失敗與規則命中情況；不作該類概括。」
+14. ❌ **「fixpoint 輪的 regression=0 是新的安全性證明」** $\rightarrow$ ⭕ 應說：「本輪未掃描 88 個 PASS cells，不能用 fixpoint 重估 regression；正式 regression 證據仍來自 Round 1／Method 2。」
+15. ❌ **「Development 40 完全沒見過／因此零污染」** $\rightarrow$ ⭕ 應說：「Development 40 用於理解失敗模式；該切分 rescue 全在 Evaluation 120、Dev rescue＝0，只支持非題目客製化，不宣稱零污染風險。」
+16. ❌ **「Aggressive 320-cell safety benchmark 已完成／等同 Method 2／Round 2／fixpoint」** $\rightarrow$ ⭕ 應說：「`Aggressive Healer full 320-cell safety benchmark`（同時掃描原始 PASS／FAIL；量測 rescue、preserved pass、PASS→FAIL regression、net PASS change）**尚未執行**，列為後續工作；不得與 Method 2、Round 2、fixpoint 混稱。」
 
 
 
@@ -125,8 +128,8 @@ THREE_MODEL_ROUND1_ACCOUNTS_SEPARATED
 3. **Corrected 第 6 格定位 (POST_HOC_TECHNICAL_CORRECTION)**：第 6 格來自既有規則成功 transform 被 runner false-loop rollback 錯誤撤回後的技術修正。此修正未新增或修改 Healer 規則，不改變 PRE_FROZEN_UNCHANGED 狀態；但因屬正式結果揭露後的技術重算，只列入 Corrected technical account，不回寫 Primary。
 4. **Payload Wrap 結構 (oracle_payload 內部包裝)**：single-key 指固定三欄回傳結構中 oracle_payload 欄位內部的唯一包裝鍵，不是最外層 return dict 只有一個鍵。Healer 不讀取 correct_answer，oracle_answer_used = false。此結果支持窄範圍、唯一、局部且離線可驗證的 deterministic repair candidate，不代表零副作用或一般語意安全保證。
 
-- 權威 Provenance Audit 報告：docs/experiments/reports/math16_healer_rule_provenance_audit_v1.md (SHA256: 872fb71d602c11c3600fbbf0d762b8dc046a167d00205c460341809f45e70965)
-- 權威 Provenance Audit Manifest：docs/experiments/reports/math16_healer_rule_provenance_audit_v1_manifest.json (SHA256: 3e45b5e67d32e6d43a1aea5928af0879e78ac1fdf7244a86c3f5b8f269f99bbf)
+- 權威 Provenance Audit 報告：docs/experiments/reports/math16_healer_rule_provenance_audit_v1.md (SHA256: 05a1ef08836e7f957cd0d4e87be9090d863b0c290474ae8b80bfd9ed4347bb4a)
+- 權威 Provenance Audit Manifest：docs/experiments/reports/math16_healer_rule_provenance_audit_v1_manifest.json (SHA256: b882b4d31a61dbca8ab60622c75ecf82290223cdab3a816de7116e4bb515ecd5)
 - 規則凍結 Commit：d9aa264c | 分類修正 Commit：97c4e985
 
 ---
@@ -164,8 +167,8 @@ THREE_MODEL_ROUND1_ACCOUNTS_SEPARATED
 **口試短答：** 有做完 16 格 frozen Healer；結果仍是 0→0，只有局部 partial repair，不算正式主表、也不推一般修復率。
 
 ### Q26: 有沒有把後段修好的程式回頭重跑（多輪迭代）？
-**正式回答：** **Round 1 為固定 single-pass 正式主分析**：每一層只承接上一層 final source，僅對仍 FAIL 的格子套用下一層規則，不做以 evaluator 結果回頭改寫流程的多輪搜尋。**Round 2 尚未執行**；若未來執行，僅定位為 post-hoc iterative replay，必須獨立分帳，**不得覆寫 Round 1 主表**。
-**口試短答：** Round 1 是固定單輪正式主分析，沒有把修好的結果拿去反復試修；Round 2 還沒做，若做也只是事後重放，不能改 Round 1 主表。
+**正式回答：** **Round 1 為固定 single-pass 正式主分析**：每一層只承接上一層 final source，僅對仍 FAIL 的格子套用下一層規則，不做以 evaluator 結果回頭改寫流程的多輪搜尋。**三模型 Round 2 正式覆寫尚未執行。** 另已完成 **Qwen 4B-only** post-hoc cell-wise deterministic fixpoint replay（輸入＝Round 1 後仍 FAIL 的 232 格；永久排除 88 個 PASS）：結果為 **232／232 `ZERO_CHANGE_CONVERGENCE`**、additional verified rescue＝**0**、無 cycle、無 max-round non-convergence。此屬機制探針，**獨立分帳**，**不得覆寫** Round 1 主表；亦**不得**把本輪 regression 欄位當新安全性證據（88 PASS 未掃描）。
+**口試短答：** Round 1 仍是單輪正式主分析；三模型 Round 2 還沒做。4B 事後 fixpoint 已跑：232 格第一輪就全零變化、多救 0 格，不能改 Round 1 主表。
 
 ### Q27: 為什麼 partial repair 仍有價值？它算不算 rescue？
 **正式回答：** **不算 verified rescue。** 正式定義：Partial repair 不計入 verified rescue，但可表示 Healer 已移除語法、執行或結構 blocker，使程式由不可解析／不可執行前進至可診斷狀態。例如 9B Tier B 有 parse gain 4、execution gain 2、blocker-removal-only 3；D1 有 execution gain 3、blocker-removal-only 3。4B cumulative sealed 帳中缺獨立欄位者維持 **「—／不推估」**，不以敘事補數字。這些顯示安全規則已產生可審計進展，但最終 PASS 仍須另計。
@@ -176,9 +179,17 @@ THREE_MODEL_ROUND1_ACCOUNTS_SEPARATED
 **口試短答：** Gemini 剩下的失敗沒打中安全修法窗口，所以 Abstain；同一套規則在 4B／9B 仍有救援，這正好說明 Healer 在量安全邊界，不是壞掉。
 
 ### Q29: Development 40／Evaluation 120 與 Round 1 320 格如何分帳？
-**正式回答：** Development 40／Evaluation 120 屬 Method 1 contract-aware 切分另帳（Evaluation 120 為該切分主要結果）。三模型 Aggressive Healer Round 1 以全量 **320** 格 FAIL-only cumulative 為正式比較 headline。兩套帳目並存，**不得互相覆寫或加總混報**。
-**口試短答：** 40／120 是 Method 1 的切分另帳；Round 1 三模型比較用全量 320，兩套數字不能混在一起講。
+**正式回答：** Round 1 全量為 **16題 × 4條件 × 5 seeds = 320**。Development 40／Evaluation 120 屬 Method 1 **Contract-Aware** 切分另帳（Evaluation 120 為該切分主要結果）：子集**僅含** `ab2d` + `ab2d_spec_v2`，即 **16題 × 2條件 × 5 seeds = 160**（Development：`4×2×5=40`；Evaluation：`12×2×5=120`；**40+120=160**，只是 320 的子集，非新實驗）。`ab1`／`ab2g` **仍在** 320 總體結果中，但因**無 domain API／function contract**，不納入此 Contract-Aware split；**不得**推論為一般 Healer 完全不能作用於 `ab1`／`ab2g`。該切分內：**Development 40 verified rescue＝0**；**全部 4 格 verified rescue 落在 Evaluation 120**。Development 40 用於理解失敗模式，**不宣稱完全未見**；結論只支持**非題目客製化**，**不宣稱完全無污染風險**。後續 Aggressive 規則採通用 AST／結構 pattern，仍以 frozen-rule benchmark 控制 development influence。三模型 Aggressive Healer Round 1 以全量 **320** 格 FAIL-only cumulative 為正式比較 headline。兩套帳目並存，**不得互相覆寫或加總混報**。另：`Aggressive Healer full 320-cell safety benchmark`（同時掃描原始 PASS／FAIL；量測 rescue、preserved pass、PASS→FAIL regression、net PASS change）**尚未執行**，列為後續工作，**不得**與 Method 2、Round 2、fixpoint 混稱。
+**口試短答：** 320＝16×4×5；40／120 只是 ab2d＋spec-v2 的 160 子集（4×2×5／12×2×5）。ab1／ab2g 仍在 320，只是沒進這切分，不是說一般 Healer 完全不能修它們。Dev 救 0、Eval 救 4；不能跟 Round 1 混帳。全量 PASS／FAIL safety benchmark 還沒做。
 
 ### Q30: 四模型（2B／4B／9B／Gemini）能不能畫成同等「可修復窗口」正式比較？
 **正式回答：** **不能。** 可討論的探索性圖像是：2B 的失敗雖可被局部修正，但多數仍距完整 PASS 較遠；Gemini 的 residual FAIL 未命中現有 frozen rules；介於兩者之間的 4B 與 9B 出現較多 deterministic rules 可介入案例，其中 4B 的 verified rescue 最明顯。這支持一項**機制性假說**：Healer 的施力空間可能集中在模型已具備主要解題骨架、但仍殘留局部、唯一、可驗證結構瑕疵的中間區間。**限制：** 2B 僅 16 cells、4B／9B／Gemini 各 320 cells；僅屬 exploratory mechanism hypothesis；不作正式相關、因果或普遍化主張；不寫「Gemini 幾乎無結構性失敗」、不寫「9B 多數已是語意層」。
 **口試短答：** 可以講探索性假說——太弱修不動到 PASS、太強規則無處可修、中間地帶最有價值；但不能當正式四模型同等統計，也不講因果。
+
+### Q31: 舊版工程 Healer（`core/healers`）跟 Math16 正式 Healer 是不是同一套？
+**正式回答：** **不是同一套正式決策鏈。** 初版 `core/healers` 屬工程導向，目標是盡量恢復可執行；Math16 正式 Healer 重新建立 deterministic、evaluator-blind、保守拒修與固定證據紀錄（eligibility／journal）。舊系統只作歷史來源，**不參與** Math16 Round 1 正式修補決策。若共用 parser／AST 等基礎設施，只能說「**修補決策模組獨立重寫**」，**不得**宣稱整套完全不共用任何程式碼。權威 lineage 見 `docs/experiments/reports/math16_healer_rule_provenance_audit_v1.md` §7。
+**口試短答：** 舊 Healer 是工程救急；Math16 是重新寫的保守研究規則。舊系統不進 Round 1 決策；頂多共用底層工具，不是整套照搬。
+
+### Q32: 4B fixpoint replay 說明了什麼？能不能當作新的 regression 安全證明？
+**正式回答：** 對 Round 1 後仍 FAIL 的 **232** cells 做 cell-wise deterministic fixpoint（順序 `A→B→C1→C2→D3→D1→D5→D2`，`max_round=8`），結果：**全部第一輪即 `ZERO_CHANGE_CONVERGENCE`**；additional verified rescue＝**0**；`CYCLE_DETECTED`＝0；`MAX_ROUND_NON_CONVERGENT`＝0。結論：現有凍結 Healer 在 Round 1 後對 4B residual 已達**操作上的 fixpoint**。**不能**把本輪 regression＝0 當新安全性證據——**88 個 PASS cells 本輪未掃描**；正式 regression 證據仍來自 Round 1／Method 2 等已封存帳。結果路徑：`docs/experiments/results/math16_qwen4b_cellwise_fixpoint_replay_v1/`。
+**口試短答：** 232 格再跑一輪全沒改、也沒多救；代表 Round 1 後規則已到 fixpoint。但不能拿這輪講 regression 安全，因為 88 個 PASS 根本沒掃。
