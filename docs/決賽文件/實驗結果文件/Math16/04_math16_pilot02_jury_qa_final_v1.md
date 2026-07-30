@@ -6,6 +6,8 @@ Q9_GEMINI_V2_BOUNDARY_CLARIFIED
 Q17_CORRECTED_CHAIN_DISPOSITION_RECONCILED
 OVERCLAIMS_REMOVED
 CATEGORY_B_QA_COMPLETED
+CATEGORY_C_ROUND1_PARTIAL_REPAIR_2B_QA_ADDED
+THREE_MODEL_ROUND1_ACCOUNTS_SEPARATED
 ```
 
 > **使用說明**：
@@ -23,12 +25,12 @@ CATEGORY_B_QA_COMPLETED
 **口試短答：** 因為缺乏明確規則強行盲目修復會破壞可解釋性並把程式改壞。Eligibility 能確保修復只在修法唯一且安全時介入。
 
 ### Q2: Gemini 與 9B 的 `eligible=0` 是否代表 Healer 沒有用？
-**正式回答：** 不是。`eligible=0` 代表在本次 320 個單元與現有凍結規則下，失敗案例未同時滿足唯一、安全、可驗證的介入條件。Healer 在無適用規則時選擇 Abstain（不介入），屬符合規範的安全行為。
-**口試短答：** 不是。`eligible=0` 代表現有規則未命中失敗案例，Healer 選擇 Abstain 主動放棄猜測，這展現了強烈的安全邊界防禦。
+**正式回答：** 不是。就 **Conservative／Primary Method 1** 帳而言，Gemini 與 9B 的 `eligible=0` 代表在該帳與既有凍結規則下，失敗案例未同時滿足唯一、安全、可驗證的介入條件，系統 Abstain。就後續封存的 **Aggressive Healer Round 1** 正式主分析而言，9B 在 FAIL-only 單輪累積下獲得 verified rescue **1**（101→102），Gemini 仍為 **0**（289→289）；Gemini 的 0 rescue 代表殘餘失敗未命中安全修法窗口，不是系統失效。Healer 的價值同時包含：命中時可驗證救援、未命中時 Abstain、以及不計入 rescue 的 partial repair。
+**口試短答：** 不是。Primary 帳的 eligible=0 是安全 Abstain；Round 1 正式比較下 9B 有 1 格 rescue、Gemini 仍 0，代表沒打中安全窗口，不是 Healer 沒用。
 
-### Q3: 為什麼 4B 可以修復 5~6 格，9B 反而 0 格？
-**正式回答：** 因為 4B 模型的失敗案例中恰好有 10 格命中事前凍結的特定語法與 JSON 瑕疵規則（如 `L2_SINGLE_KEY_ORACLE_PAYLOAD_WRAP` 等）；而 9B 雖然也有語法、執行與語義失敗，但沒有案例同時符合唯一且安全的現有修法條件。修復視窗取決於失敗型態是否落在凍結規則內。
-**口試短答：** 4B 有 10 格命中凍結規則；9B 雖有語法與執行失敗，但沒有案例符合唯一且安全的現有修法。
+### Q3: 為什麼 4B 可以修復較多格，9B／Gemini 反而較少或為 0？
+**正式回答：** 必須分帳。Conservative／Primary Method 1：4B verified rescue **6**（79→85），9B／Gemini 在該帳為 0。Aggressive Healer Round 1（正式三模型主分析）：4B **9**（79→88）、9B **1**（101→102）、Gemini **0**（289→289）；修復率 3.73%／0.46%／0%。差異來自殘餘失敗型態是否落入凍結規則窗口（residual failure type／rule fit），不是「模型越大越好修」。本次觀察到 Baseline 較高者修復率較低的遞減關聯，**不宣稱普遍因果**。
+**口試短答：** 分兩帳：Primary 是 4B 救 6 格；Round 1 正式比較是 4B／9B／Gemini＝9／1／0。關鍵是失敗型態有沒有打中凍結規則，不是模型越大越好修。
 
 ### Q4: 9B Polynomial 只有 9/80，是否代表 9B 的數學能力比 4B 差？
 **正式回答：** 不能這樣解讀。9B 總體通過數 (101/320) 高於 4B (79/320；本管線原始紀錄為歷史 78/320，經 Method 1/Method 2 交叉稽核確認為候選 artifact 擷取誤選，校正詳見 Correction Note `05_math16_baseline_correction_note_v1.md`)。Polynomial 的低下高度集中於 `ce115_calc_polynomial_division_l1` 單一題型，與多個 LaTeX 欄位組裝高度共現，屬特定提示結構敏感性，尚未證實因果，不可外推為 9B 全域失控或純數學能力落後。
@@ -47,8 +49,8 @@ CATEGORY_B_QA_COMPLETED
 **口試短答：** 正式帳目是 Baseline 79 → Final 85，Rescue 恆為 6 格；歷史上的 Primary 83／Post-hoc 84 分帳邏輯仍成立，但數字已因基線校正而移動，且已降級為附錄說明，不作正式主表數字。
 
 ### Q8: Gemini 基線已經 289/320 (90.3%)，為什麼還要研究 Healer？
-**正式回答：** 本研究的核心目標是探索「修復邊界」。在本次 Gemini、題目與凍結規則下，剩餘失敗沒有形成安全的 Healer 介入視窗；而 Post-hoc 提示修復實驗 (306/320) 則揭示了強模型在 API 簽名補齊後的真實天花板。
-**口試短答：** 本研究旨在劃定 Healer 的修復邊界。在本次 Gemini 測試與凍結規則下，剩餘失敗沒有形成安全的 Healer 介入視窗。
+**正式回答：** 本研究的核心目標是探索「修復邊界／安全邊界」。能力邊界（Baseline PASS）與安全邊界（殘餘 FAIL 是否可被凍結規則安全修復）不同。Aggressive Healer Round 1 顯示 Gemini 在 31 格殘餘 FAIL 上 eligible＝0、rescue＝0（Abstain），同時 4B／9B 分別獲得 9／1 格 verified rescue；這正好劃定規則適配窗口，而非否定 Healer。Post-hoc 提示修復實驗 (306/320) 則另帳揭示強模型在 API 簽名補齊後的探索天花板，不作 Primary／Round 1 主表。
+**口試短答：** 因為我們要畫安全邊界，不是只看誰 Baseline 高。Gemini 殘餘失敗沒打中規則所以 Abstain；同一套規則在 4B／9B 仍有救援。
 
 ### Q9: Ab2d+spec-v2 是不是最好的 Prompt 條件？
 **正式回答：** 對 4B 與 9B 而言，Ab2d+spec-v2 在本次正式四條件比較中通過數最高，分別為 36/80 與 40/80。Gemini 在 Ab2d+spec-v2 補齊 API 簽名卡後最終達 80/80；其正式 Primary 採用 Ab2d+spec-v1 為 63/80（屬研究歷程）。因此不能將 Gemini 的 80/80 與 Qwen 的 36/80/40/80 假裝為同條件 Primary 直接比較。Prompt 效果依模型、提示版本與部署條件而異。
@@ -59,8 +61,8 @@ CATEGORY_B_QA_COMPLETED
 **口試短答：** 因為多數 failure 是邏輯不通或整段 missing，真正只差臨門一腳語法瑕疵且有唯一修法的案例本來就很稀少。
 
 ### Q11: Abstain（不介入）是不是代表 Healer 的能力不足？
-**正式回答：** 不是。知曉「何時不該介入」與「何時該介入」同等重要。Abstain 是控制 Regression 風險的防禦機制，代表系統在面臨不明確修復目標時主動放棄盲猜。
-**口試短答：** 不是。知道何時不該猜是安全的表現，Abstain 能防止系統盲目修改而把原本可能的程式改壞。
+**正式回答：** 不是。知曉「何時不該介入」與「何時該介入」同等重要。本研究採 **先求不修壞，再求修得好**：Abstain 是控制 Regression 風險的防禦機制，代表系統在面臨不明確修復目標時主動放棄盲猜；verified rescue 與 partial repair 僅在唯一、局部、可驗證窗口內進行。
+**口試短答：** 不是。我們先求不修壞再求修得好；Abstain 是為了不猜修、不把程式改壞。
 
 ### Q12: 這個研究真正的新發現是什麼？
 **正式回答：** 我們劃定了 Deterministic AST Healer 的精確價值邊界：Healer 並非第二個解題模型，而在特定表面語法瑕疵區域提供可解釋防禦，且在本次命中凍結規則的修復案例中，觀察到 regression=0。
@@ -105,7 +107,12 @@ CATEGORY_B_QA_COMPLETED
 3. ❌ **「Polynomial 異常完全是 Prompt 造成的」** $\rightarrow$ ⭕ 應說：「Polynomial 偏低集中於單一題型與 LaTeX 欄位組裝共現，未確認因果責任。」
 4. ❌ **「Evaluator Parser 100% 沒有任何限制或偏見」** $\rightarrow$ ⭕ 應說：「診斷數據不偏向以 Evaluator 偏差為主要失敗原因，77.8% 屬候選碼本體 SyntaxError。」
 5. ❌ **「Gemini 代表所有雲端大模型的極限」** $\rightarrow$ ⭕ 應說：「Gemini 3.5 Flash 作為強模型參照組，展現了高基線下的 Ceiling Effect。」
-6. ❌ **「Post-hoc 數據 (84/320 或 306/320) 是主要的實驗結果」** $\rightarrow$ ⭕ 應說：「正式主表數據為校正後的 Baseline 79/320 → Final 85/320（Verified rescue = 6）；歷史 Primary 83/84 與 Post-hoc 306/320 僅作研究歷程與探索討論，不作正式主張。」
+6. ❌ **「Post-hoc 數據 (84/320 或 306/320) 是主要的實驗結果」** $\rightarrow$ ⭕ 應說：「Conservative／Primary 正式主表為校正後的 Baseline 79/320 → Final 85/320（Verified rescue = 6）；歷史 Primary 83/84 與 Post-hoc 306/320 僅作研究歷程與探索討論。三模型 Aggressive Healer Round 1 另帳為 4B 79→88（rescue 9）、9B 101→102（rescue 1）、Gemini 289→289（rescue 0），兩者不得混帳。」
+7. ❌ **「模型越大／Baseline 越高，Healer 修復率一定越高」** $\rightarrow$ ⭕ 應說：「本次三模型 Round 1 觀察到修復率 3.73%／0.46%／0% 的遞減關聯；只描述本次範圍，不宣稱普遍因果。核心是 residual failure type／rule fit。」
+8. ❌ **「Gemini rescue=0 代表 Healer 無效」** $\rightarrow$ ⭕ 應說：「代表殘餘失敗未命中安全修法窗口，系統 Abstain；這是安全邊界結果，不是系統失效。」
+9. ❌ **「Partial repair 也算 verified rescue」** $\rightarrow$ ⭕ 應說：「Partial repair 不計入 verified rescue；它表示 blocker 已移除並進入可診斷狀態。」
+10. ❌ **「Round 2 已完成／可覆寫 Round 1」** $\rightarrow$ ⭕ 應說：「Round 2 尚未執行；若執行，僅 post-hoc iterative replay，不得覆寫 Round 1 主表。」
+11. ❌ **「2B 已完成 320 格與完整 Healer 正式帳」** $\rightarrow$ ⭕ 應說：「2B 僅有四條件 smoke 0/16 PASS；尚未做完整 frozen Healer replay，屬待補 exploratory lower-bound evidence。」
 
 
 
@@ -137,3 +144,35 @@ CATEGORY_B_QA_COMPLETED
 **正式回答：** 我們另外稽核了 32 個題目條件與 422 個既有正式輸出。系統契約有 29/32 正確，另外 2 處 prompt 內部矛盾與 1 處未明確指定 method，均已標記並排除於後續契約型 Healer 候選。模型端有 20/422（4.7%）雖然答對，但未完全依約使用指定工具，因此我們不把所有 PASS 都解釋成 API 使用成功。我們再抽樣 30 格，涵蓋兩處系統契約缺陷、一處未指定 method，以及 compliant、noncompliant 與其他失敗類別；兩種抽取路徑下的 compliance 標籤 30/30 完全一致。這些補充結果不改變既有 Baseline、Healer rescue 與 Tier 1 統計，但 Ab2d 條件應解讀為系統工具選擇與 prompt 暴露設計的比較，而非所有模型都百分之百依約。
 
 **口試短答：** 32 個條件裡 29 個契約正確、2 個 prompt 矛盾與 1 個 method 未指定已排除；422 格中有 20 格答對但未完全依約。抽樣 30 格兩種抽取路徑標籤全一致；分數與 Healer 統計不變，Ab2d 要比的是工具與 prompt 設計。
+
+---
+
+## 三、 Round 1／安全邊界／Partial repair／2B 補充題（Category C）
+
+### Q23: 有沒有跑更小的模型（例如 2B）？
+**正式回答：** 有。Qwen 3.5 2B 已完成四條件 smoke：`qwen35_2b_math16_four_condition_smoke_20260725_001`，結果為 **0/16 PASS**。此為 exploratory lower-bound／基礎設施驗證證據，**不是** 320 格正式主表，亦**尚未**完成完整 frozen Healer replay。
+**口試短答：** 有跑 2B 的 16 格四條件 smoke，結果 0/16 PASS；還沒做完整 Healer，也不算 320 正式主表。
+
+### Q24: 為什麼 2B 沒有擴到 320 格？
+**正式回答：** 2B 屬於探索性下界探針，目的是確認更小模型在相同 Math16 契約下是否已具可用 Baseline。在 16 格四條件皆 0 PASS 的情況下，優先保留算力於 4B／9B／Gemini 正式 320 格與 Round 1 Healer 主分析；將 2B 擴至 320 並非本輪正式主表必要條件。
+**口試短答：** 2B 先做 16 格探針就全掛，正式主表仍以 4B／9B／Gemini 的 320 格為準，沒有為了湊數硬擴。
+
+### Q25: 2B 有沒有實際用 Healer 修？
+**正式回答：** **尚未**對 2B 執行完整 frozen Healer replay。現況僅有 Baseline smoke（0/16 PASS）。此項已列為 Round 2 前優先補作之 exploratory lower-bound evidence；補作後仍屬探索帳，不得覆寫 Round 1 三模型主表。
+**口試短答：** 還沒。現在只有 0/16 的 Baseline smoke；完整 Healer 列在 Round 2 前優先補作，而且仍是探索帳。
+
+### Q26: 有沒有把後段修好的程式回頭重跑（多輪迭代）？
+**正式回答：** **Round 1 為固定 single-pass 正式主分析**：每一層只承接上一層 final source，僅對仍 FAIL 的格子套用下一層規則，不做以 evaluator 結果回頭改寫流程的多輪搜尋。**Round 2 尚未執行**；若未來執行，僅定位為 post-hoc iterative replay，必須獨立分帳，**不得覆寫 Round 1 主表**。
+**口試短答：** Round 1 是固定單輪正式主分析，沒有把修好的結果拿去反復試修；Round 2 還沒做，若做也只是事後重放，不能改 Round 1 主表。
+
+### Q27: 為什麼 partial repair 仍有價值？它算不算 rescue？
+**正式回答：** **不算 verified rescue。** 正式定義：Partial repair 不計入 verified rescue，但可表示 Healer 已移除語法、執行或結構 blocker，使程式由不可解析／不可執行前進至可診斷狀態。例如 9B Tier B 有 parse gain 4、execution gain 2、blocker-removal-only 3；D1 有 execution gain 3、blocker-removal-only 3。4B cumulative sealed 帳中缺獨立欄位者維持 **「—／不推估」**，不以敘事補數字。這些顯示安全規則已產生可審計進展，但最終 PASS 仍須另計。
+**口試短答：** Partial repair 不是 rescue；它代表卡點被拿掉、程式變得可診斷，但還沒變成 PASS，所以要和 rescue 分帳。
+
+### Q28: 為什麼 Gemini Round 1 rescue＝0 不代表 Healer 無效？
+**正式回答：** Gemini Baseline 已達 289/320，殘餘僅 31 FAIL。Round 1 全層 eligible＝0、modified＝0，系統 Abstain，故 verified rescue＝0。這劃定的是**安全邊界未命中**，不是能力或系統失效：同一凍結規則在 4B／9B 上仍分別得到 9 與 1 格 verified rescue，並伴隨可審計的 partial repair。Healer 的正確行為包含「該修則修、不該修則 Abstain」。
+**口試短答：** Gemini 剩下的失敗沒打中安全修法窗口，所以 Abstain；同一套規則在 4B／9B 仍有救援，這正好說明 Healer 在量安全邊界，不是壞掉。
+
+### Q29: Development 40／Evaluation 120 與 Round 1 320 格如何分帳？
+**正式回答：** Development 40／Evaluation 120 屬 Method 1 contract-aware 切分另帳（Evaluation 120 為該切分主要結果）。三模型 Aggressive Healer Round 1 以全量 **320** 格 FAIL-only cumulative 為正式比較 headline。兩套帳目並存，**不得互相覆寫或加總混報**。
+**口試短答：** 40／120 是 Method 1 的切分另帳；Round 1 三模型比較用全量 320，兩套數字不能混在一起講。
