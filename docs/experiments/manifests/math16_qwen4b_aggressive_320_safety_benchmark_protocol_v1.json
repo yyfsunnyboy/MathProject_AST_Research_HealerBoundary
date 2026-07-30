@@ -1,0 +1,191 @@
+{
+  "manifest_id": "math16_qwen4b_aggressive_320_safety_benchmark_protocol_v1",
+  "protocol_status": "FROZEN_PROTOCOL_NOT_EXECUTED",
+  "verdict": "QWEN4B_AGGRESSIVE_320_SAFETY_BENCHMARK_PROTOCOL_FROZEN",
+  "protocol_document": "docs/experiments/design/math16_qwen4b_aggressive_320_safety_benchmark_protocol_v1.md",
+  "focused_tests": [
+    "tests/finals_rebuild/test_math16_qwen4b_aggressive_320_safety_benchmark_protocol_v1.py",
+    "tests/finals_rebuild/test_math16_qwen4b_aggressive_320_safety_benchmark_runner_v1.py"
+  ],
+  "frozen_at": "2026-07-30",
+  "head_at_authoring": "d5286226e658810b7ab32ff43a16c534ca6d7b27",
+  "origin_main_at_authoring": "d5286226e658810b7ab32ff43a16c534ca6d7b27",
+  "positioning": {
+    "model": "qwen3.5:4b",
+    "model_group": "qwen4b",
+    "role": "aggressive_healer_full_320_cell_safety_benchmark",
+    "round1_role": "PRIMARY_FORMAL_ANALYSIS_SEALED",
+    "this_protocol_role": "post_hoc_full_population_safety_benchmark_spec",
+    "not_method2": true,
+    "not_fixpoint": true,
+    "not_round2": true,
+    "cross_model_forbidden": [
+      "qwen9b",
+      "gemini",
+      "qwen2b"
+    ]
+  },
+  "population": {
+    "total_cells": 320,
+    "input_pass_n": 88,
+    "input_fail_n": 232,
+    "active_n": 320,
+    "identity_check": "88 + 232 == 320",
+    "pass_inclusion_policy": "SCAN_ALL_INCLUDING_PASS",
+    "round1_authorities": {
+      "three_model_summary": "docs/experiments/manifests/math16_three_model_round1_summary_v1.json",
+      "c5a_final_source_closure": "docs/experiments/manifests/math16_c5a_final_source_closure_v1.json",
+      "d5_override": "docs/experiments/manifests/math16_c5a_tier_d_d5_development_replay_v1.json",
+      "d2_override": "docs/experiments/manifests/math16_c5a_tier_d_d2_development_replay_v1.json"
+    },
+    "round1_final_source_policy": {
+      "default": "c5a_final_source",
+      "d5_override_still_fail": "docs/experiments/manifests/math16_c5a_tier_d_d5_development_replay_v1.json",
+      "d2_override_still_fail": "docs/experiments/manifests/math16_c5a_tier_d_d2_development_replay_v1.json"
+    }
+  },
+  "fixed_sequence": "A→B→C1→C2→D3→D1→D5→D2",
+  "layer_order": [
+    "tier_a",
+    "tier_b",
+    "tier_c1",
+    "tier_c2",
+    "tier_d3",
+    "tier_d1",
+    "tier_d5",
+    "tier_d2"
+  ],
+  "freeze_checks": {
+    "no_rule_mutation": true,
+    "no_guard_threshold_order_changes": true,
+    "no_new_rules": true,
+    "tier_b_rule_order": [
+      "core.normalize_fullwidth_python_punctuation",
+      "TIER_A_UNIQUE_MISSING_DELIMITER_REPAIR_V1",
+      "TIER_A_EMPTY_SUITE_INSERT_PASS_V1",
+      "TIER_A_UNIQUE_IMPORT_BINDING_REPAIR_V1"
+    ],
+    "d5_min_score": 8,
+    "d5_min_margin": 2,
+    "rule_ids": {
+      "c1": "TIER_B_EXPLICIT_DOMAIN_METHOD_BINDING_REPAIR_V1",
+      "c2": "TIER_B_DOMAIN_SIGNATURE_FORM_REPAIR_V1",
+      "d3": "TIER_D_SYNTAX_RESIDUE_QUARANTINE_V1",
+      "d1": "TIER_D_OPS_SHADOW_REMOVAL_V1",
+      "d5": "TIER_D_RANKED_DOMAIN_METHOD_BINDING_V1",
+      "d2": "TIER_D_DUPLICATE_DEFINITION_SELECTION_V1"
+    }
+  },
+  "execution_model": {
+    "unit": "cell_wise",
+    "passes_per_cell": 1,
+    "iterative_fixpoint": false,
+    "batch_resync_forbidden": true,
+    "all_320_active": true,
+    "input_pass_fail_must_not_gate_mutation": true
+  },
+  "transitions": {
+    "enum": [
+      "preserved_pass",
+      "regression",
+      "verified_rescue",
+      "unchanged_fail",
+      "modified_still_failed"
+    ],
+    "definitions": {
+      "preserved_pass": "PASS→PASS",
+      "regression": "PASS→FAIL",
+      "verified_rescue": "FAIL→PASS",
+      "unchanged_fail": "FAIL→FAIL and source_changed=false",
+      "modified_still_failed": "FAIL→FAIL and source_changed=true"
+    }
+  },
+  "rates": {
+    "rescue_rate": "verified_rescue_n / 232",
+    "regression_rate": "regression_n / 88",
+    "preservation_rate": "preserved_pass_n / 88",
+    "modification_rate": "modified_n / 320",
+    "net_pass_change": "verified_rescue_n - regression_n"
+  },
+  "blinding": {
+    "evaluator_may_observe_for_accounting": true,
+    "evaluator_must_not_accept_or_rollback_source": true,
+    "evaluator_must_not_reorder_or_skip_rules": true,
+    "input_status_must_not_gate_eligibility_or_mutation": true,
+    "outcome_guided_acceptance_forbidden": true,
+    "no_rule_adjustment_from_pass_fail": true
+  },
+  "journal": {
+    "required_fields": [
+      "cell_id",
+      "input_status",
+      "output_status",
+      "transition",
+      "start_sha",
+      "end_sha",
+      "source_changed",
+      "modified",
+      "per_rule_pre_sha",
+      "per_rule_post_sha",
+      "rule_id",
+      "eligible",
+      "modified_flags",
+      "abstained",
+      "rescue",
+      "regression",
+      "preserved_pass",
+      "unchanged_fail",
+      "modified_still_failed"
+    ]
+  },
+  "summary": {
+    "required_fields": [
+      "protocol_id",
+      "model_group",
+      "n_cells",
+      "n_input_pass",
+      "n_input_fail",
+      "fixed_sequence",
+      "transition_counts",
+      "verified_rescue_n",
+      "regression_n",
+      "preserved_pass_n",
+      "unchanged_fail_n",
+      "modified_still_failed_n",
+      "modified_n",
+      "rescue_rate",
+      "regression_rate",
+      "preservation_rate",
+      "modification_rate",
+      "net_pass_change",
+      "model_calls",
+      "formal_benchmark_executed"
+    ]
+  },
+  "outputs_reserved_not_created_this_round": {
+    "results_root": "docs/experiments/results/math16_qwen4b_aggressive_320_safety_benchmark_v1",
+    "cell_journal": "cell_journal.jsonl",
+    "summary": "summary.json"
+  },
+  "this_round": {
+    "formal_benchmark_execution": false,
+    "model_calls": false,
+    "frozen_rules_modified": false,
+    "round1_artifacts_modified": false,
+    "fixpoint_artifacts_modified": false,
+    "docs_headline_modified": false,
+    "commit": false,
+    "push": false
+  },
+  "declarations": [
+    "protocol_freeze_only",
+    "no_formal_320_execution",
+    "no_model_calls",
+    "no_frozen_rule_changes",
+    "no_round1_overwrite",
+    "no_fixpoint_overwrite",
+    "all_320_active_including_pass_88",
+    "single_stack_pass_not_fixpoint",
+    "observational_eval_only"
+  ]
+}
