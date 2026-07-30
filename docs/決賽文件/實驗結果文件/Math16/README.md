@@ -26,7 +26,8 @@
 3. [`04_math16_pilot02_jury_qa_final_v1.md`](04_math16_pilot02_jury_qa_final_v1.md) — 評審 Q&A（含 Q21）
 4. [`figures/`](figures/) — 核心圖表 Figure 1–6
 5. [`05_math16_baseline_correction_note_v1.md`](05_math16_baseline_correction_note_v1.md) — Baseline 更正說明
-6. [`appendices/`](appendices/) — 附錄總冊
+6. [`10_math16_aggressive_round1_source_label_promotion_mismatch_correction_note_v1.md`](10_math16_aggressive_round1_source_label_promotion_mismatch_correction_note_v1.md) — Aggressive Round 1 source–label overlay＋479-cell consistency
+7. [`appendices/`](appendices/) — 附錄總冊
 
 ---
 
@@ -37,8 +38,10 @@
 | Gemini 3.5 Flash | **289/320** |
 | Qwen3.5 9B | **101/320** |
 | Qwen3.5 4B Baseline | **79/320** |
-| Healer Final | **85/320** |
-| Verified rescue | **6** |
+| Healer Final（Conservative） | **85/320** |
+| Verified rescue（Conservative） | **6** |
+| Aggressive Round 1（corrected overlay） | **79→87／rescue 8／3.32%** |
+| Aggressive Round 1（frozen archive） | 79→88／rescue 9／3.73% |
 | 呈現順序 | Gemini → Qwen3.5 9B → Qwen3.5 4B |
 | Tier1（4B vs 9B） | 52／27／49／192 |
 | McNemar p | **0.015440** |

@@ -1,8 +1,10 @@
 # Math16 三模型 Round 1 — 老師展示摘要 v1
 
-> **一句話：** 同一套凍結、FAIL-only、單輪 Deterministic Healer 下，4B／9B／Gemini 的 verified rescue 為 **9／1／0**；regression 皆為 **0**。
+> **一句話（corrected overlay）：** 同一套凍結、FAIL-only、單輪 Deterministic Healer 下，4B／9B／Gemini 的 verified rescue 為 **8／1／0**；regression 皆為 **0**。（frozen archive 仍記 4B＝**9**。）
 >
 > **Round 角色：** Round 1 = **正式主分析**；**Round 2 尚未執行**（若未來執行，僅 post-hoc iterative replay，不得覆寫 Round 1 主表）。
+>
+> **⚠ 2026-07-30：** 詳見 [Correction Note](10_math16_aggressive_round1_source_label_promotion_mismatch_correction_note_v1.md)。Conservative 79→85／rescue 6 不受影響。
 
 ---
 
@@ -17,7 +19,7 @@
 
 - Baseline 高 ≠ Healer 修復率高。
 - Gemini Baseline 289/320 高，但殘餘 31 FAIL **未命中**現有安全窗口 → rescue **0**（全層 Abstain）。
-- 4B Baseline 較低，殘餘失敗較多落入規則窗口 → rescue **9**。
+- 4B Baseline 較低，殘餘失敗較多落入規則窗口 → corrected rescue **8**（frozen 帳面曾記 9，含 1 格幽靈 C2）。
 - 核心機制變項是 **residual failure type／rule fit**，不是「模型越大越好修」。
 
 ---
@@ -28,10 +30,12 @@
 |---|---|---:|---:|---|
 | Gemini 3.5 Flash | 289 → 289 | 0 | 31 | 0/31 = **0%** |
 | Qwen 9B | 101 → 102 | 1 | 219 | 1/219 = **0.46%** |
-| Qwen 4B | 79 → 88 | 9 | 241 | 9/241 = **3.73%** |
+| Qwen 4B（corrected） | 79 → **87** | **8** | 241 | 8/241 = **3.32%** |
+| Qwen 4B（frozen） | 79 → 88 | 9 | 241 | 9/241 = 3.73% |
 
 - 三模型 **regression = 0**。
-- 本次三模型觀察到修復率隨 Baseline 升高而遞減（3.73% → 0.46% → 0%）；**只描述本次範圍內的關聯，不宣稱模型規模與修復率的普遍因果**。
+- 本次觀察到修復率隨 Baseline 升高而遞減（**3.32%** → 0.46% → 0%；frozen 4B 曾記 3.73%）；**只描述本次範圍內的關聯，不宣稱模型規模與修復率的普遍因果**。
+- 4B 真 rescue＝Tier A **6**＋D1 active-shadow **2**。
 
 ---
 
@@ -62,79 +66,23 @@
 
 **Gemini：** 全層 eligible＝0、modified＝0 → **Abstain**；verified rescue／partial repair 增益皆 **0**。
 
-**Qwen 4B（cumulative `_v1` sealed；僅列有欄位者）**
+**Qwen 4B（cumulative `_v1`；overlay）**
 
-| 層 | verified rescue | parse | exec | blocker-only | modified-still-failed |
-|---|---:|---:|---:|---:|---:|
-| Tier A（Method2 C0→C1） | 6 | （sealed 無獨立欄） | （sealed 無獨立欄） | （sealed 無獨立欄） | 5 |
-| Tier B | 1 | 5 | 1 | （無獨立欄） | 4 |
-| Tier C2 | 0 | 0 | 0 | （無獨立欄） | 5 |
-| D3+D1（合併） | 2 | 1 | 4 | （無獨立欄） | 5 |
-| D5 | 0 | 0 | 0 | — | 1 |
-| D2 | 0 | 0 | 1 | **BLOCKER_REMOVAL_ONLY** | 1 |
-
-> 缺欄位處標「無獨立欄／—」，**不推估**。
+| 層 | verified rescue | 備註 |
+|---|---:|---|
+| Tier A | 6 | 不變 |
+| Tier B | **0**（frozen 帳面 1） | 幽靈帳：EMPTY_SUITE 開發 replay 成功但 sealed bytes 未晉升 |
+| D3+D1 | 2 | active-shadow；seeds 1301／2002 |
 
 ---
 
 ## 4. 正式主結論（可直接引用）
 
-在同一套凍結、FAIL-only、單輪 Deterministic Healer 下，Qwen 4B、Qwen 9B 與 Gemini 分別獲得 9、1、0 格 verified rescue；以 Baseline FAIL 為分母，修復率分別為 3.73%、0.46% 與 0%。在本次三模型與 16 題實驗範圍內，Baseline 表現較高的模型，其殘餘失敗較少命中現有 frozen rules 的安全修復窗口。此結果顯示 Healer 效益與 residual failure type 及規則適配程度密切相關，但不宣稱模型規模與修復率存在普遍因果關係。三模型 regression 均為 0。
+在同一套凍結、FAIL-only、單輪 Deterministic Healer 下，分析層 corrected overlay 為 Qwen 4B、Qwen 9B 與 Gemini 分別獲得 **8**、1、0 格 verified rescue；以 Baseline FAIL 為分母，修復率分別為 **3.32%**、0.46% 與 0%（frozen archive 仍記 4B＝9／3.73%）。在本次三模型與 16 題實驗範圍內，Baseline 表現較高的模型，其殘餘失敗較少命中現有 frozen rules 的安全修復窗口。此結果顯示 Healer 效益與 residual failure type 及規則適配程度密切相關，但不宣稱模型規模與修復率存在普遍因果關係。三模型 regression 均為 0。
 
 ---
 
-## 5. 分帳與 2B exploratory lower-bound（已完成）
+## 5. Fixpoint／320-cell safety（口試一句話）
 
-| 項目 | 狀態 |
-|---|---|
-| FAIL-only、single-pass Round 1 | **正式主分析**（三模型主表不變） |
-| Round 2 | **尚未執行**；若做，僅 post-hoc iterative replay |
-| Development 40／Evaluation 120 | Method 1 contract-aware 切分另帳（Evaluation 120 為該切分主要結果）；與 Round 1 全量 320 headline **分帳** |
-| Qwen 3.5 2B | smoke **0/16 PASS**；**已完成** 16-cell exploratory lower-bound frozen Healer replay：**0/16 → 0/16**（rescue 0、regression 0）；**不納入**三模型正式主表，**不估計**一般修復率 |
-| Abstain 的意義 | 安全邊界：不猜修 → 保護 regression=0 |
-| Regression=0 的意義 | 本次三模型 Round 1 觀察到無 PASS→FAIL；不宣稱任意情境保證 |
-
-### 2B 密封摘要（exploratory only）
-
-| 指標 | 數值 |
-|---|---|
-| Baseline → Final | **0/16 → 0/16** |
-| verified rescue／regression | **0／0** |
-| Tier A | eligible 2、modified 2、parse gain 1、blocker-removal-only 1 |
-| D3 | eligible 1、modified 1、modified-still-failed 1 |
-| D1 | eligible 1、modified 1、modified-still-failed 1 |
-| 主要失敗 | runtime 7、catastrophic truncation 5、parse minor 2、schema 1、answer incorrect 1 |
-
----
-
-## 6. 四模型探索性「可修復窗口」（非正式同等比較）
-
-> **老師版一句話：** 「太弱，錯得太深；太強，現有安全規則無處可修；Healer 最有價值的，是模型已接近成功、只差一道小柵欄的中間地帶。」
-
-四模型結果呈現一個探索性的可修復窗口圖像：2B 的失敗雖可被局部修正，但多數仍距完整 PASS 較遠；Gemini 的 residual FAIL 未命中現有 frozen rules；介於兩者之間的 4B 與 9B 出現較多 deterministic rules 可介入案例，其中 4B 的 verified rescue 最明顯。這支持一項機制性假說：Healer 的施力空間可能集中在模型已具備主要解題骨架、但仍殘留局部、唯一、可驗證結構瑕疵的中間區間。
-
-**限制（口試必講）：**
-- 2B 僅 16 cells；4B／9B／Gemini 各 320 cells。
-- 僅屬 exploratory mechanism hypothesis。
-- 不作正式相關、因果或普遍化主張。
-- 不寫「Gemini 幾乎無結構性失敗」。
-- 不寫「9B 多數已是語意層」。
-- **不得**把本段畫成與第 2 節三模型正式主表同等的統計比較。
-
----
-
-## 7. 展示提醒
-
-1. 先講 **安全邊界 ≠ 能力邊界**，並用口號 **「先求不修壞，再求修得好」**。
-2. 再秀 **Baseline→Final** 與 **rescue／Baseline FAIL**（僅三模型正式主表）。
-3. 補一句 **partial repair 有價值但不等於 rescue**。
-4. 被問 Gemini 0 rescue：答「安全邊界命中為 0，不是系統壞掉」。
-5. 被問 2B：答「已做完 16 格 Healer exploratory：0→0；有局部修正，但沒 rescue，不算正式主表」。
-6. 若提四模型窗口：先講老師版一句話，立刻補樣本異質與「探索假說、非因果」限制。
-
-## 建議展示圖
-
-1. `figures/figure_07_round1_baseline_vs_final.svg`
-2. `figures/figure_08_round1_verified_rescue.svg`
-3. `figures/figure_10_round1_rescue_rate.svg`
-4. （進階）`figures/figure_09_round1_pass_curves.svg`
+- Fixpoint v1：232／232 zero-change **只對 frozen 88／232 成立**；corrected residual FAIL＝233 含未掃描格。
+- Aggressive 320：primary preserved 88／rescue 0；sensitivity rescue 1（EMPTY_SUITE），不得與 D1 active-shadow 1301／2002 混稱。

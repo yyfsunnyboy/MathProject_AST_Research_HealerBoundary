@@ -7,6 +7,7 @@ Does not execute formal 320-cell benchmark.
 """
 from __future__ import annotations
 
+import json
 import tempfile
 from pathlib import Path
 
@@ -159,7 +160,30 @@ def test_duplicate_guard_when_outputs_exist():
         assert clear["ok"] is True
 
 
-def test_results_root_reserved_and_unused():
-    # Protocol freeze round must not have created formal outputs.
-    assert not (RESULTS_ROOT / "cell_journal.jsonl").exists()
-    assert not (RESULTS_ROOT / "summary.json").exists()
+def test_results_root_post_execution_integrity():
+    """After formal execution, results root must keep primary journal/summary intact."""
+    journal = RESULTS_ROOT / "cell_journal.jsonl"
+    summary_path = RESULTS_ROOT / "summary.json"
+    assert journal.is_file()
+    assert summary_path.is_file()
+    rows = [json.loads(line) for line in journal.read_text(encoding="utf-8").splitlines() if line.strip()]
+    assert len(rows) == EXPECTED_TOTAL == 320
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    assert summary["formal_benchmark_executed"] is True
+    assert summary["n_cells"] == 320
+    assert summary["n_input_pass"] == EXPECTED_PASS == 88
+    assert summary["n_input_fail"] == EXPECTED_FAIL == 232
+    assert summary["transition_counts"]["preserved_pass"] == 88
+    assert summary["transition_counts"]["regression"] == 0
+    assert summary["transition_counts"]["verified_rescue"] == 0
+    assert summary["transition_counts"]["unchanged_fail"] == 232
+    # Analysis overlay (sealed-source sensitivity) may be present; must not rewrite primary.
+    sens = summary.get("sealed_source_sensitivity")
+    if sens is not None:
+        assert sens["n_input_pass"] == 87
+        assert sens["n_input_fail"] == 233
+        assert sens["verified_rescue"] == 1
+        assert sens["preserved_pass"] == 87
+        assert sens["regression"] == 0
+        assert sens["unchanged_fail"] == 232
+        assert sens["net_pass_change"] == 1

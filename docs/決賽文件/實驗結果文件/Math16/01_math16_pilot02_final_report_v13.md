@@ -8,6 +8,8 @@ IVAN_MACRONIX_SCIENCE_FAIR_OFFICIAL_REPORT
 
 > **⚠ 更正說明 (Correction Notice, 2026-07-28)**：Method 1／Method 2 交叉稽核發現單一 cell（`ce115_calc_polynomial_division_l1 / ab1 / seed 2026072003`）之候選程式擷取錨定錯誤（非模型能力差異），已依分析／報告層更正本文所有主要敘述與數據表：Qwen 4B Baseline **78/320 → 79/320 (24.69%)**；Final（corrected-chain verified rescue）**84/320 → 85/320**（Verified rescue 維持 6 格不變）；Primary 中繼值（原 83/320）依更正基準連動為 84/320，已下修為附註、不再列為主表標題數字。三模型呈現順序統一調整為 Gemini 3.5 Flash → Qwen 3.5 9B → Qwen 3.5 4B（僅為展示順序調整，不影響任何數值或研究結論）。**凍結證據（raw evaluation results、Healer/Eligibility journals、manifests、pinned Evaluator/Protocol scripts、regression tests）永久保留原始 78/83/84 數值，不受本更正影響、不被修改**。本輪僅更正文字敘述與數據表，Figure 1、3、4、5 已完成更正後重繪，現行正式圖檔位於 `figures/`。完整稽核鏈見：[Math16 Baseline Correction Note v1](05_math16_baseline_correction_note_v1.md)。
 >
+> **⚠ Aggressive Round 1 overlay (Correction Notice, 2026-07-30)**：單一 cell `ce112_q04_radical_simplification / ab2d / seed 2026072003` 發生 **source–label promotion mismatch**（密封 source 為 `FAILED／parse_minor`，C5a 卻記 `PASS／PRIOR_PASS_PRESERVED`）。分析層 overlay：**Baseline 79／241 不變**；Aggressive Round 1 Final **88→87**、verified rescue **9→8**、修復率 **9／241=3.73% → 8／241=3.32%**。真 rescue＝Tier A **6**＋D1 active-shadow **2**；C2 +1 為幽靈帳（開發 replay 曾修成功，但修復 bytes 未晉升 sealed final）。**凍結 labels／manifest／journals／sealed sources 永久保留 88／9**。Conservative **79→85／rescue 6 不受影響**。Fixpoint v1 之 232／232 zero-change **僅對 frozen 88／232 人口鎖成立**，不得宣稱涵蓋 corrected residual FAIL＝233。三模型 Final PASS sealed-source 重評 **478／479** 一致（4B 87／88、9B 102／102、Gemini 289／289）；唯一 mismatch＝本格，**非**系統性問題。完整說明：[Correction Note](10_math16_aggressive_round1_source_label_promotion_mismatch_correction_note_v1.md)；overlay JSON：`docs/experiments/manifests/math16_aggressive_round1_corrected_overlay_v1.json`。
+>
 > **研究聲明**：
 > Deterministic AST Healer 不是第二個解題模型，而是只在修法唯一、局部、可驗證的窄小窗口介入；其餘情況主動 Abstain。
 
@@ -248,7 +250,7 @@ execution rescue 格為 `ce115_calc_exact_rational_expression_l1 / Ab1 / seed 20
 > - Evaluation 120 格是主要結果。
 > - 70 格只是排除 5 個 `cohort_level_provenance_uncertain` 任務後的敏感度分析，不得取代 120 格。
 > - 70 格救援為 0 與既有 split 結構及 Generic Core 已知命中分布一致，不寫成新發現。
-> - **資料分帳治理／Contract-Aware 定義：** Round 1 全量＝**16題 × 4條件 × 5 seeds = 320**。本切分為 Contract-Aware 子集，**僅含** `ab2d` + `ab2d_spec_v2`＝**16題 × 2條件 × 5 seeds = 160**（Development：`4×2×5=40`；Evaluation：`12×2×5=120`；**40+120=160**，只是 320 子集）。`ab1`／`ab2g` 仍在 320 總體，但因無 domain API／function contract 不納入此 split；**不得**推論一般 Healer 完全不能作用於 `ab1`／`ab2g`。Development 40 用於理解失敗模式，不宣稱完全未見；該切分內 verified rescue **全部**在 Evaluation 120，Development 40 verified rescue＝**0**。結論只支持**非題目客製化**，不宣稱完全無污染風險。後續 Aggressive 規則採通用 AST／結構 pattern，development influence 仍以 frozen-rule benchmark 控制。Method 1 之 Dev／Eval rescue **不得**與 Round 1 79→88 混稱。
+> - **資料分帳治理／Contract-Aware 定義：** Round 1 全量＝**16題 × 4條件 × 5 seeds = 320**。本切分為 Contract-Aware 子集，**僅含** `ab2d` + `ab2d_spec_v2`＝**16題 × 2條件 × 5 seeds = 160**（Development：`4×2×5=40`；Evaluation：`12×2×5=120`；**40+120=160**，只是 320 子集）。`ab1`／`ab2g` 仍在 320 總體，但因無 domain API／function contract 不納入此 split；**不得**推論一般 Healer 完全不能作用於 `ab1`／`ab2g`。Development 40 用於理解失敗模式，不宣稱完全未見；該切分內 verified rescue **全部**在 Evaluation 120，Development 40 verified rescue＝**0**。結論只支持**非題目客製化**，不宣稱完全無污染風險。後續 Aggressive 規則採通用 AST／結構 pattern，development influence 仍以 frozen-rule benchmark 控制。Method 1 之 Dev／Eval rescue **不得**與 Round 1 Aggressive overlay（corrected **79→87／rescue 8**；frozen archive 79→88／9）混稱。
 
 詳細結果與切分說明見：[Math16 Method 1 — 依 Development 40／Evaluation 120 切分成果報告](../../../experiments/reports/math16_method1_40_120_split_results_report_v1.md)。
 
@@ -285,17 +287,20 @@ Protocol：凍結規則 × **FAIL-only** × **single-pass** Deterministic Healer
 |---|---|---:|---:|---:|---:|
 | Gemini 3.5 Flash | 289 → 289 | 0 | 31 | 0% | 0 |
 | Qwen 9B | 101 → 102 | 1 | 219 | 0.46% | 0 |
-| Qwen 4B | 79 → 88 | 9 | 241 | 3.73% | 0 |
+| Qwen 4B（corrected overlay） | 79 → **87** | **8** | 241 | **3.32%** | 0 |
+| Qwen 4B（frozen archive） | 79 → 88 | 9 | 241 | 3.73% | 0 |
 
-Cumulative PASS 曲線（C0→C5c）：
+> 4B 主表採 **corrected overlay**（見 2026-07-30 Correction Notice）；frozen archive 88／9 永久保留於 C5a／Round1 summary，不作分析主敘事。
+
+Cumulative PASS 曲線（C0→C5c；4B 為 corrected overlay；括號內為 frozen）：
 
 | 模型 | C0 | C1 | C2 | C3 | C4 | C5a | C5b | C5c |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | Gemini | 289 | 289 | 289 | 289 | 289 | 289 | 289 | 289 |
 | Qwen 9B | 101 | 101 | 102 | 102 | 102 | 102 | 102 | 102 |
-| Qwen 4B | 79 | 85 | 86 | 86 | 86 | 88 | 88 | 88 |
+| Qwen 4B | 79 | 85 | **85**（86） | **85**（86） | **85**（86） | **87**（88） | **87**（88） | **87**（88） |
 
-**正式結論（不得擴張因果）：** 在同一套凍結、FAIL-only、單輪 Deterministic Healer 下，Qwen 4B、Qwen 9B 與 Gemini 分別獲得 9、1、0 格 verified rescue；以 Baseline FAIL 為分母，修復率分別為 3.73%、0.46% 與 0%。在本次三模型與 16 題實驗範圍內，Baseline 表現較高的模型，其殘餘失敗較少命中現有 frozen rules 的安全修復窗口。此結果顯示 Healer 效益與 residual failure type 及規則適配程度密切相關，但不宣稱模型規模與修復率存在普遍因果關係。三模型 regression 均為 0。
+**正式結論（不得擴張因果）：** 在同一套凍結、FAIL-only、單輪 Deterministic Healer 下，分析層 corrected overlay 為 Qwen 4B／9B／Gemini verified rescue **8／1／0**（frozen archive 仍記 4B＝9）；以 Baseline FAIL 為分母，修復率分別為 **3.32%**／0.46%／0%（frozen 4B 率 3.73% 僅作歷史封存）。4B 真 rescue＝Tier A 6＋D1 active-shadow 2；C2 +1 為幽靈帳。在本次三模型與 16 題實驗範圍內，Baseline 表現較高的模型，其殘餘失敗較少命中現有 frozen rules 的安全修復窗口。此結果顯示 Healer 效益與 residual failure type 及規則適配程度密切相關，但不宣稱模型規模與修復率存在普遍因果關係。三模型 regression 均為 0。
 
 ### 11B.3 Partial repair 分帳
 
@@ -315,7 +320,7 @@ Cumulative PASS 曲線（C0→C5c）：
 
 **Gemini：** 全層 eligible＝0、modified＝0 → Abstain；rescue 與 partial-repair 增益皆 0。
 
-**4B（cumulative `_v1` sealed）：** Tier A rescue 6、modified-still-failed 5；Tier B rescue 1、parse 5、exec 1、modified-still-failed 4；Tier C2 modified-still-failed 5；D3+D1 合併 rescue 2、parse 1、exec 4、modified-still-failed 5；D5 modified-still-failed 1；D2 exec 1 且 verdict=`BLOCKER_REMOVAL_ONLY`。缺獨立欄位者**不推估**。
+**4B（cumulative `_v1` sealed；分析 overlay）：** Tier A rescue 6、modified-still-failed 5；Tier B **帳面** rescue 1（幽靈：密封 bytes 未晉升）／overlay 計 **0**、parse 5、exec 1、modified-still-failed 4；Tier C2 modified-still-failed 5；D3+D1 合併 rescue **2**（active-shadow）、parse 1、exec 4、modified-still-failed 5；D5 modified-still-failed 1；D2 exec 1 且 verdict=`BLOCKER_REMOVAL_ONLY`。缺獨立欄位者**不推估**。
 
 Abstain 與 regression＝0 的意義：Abstain 是安全邊界防禦（不猜修）；regression＝0 是本次 Round 1 三模型觀察結果，不宣稱任意情境保證。
 
@@ -377,7 +382,7 @@ Protocol／結果：`math16_qwen4b_cellwise_fixpoint_replay_protocol_v1`；`docs
 | `MAX_ROUND_NON_CONVERGENT` | **0** |
 | model calls | **0** |
 
-**結論：** 現有凍結 Healer 在 Round 1 後對 4B residual FAIL 已達**操作上的 fixpoint**（再跑完整一輪 stack 無 source 變更、無額外 verified rescue）。
+**結論：** 現有凍結 Healer 在 Round 1 後對 **frozen** 4B residual FAIL（232）已達**操作上的 fixpoint**（再跑完整一輪 stack 無 source 變更、無額外 verified rescue）。**限制（2026-07-30 overlay）：** 232／232 zero-change **僅對 frozen 88／232 人口鎖成立**；corrected residual FAIL＝**233**（含未掃描之 source–label mismatch cell），**不得**宣稱涵蓋全部 corrected residual FAIL；本輪不補跑 fixpoint v2。
 
 **限制：** 本輪**未掃描** 88 個 PASS cells，**不得**把本輪 regression＝0 當新安全性證據；正式 regression 證據仍來自 Round 1／Method 2 等已封存帳。
 
@@ -497,7 +502,7 @@ Deterministic AST Healer 之安全介入架構概念如下：
 
 1. **Baseline能力與Healer可修復窗口不同**：模型 Baseline 生成通過率高，不代表剩餘失敗中包含更多可修復瑕疵；修復視窗取決於失敗案例是否符合凍結之修復規則。
 2. **4B存在窄小且可驗證的repair window（Conservative／Primary 帳）**：Qwen 4B 經 Active Healer verified rescue 6 格，通過數由 **79/320** 提升至 **85/320**（原 78→84/320，已依 [更正說明](05_math16_baseline_correction_note_v1.md) 更正）。分帳上，5 格於 Primary run 確認（對應更正後基準 84/320，中繼值，不再作主表標題），另 1 格經 corrected-chain 確認方達最終 85/320；另有 1 格 repaired-still-fail 不計入 rescue。
-3. **三模型 Aggressive Healer Round 1（正式主分析，另帳）**：同一套 FAIL-only 單輪凍結規則下，4B／9B／Gemini 為 **79→88（rescue 9）／101→102（rescue 1）／289→289（rescue 0）**；修復率 3.73%／0.46%／0%。僅描述本次遞減關聯，不宣稱規模因果；核心是 residual failure type／rule fit。三模型 Round 2 尚未執行；4B-only fixpoint（232 全 zero-change、rescue 0）為 post-hoc 機制探針，不覆寫主表。
+3. **三模型 Aggressive Healer Round 1（正式主分析，另帳）**：同一套 FAIL-only 單輪凍結規則下，分析層 corrected overlay 為 4B／9B／Gemini **79→87（rescue 8）／101→102（rescue 1）／289→289（rescue 0）**（修復率 **3.32%**／0.46%／0%）；frozen archive 仍記 4B **79→88（rescue 9／3.73%）**。僅描述本次遞減關聯，不宣稱規模因果；核心是 residual failure type／rule fit。三模型 Round 2 尚未執行；4B-only fixpoint（frozen 232 全 zero-change、rescue 0；**不涵蓋** corrected residual 233）為 post-hoc 機制探針，不覆寫主表。
 4. **2B exploratory lower-bound（另帳，非正式主表）**：16-cell frozen Healer replay 為 **0/16 → 0/16**（rescue 0、regression 0）；Tier A／D3／D1 可見局部 partial repair，但不估計一般修復率，亦不納入三模型正式主表。
 5. **9B整體通過較高，但Family結果非單調**：9B 在 Overall 通過率高於 4B，但在 Polynomial 家族因單一題型提示敏感性出現非單調狀況。
 6. **Prompt效果依模型、版本與部署條件而異**：同一 Prompt 條件（如 `Ab2d+api`）在 4B 與 Gemini 上呈現截然不同之效用。
@@ -534,7 +539,7 @@ Deterministic AST Healer 之安全介入架構概念如下：
 **答覆**：不是。Primary／Conservative 帳的 `eligible=0` 是安全 Abstain。Aggressive Healer Round 1 正式比較下，9B 有 verified rescue 1、Gemini 仍為 0；Gemini 的 0 代表安全窗口未命中，不是系統失效。
 
 ### Q3: 為什麼 4B 可以修復較多格，9B／Gemini 反而較少或為 0？
-**答覆**：分帳：Primary 為 4B rescue 6；Round 1 正式比較為 4B／9B／Gemini＝9／1／0（修復率 3.73%／0.46%／0%）。關鍵是殘餘失敗型態是否落入凍結規則，不是模型越大越好修；不宣稱普遍因果。
+**答覆**：分帳：Primary 為 4B rescue 6；Round 1 正式比較採 corrected overlay 為 4B／9B／Gemini＝**8／1／0**（修復率 **3.32%**／0.46%／0%；frozen archive 仍記 4B＝9／3.73%）。關鍵是殘餘失敗型態是否落入凍結規則，不是模型越大越好修；不宣稱普遍因果。
 
 ### Q4: 為什麼不把所有 SyntaxError 都納入 Healer 修復範圍？
 **答覆**：因為大多數 SyntaxError（如少寫半段邏輯、字串未閉合）並沒有唯一的修復解答。若強行修復將違反「修法唯一、不可反推答案」的核心原則，帶來極高修壞風險。
@@ -558,20 +563,21 @@ Deterministic AST Healer 之安全介入架構概念如下：
 ### 結論
 本研究結果支持以下定位：Deterministic AST Healer 具備精確價值與安全介入邊界。實證顯示：
 1. AST Healer 不扮演第二個解題模型，而在可驗證之特定語法瑕疵窗口發揮確定性救援功能。Conservative／Primary 帳：4B verified rescue 共 6 格，通過數由 **79/320** 提升至 **85/320**（已依 [更正說明](05_math16_baseline_correction_note_v1.md) 自原 78→84/320 更正）。技術分帳上，Primary 救援 5 格、final 對應 84/320（原 83/320，中繼值，demoted）；另 1 格由 corrected-chain 確認方達最終 85/320，且另有 1 格 repaired-still-fail 不計入 rescue。
-2. **Aggressive Healer Round 1（三模型正式主分析，另帳）：** 4B／9B／Gemini 分別 **79→88（rescue 9）／101→102（rescue 1）／289→289（rescue 0）**；修復率 3.73%／0.46%／0%。只描述本次關聯，不宣稱規模因果；Gemini 0 rescue 代表安全窗口未命中（Abstain），不代表 Healer 無效。
+2. **Aggressive Healer Round 1（三模型正式主分析，另帳）：** 4B／9B／Gemini corrected overlay 分別 **79→87（rescue 8）／101→102（rescue 1）／289→289（rescue 0）**；修復率 **3.32%**／0.46%／0%（frozen 4B 仍為 79→88／9／3.73%）。只描述本次關聯，不宣稱規模因果；Gemini 0 rescue 代表安全窗口未命中（Abstain），不代表 Healer 無效。
 3. Regression 嚴格分帳：Method 1 為 `Regression not measured`；Method 2 對全部 320 格 Raw／Final 雙路評分後為 `Regression measured = 0/320`；Round 1 三模型 cumulative 亦觀察到 regression＝0。
 4. 面臨無確定修法之失敗時，系統依凍結規則選擇 Abstain；partial repair 另帳，不計入 verified rescue。
-5. 三模型 Round 2 尚未執行。4B-only cell-wise fixpoint 已完成（232 全 `ZERO_CHANGE_CONVERGENCE`、additional rescue＝0），屬 post-hoc 機制探針，不得覆寫 Round 1 主表；亦不得以本輪未掃描 88 PASS cells 重估 regression。
-6. Qwen 3.5 2B 四條件 smoke 為 0/16 PASS，且**已完成** 16-cell exploratory lower-bound frozen Healer replay：**0/16 → 0/16**（rescue 0、regression 0）；不估計一般修復率，不納入三模型正式主表。四模型「可修復窗口」僅作探索性機制假說（見第 11B.4 節）。
-7. Development 40／Evaluation 120：Dev rescue＝0、Eval rescue＝4；只支持非題目客製化，不宣稱零污染。舊版 `core/healers` 不進 Round 1 正式決策（見 provenance §7）。
+5. 三模型 Round 2 尚未執行。4B-only cell-wise fixpoint 已完成（frozen 232 全 `ZERO_CHANGE_CONVERGENCE`、additional rescue＝0），屬 post-hoc 機制探針，不得覆寫 Round 1 主表；亦不得以未掃描 PASS cells 重估 regression；**不得**將該結果外推為涵蓋 corrected residual FAIL＝233。
+6. **`Aggressive Healer full 320-cell safety benchmark`（已執行；見 results root）：** frozen-label primary＝preserved 88／regression 0／rescue 0；sealed-source sensitivity＝preserved 87／regression 0／rescue 1（EMPTY_SUITE；D1＝dead-shadow cleanup）；**不得**與 Method 2、Round 2、fixpoint 混稱。
+7. Qwen 3.5 2B 四條件 smoke 為 0/16 PASS，且**已完成** 16-cell exploratory lower-bound frozen Healer replay：**0/16 → 0/16**（rescue 0、regression 0）；不估計一般修復率，不納入三模型正式主表。四模型「可修復窗口」僅作探索性機制假說（見第 11B.4 節）。
+8. Development 40／Evaluation 120：Dev rescue＝0、Eval rescue＝4；只支持非題目客製化，不宣稱零污染。舊版 `core/healers` 不進 Round 1 正式決策（見 provenance §7）。
 
 ### 後續工作
 1. 若執行三模型 Round 2：僅 post-hoc iterative replay，獨立分帳，不覆寫 Round 1。
 2. 2B 若擴樣，須另開協議；不得把 16-cell exploratory 帳寫成 320 正式主表。
 3. 擴充預註冊修復規則庫時，須以獨立驗證集驗證，禁止事後配合資料改規則。
 4. 引入多 Task 跨領域擴展測試，縮減 Task-clustered Bootstrap 信賴區間不確定性。
-5. 不以 4B fixpoint＝zero-change 放寬 frozen rules；不以未掃描 PASS cells 改寫 regression 安全敘事。
-6. **`Aggressive Healer full 320-cell safety benchmark`（尚未執行）：** 同時掃描原始 PASS／FAIL，量測 rescue、preserved pass、PASS→FAIL regression、net PASS change；**不得**與 Method 2、Round 2、fixpoint 混稱。
+5. 不以 4B fixpoint＝zero-change 放寬 frozen rules；不以未掃描 PASS cells 改寫 regression 安全敘事；fixpoint v1 不涵蓋 corrected residual FAIL＝233。
+6. **`Aggressive Healer full 320-cell safety benchmark`：** 保留 frozen-label primary 與 sealed-source sensitivity 雙帳；**不得**與 Method 2、Round 2、fixpoint 混稱。
 
 ### 正式證據與產物索引
 - **Evidence Complete Milestone v1**：`docs/experiments/milestones/math16_pilot02_evidence_complete_v1/`

@@ -22,16 +22,17 @@
 |---|---:|---:|---|
 | C0 Raw | **79**/320 | — | Baseline |
 | C1 Conservative（Tier A 六規則） | **85**/320 | **+6** | Pilot-02 frozen allowlist |
-| C2 Tier B（safe structural） | **86**/320 | **+1** | Development replay |
-| Tier C（C1 spec-only + C2 narrow） | **86**/320 | **+0** | 無 PASS 增益 |
-| Tier D D3+D1（C5a） | **88**/320 | **+2** | Development evidence |
-| Tier D D5 | 88 | **0** | `NO_DEVELOPMENT_GAIN` |
-| Tier D D2 | 88 | **0** | `BLOCKER_REMOVAL_ONLY`；execution gain **1** |
+| C2 Tier B（safe structural） | **86**/320（frozen）／**85**/320（corrected） | **+1** frozen／**+0** corrected | Development replay；+1＝幽靈帳（sealed bytes 未晉升） |
+| Tier C（C1 spec-only + C2 narrow） | **86**/320（frozen）／**85**/320（corrected） | **+0** | 無 PASS 增益 |
+| Tier D D3+D1（C5a） | **88**/320（frozen）／**87**/320（corrected） | **+2** | Development evidence；D1 active-shadow ×2 |
+| Tier D D5 | 88／87 | **0** | `NO_DEVELOPMENT_GAIN` |
+| Tier D D2 | 88／87 | **0** | `BLOCKER_REMOVAL_ONLY`；execution gain **1** |
 
-- **最終 4B：** **88/320**
-- **總 verified rescue：** **+9**（6+1+0+2；D5/D2 各 0）
+- **最終 4B（analysis overlay）：** **87/320**（frozen archive **88/320** 永久保留）
+- **總 verified rescue（overlay）：** **+8**（6+0+0+2）；frozen 帳面曾記 +9（含 C2 幽靈 +1）
 - **Regression：** **無**
 - **`TIER_D_4B_EXPLORATION_CLOSED`：** 是（停止新增 D4／D6／其他 Tier D 規則探索）
+- **Correction Note（2026-07-30）：** `docs/決賽文件/實驗結果文件/Math16/10_math16_aggressive_round1_source_label_promotion_mismatch_correction_note_v1.md`
 
 ### D1 正式措辭（兩格 rescue）
 

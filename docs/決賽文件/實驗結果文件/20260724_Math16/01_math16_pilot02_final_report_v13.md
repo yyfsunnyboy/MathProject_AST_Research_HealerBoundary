@@ -8,6 +8,8 @@ IVAN_MACRONIX_SCIENCE_FAIR_OFFICIAL_REPORT
 
 > **⚠ 更正說明 (Correction Notice, 2026-07-28)**：Method 1／Method 2 交叉稽核發現單一 cell（`ce115_calc_polynomial_division_l1 / ab1 / seed 2026072003`）之候選程式擷取錨定錯誤（非模型能力差異），已依分析／報告層更正本文所有主要敘述與數據表：Qwen 4B Baseline **78/320 → 79/320 (24.69%)**；Final（corrected-chain verified rescue）**84/320 → 85/320**（Verified rescue 維持 6 格不變）；Primary 中繼值（原 83/320）依更正基準連動為 84/320，已下修為附註、不再列為主表標題數字。三模型呈現順序統一調整為 Gemini 3.5 Flash → Qwen 3.5 9B → Qwen 3.5 4B（僅為展示順序調整，不影響任何數值或研究結論）。**凍結證據（raw evaluation results、Healer/Eligibility journals、manifests、pinned Evaluator/Protocol scripts、regression tests）永久保留原始 78/83/84 數值，不受本更正影響、不被修改**。本輪僅更正文字敘述與數據表，Figure 1/3/4/5 之 PNG 圖檔尚未於本批次同步重新產出，可能仍顯示更正前數值，正式圖檔重繪另案處理。完整稽核鏈見：[Math16 Baseline Correction Note v1](../../../experiments/reports/math16_baseline_correction_note_v1.md)。
 >
+> **⚠ Aggressive Round 1 overlay (Correction Notice, 2026-07-30)**：單一 cell `ce112_q04_radical_simplification / ab2d / seed 2026072003` 發生 **source–label promotion mismatch**。分析層：Final **88→87**、rescue **9→8**、率 **3.73%→3.32%**；真 rescue＝Tier A 6＋D1 active-shadow 2；C2 +1 為幽靈帳。**凍結 labels／manifest／journals 永久保留 88／9**。Conservative 79→85／6 不受影響。Fixpoint v1 之 232／232 zero-change **僅對 frozen 88／232 成立**。三模型 Final PASS sealed-source 重評 **478／479** 一致；唯一 mismatch＝本格，**非**系統性問題。權威說明：[Correction Note](../../../experiments/reports/math16_aggressive_round1_source_label_promotion_mismatch_correction_note_v1.md)；overlay：`docs/experiments/manifests/math16_aggressive_round1_corrected_overlay_v1.json`。工作副本對照：`../Math16/10_math16_aggressive_round1_source_label_promotion_mismatch_correction_note_v1.md`。
+>
 > **研究聲明**：
 > Deterministic AST Healer 不是第二個解題模型，而是只在修法唯一、局部、可驗證的窄小窗口介入；其餘情況主動 Abstain。
 
@@ -248,7 +250,7 @@ execution rescue 格為 `ce115_calc_exact_rational_expression_l1 / Ab1 / seed 20
 > - Evaluation 120 格是主要結果。
 > - 70 格只是排除 5 個 `cohort_level_provenance_uncertain` 任務後的敏感度分析，不得取代 120 格。
 > - 70 格救援為 0 與既有 split 結構及 Generic Core 已知命中分布一致，不寫成新發現。
-> - **資料分帳治理／Contract-Aware 定義：** Round 1 全量＝**16題 × 4條件 × 5 seeds = 320**。本切分為 Contract-Aware 子集，**僅含** `ab2d` + `ab2d_spec_v2`＝**16題 × 2條件 × 5 seeds = 160**（Development：`4×2×5=40`；Evaluation：`12×2×5=120`；**40+120=160**，只是 320 子集）。`ab1`／`ab2g` 仍在 320 總體，但因無 domain API／function contract 不納入此 split；**不得**推論一般 Healer 完全不能作用於 `ab1`／`ab2g`。Development 40 用於理解失敗模式，不宣稱完全未見；該切分內 verified rescue **全部**在 Evaluation 120，Development 40 verified rescue＝**0**。結論只支持**非題目客製化**，不宣稱完全無污染風險。後續 Aggressive 規則採通用 AST／結構 pattern，development influence 仍以 frozen-rule benchmark 控制。Method 1 之 Dev／Eval rescue **不得**與 Round 1 79→88 混稱。
+> - **資料分帳治理／Contract-Aware 定義：** Round 1 全量＝**16題 × 4條件 × 5 seeds = 320**。本切分為 Contract-Aware 子集，**僅含** `ab2d` + `ab2d_spec_v2`＝**16題 × 2條件 × 5 seeds = 160**（Development：`4×2×5=40`；Evaluation：`12×2×5=120`；**40+120=160**，只是 320 子集）。`ab1`／`ab2g` 仍在 320 總體，但因無 domain API／function contract 不納入此 split；**不得**推論一般 Healer 完全不能作用於 `ab1`／`ab2g`。Development 40 用於理解失敗模式，不宣稱完全未見；該切分內 verified rescue **全部**在 Evaluation 120，Development 40 verified rescue＝**0**。結論只支持**非題目客製化**，不宣稱完全無污染風險。後續 Aggressive 規則採通用 AST／結構 pattern，development influence 仍以 frozen-rule benchmark 控制。Method 1 之 Dev／Eval rescue **不得**與 Round 1 Aggressive overlay（corrected **79→87／rescue 8**；frozen archive 79→88／9）混稱。
 
 詳細結果與切分說明見：[Math16 Method 1 — 依 Development 40／Evaluation 120 切分成果報告](../../../experiments/reports/math16_method1_40_120_split_results_report_v1.md)。
 
@@ -276,8 +278,8 @@ Protocol／結果：`math16_qwen4b_cellwise_fixpoint_replay_protocol_v1`；`docs
 
 | 指標 | 數值 |
 |---|---|
-| 輸入 | Round 1 final 後仍 FAIL **232** cells |
-| 永久排除 | Round 1 final 已 PASS **88** cells（本輪未掃描） |
+| 輸入 | Round 1 final 後仍 FAIL **232** cells（**frozen** 人口鎖） |
+| 永久排除 | Round 1 final 已 PASS **88** cells（本輪未掃描；含 1 格 source–label mismatch） |
 | 規則順序 | `A→B→C1→C2→D3→D1→D5→D2`；`max_round=8` |
 | `ZERO_CHANGE_CONVERGENCE` | **232**（全部第一輪 zero-change） |
 | `ITERATIVE_RESCUE` | **0** |
@@ -285,8 +287,7 @@ Protocol／結果：`math16_qwen4b_cellwise_fixpoint_replay_protocol_v1`；`docs
 | `MAX_ROUND_NON_CONVERGENT` | **0** |
 | model calls | **0** |
 
-**結論：** 現有凍結 Healer 在 Round 1 後對 4B residual FAIL 已達**操作上的 fixpoint**（再跑完整一輪 stack 無 source 變更、無額外 verified rescue）。
-
+**結論：** 現有凍結 Healer 在 Round 1 後對 **frozen** 4B residual FAIL（232）已達**操作上的 fixpoint**。**限制（2026-07-30）：** 232／232 zero-change **僅對 frozen 88／232 成立**；corrected residual FAIL＝**233**；**不得**宣稱涵蓋全部 corrected residual；本輪不補跑 fixpoint v2。
 **限制：** 本輪**未掃描** 88 個 PASS cells，**不得**把本輪 regression＝0 當新安全性證據；正式 regression 證據仍來自 Round 1／Method 2 等已封存帳。
 
 ---
@@ -452,14 +453,14 @@ Deterministic AST Healer 之安全介入架構概念如下：
 1. AST Healer 不扮演第二個解題模型，而在可驗證之特定語法瑕疵窗口發揮確定性救援功能（4B verified rescue 共 6 格，通過數由 **79/320** 提升至 **85/320**，已依 [更正說明](../../../experiments/reports/math16_baseline_correction_note_v1.md) 自原 78→84/320 更正）。技術分帳上，Primary 救援 5 格、final 對應 84/320（原 83/320，中繼值，demoted）；另 1 格由 corrected-chain 確認方達最終 85/320，且另有 1 格 repaired-still-fail 不計入 rescue。
 2. Regression 嚴格分帳：Method 1 為 `Regression not measured`；Method 2 對全部 320 格 Raw／Final 雙路評分後為 `Regression measured = 0/320`。
 3. 面臨無確定修法之失敗時，系統依凍結規則選擇 Abstain，降低盲目修改帶來之風險並維持整體架構之可解釋性。
-4. 4B-only cell-wise fixpoint 已完成（232 全 `ZERO_CHANGE_CONVERGENCE`、additional rescue＝0），屬 post-hoc 機制探針，不得覆寫 Round 1 主表；亦不得以本輪未掃描 88 PASS cells 重估 regression。
+4. 4B-only cell-wise fixpoint 已完成（frozen 232 全 `ZERO_CHANGE_CONVERGENCE`、additional rescue＝0），屬 post-hoc 機制探針，不得覆寫 Round 1 主表；亦不得以未掃描 PASS cells 重估 regression；**不得**宣稱涵蓋 corrected residual FAIL＝233。
 5. Development 40／Evaluation 120：Dev rescue＝0、Eval rescue＝4；只支持非題目客製化，不宣稱零污染。舊版 `core/healers` 不進 Round 1 正式決策（見 provenance §7）。
 
 ### 後續工作
 1. 擴充預註冊修復規則庫，針對 9B 語法瑕疵開發獨立驗證集。
 2. 引入多 Task 跨領域擴展測試，縮減 Task-clustered Bootstrap 信賴區間不確定性。
 3. 不以 4B fixpoint＝zero-change 放寬 frozen rules；不以未掃描 PASS cells 改寫 regression 安全敘事。
-4. **`Aggressive Healer full 320-cell safety benchmark`（尚未執行）：** 同時掃描原始 PASS／FAIL，量測 rescue、preserved pass、PASS→FAIL regression、net PASS change；**不得**與 Method 2、Round 2、fixpoint 混稱。
+4. **`Aggressive Healer full 320-cell safety benchmark`（已執行）：** frozen-label primary＝preserved 88／regression 0／rescue 0；sealed-source sensitivity＝preserved 87／regression 0／rescue 1（EMPTY_SUITE）；**不得**與 Method 2、Round 2、fixpoint 混稱。Round 1 Aggressive 主敘事採 corrected overlay **79→87／rescue 8**（frozen 88／9 永久保留）。
 
 ### 正式證據與產物索引
 - **Evidence Complete Milestone v1**：`docs/experiments/milestones/math16_pilot02_evidence_complete_v1/`

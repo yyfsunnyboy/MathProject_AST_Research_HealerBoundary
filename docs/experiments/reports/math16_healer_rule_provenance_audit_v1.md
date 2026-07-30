@@ -158,7 +158,7 @@
 2. 該切分內 **全部 verified rescue 落在獨立 Evaluation 120**；Development 40 verified rescue＝**0**。
 3. 結論只能寫成：**支持非題目客製化**（規則未在 Development 40 刷出 PASS）；**不得**宣稱完全無污染風險。
 4. 後續 Aggressive／Tier B–D 規則採通用 AST／結構 pattern；development influence 仍以 **frozen-rule benchmark**（固定規則、FAIL-only、journal）控制，不得把開發觀察直接升格為正式泛化保證。
-5. Development 40／Evaluation 120 與三模型 Round 1 全量 320 headline **分帳**，不得加總混報；Method 1 之 Dev rescue＝0／Eval rescue＝4 **不得**與 Round 1 79→88 混稱。
+5. Development 40／Evaluation 120 與三模型 Round 1 全量 320 headline **分帳**，不得加總混報；Method 1 之 Dev rescue＝0／Eval rescue＝4 **不得**與 Round 1 Aggressive overlay（corrected **79→87／rescue 8**；frozen archive 79→88／9）混稱。
 
 ---
 

@@ -116,8 +116,8 @@ CATEGORY_B_QA_COMPLETED
 3. **Corrected 第 6 格定位 (POST_HOC_TECHNICAL_CORRECTION)**：第 6 格來自既有規則成功 transform 被 runner false-loop rollback 錯誤撤回後的技術修正。此修正未新增或修改 Healer 規則，不改變 PRE_FROZEN_UNCHANGED 狀態；但因屬正式結果揭露後的技術重算，只列入 Corrected technical account，不回寫 Primary。
 4. **Payload Wrap 結構 (oracle_payload 內部包裝)**：single-key 指固定三欄回傳結構中 oracle_payload 欄位內部的唯一包裝鍵，不是最外層 return dict 只有一個鍵。Healer 不讀取 correct_answer，oracle_answer_used = false。此結果支持窄範圍、唯一、局部且離線可驗證的 deterministic repair candidate，不代表零副作用或一般語意安全保證。
 
-- 權威 Provenance Audit 報告：docs/experiments/reports/math16_healer_rule_provenance_audit_v1.md (SHA256: 05a1ef08836e7f957cd0d4e87be9090d863b0c290474ae8b80bfd9ed4347bb4a)
-- 權威 Provenance Audit Manifest：docs/experiments/reports/math16_healer_rule_provenance_audit_v1_manifest.json (SHA256: b882b4d31a61dbca8ab60622c75ecf82290223cdab3a816de7116e4bb515ecd5)
+- 權威 Provenance Audit 報告：docs/experiments/reports/math16_healer_rule_provenance_audit_v1.md (SHA256: 22b44083238e1361102ab09126061cbea8f0749d39c8944fc2c8137bbd3f8334)
+- 權威 Provenance Audit Manifest：docs/experiments/reports/math16_healer_rule_provenance_audit_v1_manifest.json (SHA256: fb06e2e245eaea8f2ce610590b7cf1e774648a26268e9da9b49a61f302fb10b5)
 - 規則凍結 Commit：d9aa264c | 分類修正 Commit：97c4e985
 
 ---
