@@ -4,7 +4,7 @@
 >
 > **Round 角色：** Round 1 = **正式主分析**；**Round 2 尚未執行**（若未來執行，僅 post-hoc iterative replay，不得覆寫 Round 1 主表）。
 >
-> **⚠ 2026-07-30：** 詳見 [Correction Note](10_math16_aggressive_round1_source_label_promotion_mismatch_correction_note_v1.md)。Conservative 79→85／rescue 6 不受影響。
+> **⚠ 2026-07-30：** 詳見 [Correction Note](10_math16_aggressive_round1_source_label_promotion_mismatch_correction_note_v1.md) 與 `docs/experiments/reports/math16_aggressive_round1_source_label_promotion_mismatch_correction_note_v1.md`；479-cell formal evidence：`docs/experiments/results/math16_historical_round1_final_overlay_audit_v1/final_overlay_audit.jsonl`、`validation_summary.json`、`sha256_manifest.json`、`scripts/build_math16_historical_round1_final_overlay_audit_v1.py`、`docs/experiments/reports/math16_healer_rule_provenance_audit_v1.md`／`math16_healer_rule_provenance_audit_v1_manifest.json`。Conservative 79→85／rescue 6 不受影響。
 
 ---
 

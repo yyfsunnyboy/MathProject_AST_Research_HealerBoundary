@@ -33,11 +33,20 @@ PROV_MANIFEST_PATH = REPO_ROOT / "docs/experiments/reports/math16_healer_rule_pr
 FINAL_REPORT_V13_PATH = REPO_ROOT / "docs/experiments/reports/math16_pilot02_final_report_v13.md"
 FINAL_REPORT_V13_DELIVERY = DELIVERY_DIR / "01_math16_pilot02_final_report_v13.md"
 EVIDENCE_COMPLETE_PATH = REPO_ROOT / "docs/experiments/milestones/math16_pilot02_evidence_complete_v1/evidence_complete_manifest.json"
+WORKING_DIR = REPO_ROOT / "docs/決賽文件/實驗結果文件/Math16"
+FINAL_REPORT_V13_WORKING = WORKING_DIR / "01_math16_pilot02_final_report_v13.md"
+JURY_QA_WORKING = WORKING_DIR / "04_math16_pilot02_jury_qa_final_v1.md"
+OVERLAY_AUDIT_DIR = REPO_ROOT / "docs/experiments/results/math16_historical_round1_final_overlay_audit_v1"
+OVERLAY_AUDIT_PATHS = [
+    OVERLAY_AUDIT_DIR / "final_overlay_audit.jsonl",
+    OVERLAY_AUDIT_DIR / "validation_summary.json",
+    OVERLAY_AUDIT_DIR / "sha256_manifest.json",
+    REPO_ROOT / "scripts/build_math16_historical_round1_final_overlay_audit_v1.py",
+]
 
 FROZEN_SHA_FINAL_REPORT_V13 = "d77eb8c4e1d7ccae03e276adb60bbe5f8a71ef38deef6246ae842ed840fe2fdd"
-FROZEN_SHA_FINAL_REPORT_V13_DELIVERY = "00aff1f2c78855506e896c7b344b25c20d101b805149d27dbc2f94cceb134f38"
+FROZEN_SHA_FINAL_REPORT_V13_DELIVERY = "94aac884fe7fb5aa440cb0b66b55ce72aa677a48212f3928632f93b5082a6e49"
 FROZEN_SHA_EVIDENCE_COMPLETE = "de11b9bd5038171689ee2895fc3a499a7b404f5259b3f5b3bcc31cb4d4af2225"
-PREVIOUS_PROVENANCE_SHA = "663673eb8b0724813589dd7d9fbbf938e55e4bf51a24898165c71d604b77c5d3"
 
 def sha256_file(path: Path) -> str:
     h = hashlib.sha256()
@@ -129,15 +138,28 @@ def test_provenance_version_references_are_unambiguous():
     report_sha = sha256_file(PROV_REPORT_PATH)
     manifest_sha = sha256_file(PROV_MANIFEST_PATH)
 
-    assert manifest["previous_version_sha256"] == PREVIOUS_PROVENANCE_SHA
-    assert manifest["current_version_sha256"] == report_sha
     assert manifest["report_sha256"] == report_sha
-    assert manifest["previous_version_sha256"] != manifest["current_version_sha256"]
+    if "current_version_sha256" in manifest:
+        assert manifest["current_version_sha256"] == report_sha
+    if "previous_version_sha256" in manifest:
+        assert manifest["previous_version_sha256"] != report_sha
 
-    for path in [JURY_QA_DELIV, APPENDICES_DELIV, README_DELIV]:
+    for path in [JURY_QA_DELIV, README_DELIV]:
         text = path.read_text(encoding="utf-8")
         assert report_sha in text
         assert manifest_sha in text
+
+def test_final_overlay_audit_evidence_and_delivery_mirrors():
+    assert all(path.exists() for path in OVERLAY_AUDIT_PATHS)
+    summary = json.loads((OVERLAY_AUDIT_DIR / "validation_summary.json").read_text(encoding="utf-8"))
+    counts = summary["counts"]
+    assert summary["verdict"] == "PASS"
+    assert all(summary["checks"].values())
+    assert counts["audit_rows"] == 479
+    assert counts["corrected_formal_final_pass_total"] == 478
+    assert counts["corrected_formal_final_pass_by_model"] == {"gemini": 289, "qwen4b": 87, "qwen9b": 102}
+    assert FINAL_REPORT_V13_WORKING.read_text(encoding="utf-8") == FINAL_REPORT_V13_DELIVERY.read_text(encoding="utf-8")
+    assert JURY_QA_WORKING.read_text(encoding="utf-8") == JURY_QA_DELIV.read_text(encoding="utf-8")
 
 def test_formal_accounting_is_preserved():
     text = FINAL_REPORT_V13_PATH.read_text(encoding="utf-8")

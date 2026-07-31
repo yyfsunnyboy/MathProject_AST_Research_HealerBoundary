@@ -101,6 +101,12 @@ Read-only revalidation of **all frozen Final PASS** sealed sources（no model／
 
 ---
 
+## 6.1 479-cell final overlay audit
+
+The local, read-only audit records the two accounts separately: frozen Final PASS＝**479**（Qwen 4B **88**／Qwen 9B **102**／Gemini **289**）；the corrected overlay matches **1** target and gives **PASS→FAIL＝1**, so corrected Final PASS＝**478**（Qwen 4B **87**／Qwen 9B **102**／Gemini **289**）. The other **478** cells retain their frozen final result. `duplicate=0`、`missing=0`、`unmatched=0`、`SHA mismatch=0`, and two deterministic builds are byte-stable. The sole target is `qwen3_5_4b__ce112_q04_radical_simplification__ab2d__seed_2026072003`; its sealed source SHA-256 is `67844bb65356bdce44c35032033d3d80099b822e843dcd07ef4000bb5d18eed4`. Audit evidence: `scripts/build_math16_historical_round1_final_overlay_audit_v1.py`; `docs/experiments/results/math16_historical_round1_final_overlay_audit_v1/final_overlay_audit.jsonl`; `docs/experiments/results/math16_historical_round1_final_overlay_audit_v1/validation_summary.json`; `docs/experiments/results/math16_historical_round1_final_overlay_audit_v1/sha256_manifest.json`.
+
+---
+
 ## 7. Documents／artifacts disposition
 
 | Class | Action |

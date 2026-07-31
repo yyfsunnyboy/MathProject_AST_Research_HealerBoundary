@@ -5,6 +5,45 @@ from pathlib import Path
 repo_root = Path(__file__).parent.parent.resolve()
 report_p = repo_root / "docs/experiments/reports/math16_healer_rule_provenance_audit_v1.md"
 manifest_p = repo_root / "docs/experiments/reports/math16_healer_rule_provenance_audit_v1_manifest.json"
+overlay_audit_dir = repo_root / "docs/experiments/results/math16_historical_round1_final_overlay_audit_v1"
+overlay_audit_p = overlay_audit_dir / "final_overlay_audit.jsonl"
+overlay_summary_p = overlay_audit_dir / "validation_summary.json"
+overlay_sha_manifest_p = overlay_audit_dir / "sha256_manifest.json"
+overlay_builder_p = repo_root / "scripts/build_math16_historical_round1_final_overlay_audit_v1.py"
+
+# The Round 1 overlay facts are read from the local audit artifacts, so a
+# future provenance rebuild cannot silently discard or hand-copy this update.
+overlay_summary = json.loads(overlay_summary_p.read_text(encoding="utf-8"))
+if overlay_summary["verdict"] != "PASS" or not all(overlay_summary["checks"].values()):
+    raise RuntimeError("Historical Round 1 final-overlay audit is not PASS")
+overlay_rows = [json.loads(line) for line in overlay_audit_p.read_text(encoding="utf-8").splitlines() if line]
+overlay_changed = [row for row in overlay_rows if row["status_changed"]]
+if len(overlay_changed) != 1:
+    raise RuntimeError("Historical Round 1 final-overlay audit must have exactly one status change")
+overlay_changed = overlay_changed[0]
+overlay_counts = overlay_summary["counts"]
+overlay_evidence_paths = [
+    "scripts/build_math16_historical_round1_final_overlay_audit_v1.py",
+    "docs/experiments/results/math16_historical_round1_final_overlay_audit_v1/final_overlay_audit.jsonl",
+    "docs/experiments/results/math16_historical_round1_final_overlay_audit_v1/validation_summary.json",
+    "docs/experiments/results/math16_historical_round1_final_overlay_audit_v1/sha256_manifest.json",
+]
+overlay_audit_section = f"""
+---
+
+## 5.1 Historical Round 1 479-cell final overlay evidence node
+
+This provenance audit imports the local, read-only Historical Round 1 final-overlay audit. It does not rerun a model, Healer, candidate source, replay, evaluator, safety benchmark, or fixpoint.
+
+| Account | Frozen Final PASS | Corrected Final PASS | Model split (4B／9B／Gemini) |
+|---|---:|---:|---|
+| Historical Round 1 final overlay | {overlay_counts['audit_rows']} | {overlay_counts['corrected_formal_final_pass_total']} | frozen {overlay_counts['frozen_final_pass_by_model']['qwen4b']}／{overlay_counts['frozen_final_pass_by_model']['qwen9b']}／{overlay_counts['frozen_final_pass_by_model']['gemini']}; corrected {overlay_counts['corrected_formal_final_pass_by_model']['qwen4b']}／{overlay_counts['corrected_formal_final_pass_by_model']['qwen9b']}／{overlay_counts['corrected_formal_final_pass_by_model']['gemini']} |
+
+- Overlay target count={overlay_counts['overlay_target_count']}; `PASS→FAIL`={overlay_counts['pass_to_fail']}; the remaining {overlay_counts['non_target_count']} non-target cells are unchanged.
+- `duplicate={overlay_counts['duplicate']}`; `missing={overlay_counts['missing']}`; `unmatched={overlay_counts['unmatched']}`; `SHA mismatch={overlay_counts['source_sha_mismatch']}`; the audit's two deterministic builds are byte-stable.
+- Sole changed cell: `{overlay_changed['raw_cell_id']}`; sealed source SHA-256 `{overlay_changed['frozen_final_source_sha256']}`; evidence ref `{overlay_changed['overlay_evidence_ref']}`.
+- Evidence paths: `{'`; `'.join(overlay_evidence_paths)}`.
+"""
 
 report_content = """# Math16 Healer 規則 Provenance Audit 報告 v1 (Refined Classification Audit)
 
@@ -120,6 +159,9 @@ report_content = """# Math16 Healer 規則 Provenance Audit 報告 v1 (Refined C
 
 ---
 
+""" + overlay_audit_section + """
+---
+
 ## 6. 研究限制 (Methodological Limitations)
 
 1. **同批資料規則發現風險 (Discovery Cohort Risk)**：規則原型雖然在 4B 實驗前凍結，但早期開發曾參考同系列開發數據。
@@ -128,15 +170,15 @@ report_content = """# Math16 Healer 規則 Provenance Audit 報告 v1 (Refined C
 """
 
 report_p.parent.mkdir(parents=True, exist_ok=True)
-report_p.write_text(report_content, encoding="utf-8")
+report_p.write_text(report_content, encoding="utf-8", newline="\n")
 report_sha = hashlib.sha256(report_p.read_bytes()).hexdigest()
 
 manifest_content = {
   "manifest_id": "math16_healer_rule_provenance_audit_v1_manifest",
-  "audit_version": "1.1",
+  "audit_version": "1.2",
   "audit_title": "Math16 Healer 規則 Provenance Audit 報告 v1",
   "project": "Ivan旺宏科學展 HealerBoundary",
-  "generated_at_utc": "2026-07-23T00:00:00Z",
+  "generated_at_utc": "2026-07-31T00:00:00Z",
   "report_path": "docs/experiments/reports/math16_healer_rule_provenance_audit_v1.md",
   "report_sha256": report_sha,
   "governing_final_report_path": "docs/experiments/reports/math16_pilot02_final_report_v13.md",
@@ -156,6 +198,30 @@ manifest_content = {
     "no_rule_candidate": 231,
     "unique_candidate_primary_eligible": 10,
     "ambiguous_multiple_candidates": 1
+  },
+  "historical_round1_final_overlay_audit": {
+    "account_namespace": "historical_round1",
+    "scope": "frozen_final_pass_only",
+    "frozen_final_pass": overlay_counts["audit_rows"],
+    "corrected_final_pass": overlay_counts["corrected_formal_final_pass_total"],
+    "frozen_final_pass_by_model": overlay_counts["frozen_final_pass_by_model"],
+    "corrected_final_pass_by_model": overlay_counts["corrected_formal_final_pass_by_model"],
+    "overlay_target_count": overlay_counts["overlay_target_count"],
+    "pass_to_fail": overlay_counts["pass_to_fail"],
+    "non_target_unchanged": overlay_counts["non_target_count"],
+    "duplicate": overlay_counts["duplicate"],
+    "missing": overlay_counts["missing"],
+    "unmatched": overlay_counts["unmatched"],
+    "source_sha_mismatch": overlay_counts["source_sha_mismatch"],
+    "byte_stable": True,
+    "unique_changed_cell_id": overlay_changed["raw_cell_id"],
+    "unique_changed_source_sha256": overlay_changed["frozen_final_source_sha256"],
+    "evidence_ref": overlay_changed["overlay_evidence_ref"],
+    "evidence_paths": overlay_evidence_paths,
+    "audit_artifact_sha256": {
+      path: hashlib.sha256((repo_root / path).read_bytes()).hexdigest()
+      for path in overlay_evidence_paths
+    }
   },
   "rules": [
     {
@@ -272,5 +338,5 @@ manifest_content = {
   ]
 }
 
-manifest_p.write_text(json.dumps(manifest_content, ensure_ascii=False, indent=2), encoding="utf-8")
+manifest_p.write_text(json.dumps(manifest_content, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
 print("Updated generate_healer_provenance_audit.py and generated audit files cleanly!")

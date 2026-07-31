@@ -130,8 +130,8 @@ THREE_MODEL_ROUND1_ACCOUNTS_SEPARATED
 3. **Corrected 第 6 格定位 (POST_HOC_TECHNICAL_CORRECTION)**：第 6 格來自既有規則成功 transform 被 runner false-loop rollback 錯誤撤回後的技術修正。此修正未新增或修改 Healer 規則，不改變 PRE_FROZEN_UNCHANGED 狀態；但因屬正式結果揭露後的技術重算，只列入 Corrected technical account，不回寫 Primary。
 4. **Payload Wrap 結構 (oracle_payload 內部包裝)**：single-key 指固定三欄回傳結構中 oracle_payload 欄位內部的唯一包裝鍵，不是最外層 return dict 只有一個鍵。Healer 不讀取 correct_answer，oracle_answer_used = false。此結果支持窄範圍、唯一、局部且離線可驗證的 deterministic repair candidate，不代表零副作用或一般語意安全保證。
 
-- 權威 Provenance Audit 報告：docs/experiments/reports/math16_healer_rule_provenance_audit_v1.md (SHA256: 22b44083238e1361102ab09126061cbea8f0749d39c8944fc2c8137bbd3f8334)
-- 權威 Provenance Audit Manifest：docs/experiments/reports/math16_healer_rule_provenance_audit_v1_manifest.json (SHA256: fb06e2e245eaea8f2ce610590b7cf1e774648a26268e9da9b49a61f302fb10b5)
+- 權威 Provenance Audit 報告：docs/experiments/reports/math16_healer_rule_provenance_audit_v1.md (SHA256: 0654332130e910bab02f61bd8b71f2cab7b1e95e9a64cb1e1cb5163ea7b5864b)
+- 權威 Provenance Audit Manifest：docs/experiments/reports/math16_healer_rule_provenance_audit_v1_manifest.json (SHA256: 25850f332bc8d64fc4c5ebd7707f2e35855bc6713ca3d2985bf78121c86100ca)
 - 規則凍結 Commit：d9aa264c | 分類修正 Commit：97c4e985
 
 ---
@@ -197,7 +197,7 @@ THREE_MODEL_ROUND1_ACCOUNTS_SEPARATED
 **口試短答：** frozen 232 格再跑一輪全沒改、也沒多救；代表對那批 FAIL 已到 fixpoint。但不能講涵蓋 corrected 233，也不能拿這輪講 regression 安全。
 
 ### Q33: Aggressive Round 1 為什麼有時講 88／9、有時講 87／8？
-**正式回答：** **frozen archive**（C5a／Round1 summary／journals）永久保留 Final **88**、rescue **9**。**分析 overlay**（2026-07-30 Correction Note）因單一 cell `…ce112_q04…seed_2026072003` 的 source–label promotion mismatch（密封 source＝`FAILED／parse_minor`，manifest＝`PASS／PRIOR_PASS_PRESERVED`）改為 Final **87**、rescue **8**、修復率 **8／241＝3.32%**。真 rescue＝Tier A 6＋D1 active-shadow 2；C2 +1 為幽靈帳。Conservative 79→85／6 **不受影響**。三模型 Final PASS sealed-source 重評 **478／479** 一致（唯一 mismatch＝本格；9B／Gemini 0；非系統性）。口試／主表以 overlay 為準，並聲明 frozen 數字未覆寫。
+**正式回答：** **frozen archive**（C5a／Round1 summary／journals）永久保留 Final **88**、rescue **9**。**分析 overlay**（2026-07-30 Correction Note）因單一 cell `…ce112_q04…seed_2026072003` 的 source–label promotion mismatch（密封 source＝`FAILED／parse_minor`，manifest＝`PASS／PRIOR_PASS_PRESERVED`）改為 Final **87**、rescue **8**、修復率 **8／241＝3.32%**。真 rescue＝Tier A 6＋D1 active-shadow 2；C2 +1 為幽靈帳。Conservative 79→85／6 **不受影響**。三模型 Final PASS sealed-source 重評 **478／479** 一致（唯一 mismatch＝本格；9B／Gemini 0；非系統性）。口試／主表以 overlay 為準，並聲明 frozen 數字未覆寫。正式逐格證據：`docs/experiments/results/math16_historical_round1_final_overlay_audit_v1/final_overlay_audit.jsonl`、`validation_summary.json`、`sha256_manifest.json`、`scripts/build_math16_historical_round1_final_overlay_audit_v1.py`、兩份 Correction Note（`10_math16_aggressive_round1_source_label_promotion_mismatch_correction_note_v1.md`；`docs/experiments/reports/math16_aggressive_round1_source_label_promotion_mismatch_correction_note_v1.md`）及 `docs/experiments/reports/math16_healer_rule_provenance_audit_v1.md`／`math16_healer_rule_provenance_audit_v1_manifest.json`。
 **口試短答：** 88／9 是凍結封存；87／8 是分析更正。那一格程式其實 parse 失敗卻被標成 PASS，所以少算一格真 rescue。
 
 ### Q34: 為何能主張 Healer 安全？

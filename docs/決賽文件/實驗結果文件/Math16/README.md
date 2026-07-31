@@ -26,7 +26,7 @@
 3. [`04_math16_pilot02_jury_qa_final_v1.md`](04_math16_pilot02_jury_qa_final_v1.md) — 評審 Q&A（含 Q21）
 4. [`figures/`](figures/) — 核心圖表 Figure 1–6
 5. [`05_math16_baseline_correction_note_v1.md`](05_math16_baseline_correction_note_v1.md) — Baseline 更正說明
-6. [`10_math16_aggressive_round1_source_label_promotion_mismatch_correction_note_v1.md`](10_math16_aggressive_round1_source_label_promotion_mismatch_correction_note_v1.md) — Aggressive Round 1 source–label overlay＋479-cell consistency
+6. [`10_math16_aggressive_round1_source_label_promotion_mismatch_correction_note_v1.md`](10_math16_aggressive_round1_source_label_promotion_mismatch_correction_note_v1.md) — Aggressive Round 1 source–label overlay＋479-cell consistency；formal evidence：`docs/experiments/results/math16_historical_round1_final_overlay_audit_v1/final_overlay_audit.jsonl`、`validation_summary.json`、`sha256_manifest.json`、`scripts/build_math16_historical_round1_final_overlay_audit_v1.py`、`docs/experiments/reports/math16_aggressive_round1_source_label_promotion_mismatch_correction_note_v1.md`、`docs/experiments/reports/math16_healer_rule_provenance_audit_v1.md`／`math16_healer_rule_provenance_audit_v1_manifest.json`
 7. [`appendices/`](appendices/) — 附錄總冊
 
 ---
