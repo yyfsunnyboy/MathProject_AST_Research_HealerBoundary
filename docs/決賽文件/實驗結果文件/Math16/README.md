@@ -27,7 +27,8 @@
 4. [`figures/`](figures/) — 核心圖表 Figure 1–6
 5. [`05_math16_baseline_correction_note_v1.md`](05_math16_baseline_correction_note_v1.md) — Baseline 更正說明
 6. [`10_math16_aggressive_round1_source_label_promotion_mismatch_correction_note_v1.md`](10_math16_aggressive_round1_source_label_promotion_mismatch_correction_note_v1.md) — Aggressive Round 1 source–label overlay＋479-cell consistency；formal evidence：`docs/experiments/results/math16_historical_round1_final_overlay_audit_v1/final_overlay_audit.jsonl`、`validation_summary.json`、`sha256_manifest.json`、`scripts/build_math16_historical_round1_final_overlay_audit_v1.py`、`docs/experiments/reports/math16_aggressive_round1_source_label_promotion_mismatch_correction_note_v1.md`、`docs/experiments/reports/math16_healer_rule_provenance_audit_v1.md`／`math16_healer_rule_provenance_audit_v1_manifest.json`
-7. [`appendices/`](appendices/) — 附錄總冊
+7. [`08_math16_three_model_aggressive_healer_round1_comparison_v2.md`](08_math16_three_model_aggressive_healer_round1_comparison_v2.md) — Historical Round 1 完整技術比較（正式更新版；v1 保留）
+8. [`appendices/`](appendices/) — 附錄總冊
 
 ---
 
@@ -64,6 +65,7 @@ Gemini **Ab2d+spec** 顯示 **80/80\***：採 **Post-hoc spec-v2** 結果；原 
 | `03_…one_pager_v23.pdf` | One-Pager PDF（1 頁） |
 | `04_…jury_qa_final_v1.md` | 口試／評審 Q1–Q21 |
 | `05_…correction_note_v1.md` | 分析／報告層 Baseline 更正說明（凍結證據不變） |
+| `08_…comparison_v2.md` | Historical Round 1 完整技術比較（正式更新版；v1 不覆寫） |
 | `figures/` | Figure 1–6 最新 canonical SVG／PNG |
 | `appendices/05_…appendices_v1.md` | 評審理解用附錄總冊 |
 | `manifest_sha256.txt` | 本目錄正式檔案 SHA-256 目錄 |

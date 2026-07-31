@@ -268,7 +268,7 @@ execution rescue 格為 `ce115_calc_exact_rational_expression_l1 / Ab1 / seed 20
 
 ## 11B. 三模型 Aggressive Healer Round 1（FAIL-only 單輪正式主分析）
 
-> **分帳聲明：** 第 10–11 節 Method 1／Method 2 Conservative／Primary 帳目（4B **79→85**，verified rescue **6**）維持不變。本節為後續封存之 **Aggressive／cumulative FAIL-only Round 1** 三模型正式比較主分析；兩者**不得混帳**。權威比較見 [08_math16_three_model_aggressive_healer_round1_comparison_v1.md](08_math16_three_model_aggressive_healer_round1_comparison_v1.md) 與 `docs/experiments/manifests/math16_three_model_round1_summary_v1.json`。
+> **分帳聲明：** 第 10–11 節 Method 1／Method 2 Conservative／Primary 帳目（4B **79→85**，verified rescue **6**）維持不變。本節為後續封存之 **Aggressive／cumulative FAIL-only Round 1** 三模型正式比較主分析；兩者**不得混帳**。權威完整技術比較見 [08_math16_three_model_aggressive_healer_round1_comparison_v2.md](../../../../docs/決賽文件/實驗結果文件/Math16/08_math16_three_model_aggressive_healer_round1_comparison_v2.md)（v1 保留為歷史版）與 `docs/experiments/manifests/math16_three_model_round1_summary_v1.json`。
 
 ### 11B.1 安全邊界 vs 能力邊界
 
@@ -629,7 +629,7 @@ Deterministic AST Healer 之安全介入架構概念如下：
 - **Evidence Complete Milestone v1**：`docs/experiments/milestones/math16_pilot02_evidence_complete_v1/`
 - **Integrated Results Report v1**：`docs/experiments/reports/math16_pilot02_integrated_results_report_v1.md`
 - **正式 Jury Q&A Defense Manual v1**：`docs/決賽文件/實驗結果文件/Math16/04_math16_pilot02_jury_qa_final_v1.md`
-- **三模型 Round 1 比較**：`docs/決賽文件/實驗結果文件/Math16/08_math16_three_model_aggressive_healer_round1_comparison_v1.md`
+- **三模型 Round 1 完整技術比較**：`docs/決賽文件/實驗結果文件/Math16/08_math16_three_model_aggressive_healer_round1_comparison_v2.md`（v1 保留為歷史版）
 - **老師展示摘要**：`docs/決賽文件/實驗結果文件/Math16/09_math16_three_model_round1_teacher_brief_v1.md`
 - **Round 1 summary JSON**：`docs/experiments/manifests/math16_three_model_round1_summary_v1.json`
 - **2B exploratory lower-bound cumulative**：`docs/experiments/results/math16_cumulative_qwen2b_16cell_exploratory_lower_bound_v1/summary.json`

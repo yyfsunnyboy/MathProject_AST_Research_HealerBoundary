@@ -10,6 +10,10 @@ overlay_audit_p = overlay_audit_dir / "final_overlay_audit.jsonl"
 overlay_summary_p = overlay_audit_dir / "validation_summary.json"
 overlay_sha_manifest_p = overlay_audit_dir / "sha256_manifest.json"
 overlay_builder_p = repo_root / "scripts/build_math16_historical_round1_final_overlay_audit_v1.py"
+technical_report_rel = "docs/決賽文件/實驗結果文件/Math16/08_math16_three_model_aggressive_healer_round1_comparison_v2.md"
+technical_report_p = repo_root / technical_report_rel
+if not technical_report_p.is_file():
+    raise RuntimeError("Historical Round 1 technical comparison v2 is missing")
 
 # The Round 1 overlay facts are read from the local audit artifacts, so a
 # future provenance rebuild cannot silently discard or hand-copy this update.
@@ -43,6 +47,7 @@ This provenance audit imports the local, read-only Historical Round 1 final-over
 - `duplicate={overlay_counts['duplicate']}`; `missing={overlay_counts['missing']}`; `unmatched={overlay_counts['unmatched']}`; `SHA mismatch={overlay_counts['source_sha_mismatch']}`; the audit's two deterministic builds are byte-stable.
 - Sole changed cell: `{overlay_changed['raw_cell_id']}`; sealed source SHA-256 `{overlay_changed['frozen_final_source_sha256']}`; evidence ref `{overlay_changed['overlay_evidence_ref']}`.
 - Evidence paths: `{'`; `'.join(overlay_evidence_paths)}`.
+- Formal technical comparison v2 (v1 retained as historical): `{technical_report_rel}`; SHA-256 `{hashlib.sha256(technical_report_p.read_bytes()).hexdigest()}`.
 """
 
 report_content = """# Math16 Healer 規則 Provenance Audit 報告 v1 (Refined Classification Audit)
@@ -222,6 +227,18 @@ manifest_content = {
       path: hashlib.sha256((repo_root / path).read_bytes()).hexdigest()
       for path in overlay_evidence_paths
     }
+  },
+  "historical_round1_technical_comparison_v2": {
+    "path": technical_report_rel,
+    "sha256": hashlib.sha256(technical_report_p.read_bytes()).hexdigest(),
+    "formal_baseline": 469,
+    "corrected_formal_final": 478,
+    "verified_rescue": 9,
+    "rescue_by_model": {"qwen4b": 8, "qwen9b": 1, "gemini": 0},
+    "modified_still_failed_unique_cells": 38,
+    "stage_modification_events": 43,
+    "evaluator_only_rescues": 6,
+    "pipeline_assisted_rescues": 3
   },
   "rules": [
     {

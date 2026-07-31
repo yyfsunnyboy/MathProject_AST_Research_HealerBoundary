@@ -45,7 +45,7 @@ OVERLAY_AUDIT_PATHS = [
 ]
 
 FROZEN_SHA_FINAL_REPORT_V13 = "d77eb8c4e1d7ccae03e276adb60bbe5f8a71ef38deef6246ae842ed840fe2fdd"
-FROZEN_SHA_FINAL_REPORT_V13_DELIVERY = "94aac884fe7fb5aa440cb0b66b55ce72aa677a48212f3928632f93b5082a6e49"
+FROZEN_SHA_FINAL_REPORT_V13_DELIVERY = "767c63988012bcd8e30088261b3e2a973372406f441eaf9880ce6b117c467d3b"
 FROZEN_SHA_EVIDENCE_COMPLETE = "de11b9bd5038171689ee2895fc3a499a7b404f5259b3f5b3bcc31cb4d4af2225"
 
 def sha256_file(path: Path) -> str:
@@ -160,6 +160,15 @@ def test_final_overlay_audit_evidence_and_delivery_mirrors():
     assert counts["corrected_formal_final_pass_by_model"] == {"gemini": 289, "qwen4b": 87, "qwen9b": 102}
     assert FINAL_REPORT_V13_WORKING.read_text(encoding="utf-8") == FINAL_REPORT_V13_DELIVERY.read_text(encoding="utf-8")
     assert JURY_QA_WORKING.read_text(encoding="utf-8") == JURY_QA_DELIV.read_text(encoding="utf-8")
+
+def test_historical_round1_comparison_v2_is_the_formal_update():
+    report = WORKING_DIR / "08_math16_three_model_aggressive_healer_round1_comparison_v2.md"
+    legacy = WORKING_DIR / "08_math16_three_model_aggressive_healer_round1_comparison_v1.md"
+    text = report.read_text(encoding="utf-8")
+    assert report.exists() and legacy.exists()
+    for value in ["469/960", "478/960", "verified rescue `9`", "38 個不重複 modified-still-failed", "**43**", "Evaluator-only", "Pipeline-assisted"]:
+        assert value in text
+    assert "479" not in text
 
 def test_formal_accounting_is_preserved():
     text = FINAL_REPORT_V13_PATH.read_text(encoding="utf-8")
