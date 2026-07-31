@@ -14,6 +14,15 @@ technical_report_rel = "docs/決賽文件/實驗結果文件/Math16/08_math16_th
 technical_report_p = repo_root / technical_report_rel
 if not technical_report_p.is_file():
     raise RuntimeError("Historical Round 1 technical comparison v2 is missing")
+correction_note_delivery_rel = "docs/決賽文件/實驗結果文件/Math16/10_math16_aggressive_round1_source_label_promotion_mismatch_correction_note_v1.md"
+correction_note_experiments_rel = "docs/experiments/reports/math16_aggressive_round1_source_label_promotion_mismatch_correction_note_v1.md"
+correction_note_delivery_p = repo_root / correction_note_delivery_rel
+correction_note_experiments_p = repo_root / correction_note_experiments_rel
+if not correction_note_delivery_p.is_file() or not correction_note_experiments_p.is_file():
+    raise RuntimeError("Historical Round 1 correction-note mirror is missing")
+if correction_note_delivery_p.read_bytes() != correction_note_experiments_p.read_bytes():
+    raise RuntimeError("Historical Round 1 correction-note mirror bytes differ")
+correction_note_sha256 = hashlib.sha256(correction_note_delivery_p.read_bytes()).hexdigest()
 
 # The Round 1 overlay facts are read from the local audit artifacts, so a
 # future provenance rebuild cannot silently discard or hand-copy this update.
@@ -47,6 +56,7 @@ This provenance audit imports the local, read-only Historical Round 1 final-over
 - `duplicate={overlay_counts['duplicate']}`; `missing={overlay_counts['missing']}`; `unmatched={overlay_counts['unmatched']}`; `SHA mismatch={overlay_counts['source_sha_mismatch']}`; the audit's two deterministic builds are byte-stable.
 - Sole changed cell: `{overlay_changed['raw_cell_id']}`; sealed source SHA-256 `{overlay_changed['frozen_final_source_sha256']}`; evidence ref `{overlay_changed['overlay_evidence_ref']}`.
 - Evidence paths: `{'`; `'.join(overlay_evidence_paths)}`.
+- Historical correction-note mirrors (byte-identical): `{correction_note_delivery_rel}`; `{correction_note_experiments_rel}`; SHA-256 `{correction_note_sha256}`.
 - Formal technical comparison v2 (v1 retained as historical): `{technical_report_rel}`; SHA-256 `{hashlib.sha256(technical_report_p.read_bytes()).hexdigest()}`.
 """
 
@@ -223,6 +233,10 @@ manifest_content = {
     "unique_changed_source_sha256": overlay_changed["frozen_final_source_sha256"],
     "evidence_ref": overlay_changed["overlay_evidence_ref"],
     "evidence_paths": overlay_evidence_paths,
+    "correction_note_delivery_path": correction_note_delivery_rel,
+    "correction_note_experiments_path": correction_note_experiments_rel,
+    "correction_note_mirrors_byte_identical": True,
+    "correction_note_sha256": correction_note_sha256,
     "audit_artifact_sha256": {
       path: hashlib.sha256((repo_root / path).read_bytes()).hexdigest()
       for path in overlay_evidence_paths

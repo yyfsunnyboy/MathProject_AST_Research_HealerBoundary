@@ -127,6 +127,7 @@ This provenance audit imports the local, read-only Historical Round 1 final-over
 - `duplicate=0`; `missing=0`; `unmatched=0`; `SHA mismatch=0`; the audit's two deterministic builds are byte-stable.
 - Sole changed cell: `qwen3_5_4b__ce112_q04_radical_simplification__ab2d__seed_2026072003`; sealed source SHA-256 `67844bb65356bdce44c35032033d3d80099b822e843dcd07ef4000bb5d18eed4`; evidence ref `docs/experiments/manifests/math16_aggressive_round1_corrected_overlay_v1.json#anomalous_cell`.
 - Evidence paths: `scripts/build_math16_historical_round1_final_overlay_audit_v1.py`; `docs/experiments/results/math16_historical_round1_final_overlay_audit_v1/final_overlay_audit.jsonl`; `docs/experiments/results/math16_historical_round1_final_overlay_audit_v1/validation_summary.json`; `docs/experiments/results/math16_historical_round1_final_overlay_audit_v1/sha256_manifest.json`.
+- Historical correction-note mirrors (byte-identical): `docs/決賽文件/實驗結果文件/Math16/10_math16_aggressive_round1_source_label_promotion_mismatch_correction_note_v1.md`; `docs/experiments/reports/math16_aggressive_round1_source_label_promotion_mismatch_correction_note_v1.md`; SHA-256 `ec46e857b73b91fc932d8094bd529925851a81e751d68c1c70d84e2636c04bf1`.
 - Formal technical comparison v2 (v1 retained as historical): `docs/決賽文件/實驗結果文件/Math16/08_math16_three_model_aggressive_healer_round1_comparison_v2.md`; SHA-256 `c53b90bb60bfc3dbd69168e257d0523e174e4d3d105d3aae7695cd33edc5f844`.
 
 ---
