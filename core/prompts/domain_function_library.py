@@ -31,6 +31,21 @@ logger = logging.getLogger(__name__)
 getcontext().prec = 28
 
 
+def _prime_factorization_abs(n: int) -> dict[int, int]:
+    """Model-invisible helper: prime factorization of a positive integer."""
+    factors: dict[int, int] = {}
+    temp = n
+    d = 2
+    while d * d <= temp:
+        while temp % d == 0:
+            factors[d] = factors.get(d, 0) + 1
+            temp //= d
+        d += 1
+    if temp > 1:
+        factors[temp] = factors.get(temp, 0) + 1
+    return factors
+
+
 # ============================================================================
 # [V2.5 新增] Python 實現的標準操作類（用於 LLM 提示和本地測試）
 # ============================================================================
@@ -201,6 +216,29 @@ class IntegerOps:
         if b == 0:
             return False
         return a % b == 0
+
+    @staticmethod
+    def prime_factorization(n):
+        """質因數分解：回傳 {prime: exponent}。對 abs(n) 分解；±1 → {}。
+
+        拒絕 bool 與 n==0。不回傳 selected／答案捷徑。
+        """
+        if isinstance(n, bool) or not isinstance(n, int):
+            raise ValueError("prime_factorization requires a non-bool int")
+        if n == 0:
+            raise ValueError("prime_factorization rejects 0")
+        if abs(n) == 1:
+            return {}
+        return _prime_factorization_abs(abs(n))
+
+    @staticmethod
+    def positive_divisors(n):
+        """回傳正整數 n 的全部正因數（升序）。只接受 n>0；不接受其他題目條件。"""
+        if isinstance(n, bool) or not isinstance(n, int):
+            raise ValueError("positive_divisors requires a non-bool int")
+        if n <= 0:
+            raise ValueError("positive_divisors requires n > 0")
+        return [i for i in range(1, n + 1) if n % i == 0]
     
     @staticmethod
     def safe_eval(expr) -> int | float:
@@ -297,19 +335,11 @@ class RadicalOps:
 
     @staticmethod
     def get_prime_factors(n):
-        """質因數分解 (例: 12 -> {2:2, 3:1})"""
+        """質因數分解 (例: 12 -> {2:2, 3:1})。Internal helper surface; prefer IntegerOps.prime_factorization in Integer domain."""
         n = abs(int(n))
-        factors = {}
-        d = 2
-        temp = n
-        while d * d <= temp:
-            while temp % d == 0:
-                factors[d] = factors.get(d, 0) + 1
-                temp //= d
-            d += 1
-        if temp > 1:
-            factors[temp] = factors.get(temp, 0) + 1
-        return factors
+        if n <= 1:
+            return {}
+        return _prime_factorization_abs(n)
 
     @staticmethod
     def simplify_term(coeff, radicand):
@@ -574,6 +604,102 @@ class RadicalOps:
         a_out = (num * conj_a) / denom
         b_out = (num * conj_b) / denom
         return a_out, b_out, int(radicand)
+
+    @staticmethod
+    def _as_linear_radical(term):
+        """Validate LinearRadical dict invariant (model-invisible)."""
+        if not isinstance(term, dict):
+            raise ValueError("LinearRadical must be a dict")
+        required = ("rational", "radical_coefficient", "radicand")
+        if any(key not in term for key in required):
+            raise ValueError("LinearRadical requires rational, radical_coefficient, radicand")
+        rational = term["rational"]
+        coeff = term["radical_coefficient"]
+        radicand = term["radicand"]
+        for name, value in (
+            ("rational", rational),
+            ("radical_coefficient", coeff),
+            ("radicand", radicand),
+        ):
+            if isinstance(value, bool) or not isinstance(value, int):
+                raise ValueError(f"LinearRadical.{name} must be a non-bool int")
+        if radicand <= 0:
+            raise ValueError("LinearRadical.radicand must be positive")
+        if coeff == 0:
+            raise ValueError("LinearRadical.radical_coefficient must be nonzero")
+        return {
+            "rational": rational,
+            "radical_coefficient": coeff,
+            "radicand": radicand,
+        }
+
+    @staticmethod
+    def scale_linear_radical(term, k):
+        """Scale LinearRadical by nonzero int k. Returns JSON-safe LinearRadical dict."""
+        base = RadicalOps._as_linear_radical(term)
+        if isinstance(k, bool) or not isinstance(k, int):
+            raise ValueError("scale scalar k must be a non-bool int")
+        if k == 0:
+            raise ValueError("scale scalar k must be nonzero")
+        return {
+            "rational": k * base["rational"],
+            "radical_coefficient": k * base["radical_coefficient"],
+            "radicand": base["radicand"],
+        }
+
+    @staticmethod
+    def add_linear_radicals(term_a, term_b):
+        """Add two LinearRadical terms with identical radicand. Result coeff must be nonzero."""
+        a = RadicalOps._as_linear_radical(term_a)
+        b = RadicalOps._as_linear_radical(term_b)
+        if a["radicand"] != b["radicand"]:
+            raise ValueError("add_linear_radicals requires identical radicand")
+        coeff = a["radical_coefficient"] + b["radical_coefficient"]
+        if coeff == 0:
+            raise ValueError("add_linear_radicals result radical_coefficient must be nonzero")
+        return {
+            "rational": a["rational"] + b["rational"],
+            "radical_coefficient": coeff,
+            "radicand": a["radicand"],
+        }
+
+    @staticmethod
+    def format_linear_radical(term):
+        """Format LinearRadical as presentation LaTeX string (not a semantic judge)."""
+        t = RadicalOps._as_linear_radical(term)
+        rational = t["rational"]
+        coeff = t["radical_coefficient"]
+        radicand = t["radicand"]
+        if abs(coeff) == 1:
+            radical = f"\\sqrt{{{radicand}}}"
+        else:
+            radical = f"{abs(coeff)}\\sqrt{{{radicand}}}"
+        if rational == 0:
+            return radical if coeff > 0 else f"-{radical}"
+        if coeff > 0:
+            return f"{rational}+{radical}"
+        return f"{rational}-{radical}"
+
+    @staticmethod
+    def exact_integer(value):
+        """Convert exact integral value to JSON-safe int. Non-integral rationals raise ValueError."""
+        if isinstance(value, bool):
+            raise ValueError("exact_integer rejects bool")
+        if isinstance(value, int):
+            return value
+        if isinstance(value, Fraction):
+            if value.denominator != 1:
+                raise ValueError(f"exact_integer requires an integral Fraction (got {value})")
+            return int(value.numerator)
+        if isinstance(value, str):
+            try:
+                frac = Fraction(value)
+            except (ValueError, ZeroDivisionError) as exc:
+                raise ValueError(f"exact_integer invalid rational string: {value!r}") from exc
+            if frac.denominator != 1:
+                raise ValueError(f"exact_integer requires an integral value (got {value!r})")
+            return int(frac.numerator)
+        raise ValueError("exact_integer requires int, integral Fraction, or integral 'p/q' string")
 
 class CalculusOps:
     """微積分運算模組 - 多項式與微分"""

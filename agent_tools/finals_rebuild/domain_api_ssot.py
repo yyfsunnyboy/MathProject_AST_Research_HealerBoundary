@@ -1,7 +1,7 @@
 """Typed Domain API SSOT for Math16 Ab2d and future local-model runs.
 
 Only ``SUPPORTED_PUBLIC`` entries may be routed into model-facing prompts.
-The 43-method inventory is explicit so adding a callable to a toolbox class is
+The method inventory is explicit so adding a callable to a toolbox class is
 a reviewed contract change rather than an accidental prompt expansion.
 """
 from __future__ import annotations
@@ -23,13 +23,15 @@ DUPLICATE = "DUPLICATE"
 
 # Every callable that is public by Python naming convention is classified.
 API_CLASSIFICATION: dict[str, str] = {
-    # IntegerOps (7)
+    # IntegerOps (9)
     "IntegerOps.add": SUPPORTED_PUBLIC,
     "IntegerOps.sub": SUPPORTED_PUBLIC,
     "IntegerOps.op_to_latex": INTERNAL,
     "IntegerOps.fmt_num": SUPPORTED_PUBLIC,
     "IntegerOps.random_nonzero": INTERNAL,
     "IntegerOps.is_divisible": SUPPORTED_PUBLIC,
+    "IntegerOps.prime_factorization": SUPPORTED_PUBLIC,
+    "IntegerOps.positive_divisors": SUPPORTED_PUBLIC,
     "IntegerOps.safe_eval": SUPPORTED_PUBLIC,
     # FractionOps (8)
     "FractionOps.create": SUPPORTED_PUBLIC,
@@ -40,7 +42,7 @@ API_CLASSIFICATION: dict[str, str] = {
     "FractionOps.div": SUPPORTED_PUBLIC,
     "FractionOps.from_parts": SUPPORTED_PUBLIC,
     "FractionOps.to_exact": SUPPORTED_PUBLIC,
-    # RadicalOps (17)
+    # RadicalOps (21)
     "RadicalOps.create": DEPRECATED,
     "RadicalOps.is_perfect_square": INTERNAL,
     "RadicalOps.to_latex": DEPRECATED,
@@ -58,6 +60,10 @@ API_CLASSIFICATION: dict[str, str] = {
     "RadicalOps.simplify_root": DUPLICATE,
     "RadicalOps.normalize_term_list": SUPPORTED_PUBLIC,
     "RadicalOps.rationalize_linear_denominator": SUPPORTED_PUBLIC,
+    "RadicalOps.scale_linear_radical": SUPPORTED_PUBLIC,
+    "RadicalOps.add_linear_radicals": SUPPORTED_PUBLIC,
+    "RadicalOps.format_linear_radical": SUPPORTED_PUBLIC,
+    "RadicalOps.exact_integer": SUPPORTED_PUBLIC,
     # PolynomialOps (11)
     "PolynomialOps.normalize": SUPPORTED_PUBLIC,
     "PolynomialOps.format_latex": SUPPORTED_PUBLIC,
@@ -94,6 +100,14 @@ DOMAIN_API_SSOT: dict[str, dict[str, Any]] = {
         shape={"type":"str","json_safe":True}, normalization="presentation only", example='IntegerOps.fmt_num(-3)  # "(-3)"'),
     "IntegerOps.is_divisible": _c("(a, b)", "bool", inputs="integer-like a,b; b=0 returns False",
         shape={"type":"bool","json_safe":True}, normalization="not an answer integer", example="IntegerOps.is_divisible(156, 13)  # True"),
+    "IntegerOps.prime_factorization": _c("(n)", "dict[int, int]  # prime -> exponent; ±1 -> {}",
+        inputs="non-bool int; n!=0; factors abs(n)",
+        shape={"type":"dict","keys":"positive primes","values":"positive int exponents","json_safe":True},
+        normalization="no selected/answer field", example="IntegerOps.prime_factorization(12)  # {2:2, 3:1}"),
+    "IntegerOps.positive_divisors": _c("(n)", "list[int]  # ascending positive divisors",
+        inputs="non-bool int n>0; no other task filters",
+        shape={"type":"list","element_types":["int"],"ordering":"ascending","json_safe":True},
+        normalization="filter multiples in model assembly if needed", example="IntegerOps.positive_divisors(12)  # [1,2,3,4,6,12]"),
     "IntegerOps.safe_eval": _c("(expr)", "int | float  # bool and container results raise ValueError",
         inputs="arithmetic expression string using literals,+,-,*,/,//,%,**,abs,sum,min,max; trusted generated input only",
         shape={"type":"union","types":["int","float"],"json_safe":True,"forbidden_types":["bool","tuple","list","dict"]},
@@ -125,7 +139,21 @@ DOMAIN_API_SSOT: dict[str, dict[str, Any]] = {
     "RadicalOps.normalize_term_list": _c("(terms)", "list[dict]  # sorted; keys coefficient,radicand", inputs="list/tuple of pairs or coefficient/radicand dicts",
         shape={"type":"list","length":"variable","element":{"type":"dict","required_keys":["coefficient","radicand"],"value_types":{"coefficient":["int","str"],"radicand":["int"]}},"ordering":"ascending radicand","json_safe":True}, normalization="official radical semantic JSON adapter", example="RadicalOps.normalize_term_list([(1,12)])"),
     "RadicalOps.rationalize_linear_denominator": _c("(numerator, denom_rational, denom_radical_coeff, radicand)", "tuple[int | Fraction, int | Fraction, int]", inputs="exact rational coefficients; positive nonsquare radicand; nonzero conjugate denominator",
-        shape={"type":"tuple","length":3,"elements":[{"types":["int","Fraction"]},{"types":["int","Fraction"]},{"type":"int"}],"json_safe":"partial"}, normalization="to_exact on first two leaves before JSON", example="RadicalOps.rationalize_linear_denominator(1,2,1,3)"),
+        shape={"type":"tuple","length":3,"elements":[{"types":["int","Fraction"]},{"types":["int","Fraction"]},{"type":"int"}],"json_safe":"partial"}, normalization="RadicalOps.exact_integer on integral leaves before JSON", example="RadicalOps.rationalize_linear_denominator(1,2,1,3)"),
+    "RadicalOps.scale_linear_radical": _c("(term, k)", "dict  # LinearRadical JSON-safe ints",
+        inputs="term LinearRadical dict; k nonzero non-bool int",
+        shape={"type":"dict","required_keys":["rational","radical_coefficient","radicand"],"value_types":{"rational":["int"],"radical_coefficient":["int"],"radicand":["int"]},"json_safe":True},
+        normalization="rejects k==0 and zero radical_coefficient", example='RadicalOps.scale_linear_radical({"rational":1,"radical_coefficient":1,"radicand":2}, 2)'),
+    "RadicalOps.add_linear_radicals": _c("(term_a, term_b)", "dict  # LinearRadical JSON-safe ints",
+        inputs="two LinearRadical dicts with identical positive radicand",
+        shape={"type":"dict","required_keys":["rational","radical_coefficient","radicand"],"value_types":{"rational":["int"],"radical_coefficient":["int"],"radicand":["int"]},"json_safe":True},
+        normalization="rejects mismatched radicand or zero result coefficient", example='RadicalOps.add_linear_radicals({"rational":1,"radical_coefficient":1,"radicand":2},{"rational":3,"radical_coefficient":-1,"radicand":2})'),
+    "RadicalOps.format_linear_radical": _c("(term)", "str  # presentation LaTeX",
+        inputs="LinearRadical dict",
+        shape={"type":"str","json_safe":True}, normalization="presentation only", example=r'RadicalOps.format_linear_radical({"rational":1,"radical_coefficient":1,"radicand":2})  # "1+\sqrt{2}"'),
+    "RadicalOps.exact_integer": _c("(value)", "int  # rejects non-integral rationals",
+        inputs="non-bool int, integral Fraction, or integral 'p/q' string",
+        shape={"type":"int","json_safe":True}, normalization="never returns str union", example="RadicalOps.exact_integer(Fraction(4,1))  # 4"),
     "PolynomialOps.normalize": _c("(coeffs)", "list[number]  # highest degree first; leading zeros removed", inputs="non-empty coefficient sequence",
         shape={"type":"list","length":"variable","ordering":"highest degree first","json_safe":"operand-dependent"}, normalization="preserves coefficient types", example="PolynomialOps.normalize([0,2,1])  # [2,1]"),
     "PolynomialOps.format_latex": _c("(coeffs, var='x')", "str", inputs="highest-degree-first numeric coefficients",

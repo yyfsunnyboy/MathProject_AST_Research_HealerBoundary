@@ -1,0 +1,62 @@
+# Math16 Ab2d+full system
+Write only Python source implementing `def generate(level=1, **kwargs):`.
+Return a dict with exactly three keys: question_text, correct_answer, oracle_payload.
+question_text must be the provided stem string (do not rebuild LaTeX).
+oracle_payload must exactly equal the frozen_params object.
+correct_answer must be JSON-compatible and match the task answer shape.
+Use only the listed Domain API methods from this prompt.
+Domain for this task: RadicalOps.
+Allowed native ops: arithmetic, comparisons, if/else, loops, list/dict, unpacking, sorting.
+Forbidden: other domain public APIs; task-specific solvers; reading audit payloads;
+manifest answers; evaluator expected answers; answer lookup by task_id.
+Do not use Markdown fences or explanations outside the Python source.
+Import Domain API from `core.prompts.domain_function_library` only as needed.
+
+# Task `ce112_q04_radical_simplification`
+domain_ops: RadicalOps
+
+## Question stem (use verbatim as question_text)
+將
+\[
+\sqrt{135}
+\]
+化為最簡根式。
+
+## frozen_params (oracle_payload must equal this object)
+{
+  "radicand": 135
+}
+
+## Allowed Domain API
+- `RadicalOps.simplify_term` | import: `core.prompts.domain_function_library` | signature: `(coeff, radicand)` | returns: tuple[int | Fraction, int]  # semantic (coefficient, square-free radicand)
+  inputs: exact coeff; non-negative int or Fraction radicand
+  notes: normalize_term_list or to_exact before JSON
+- `RadicalOps.format_term` | import: `core.prompts.domain_function_library` | signature: `(coeff, radicand, is_first=True)` | returns: str  # complete single-term LaTeX including coefficient/sign
+  inputs: semantic coefficient and radicand
+  notes: presentation only
+
+## Processing steps
+1) simplify_term(1, radicand).
+2) Pack coefficient/radicand.
+
+## Output contract
+Return exactly:
+{"question_text": <stem str>, "correct_answer": <task shape>, "oracle_payload": <frozen_params>}
+
+## Generic domain example (non-task numbers)
+```python
+from core.prompts.domain_function_library import RadicalOps
+
+def generate(level=1, **kwargs):
+    frozen = {"radicand": 50}
+    coeff, rest = RadicalOps.simplify_term(1, frozen["radicand"])
+    return {
+        "question_text": "example stem",
+        "correct_answer": {
+            "coefficient": coeff,
+            "radicand": rest,
+            "canonical_latex": RadicalOps.format_term(coeff, rest),
+        },
+        "oracle_payload": frozen,
+    }
+```

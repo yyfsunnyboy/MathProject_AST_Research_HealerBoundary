@@ -1,0 +1,57 @@
+# Math16 Ab2d+full system
+Write only Python source implementing `def generate(level=1, **kwargs):`.
+Return a dict with exactly three keys: question_text, correct_answer, oracle_payload.
+question_text must be the provided stem string (do not rebuild LaTeX).
+oracle_payload must exactly equal the frozen_params object.
+correct_answer must be JSON-compatible and match the task answer shape.
+Use only the listed Domain API methods from this prompt.
+Domain for this task: IntegerOps.
+Allowed native ops: arithmetic, comparisons, if/else, loops, list/dict, unpacking, sorting.
+Forbidden: other domain public APIs; task-specific solvers; reading audit payloads;
+manifest answers; evaluator expected answers; answer lookup by task_id.
+Do not use Markdown fences or explanations outside the Python source.
+Import Domain API from `core.prompts.domain_function_library` only as needed.
+
+# Task `ce112_q09_divisor_multiple_intersection`
+domain_ops: IntegerOps
+
+## Question stem (use verbatim as question_text)
+有多少個正整數同時是 \(18\) 的倍數，也是 \(216\) 的因數？
+
+## frozen_params (oracle_payload must equal this object)
+{
+  "divisor_of": 216,
+  "multiple_of": 18
+}
+
+## Allowed Domain API
+- `IntegerOps.positive_divisors` | import: `core.prompts.domain_function_library` | signature: `(n)` | returns: list[int]  # ascending positive divisors
+  inputs: non-bool int n>0; no other task filters
+  notes: filter multiples in model assembly if needed
+- `IntegerOps.is_divisible` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | returns: bool
+  inputs: integer-like a,b; b=0 returns False
+  notes: not an answer integer
+
+## Processing steps
+1) positive_divisors(divisor_of).
+2) Keep values divisible by multiple_of.
+3) Return {"count": len(valid)}.
+
+## Output contract
+Return exactly:
+{"question_text": <stem str>, "correct_answer": <task shape>, "oracle_payload": <frozen_params>}
+
+## Generic domain example (non-task numbers)
+```python
+from core.prompts.domain_function_library import IntegerOps
+
+def generate(level=1, **kwargs):
+    frozen = {"n": 12, "candidates": [2, 5, 7]}
+    factors = IntegerOps.prime_factorization(frozen["n"])
+    chosen = [c for c in frozen["candidates"] if c in factors][0]
+    return {
+        "question_text": "example stem",
+        "correct_answer": chosen,
+        "oracle_payload": frozen,
+    }
+```

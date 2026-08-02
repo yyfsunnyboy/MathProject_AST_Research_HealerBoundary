@@ -1,0 +1,81 @@
+# Math16 Ab2d+full system
+Write only Python source implementing `def generate(level=1, **kwargs):`.
+Return a dict with exactly three keys: question_text, correct_answer, oracle_payload.
+question_text must be the provided stem string (do not rebuild LaTeX).
+oracle_payload must exactly equal the frozen_params object.
+correct_answer must be JSON-compatible and match the task answer shape.
+Use only the listed Domain API methods from this prompt.
+Domain for this task: RadicalOps.
+Allowed native ops: arithmetic, comparisons, if/else, loops, list/dict, unpacking, sorting.
+Forbidden: other domain public APIs; task-specific solvers; reading audit payloads;
+manifest answers; evaluator expected answers; answer lookup by task_id.
+Do not use Markdown fences or explanations outside the Python source.
+Import Domain API from `core.prompts.domain_function_library` only as needed.
+
+# Task `ce111_q10_ordered_quadratic_roots_radical`
+domain_ops: RadicalOps
+
+## Question stem (use verbatim as question_text)
+一元二次方程式
+\[
+(x-2)^2=3
+\]
+的兩根為 \(a,b\)，且 \(a>b\)。求 \(2a+b\)，答案須保持精確根式形式。
+
+## frozen_params (oracle_payload must equal this object)
+{
+  "equation": "(x-2)^2=3",
+  "order": "a>b",
+  "target": "2a+b"
+}
+
+## derived_scaffold (DERIVED_NON_ORACLE_STRUCTURAL_SCAFFOLD)
+Use this structure; it contains no answers.
+{
+  "center": 2,
+  "equation_form": "shifted_square",
+  "order": "larger_first",
+  "squared_distance": 3,
+  "target_weights": {
+    "larger": 2,
+    "smaller": 1
+  }
+}
+
+## Allowed Domain API
+- `RadicalOps.scale_linear_radical` | import: `core.prompts.domain_function_library` | signature: `(term, k)` | returns: dict  # LinearRadical JSON-safe ints
+  inputs: term LinearRadical dict; k nonzero non-bool int
+  notes: rejects k==0 and zero radical_coefficient
+- `RadicalOps.add_linear_radicals` | import: `core.prompts.domain_function_library` | signature: `(term_a, term_b)` | returns: dict  # LinearRadical JSON-safe ints
+  inputs: two LinearRadical dicts with identical positive radicand
+  notes: rejects mismatched radicand or zero result coefficient
+- `RadicalOps.format_linear_radical` | import: `core.prompts.domain_function_library` | signature: `(term)` | returns: str  # presentation LaTeX
+  inputs: LinearRadical dict
+  notes: presentation only
+
+## Processing steps
+1) From shifted-square scaffold build larger/smaller LinearRadical.
+2) scale_linear_radical(larger, weight); add_linear_radicals.
+3) Assemble nested or flat result dict.
+
+## Output contract
+Return exactly:
+{"question_text": <stem str>, "correct_answer": <task shape>, "oracle_payload": <frozen_params>}
+
+## Generic domain example (non-task numbers)
+```python
+from core.prompts.domain_function_library import RadicalOps
+
+def generate(level=1, **kwargs):
+    frozen = {"radicand": 50}
+    coeff, rest = RadicalOps.simplify_term(1, frozen["radicand"])
+    return {
+        "question_text": "example stem",
+        "correct_answer": {
+            "coefficient": coeff,
+            "radicand": rest,
+            "canonical_latex": RadicalOps.format_term(coeff, rest),
+        },
+        "oracle_payload": frozen,
+    }
+```
