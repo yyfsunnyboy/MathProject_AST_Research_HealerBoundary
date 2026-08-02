@@ -1,0 +1,91 @@
+<!-- DOMAIN_API_BLOCK_BEGIN -->
+# Domain API menu: PolynomialOps
+
+This menu lists every SUPPORTED_PUBLIC method on `PolynomialOps`.
+It is domain-general: it does not name a Math16 task, prescribe which
+APIs a specific item must call, or give call order / solution steps.
+
+## Public APIs
+- `PolynomialOps.add` | import: `core.prompts.domain_function_library` | signature: `(c1, c2)` | returns: list[number]  # operand-dependent coefficient type; highest degree first
+  inputs: coefficient lists with mutually arithmetic-compatible values; bool forbidden
+  returns_shape: `{"json_safe": "operand-dependent", "length": "max operand length after normalization", "ordering": "highest degree first", "type": "list"}`
+  boundary: use to_exact per Fraction coefficient before JSON
+  example: `PolynomialOps.add([1, 2], [3, 4])  # [4, 6]`
+
+- `PolynomialOps.coeffs_from_py_expression` | import: `core.prompts.domain_function_library` | signature: `(expression, var='x')` | returns: list[Fraction]  # highest degree first
+  inputs: restricted polynomial expression using integer constants,+,-,*,nonnegative integer **
+  returns_shape: `{"element_types": ["Fraction"], "json_safe": false, "length": "degree+1", "ordering": "highest degree first", "type": "list"}`
+  boundary: to_degree_map or to_exact per coefficient
+  example: `PolynomialOps.coeffs_from_py_expression('(x+1)*(x-1)')`
+
+- `PolynomialOps.div_qr` | import: `core.prompts.domain_function_library` | signature: `(dividend_coefficients, divisor_coefficients)` | returns: tuple[list[int | str], list[int | str]]  # quotient,remainder
+  inputs: non-empty exact coefficient lists: int,Fraction,or p/q; no bool/float; nonzero divisor
+  returns_shape: `{"elements": [{"element_types": ["int", "str"], "type": "list"}, {"element_types": ["int", "str"], "type": "list"}], "json_safe": true, "length": 2, "ordering": "highest degree first", "type": "tuple"}`
+  boundary: already exact JSON leaves
+  example: `PolynomialOps.div_qr([2, 0, 2], [1, 1])`
+
+- `PolynomialOps.factor_quadratic_exact` | import: `core.prompts.domain_function_library` | signature: `(a, b, c)` | returns: list[dict, dict]  # fixed length 2; keys x_coefficient,constant; int or 'p/q'; NOT a 3-tuple
+  inputs: exact rational a,b,c; a nonzero; rational roots required
+  returns_shape: `{"element": {"required_keys": ["x_coefficient", "constant"], "type": "dict", "value_types": ["int", "str"]}, "json_safe": true, "length": 2, "ordering": "deterministic implementation order; consumers must not infer sorted roots", "type": "list"}`
+  boundary: already JSON safe
+  example: `PolynomialOps.factor_quadratic_exact(1, -5, 6)`
+
+- `PolynomialOps.format_latex` | import: `core.prompts.domain_function_library` | signature: `(coeffs, var='x')` | returns: str
+  inputs: highest-degree-first numeric coefficients; bool forbidden
+  returns_shape: `{"json_safe": true, "type": "str"}`
+  boundary: presentation only
+  example: `PolynomialOps.format_latex([2, 0])  # '2x'`
+
+- `PolynomialOps.mul` | import: `core.prompts.domain_function_library` | signature: `(c1, c2)` | returns: list[int | float | Fraction]  # operand-dependent; highest degree first
+  inputs: coefficient lists containing arithmetic-compatible int,float,Fraction; empty operand -> [0]; bool forbidden
+  returns_shape: `{"element_types": ["int", "float", "Fraction"], "json_safe": "operand-dependent", "length": "len(c1)+len(c2)-1 before leading-zero normalization", "ordering": "highest degree first", "type": "list"}`
+  boundary: Fraction coefficients require to_exact; exact tasks must not use float
+  example: `PolynomialOps.mul([1, 1], [1, -1])  # [1, 0, -1]`
+
+- `PolynomialOps.normalize` | import: `core.prompts.domain_function_library` | signature: `(coeffs)` | returns: list[number]  # highest degree first; leading zeros removed
+  inputs: coefficient sequence; empty or all-zero -> [0]; bool coefficients forbidden
+  returns_shape: `{"json_safe": "operand-dependent", "length": "variable", "ordering": "highest degree first", "type": "list"}`
+  boundary: preserves coefficient types
+  example: `PolynomialOps.normalize([0, 2, 1])  # [2, 1]`
+
+- `PolynomialOps.sub` | import: `core.prompts.domain_function_library` | signature: `(c1, c2)` | returns: list[number]  # operand-dependent coefficient type; highest degree first
+  inputs: coefficient lists with mutually arithmetic-compatible values; bool forbidden
+  returns_shape: `{"json_safe": "operand-dependent", "length": "max operand length after normalization", "ordering": "highest degree first", "type": "list"}`
+  boundary: use to_exact per Fraction coefficient before JSON
+  example: `PolynomialOps.sub([1, 2], [3, 4])  # [-2, -2]`
+
+- `PolynomialOps.to_degree_map` | import: `core.prompts.domain_function_library` | signature: `(coeffs)` | returns: dict[str, int | str]  # descending degree insertion order
+  inputs: non-empty exact coefficient list
+  returns_shape: `{"json_safe": true, "keys": "decimal degree strings", "ordering": "descending numeric degree insertion order", "type": "dict", "values": ["int", "str"]}`
+  boundary: official polynomial JSON adapter
+  example: `PolynomialOps.to_degree_map([1, 0, -1])`
+
+## Generic domain code example (non-formal numbers)
+```python
+from core.prompts.domain_function_library import PolynomialOps
+
+def generate(level=1, **kwargs):
+    # Generic illustration only — not a Math16 formal item.
+    frozen = {"dividend_coefficients": [2, 0, 2], "divisor_coefficients": [1, 1]}
+    q, r = PolynomialOps.div_qr(
+        frozen["dividend_coefficients"], frozen["divisor_coefficients"]
+    )
+    return {
+        "question_text": "example stem",
+        "correct_answer": {
+            "quotient_coefficients": q,
+            "remainder_coefficients": r,
+            "quotient_latex": PolynomialOps.format_latex(q),
+            "remainder_latex": PolynomialOps.format_latex(r),
+        },
+        "oracle_payload": frozen,
+    }
+```
+
+## Shared output contract
+Return a dict with exactly three keys: question_text, correct_answer, oracle_payload.
+- question_text: the provided stem string (do not rebuild from scratch unless required).
+- correct_answer: JSON-compatible value matching the task answer shape.
+- oracle_payload: must exactly equal the frozen_params object provided in the task block.
+Do not read audit payloads, evaluator expected answers, or answer tables.
+<!-- DOMAIN_API_BLOCK_END -->

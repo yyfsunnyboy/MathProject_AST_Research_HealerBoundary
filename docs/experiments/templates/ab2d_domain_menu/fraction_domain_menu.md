@@ -1,0 +1,84 @@
+<!-- DOMAIN_API_BLOCK_BEGIN -->
+# Domain API menu: FractionOps
+
+This menu lists every SUPPORTED_PUBLIC method on `FractionOps`.
+It is domain-general: it does not name a Math16 task, prescribe which
+APIs a specific item must call, or give call order / solution steps.
+
+## Public APIs
+- `FractionOps.add` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | returns: Fraction
+  inputs: a,b: Fraction
+  returns_shape: `{"json_safe": false, "type": "Fraction"}`
+  boundary: to_exact before correct_answer
+  example: `FractionOps.add(Fraction(1, 2), Fraction(1, 3))`
+
+- `FractionOps.create` | import: `core.prompts.domain_function_library` | signature: `(value)` | returns: Fraction  # not JSON serializable; use the to_exact adapter
+  inputs: int, finite float, legal numeric str, or Fraction; bool forbidden
+  returns_shape: `{"json_safe": false, "type": "Fraction"}`
+  boundary: FractionOps.to_exact before correct_answer
+  example: `FractionOps.create("2/7")  # Fraction(2, 7)`
+
+- `FractionOps.div` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | returns: Fraction
+  inputs: a,b: Fraction; b != 0
+  returns_shape: `{"json_safe": false, "type": "Fraction"}`
+  boundary: to_exact before correct_answer
+  example: `FractionOps.div(Fraction(1, 2), Fraction(1, 3))`
+
+- `FractionOps.from_parts` | import: `core.prompts.domain_function_library` | signature: `(numerator, denominator=1)` | returns: Fraction
+  inputs: numerator,denominator: int; bool forbidden; denominator != 0
+  returns_shape: `{"json_safe": false, "type": "Fraction"}`
+  boundary: to_exact before correct_answer
+  example: `FractionOps.from_parts(6, 3)  # Fraction(2, 1)`
+
+- `FractionOps.mul` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | returns: Fraction
+  inputs: a,b: Fraction
+  returns_shape: `{"json_safe": false, "type": "Fraction"}`
+  boundary: to_exact before correct_answer
+  example: `FractionOps.mul(Fraction(1, 2), Fraction(1, 3))`
+
+- `FractionOps.sub` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | returns: Fraction
+  inputs: a,b: Fraction
+  returns_shape: `{"json_safe": false, "type": "Fraction"}`
+  boundary: to_exact before correct_answer
+  example: `FractionOps.sub(Fraction(1, 2), Fraction(1, 6))`
+
+- `FractionOps.to_exact` | import: `core.prompts.domain_function_library` | signature: `(value)` | returns: int | str  # integer or irreducible 'p/q'
+  inputs: int, Fraction, or legal exact string; bool/float forbidden
+  returns_shape: `{"json_safe": true, "string_schema": "^-?[0-9]+/[1-9][0-9]*$", "type": "union", "types": ["int", "str"]}`
+  boundary: official Fraction-to-JSON adapter
+  example: `FractionOps.to_exact(Fraction(3, 2))  # '3/2'`
+
+- `FractionOps.to_latex` | import: `core.prompts.domain_function_library` | signature: `(val, mixed=False)` | returns: str
+  inputs: exact value; mixed: bool
+  returns_shape: `{"json_safe": true, "type": "str"}`
+  boundary: presentation only; not semantic serialization
+  example: `FractionOps.to_latex(Fraction(2, 7))  # '\frac{2}{7}'`
+
+## Generic domain code example (non-formal numbers)
+```python
+from core.prompts.domain_function_library import FractionOps
+
+def generate(level=1, **kwargs):
+    # Generic illustration only — not a Math16 formal item.
+    frozen = {"p1": [1, 6], "p2": [1, 3]}
+    a = FractionOps.from_parts(frozen["p1"][0], frozen["p1"][1])
+    b = FractionOps.from_parts(frozen["p2"][0], frozen["p2"][1])
+    value = FractionOps.mul(a, b)
+    return {
+        "question_text": "example stem",
+        "correct_answer": {
+            "numerator": value.numerator,
+            "denominator": value.denominator,
+            "canonical_latex": FractionOps.to_latex(value),
+        },
+        "oracle_payload": frozen,
+    }
+```
+
+## Shared output contract
+Return a dict with exactly three keys: question_text, correct_answer, oracle_payload.
+- question_text: the provided stem string (do not rebuild from scratch unless required).
+- correct_answer: JSON-compatible value matching the task answer shape.
+- oracle_payload: must exactly equal the frozen_params object provided in the task block.
+Do not read audit payloads, evaluator expected answers, or answer tables.
+<!-- DOMAIN_API_BLOCK_END -->
