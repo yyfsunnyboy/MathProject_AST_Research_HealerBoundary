@@ -1,0 +1,48 @@
+from core.prompts.domain_function_library import FractionOps
+
+
+def generate(level=1, **kwargs):
+    expression = kwargs.get("expression", "9/22 + 11/18 - (23/22 - 7/18)")
+    
+    # Parse components from the frozen_params structure if available in kwargs or construct directly
+    # Based on task_id 'ce111_q05_exact_fraction_expression', we use the expression provided
+    
+    # Extract fractions: 
+    # Term 1: 9/22 -> a = Fraction(9, 22)
+    term_a_num = 9
+    term_a_den = 22
+    a = FractionOps.from_parts(term_a_num, term_a_den)
+    
+    # Term 2: 11/18 -> b = Fraction(11, 18)
+    term_b_num = 11
+    term_b_den = 18
+    b = FractionOps.from_parts(term_b_num, term_b_den)
+    
+    # Parenthesized part: (23/22 - 7/18) -> c = Fraction(23, 22), d = Fraction(7, 18)
+    paren_c_num = 23
+    paren_c_den = 22
+    c = FractionOps.from_parts(paren_c_num, paren_c_den)
+    
+    paren_d_num = 7
+    paren_d_den = 18
+    d = FractionOps.from_parts(paren_d_num, paren_d_den)
+    
+    # Calculate the difference inside parentheses: (c - d)
+    diff_inside = FractionOps.sub(c, d)
+    
+    # Full expression: a + b - diff_inside
+    sum_ab = FractionOps.add(a, b)
+    result = FractionOps.sub(sum_ab, diff_inside)
+    
+    # Assemble correct_answer according to the contract
+    canonical_latex = FractionOps.to_latex(result)
+    
+    return {
+        "question_text": expression + ". 答案須化為最簡分數。",
+        "correct_answer": {
+            "numerator": result.numerator,
+            "denominator": result.denominator,
+            "canonical_latex": canonical_latex
+        },
+        "oracle_payload": kwargs.get("expression") or {"expression": expression}
+    }

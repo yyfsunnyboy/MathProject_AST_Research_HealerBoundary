@@ -1,0 +1,159 @@
+```python
+from core.prompts.domain_function_library import FractionOps
+
+def generate(level=1, **kwargs):
+    frozen_params = kwargs.get("frozen_params", {"expression": "3/7 - (-1/4)"})
+    
+    # Parse the expression: 3/7 and -(-1/4) which is equivalent to adding 1/4.
+    # However, the task asks for subtraction of a negative fraction: A - B where B = -1/4.
+    # So we compute (3/7) - (-1/4).
+    
+    # Operand 1: 3/7
+    num1 = frozen_params["expression"].split(" ")[0].replace("-", "") if "-" in str(frozen_params["expression"]).split("/")[0] else int(str(frozen_params["expression"]).split("/")[0]) 
+    # Actually, let's parse strictly from the expression string provided.
+    expr_str = frozen_params["expression"]
+    
+    # Extract first fraction: 3/7
+    parts1 = str(expr_str).replace("-", "").split("/") if "-" not in str(frozen_params["expression"]).split("/")[0] else [int(str(x) for x in str(frozen_params["expression"]).replace(" ", "")[:str(frozen_params["expression"]).find("-")].split("/"))]
+    # Simpler approach: The expression is "3/7 - (-1/4)". 
+    # Left operand numerator/denominator are 3 and 7.
+    
+    a = FractionOps.from_parts(3, 7)
+    
+    # Right operand inside the parenthesis is -1/4. But we subtract it.
+    # So right part for subtraction logic: The term being subtracted is (-1/4).
+    # We need to create Fraction(-1, 4) and then do a.sub(a, b).
+    
+    b = FractionOps.from_parts(1, 4) * -1
+    
+    result_fraction = FractionOps.sub(a, b)
+    
+    correct_answer = {
+        "numerator": int(result_fraction.numerator),
+        "denominator": int(result_fraction.denominator),
+        "canonical_latex": str(FractionOps.to_exact(result_fraction)) if isinstance(FractionOps.to_exact(result_fraction), str) else FractionOps.to_str(result_fraction, mixed=False).replace("\\", "") # Wait, to_exact returns 'p/q' string. 
+    }
+
+    # Correct logic for canonical_latex using the provided API
+    latex_val = FractionOps.to_latex(result_fraction) if hasattr(FractionOps, "to_latex") else str(result_fraction)
+    
+    correct_answer["canonical_latex"] = latex_val
+    
+    return {
+        "question_text": frozen_params.get("description", f"精確計算\\[{expr_str}\\].答案須化為最簡分數。"),
+        "correct_answer": correct_answer,
+        "oracle_payload": frozen_params
+    }
+
+# Re-implementing cleanly based on the specific steps requested to ensure correctness without external parsing logic errors.
+def generate(level=1, **kwargs):
+    from core.prompts.domain_function_library import FractionOps
+    
+    # Step 1: Construct operands
+    # Expression: 3/7 - (-1/4)
+    # Left operand: 3/7
+    a = FractionOps.from_parts(3, 7)
+    
+    # Right operand part for subtraction is the term inside parentheses with its sign.
+    # We are subtracting (-1/4). 
+    # So we create -1/4 and subtract it. Or equivalently add 1/4.
+    # The instruction says: "Compute FractionOps.sub(left, right)".
+    # Right should be the fraction being subtracted, which is -1/4.
+    
+    b = FractionOps.from_parts(-1, 4)
+    
+    result = FractionOps.sub(a, b)
+    
+    # Step 2 & 3: Assemble correct_answer and payload
+    
+    numerator_val = int(result.numerator)
+    denominator_val = int(result.denominator)
+    
+    # Ensure irreducible (Fraction handles this automatically in Python's math module usually, 
+    # but FractionOps.from_parts creates a canonical fraction).
+    
+    latex_str = str(FractionOps.to_latex(result)) if hasattr(FractionOps, "to_latex") else f"{numerator_val}/{denominator_val}"
+    
+    return {
+        "question_text": kwargs.get("frozen_params", {}).get("description", ""), # Assuming description is in payload or passed separately? 
+        # The prompt says: Frozen task description (use as question_text).
+        # And frozen_params contains expression. Let's assume the text was provided in a variable not shown here, 
+        # but I will construct it from context if needed. Actually, looking at "Frozen task description", that is the string to use.
+        
+    }
+
+# Final clean implementation adhering strictly to constraints and inputs provided in the prompt block.
+def generate(level=1, **kwargs):
+    from core.prompts.domain_function_library import FractionOps
+    
+    # Retrieve frozen_params which contains expression if needed for verification or just use constants derived from task_id/description
+    expr = "3/7 - (-1/4)"
+    
+    # Construct operands preserving negative numerator as per instruction logic (though mathematically equivalent)
+    a = FractionOps.from_parts(3, 7)
+    b = FractionOps.from_parts(-1, 4)
+    
+    result_fraction = FractionOps.sub(a, b)
+    
+    correct_answer = {
+        "numerator": int(result_fraction.numerator),
+        "denominator": int(result_fraction.denominator),
+        "canonical_latex": str(FractionOps.to_exact(result_fraction)) # to_exact returns 'p/q' string format which is safe JSON and matches canonical latex representation without LaTeX delimiters usually, or we can use to_latex. 
+    }
+
+    # Let's check the example in API docs: FractionOps.to_latex(Fraction(2, 7)) -> '\frac{2}{7}'
+    # The contract asks for "canonical_latex". Usually this means the LaTeX string representation.
+    latex_repr = str(FractionOps.to_latex(result_fraction)).replace("'", "") if isinstance(str(FractionOps.to_latex(result_fraction)), str) else ""
+
+    correct_answer["canonical_latex"] = latex_repr
+    
+    # Oracle payload must equal frozen_params object provided in task block: {"expression": "3/7 - (-1/4)"}.
+    oracle_payload = {
+        "expression": expr
+    }
+    
+    return {
+        "question_text": f"精確計算\\[{expr}\\].答案須化為最簡分數。",
+        "correct_answer": correct_answer,
+        "oracle_payload": oracle_payload
+    }
+
+# Wait, I need to make sure the imports are minimal and only from core.prompts.domain_function_library.
+from core.prompts.domain_function_library import FractionOps
+
+def generate(level=1, **kwargs):
+    # Define constants based on task description provided in prompt block
+    expr = "3/7 - (-1/4)"
+    
+    # Step 1: Construct both operands from the frozen expression with FractionOps.from_parts 
+    # (preserve the negative numerator). The term being subtracted is -(-1/4), so we treat it as subtracting a fraction of -1/4.
+    left_operand = FractionOps.from_parts(3, 7)
+    right_operand = FractionOps.from_parts(-1, 4)
+    
+    # Step 2: Compute subtraction
+    result_fraction = FractionOps.sub(left_operand, right_operand)
+    
+    # Step 3: Assemble correct_answer exactly according to the Answer contract.
+    numerator_val = int(result_fraction.numerator)
+    denominator_val = int(result_fraction.denominator)
+    
+    # Use to_latex for canonical representation as per API example '\frac{2}{7}'
+    latex_str = str(FractionOps.to_latex(result_fraction)) if hasattr(FractionOps, "to_latex") else f"{numerator_val}/{denominator_val}"
+
+    correct_answer_dict = {
+        "numerator": numerator_val,
+        "denominator": denominator_val,
+        "canonical_latex": latex_str.replace("'", "") # Remove quotes from string representation if any
+    }
+    
+    oracle_payload = {"expression": expr}
+    
+    return {
+        "question_text": f"精確計算\\[{expr}\\].答案須化為最簡分數。",
+        "correct_answer": correct_answer_dict,
+        "oracle_payload": oracle_payload
+    }
+
+# Wait, the prompt says "Write only Python source implementing `def generate(level=1, **kwargs):`." and imports should be inside or at top. 
+# I will put import at top level as allowed by standard python file structure unless specified otherwise ("Import Domain API ... only as needed").
+```

@@ -1,0 +1,173 @@
+def generate(level=1, **kwargs):
+    frozen_params = kwargs.get("frozen_params", {"denominator": None, "numerator": None, "radicand": None})
+    
+    # Extract parameters from the task description and frozen params if needed.
+    # The task asks to rationalize 9/(4-sqrt(7)) into a+b*sqrt(radicand).
+    numerator = frozen_params.get("numerator", 9)
+    denominator_part_rational = FrozenParams.denominator_parts(frozen_params["denominator"])
+    
+    # We need to perform the algebraic manipulation: 
+    # (a + b√r)(c - d√r) / ((c^2 - r*d^2)) -> rationalize.
+    # Here we have 9/(4-√7). Multiply by conjugate (4+√7)/(4+√7).
+    
+    a = denominator_part_rational[0]  # 4
+    b = FrozenParams.extract_radical_coefficient(frozen_params["denominator"]) 
+    radicand_val = frozen_params.get("radicand", 7)
+
+    # The term in the denominator is (a - sqrt(radicand)).
+    # Conjugate is (a + sqrt(radicand)).
+    
+    conjugate_rational_part = a
+    conjugate_radical_coefficient = b
+    
+    # Numerator expansion: numerator * (conjugate)
+    num_expansion = RadicalOps.scale_linear_radical({"rational": 0, "radical_coefficient": 1, "radicand": radicand_val}, 
+                                                      RationalTerm(conjugate_rational_part)) + \
+                    RadicalOps.scale_linear_radical({"rational": numerator, "radical_coefficient": 0, "radicand": radicand_val}, 
+                                                      RationalTerm(1))
+
+    # Denominator expansion: (a - sqrt(r))^2 = a^2 - r
+    
+    denom_expansion_rational_part = RadicalOps.exact_integer(a) ** 2
+    denom_expansion_radical_coefficient = 0 
+    
+    denominator_value = denom_expansion_rational_part + \
+                        RationalTerm(denom_expansion_radical_coefficient, radicand_val).to_fraction() * (radicand_val if False else Fraction(1))
+
+    # Actually simpler: Denominator is a^2 - r.
+    
+    final_denom = denominator_value
+    
+    # Now we have num / denom. We need to separate rational and radical parts.
+    # The result should be A + B*sqrt(r).
+    
+    # Let's compute the actual values manually based on math logic since API is for representation mostly, 
+    # but let's try to use APIs where possible if they help with structure.
+    
+    # Re-evaluating using direct computation via domain helpers if available or manual integer arithmetic which is allowed as native op.
+    
+    a_val = 4
+    r_val = radicand_val
+    
+    denom_sq_minus_r = (a_val ** 2) - r_val
+    
+    numerator_total = numerator * ((conjugate_rational_part + b * sqrt(r_val))) # This logic needs careful handling with types
+
+    # Let's stick to pure integer arithmetic for the coefficients a and b in the final answer.
+    
+    term1_num = numerator * conjugate_rational_part  # Rational part of numerator after expansion
+    term2_num = numerator * (b)                     # Radical coefficient part
+    
+    total_numerator_rational = term1_num + \
+                               Fraction(term2_num, denom_sq_minus_r).numerator if False else term2_num
+
+    final_a = int(total_numerator_rational / denom_sq_minus_r) 
+    final_b = int((term2_num * b) / (denom_sq_minus_r)) # Wait logic is slightly off.
+    
+    # Correct Math:
+    # 9/(4-sqrt(7)) * (4+sqrt(7))/(4+sqrt(7))
+    # Numerator: 9*(4 + sqrt(7)) = 36 + 9*sqrt(7)
+    # Denominator: 16 - 7 = 9
+    
+    # Result: (36/9) + (9/9)*sqrt(7) = 4 + 1*sqrt(7)
+    
+    final_a_val = numerator * conjugate_rational_part // denom_sq_minus_r 
+    final_b_val = (numerator * b) // denom_sq_minus_r
+    
+    # Verify with API if needed, but direct integer math is robust here.
+    
+    question_text = "將 \n\\[ \\frac{9}{4-\\\\sqrt{7}} \\] 化為 \(a+b\\\\sqrt{7}\)，其中 \(a,b\) 為整數，求 \(a+b\)。"
+
+    correct_answer = final_a_val + final_b_val
+    
+    oracle_payload = frozen_params.copy()
+    
+    return {
+        "question_text": question_text,
+        "correct_answer": int(correct_answer),
+        "oracle_payload": oracle_payload
+    }
+
+
+class RationalTerm:
+    def __init__(self, rational_part=0, radical_coefficient=1):
+        self.rational = rational_part
+        self.radical_coef = radical_coefficient
+
+def FrozenParams.denominator_parts(s_str):
+    # Parse string like "4-sqrt(7)" -> (4, 7) or similar logic if needed. 
+    # Since we know the structure from task description: a - sqrt(r).
+    return int(str.split("-")[0])
+
+
+# Helper to extract b and radicand from denominator string representation if not passed directly as dict values in some cases.
+def FrozenParams.extract_radical_coefficient(s_str):
+    parts = s_str.replace("sqrt(", "").replace("-", " ").split()
+    # Assuming format is like '4 sqrt(7)' after cleaning or similar parsing logic needed for robustness? 
+    # Given the specific task, we can infer b=1 if it's just a single radical term in denominator.
+    return 1
+
+# Re-implementing without helper classes to ensure pure function source as requested by "Write only Python source" constraint usually implies no extra class definitions unless necessary for logic flow within generate or imports. 
+# However, the prompt says "Import Domain API...". It doesn't forbid defining helpers inside the file if needed, but typically these tasks expect a clean script.
+# Let's refactor to avoid inner classes and use direct math since native ops are allowed.
+
+def generate(level=1, **kwargs):
+    frozen_params = kwargs.get("frozen_params", {})
+    
+    # Task specific extraction logic based on the provided string representation in task description or params
+    numerator_val = frozen_params.get("numerator", 9)
+    denom_str = frozen_params.get("denominator", "4-sqrt(7)")
+    radicand_val = frozen_params.get("radicand", 7)
+
+    # Parse denominator: a - sqrt(r)
+    # The string is likely "a-b" where b represents the radical part. 
+    # From example: "4-sqrt(7)" -> a=4, r=7. Coefficient of sqrt is implicitly 1 unless specified otherwise?
+    # In standard form c + d*sqrt(r), here we have 9/(c - 1*sqrt(r)). So b_coeff = 1.
+    
+    import re
+    
+    match_denom = re.search(r'(\d+)-\s*\sqrt\s*\((\d+)\)', denom_str)
+    if not match_denom:
+        # Fallback for cases where parsing might differ, but based on task description it's fixed format.
+        a_val = 4 
+        b_coeff = 1
+        r_val = radicand_val
+    else:
+        a_val = int(match_denom.group(1))
+        r_val = int(match_denom.group(2))
+
+    # Calculate denominator value (rational part) for division
+    denom_rational_part = a_val ** 2 - r_val
+    
+    # Numerator expansion: numerator * (a + sqrt(r))
+    num_expansion_rational = numerator_val * a_val
+    num_expansion_radical_coef = numerator_val * b_coeff
+
+    final_a = int(num_expansion_rational // denom_rational_part)
+    final_b = int((num_expansion_radical_coef / denom_rational_part).as_integer() if hasattr(Fraction, 'as_integer') else (int(num_expansion_radical_coef / denom_rational_part))) # Ensure integer division
+    
+    # Using Fraction for precision then converting to int at end.
+    from fractions import Fraction as F
+
+    res_a = num_expansion_rational // denom_rational_part
+    res_b = (num_expansion_radical_coef * 1) // denom_rational_part if isinstance(num_expansion_radical_coef, int) else int(F(num_expansion_radical_coef / denom_rational_part)) # Simplified logic
+    
+    # Actually: 
+    # Result is A + B*sqrt(r).
+    # A = (numerator * a) / (a^2 - r)
+    # B = (numerator * 1) / (a^2 - r)
+    
+    res_a_int = int(num_expansion_rational // denom_rational_part) if isinstance(denom_rational_part, int) else int(F(res_a))
+    res_b_int = int((F(num_expansion_radical_coef) / F(denom_rational_part)))
+
+    question_text = "將 \n\\[ \\frac{9}{4-\\\\sqrt{7}} \\] 化為 \(a+b\\\\sqrt{7}\)，其中 \(a,b\) 為整數，求 \(a+b\)。"
+    
+    correct_answer_int = res_a_int + res_b_int
+    
+    oracle_payload = frozen_params.copy()
+
+    return {
+        "question_text": question_text,
+        "correct_answer": int(correct_answer_int),
+        "oracle_payload": oracle_payload
+    }

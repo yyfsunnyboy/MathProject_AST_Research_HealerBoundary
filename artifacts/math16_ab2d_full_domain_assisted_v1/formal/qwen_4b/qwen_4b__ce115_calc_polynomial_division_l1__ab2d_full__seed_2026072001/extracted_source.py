@@ -1,0 +1,35 @@
+from core.prompts.domain_function_library import PolynomialOps, Fraction
+
+def generate(level=1, **kwargs):
+    # Extract parameters from kwargs if needed, but task specifies frozen_params directly in context
+    # The oracle_payload must exactly match the provided frozen_params object
+    
+    dividend_coeffs = [6, 0, 6]
+    divisor_coeffs = [1, -4]
+    
+    # Step 1: Perform polynomial division using domain API
+    quotient, remainder = PolynomialOps.div_qr(dividend_coeffs, divisor_coeffs)
+    
+    # Step 2: Format results to LaTeX strings for the answer contract
+    quotient_latex = PolynomialOps.format_latex(quotient)
+    remainder_latex = PolynomialOps.format_latex(remainder)
+    
+    # Assemble correct_answer according to Task-specific answer contract
+    correct_answer = {
+        "quotient_coefficients": quotient,
+        "remainder_coefficients": remainder,
+        "quotient_latex": quotient_latex,
+        "remainder_latex": remainder_latex
+    }
+    
+    # oracle_payload must exactly equal the frozen_params object provided in task block
+    oracle_payload = {
+        "dividend_coefficients": [6, 0, 6],
+        "divisor_coefficients": [1, -4]
+    }
+    
+    return {
+        "question_text": r"將多項式 \[ 6x^2+6 \] 除以 \[ x-4,\ ]求商式與餘式。",
+        "correct_answer": correct_answer,
+        "oracle_payload": oracle_payload
+    }

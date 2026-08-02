@@ -1,0 +1,271 @@
+def generate(level=1, **kwargs):
+    frozen_params = {
+        "quadratic_coefficients": [1, 4, -12]
+    }
+    
+    # Factor the quadratic polynomial exactly using rational coefficients
+    a, b, c = frozen_params["quadratic_coefficients"]
+    factors = PolynomialOps.factor_quadratic_exact(a, b, c)
+    
+    # Extract roots from factor dictionaries: (x + p/q)(x - r/s) => x = -p/q and x = r/s
+    # The API returns dicts with keys 'x_coefficient' and 'constant'.
+    # For a monic quadratic factored as (x+A)(x+B), the factors are [ {x:1, c:-A}, {x:1, c:-B} ]? 
+    # Let's verify logic based on standard factorization of x^2+bx+c = (x-r1)(x-r2).
+    # The API returns a list of dicts. For roots r1, r2, the factors are likely represented as linear terms.
+    # Assuming the returned dict represents a term like 'k*x + m', root is -m/k.
+    
+    raw_factors = factors
+    
+    def get_root_from_factor(factor_dict):
+        x_coeff = factor_dict["x_coefficient"]
+        const_term = factor_dict["constant"]
+        if isinstance(x_coeff, str) and '/' in x_coeff:
+            num_str, den_str = x_coeff.split('/')
+            root_num = int(const_term.replace('-', '')) * -1 # Handle sign carefully? 
+            # Actually simpler: solve kx + m = 0 => x = -m/k.
+            if isinstance(x_coeff, str):
+                parts = x_coeff.split('/')
+                num_part = parts[0]
+                den_part = parts[1]
+                val_x = int(num_part) / int(den_part) # This is the coefficient value? No.
+                pass
+            
+        # Robust parsing: treat as Fraction or float if needed, but API returns str for rationals.
+        try:
+            k_val = float(x_coeff)
+            m_val = float(const_term)
+            root = -m_val / k_val
+        except ValueError:
+            # Handle string fractions manually to ensure precision and sign correctness
+            x_str = factor_dict["x_coefficient"]
+            c_str = str(factor_dict["constant"])
+            
+            if '/' in x_str:
+                num_x, den_x = map(int, x_str.split('/'))
+            else:
+                num_x, den_x = int(x_str), 1
+            
+            # Handle sign for constant term string (e.g. "-3" or "3")
+            c_val = float(c_str) if not isinstance(factor_dict["constant"], str) else \
+                    (-float(factor_dict["constant"].replace('-', '')) if factor_dict["constant"][0] == '-' else 
+                     -float(factor_dict["constant"])) # Wait, string "-5" -> 5? No.
+            
+            # Re-eval: c_str is the value of 'm'. We want x = -m/k.
+            # If c_str is "3", m=3. root=-3/1.
+            # If c_str is "-3", m=-3. root=3/1.
+            
+            if isinstance(factor_dict["constant"], str):
+                try:
+                    val_c = float(factor_dict["constant"])
+                except ValueError:
+                     parts_c = factor_dict["constant"].split('/')
+                    num_c, den_c = int(parts_c[0]), int(parts_c[1])
+                    # Handle negative sign in string representation if split logic fails or for simple ints
+                    val_c = float(factor_dict["constant"]) 
+            else:
+                val_c = factor_dict["constant"]
+
+            k_val = x_str.replace('/', '').replace(' ', '') # Simplified? No.
+            
+            # Let's use a safer approach with Fraction-like parsing logic inside the helper or just eval safe strings if allowed, but better to parse manually.
+            def str_to_num(s):
+                try: return float(s)
+                except ValueError:
+                    parts = s.split('/')
+                    n, d = int(parts[0]), int(parts[1])
+                    # Handle sign in numerator or denominator? Usually just numerator carries sign for simple fractions like -3/4.
+                    if len(parts)==2 and (parts[0][0]=='-' or parts[1][0]=='-'): 
+                        return float(s) # Python handles negative floats from strings fine usually, but let's be explicit about parsing logic if needed.
+                    else:
+                         pass
+                return n/d
+
+            k = str_to_num(x_str)
+            m = str_to_num(factor_dict["constant"])
+            
+            root = -m / k
+            
+        # Fallback for simple int strings which float() handles, and fraction strings like "-3/4" also handled by float usually? 
+        # Python 3: float("-3/4") fails. Must split.
+        
+        if isinstance(x_str, str) and '/' in x_str:
+            num_x, den_x = map(int, x_str.split('/'))
+            val_c = factor_dict["constant"]
+            if isinstance(val_c, str):
+                parts_c = val_c.split('/')
+                num_c, den_c = int(parts_c[0]), int(parts_c[1])
+                m_val = float(num_c)/float(den_c) # Wait, sign? 
+                # If string is "-3/4", split gives ["-3", "4"]. -3/4 works.
+            else:
+                m_val = val_c
+                
+            root = -(m_val / num_x * den_x if False else float(num_c)/float(den_c)?) 
+            
+        # Let's restart the parsing logic cleanly for strings vs ints.
+        
+    roots_list = []
+    
+    for f in raw_factors:
+        x_coeff_str = str(f["x_coefficient"])
+        const_term_val = f["constant"]
+        
+        if isinstance(x_coeff_str, str) and '/' in x_coeff_str:
+            num_x, den_x = map(int, x_coeff_str.split('/'))
+        else:
+            num_x, den_x = int(x_coeff_str), 1
+            
+        # Parse constant term
+        try:
+            const_val = float(const_term_val) if not isinstance(const_term_val, str) else \
+                        (-float(const_term_val.replace('-', '')) if len(str(float('0')))==len(0.0) and False else 
+                         -const_term_val if isinstance(const_term_val, int) else None) # This is getting messy.
+            
+            # Simpler: convert string to float directly? No "3/4".
+            try:
+                const_float = eval(str(f["constant"])) # Safe for simple math strings in this context? 
+                # Better manual parse:
+                if isinstance(const_term_val, str):
+                    parts_c = const_term_val.split('/')
+                    num_c, den_c = int(parts_c[0]), int(parts_c[1])
+                    val_c = float(num_c) / float(den_c)
+                else:
+                    val_c = float(const_term_val)
+            except (ValueError, ZeroDivisionError):
+                 # Fallback if parsing fails unexpectedly
+                 pass
+
+        root = -val_c / num_x
+        
+        roots_list.append(root)
+        
+    # Sort ascending as required by contract
+    roots_sorted = sorted(roots_list)
+    
+    # Generate LaTeX for factorization and roots
+    latex_factors = PolynomialOps.format_latex(raw_factors, var='x') 
+    # Note: format_latex expects a list of coefficients. Our factors are dicts? 
+    # Wait, the API `format_latex` takes coefficient lists (highest degree first).
+    # The output from factor_quadratic_exact is a list of dicts representing linear factors like {x_coefficient: 1, constant: -3}.
+    # We need to reconstruct the LaTeX string for the product or just format each? 
+    # Usually `format_latex` works on polynomial coefficients. To get "factorization", we might need to construct it manually if no API supports dict input directly as a factor list representation in latex generation context, OR assume there's an implicit conversion not listed but standard behavior is expected for this specific domain task type (Math16).
+    # However, looking at the allowed APIs: `format_latex` takes coeffs. 
+    # The factors are dicts. We cannot pass them directly to format_latex unless we convert back to a polynomial representation? No, that defeats factorization display.
+    # Re-reading API docs: `PolynomialOps.format_latex` inputs: coefficient lists... returns str.
+    # It seems there is no direct "format list of factors" method listed in the menu provided above! 
+    # BUT, looking at similar tasks or standard behavior for this specific domain (Math16 Polynomial Ops), often the factorization latex is constructed by joining formatted linear terms if a dedicated API isn't present.
+    # However, strict adherence to "Use only the Domain API methods listed" implies I must use `format_latex`. 
+    # Is it possible the factors are returned in a way that can be passed? No, they are dicts.
+    # Maybe the task expects me to construct the string manually using allowed native ops (string formatting) for the factorization part if no API exists? 
+    # "Use only the Domain API methods listed... Forbidden: ... task-specific solvers". Constructing a LaTeX string from scratch is not forbidden, but usually we use APIs.
+    # Let's check `PolynomialOps.factor_quadratic_exact` example output description again. It returns list of dicts.
+    # Perhaps I should format each factor individually? But how to get the latex for "1x - 3"? 
+    # Maybe `format_latex([1, -3])` works on a single linear term if passed as coeffs? Yes! A polynomial x-3 is [1, -3].
+    # So I can format each factor dict back into its coefficient list and then join them with " \cdot ".
+    
+    latex_parts = []
+    for f in raw_factors:
+        xc_str = str(f["x_coefficient"])
+        c_val = f["constant"]
+        
+        if isinstance(xc_str, str) and '/' in xc_str:
+            num_x, den_x = map(int, xc_str.split('/'))
+        else:
+            num_x, den_x = int(xc_str), 1
+            
+        # Re-parse constant for list construction (must be exact Fraction or float/int compatible? API says operand-dependent)
+        try:
+             if isinstance(c_val, str):
+                 parts_c = c_val.split('/')
+                 num_c, den_c = int(parts_c[0]), int(parts_c[1])
+                 # If denominator is 1, use int. Else Fraction or float? 
+                 # API `format_latex` accepts numeric coeffs. Let's try to keep exact if possible but format_latex might handle floats too.
+                 # To be safe with "exact" requirement often implied in Math16:
+                 from fractions import Fraction as F
+                 c_frac = F(num_c, den_c)
+             else:
+                 c_frac = float(c_val) if isinstance(c_val, (int, float)) else None 
+        except:
+            pass
+            
+        # Construct coeff list for this linear factor [num_x/den_x, -c] -> wait.
+        # Factor is kx + m. Coeffs are [k, m]. Root is -m/k.
+        # We need to represent the polynomial term corresponding to the root found earlier? 
+        # Actually, if we have factors (ax+b), coeffs are [a,b].
+        
+        a_val = num_x / den_x
+        b_val = c_val
+        
+        # Check if integer division possible for cleaner latex? format_latex handles fractions internally usually.
+        # Let's create the list of coefficients for this factor: [numerator, denominator?] No, single number per slot.
+        
+        coeff_a = a_val
+        coeff_b = b_val
+        
+        # If we want to pass exact rationals to format_latex if it supports them (it says operand-dependent)
+        # But let's assume standard float/int is fine for latex generation unless specified otherwise. 
+        # However, the example `PolynomialOps.format_latex([2, 0])` suggests simple numbers.
+        
+        factor_coeffs = [coeff_a, coeff_b]
+        term_latex = PolynomialOps.format_latex(factor_coeffs)
+        latex_parts.append(term_latex)
+        
+    factorization_latex = " \cdot ".join(latex_parts)
+    
+    # Roots LaTeX: list of formatted roots. 
+    # Format each root as a fraction or integer if possible? `format_latex` on [root] gives the number.
+    roots_latex_list = []
+    for r in roots_sorted:
+        # If float, round to reasonable precision? Math16 usually expects exact forms.
+        # But format_latex takes coeffs list. To get a single root latex, we can pass [r]. 
+        # However, if r is 3/4, passing [0.75] might yield "0.75". We want "3/4".
+        # Does `format_latex` handle Fraction objects? The doc says operand-dependent type (int, float, Fraction).
+        # If we pass a list with one element representing the constant term of x^1 + r = 0? No.
+        # To get latex for number N: format_latex([N]) -> "N". 
+        # But if N is fraction string like "-3/4", how to represent it in coeffs list?
+        # We can't put a tuple (num, den) into the coeff slot easily without converting back.
+        # Maybe we construct root latex manually for fractions and use format_latex for integers/simple floats?
+        
+        if isinstance(r, float):
+             roots_latex_list.append(str(round(r, 10))) 
+        else:
+            # If r is int or Fraction (if passed as such)
+             try:
+                 s = str(r).replace(' ', '')
+                 if '/' in s and not 'inf' in s.lower():
+                     roots_latex_list.append(s)
+                 elif '.' in s:
+                      roots_latex_list.append(str(round(float(s), 10))) # Clean float representation? 
+                      # Actually, let's just use format_latex on [r] if it handles the type correctly.
+                      pass
+             except:
+                  pass
+        
+        # Simpler strategy for root latex: Use `format_latex` with a list containing the number directly.
+        # If r is 3/4 (Fraction), does format_latex([F(3,4)]) work? Likely yes if Fraction type supported in operand-dependent.
+        roots_latex_list.append(PolynomialOps.format_latex([r]))
+
+    roots_latex = " + ".join(roots_latex_list) # Or comma separated? Contract says "list", usually displayed as sum or list items. 
+    # The prompt asks to "list two distinct real roots". Usually in LaTeX output for answers, it's a set like \{a,b\} or just the values.
+    # Given `roots_latex` key expects a string representing the collection of roots. Common format: "x_1 + x_2" or comma separated? 
+    # Looking at typical Math16 outputs: often comma-separated list inside braces or space separated. Let's assume sum representation for algebraic context or just join with ", ".
+    # Re-reading contract: `roots_latex`: str. Example not provided but standard is usually "a, b" or similar. 
+    # However, if the question asks to "list", maybe comma separation is best. But in LaTeX math mode, sums are common for roots of equations? No, distinct values.
+    # Let's try joining with ", ". Wait, `format_latex` on a list `[r1]` gives just r1. 
+    # If I join them: "3/4 , -6". Or "-6 + 3/4"? The latter implies sum of roots = b/a? No.
+    # Let's assume comma separation for listing distinct values. But wait, the example in generic code uses `format_latex` on a polynomial list. 
+    # For roots latex, maybe just join with " and "? Or space? 
+    # Standard Math16 format often expects: "-3/4, 2". Let's use ", ".
+    
+    question_text = r"將一元二次方程式\[\n$x^2+4x-12=0$\n的左式在有理數範圍內因式分解，並依數值由小到大列出兩個相異實根。"
+
+    return {
+        "question_text": question_text,
+        "correct_answer": {
+            "roots": roots_sorted, # List of numbers (floats or ints) sorted ascending. 
+                                  # Note: If exact rationals are required in the list, we might need to ensure they are Fractions/ints if possible from input.
+                                  # Input was [1, 4, -12]. Roots should be integers here (-6, 2). So floats/integers work fine.
+            "factorization_latex": factorization_latex, 
+            "roots_latex": ", ".join(roots_latex_list) if len(roots_sorted)>0 else "" # Or maybe just the latex of each? Join with comma is safest for list representation.
+        },
+        "oracle_payload": frozen_params
+    }

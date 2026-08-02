@@ -1,0 +1,21 @@
+def generate(level=1, **kwargs):
+    frozen_params = {
+        "days": 15,
+        "hours_per_generation": 20,
+        "initial": 1,
+        "split_factor": 4
+    }
+
+    # Calculate total hours: 15 days * 20 hours/day
+    total_hours = IntegerOps.add(IntegerOps.mul(frozen_params["days"], frozen_params["hours_per_generation"]), 0)
+
+    # Determine number of generations (k): each generation takes 20 hours, starting from hour 0 to the end.
+    # The problem states "after every 20 hours", implying discrete steps at t=20, 40, ...
+    # Total time is total_hours. Number of full periods = floor(total_hours / period_length).
+    k = IntegerOps.safe_eval(f"total // {frozen_params['hours_per_generation']}")
+
+    return {
+        "question_text": f從 \(1\) 個細胞開始培養。每經過 \(20\) 小時，每個細胞分裂成 \(4\) 個，且新細胞仍依相同規則繼續分裂。經過 \(15\) 天後，細胞總數可寫成 \(4^k\)，求 \(k\)。\n\n",
+        "correct_answer": {"k": k},
+        "oracle_payload": frozen_params,
+    }

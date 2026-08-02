@@ -1,0 +1,34 @@
+```python
+from core.prompts.domain_function_library import FractionOps
+
+def generate(level=1, **kwargs):
+    products = kwargs.get("frozen_params", {}).get("products", [])
+    
+    # Initialize total as 0 (Fraction)
+    total = FractionOps.create(0)
+    
+    for prod in products:
+        left_str = prod["left"]
+        right_str = prod["right"]
+        sign = prod["sign"]
+        
+        a = FractionOps.create(left_str)
+        b = FractionOps.create(right_str)
+        
+        product = FractionOps.mul(a, b)
+        
+        if sign == 1:
+            total = FractionOps.add(total, product)
+        else:
+            total = FractionOps.sub(total, product)
+    
+    # Get exact value and latex representation
+    exact_value = FractionOps.to_exact(total)
+    canonical_latex = FractionOps.to_latex(total)
+    
+    return {
+        "question_text": r"精確計算\n\[2.79\times 89.3-\left(-0.21\times 89.3\right).\]\n答案不得使用近似值。",
+        "correct_answer": {"value": exact_value, "canonical_latex": canonical_latex},
+        "oracle_payload": kwargs.get("frozen_params")
+    }
+```

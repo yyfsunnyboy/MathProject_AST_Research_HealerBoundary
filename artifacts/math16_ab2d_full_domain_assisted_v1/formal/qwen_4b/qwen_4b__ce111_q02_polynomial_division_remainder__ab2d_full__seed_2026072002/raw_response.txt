@@ -1,0 +1,30 @@
+```python
+from core.prompts.domain_function_library import PolynomialOps, Fraction
+
+def generate(level=1, **kwargs):
+    frozen_params = {
+        "dividend_coefficients": [6, 4, 0],
+        "divisor_coefficients": [2, 0, 0]
+    }
+    
+    dividend_coeffs = frozen_params["dividend_coefficients"]
+    divisor_coeffs = frozen_params["divisor_coefficients"]
+    
+    # Perform polynomial division to get quotient and remainder
+    q, r = PolynomialOps.div_qr(dividend_coeffs, divisor_coeffs)
+    
+    # The task asks for the remainder only. 
+    # Note: In standard polynomial arithmetic over integers or rationals, dividing 6x^2+4x by 2x^2 yields a quotient of 3 and remainder 4x.
+    # However, let's verify with the API output which handles exact coefficients (int/Fraction).
+    
+    correct_answer = {
+        "remainder": str(r),
+        "canonical_latex": PolynomialOps.format_latex(r) if r else ""
+    }
+    
+    return {
+        "question_text": f"計算多項式 \\({dividend_coeffs[0]}x^{len(dividend_coeffs)-1}+{dividend_coeffs[1]}x+{dividend_coeffs[2]}) 除以 \\({divisor_coeffs[0]}x^{len(divisor_coeffs)-1}+{''.join([str(c) if c != 0 else '0' for c in divisor_coeffs])}) 所得的餘式。",
+        "correct_answer": correct_answer,
+        "oracle_payload": frozen_params
+    }
+```

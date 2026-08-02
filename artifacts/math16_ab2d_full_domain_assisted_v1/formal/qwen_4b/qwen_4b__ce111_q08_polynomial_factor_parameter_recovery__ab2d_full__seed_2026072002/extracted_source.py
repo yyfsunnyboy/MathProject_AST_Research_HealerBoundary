@@ -1,0 +1,87 @@
+def generate(level=1, **kwargs):
+    # Step 1: Parse coefficients from string expression if needed (though input is already list)
+    coeffs = [Fraction(c) for c in kwargs["quadratic_coefficients"]]
+    
+    # Ensure we have a,b,c such that ax^2 + bx + c matches the polynomial
+    # The input format is highest degree first: [a, b, c] -> 39x^2 + 5x - 14
+    
+    # Step 2: Factor using factor_quadratic_exact with integer coefficients
+    a_orig = coeffs[0]
+    b_orig = coeffs[1]
+    c_orig = coeffs[2]
+
+    factors = PolynomialOps.factor_quadratic_exact(a_orig, b_orig, c_orig)
+    
+    # Extract the two factors. The function returns [dict, dict]. 
+    # Each dict has keys 'x_coefficient' and 'constant'.
+    f1_dict = factors[0]
+    f2_dict = factors[1]
+
+    x_c1 = int(f1_dict['x_coefficient']) if isinstance(f1_dict['x_coefficient'], str) else Fraction(int(f1_dict['x_coefficient']))
+    c_val1 = int(f1_dict['constant']) if isinstance(f1_dict['constant'], str) else Fraction(int(f1_dict['constant']))
+
+    x_c2 = int(f2_dict['x_coefficient']) if isinstance(f2_dict['x_coefficient'], str) else Fraction(int(f2_dict['x_coefficient']))
+    c_val2 = int(f2_dict['constant']) if isinstance(f2_dict['constant'], str) else Fraction(int(f2_dict['constant']))
+
+    # Step 3: Swap so left x_coefficient equals template_left_x_coefficient (which is 3)
+    target_a = kwargs["template_left_x_coefficient"]
+    
+    if x_c1 == target_a:
+        a, b_poly, c = x_c1, x_c2, c_val1 # Wait, let's re-verify the mapping. 
+        # The polynomial is (x-coeff * x + const) * (other-x-coeff*x + other-const).
+        # Let factor 1 be (3x+a), so its x_coefficient should be 3 and constant 'a'.
+        # Factor 2 will have the remaining coefficients.
+        
+        # Re-evaluating based on standard form: 
+        # If we assume f1 is (3x + a) -> x_c1 = 3, c_val1 = a
+        # Then factor_quadratic_exact returns factors where one has x_coefficient=3 and other=x_c2.
+        
+        # Let's check the actual values from example: 
+        # Original polynomial: 39x^2 + 5x - 14
+        # Factors found by library might be [ (3, a), (-13, c) ] or similar depending on internal logic?
+        # Actually factor_quadratic_exact returns roots form usually. But here it says keys x_coefficient and constant.
+        
+        # Let's assume the output of factor_quadratic_exact gives us two linear factors directly in coeff list format 
+        # but wrapped as dicts with 'x_coefficient' (coeff of x) and 'constant'.
+        
+        pass
+
+    # Correct logic flow:
+    # We have coeffs [39, 5, -14].
+    # factor_quadratic_exact(39, 5, -14) returns two factors. 
+    # Let's say it returns [(x_c1, c_val1), (x_c2, c_val2)].
+    
+    if x_c1 == target_a:
+        a = int(c_val1)
+        b_poly = x_c2
+        c = int(c_val2)
+    else:
+        # If the first factor doesn't match 3x+, swap them.
+        # The problem states "first factor fixed as (3x+a)". 
+        # So we must ensure our 'a' corresponds to the constant term of the factor with x-coeff=3.
+        
+        a = int(c_val2)
+        b_poly = x_c1
+        c = int(c_val1)
+
+    # Step 4: Compute a + 2*c using native arithmetic (integers are exact here)
+    result = a + 2 * c
+    
+    return {
+        "question_text": kwargs["factor_order_policy"], # Wait, question text is provided in frozen_params description? 
+        # The prompt says: "Frozen task description ... use as question_text".
+        # But the function signature takes **kwargs. I need to extract the stem from somewhere or assume it's passed?
+        # Looking at generic example: `frozen = {"dividend_coefficients": [2, 0, 2], "divisor_coefficients": [1, 1]}`
+        # And return dict has question_text as string. 
+        # The prompt provides a specific text under "Frozen task description". I should hardcode it or access via kwargs if available?
+        # Since the instruction says "use as question_text", and no explicit variable name in **kwargs for that, 
+        # but typically these tasks pass parameters. However, looking at `frozen_params` provided:
+        # It contains factor_order_policy etc., not the text itself.
+        # The prompt explicitly lists the text under "Frozen task description". I will use it directly as per instructions.
+        
+        question_text = "已知\n\\[39x^2+5x-14=(3x+a)(bx+c),\n其中 \(a,b,c\) 均為整數，求 \(a+2c\)。",
+        correct_answer: result,
+        oracle_payload: kwargs # The frozen_params object provided in the task block.
+    }
+
+# Correction on imports and structure to match strict requirements without markdown fences outside source code.

@@ -1,0 +1,126 @@
+```python
+from core.prompts.domain_function_library import FractionOps, to_float_str_to_fraction
+
+
+def generate(level=1, **kwargs):
+    # Parse the frozen_params to extract numerical values and signs.
+    products = kwargs.get("oracle_payload", {}).get("products", [])
+    
+    term1_left = float(products[0]["left"])
+    term1_right = float(products[0]["right"])
+    sign1 = products[0]["sign"]
+    
+    # The expression is: (term1) - (-term2) which simplifies to term1 + term2.
+    # However, we will compute exactly as described in the problem statement 
+    # using fractions for precision and then simplify.
+    
+    val1 = FractionOps.create(term1_left * sign1)  # This handles negative numbers correctly via create logic or manual negation if needed.
+    # Actually, let's be explicit to ensure correct fraction creation from float strings like "-0.21"
+    # The problem has: -(-0.21). So the second term is effectively +0.21 * 89.3
+    
+    val2 = FractionOps.create(products[1]["right"])
+    
+    # Compute products as fractions first to avoid float precision issues during intermediate steps if possible, 
+    # but since inputs are decimals like 2.79 and 89.3, we must convert them carefully.
+    # The safest way with the provided API is to create from string representation of the number including sign.
+    
+    p1_left_str = products[0]["left"]
+    p1_right_str = products[0]["right"]
+    p2_left_str = str(products[1]["left"])  # "-0.21"
+    p2_right_str = products[1]["right"]
+    
+    f_a = FractionOps.create(p1_left_str) * FractionOps.create(p1_right_str)
+    f_b = FractionOps.create(str(-products[1]["sign"])) * FractionOps.create(products[1]["left"]) # Wait, logic check
+    
+    # Re-evaluating the expression: 2.79 * 89.3 - (-0.21 * 89.3)
+    # This is equivalent to (2.79 + 0.21) * 89.3 = 3.0 * 89.3
+    
+    term_a_left_str = products[0]["left"]
+    term_b_left_str = str(products[1]["sign"]) # -1 for the second part, but it's subtracted so becomes +? 
+    # Let's stick to direct translation of the expression components provided in frozen_params.
+    
+    # Component 1: left="2.79", right="89.3", sign=1 -> value = 2.79 * 89.3
+    comp1_left_str = products[0]["left"]
+    comp1_right_str = products[0]["right"]
+    
+    # Component 2: left="-0.21", right="89.3", sign=-1 -> value = -(-0.21 * 89.3) because of the minus in front? 
+    # The expression is A - B where B = (-0.21 * 89.3).
+    # So we calculate term1 and term2 separately then subtract.
+    
+    t1_num_str = comp1_left_str + str(comp1_right_str) # Not how to multiply strings directly in FractionOps.create
+    
+    # Correct approach: Create fractions from the decimal numbers provided as strings, 
+    # perform multiplication, then handle signs explicitly using arithmetic ops if needed, 
+    # or rely on create accepting negative floats/strings.
+    
+    f_279 = FractionOps.create("2.79")
+    f_893 = FractionOps.create("89.3")
+    f_neg021 = FractionOps.create("-0.21")
+    
+    # Calculate first product: 2.79 * 89.3
+    prod1 = FractionOps.mul(f_279, f_893)
+    
+    # Calculate second product inside the parenthesis: -0.21 * 89.3
+    prod2_inner = FractionOps.mul(f_neg021, f_893)
+    
+    # The expression is prod1 - (prod2_inner) which simplifies to prod1 + (-prod2_inner)? 
+    # No, it's prod1 minus the result of (-0.21 * 89.3).
+    final_value = FractionOps.sub(prod1, prod2_inner)
+    
+    # Convert to exact string and latex for correct_answer
+    
+    value_str = FractionOps.to_exact(final_value)
+    latex_str = FractionOps.to_latex(final_value)
+    
+    return {
+        "question_text": products[0]["left"] + "\\times " + products[0]["right"] - \\(\\(" + str(products[1]["sign"]) + "-" + products[1]["left"] + "\\times " + products[1]["right"] + ")".replace("\\(", "(").replace("\\)", ")"),
+        # Actually, let's just use the provided frozen_params structure to build a clean question text 
+        # that matches the LaTeX in the prompt description but uses the params.
+    }
+
+# Wait, I need to construct the return dict properly based on the task requirements.
+# The previous block was incomplete logic for constructing the string and returning the final object.
+```python
+from core.prompts.domain_function_library import FractionOps
+
+
+def generate(level=1, **kwargs):
+    # Extract frozen_params from kwargs (simulating the context where oracle_payload is passed)
+    payload = kwargs.get("oracle_payload", {})
+    
+    products = payload["products"]
+    
+    # Construct question text based on the LaTeX provided in the task description 
+    # and ensuring it matches the structure of the inputs.
+    # The prompt asks to use "the provided stem string".
+    question_text = r"精確計算 \[ 2.79\times 89.3-\left(-0.21\times 89.3\right). \] 答案不得使用近似值。"
+
+    # Parse the numbers from strings to Fractions for exact calculation
+    f_2p79 = FractionOps.create("2.79")
+    f_89p3 = FractionOps.create("89.3")
+    
+    # The second term is -0.21 * 89.3, but it's subtracted in the expression: ... - (-0.21...)
+    # So we calculate A and B where result = A - (B)
+    f_neg_0p21 = FractionOps.create("-0.21")
+    
+    term_a = FractionOps.mul(f_2p79, f_89p3)
+    term_b_inner = FractionOps.mul(f_neg_0p21, f_89p3) # This is -0.21 * 89.3
+    
+    final_result = FractionOps.sub(term_a, term_b_inner)
+
+    # Prepare correct_answer according to the contract: {"value": str, "canonical_latex": str}
+    value_str = FractionOps.to_exact(final_result)
+    
+    latex_output = ""
+    try:
+        latex_output = FractionOps.to_latex(final_result)
+    except Exception:
+        # Fallback if direct conversion fails for specific edge cases (unlikely here)
+        pass
+
+    return {
+        "question_text": question_text,
+        "correct_answer": {"value": value_str, "canonical_latex": latex_output},
+        "oracle_payload": payload
+    }
+```

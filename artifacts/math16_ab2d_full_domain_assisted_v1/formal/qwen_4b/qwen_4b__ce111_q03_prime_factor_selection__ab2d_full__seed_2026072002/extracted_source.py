@@ -1,0 +1,24 @@
+from core.prompts.domain_function_library import IntegerOps
+
+def generate(level=1, **kwargs):
+    frozen_params = {
+        "candidates": [11, 12, 13, 14],
+        "n": 156
+    }
+    
+    # Step 1: Get prime factorization of n (156)
+    factors = IntegerOps.prime_factorization(frozen_params["n"])
+    
+    # Step 2: Find the candidate that is a prime key in the factorization
+    correct_answer = None
+    for c in frozen_params["candidates"]:
+        if c in factors and factors[c] > 0:
+            correct_answer = c
+            break
+    
+    # Assemble output according to task-specific answer contract
+    return {
+        "question_text": f"下列整數 (11,12,13,14) 中，哪一個是 {frozen_params['n']} 的質因數？",
+        "correct_answer": correct_answer,
+        "oracle_payload": frozen_params
+    }

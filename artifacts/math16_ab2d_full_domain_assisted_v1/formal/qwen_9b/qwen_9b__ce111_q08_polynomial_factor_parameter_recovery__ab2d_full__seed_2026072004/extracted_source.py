@@ -1,0 +1,45 @@
+def generate(level=1, **kwargs):
+    # 1. Factor the quadratic using exact coefficients [39, 5, -14]
+    factors = PolynomialOps.factor_quadratic_exact(39, 5, -14)
+    
+    # The API returns a list of two dicts: [{"x_coefficient": ..., "constant": ...}, {"x_coefficient": ..., "constant": ...}]
+    f0 = factors[0]
+    f1 = factors[1]
+    
+    # Current state from factor_quadratic_exact is not guaranteed to match the template order.
+    # Template requires left x-coefficient (of 39) to be associated with 'a' in (3x+a).
+    # We must swap if necessary so that f_left['x_coefficient'] == 3.
+    
+    current_x0 = f0["x_coefficient"]
+    current_x1 = f1["x_coefficient"]
+    
+    template_target_x = kwargs.get("template_left_x_coefficient", 3)
+    
+    # Determine which factor is the "left" one based on x-coefficient matching target
+    if current_x0 == template_target_x:
+        left_factor = f0
+        right_factor = f1
+    else:
+        left_factor = f1
+        right_factor = f0
+        
+    # Extract a and c from (3x + a) -> x_coefficient is 3, constant term is 'a'
+    # The other factor is (bx + c). We need to identify b and c.
+    # However, the problem asks for a+2c where (3x+a)(bx+c) = original polynomial.
+    # left_factor corresponds to (3x + a), so left_factor["constant"] is 'a'.
+    right_factor corresponds to (bx + c). But wait, does the order of factors in multiplication matter?
+    Yes: (3x+a)*(bx+c). The constant term of the first factor is 'a'.
+    The second factor has x-coefficient 'b' and constant 'c'.
+    
+    a = left_factor["constant"]
+    b = right_factor["x_coefficient"]
+    c = right_factor["constant"]
+    
+    # Compute result: a + 2*c
+    result = int(a) + 2 * int(c)
+    
+    return {
+        "question_text": kwargs.get("frozen_description", ""),
+        "correct_answer": result,
+        "oracle_payload": kwargs.get("frozen_params", {})
+    }

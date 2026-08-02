@@ -1,0 +1,35 @@
+{
+  "provider": "gemini",
+  "model": "gemini-3.5-flash",
+  "contents": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "# Math16 Ab2d+domain-menu\nWrite only Python source implementing `def generate(level=1, **kwargs):`.\nUse only the Domain API methods listed in the Domain API menu below for this domain.\nAllowed native ops: arithmetic, comparisons, if/else, loops, list/dict, unpacking, sorting.\nForbidden: other domain public APIs; task-specific solvers; reading audit payloads;\nmanifest answers; evaluator expected answers; answer lookup by task_id;\nprescribed per-item API sequences (none are provided — choose APIs yourself).\nDo not use Markdown fences or explanations outside the Python source.\nImport Domain API from `core.prompts.domain_function_library` only as needed.\n\nDomain for this task: IntegerOps.\n\n<!-- DOMAIN_API_BLOCK_BEGIN -->\n# Domain API menu: IntegerOps\n\nThis menu lists every SUPPORTED_PUBLIC method on `IntegerOps`.\nIt is domain-general: it does not name a Math16 task, prescribe which\nAPIs a specific item must call, or give call order / solution steps.\n\n## Public APIs\n- `IntegerOps.add` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | returns: int\n  inputs: a,b: int; bool forbidden\n  returns_shape: `{\"json_safe\": true, \"type\": \"int\"}`\n  boundary: none\n  example: `IntegerOps.add(10, 20)  # 30`\n\n- `IntegerOps.fmt_num` | import: `core.prompts.domain_function_library` | signature: `(n)` | returns: str\n  inputs: ordered numeric n\n  returns_shape: `{\"json_safe\": true, \"type\": \"str\"}`\n  boundary: presentation only\n  example: `IntegerOps.fmt_num(-2)  # \"(-2)\"`\n\n- `IntegerOps.is_divisible` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | returns: bool\n  inputs: non-bool int a,b; float/bool raise ValueError; b=0 returns False (not an exception)\n  returns_shape: `{\"json_safe\": true, \"type\": \"bool\"}`\n  boundary: not an answer integer\n  example: `IntegerOps.is_divisible(21, 7)  # True`\n\n- `IntegerOps.positive_divisors` | import: `core.prompts.domain_function_library` | signature: `(n)` | returns: list[int]  # ascending positive divisors\n  inputs: non-bool int n>0; no other task filters\n  returns_shape: `{\"element_types\": [\"int\"], \"json_safe\": true, \"ordering\": \"ascending\", \"type\": \"list\"}`\n  boundary: filter multiples in model assembly if needed\n  example: `IntegerOps.positive_divisors(12)  # [1, 2, 3, 4, 6, 12]`\n\n- `IntegerOps.prime_factorization` | import: `core.prompts.domain_function_library` | signature: `(n)` | returns: dict[int, int]  # prime -> exponent; ±1 -> {}\n  inputs: non-bool int; n!=0; factors abs(n)\n  returns_shape: `{\"json_safe\": true, \"keys\": \"positive primes\", \"type\": \"dict\", \"values\": \"positive int exponents\"}`\n  boundary: no selected/answer field\n  example: `IntegerOps.prime_factorization(12)  # {2: 2, 3: 1}`\n\n- `IntegerOps.safe_eval` | import: `core.prompts.domain_function_library` | signature: `(expr)` | returns: int | float  # bool and container results raise ValueError\n  inputs: arithmetic expression string using literals,+,-,*,/,//,%,**,abs,sum,min,max; trusted generated input only\n  returns_shape: `{\"forbidden_types\": [\"bool\", \"tuple\", \"list\", \"dict\"], \"json_safe\": true, \"type\": \"union\", \"types\": [\"int\", \"float\"]}`\n  boundary: exact-int contracts must require type(value) is int; floats are never coerced to int\n  example: `IntegerOps.safe_eval(\"2**4\")  # 16`\n\n- `IntegerOps.sub` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | returns: int\n  inputs: a,b: int; bool forbidden\n  returns_shape: `{\"json_safe\": true, \"type\": \"int\"}`\n  boundary: none\n  example: `IntegerOps.sub(30, 8)  # 22`\n\n## Generic domain code example (non-formal numbers)\n```python\nfrom core.prompts.domain_function_library import IntegerOps\n\ndef generate(level=1, **kwargs):\n    # Generic API-usage illustration only — not a Math16 formal item.\n    # Demonstrates IntegerOps calls; the return shape below is NOT the answer\n    # contract for any Math16 task. Assemble correct_answer exactly according\n    # to ## Task-specific answer contract.\n    frozen = {\"n\": 12, \"candidates\": [2, 7, 11]}\n    factors = IntegerOps.prime_factorization(frozen[\"n\"])\n    chosen = [c for c in frozen[\"candidates\"] if c in factors][0]\n    return {\n        \"question_text\": \"example stem\",\n        \"correct_answer\": chosen,  # ILLUSTRATIVE ONLY — see Task-specific answer contract\n        \"oracle_payload\": frozen,\n    }\n```\n\n## Shared output contract\nReturn a dict with exactly three keys: question_text, correct_answer, oracle_payload.\n- question_text: the provided stem string (do not rebuild from scratch unless required).\n- correct_answer: JSON-compatible value matching ## Task-specific answer contract\n  (not the generic domain code example).\n- oracle_payload: must exactly equal the frozen_params object provided in the task block.\nDo not read audit payloads, evaluator expected answers, or answer tables.\nExact-value adapters such as to_exact (when used) only serialize values to JSON-safe\nforms; they do not decide the final correct_answer schema.\n<!-- DOMAIN_API_BLOCK_END -->\n\n## Task-specific answer contract\nSource: agent_tools/finals_rebuild/math_answer_contracts.py (oracle_type=`integer_exact_k`).\nAssemble `correct_answer` exactly according to this contract. Do not treat the generic domain code example as the answer shape.\nRequired return schema:\n{\n  \"question_text\": str,\n  \"correct_answer\": {\"k\": int},\n  \"oracle_payload\": dict\n}\n- Exact k match.\n\n## Task\ntask_id: `ce111_nonchoice_q01_part1_exponential_growth`\ndomain_ops: `IntegerOps`\nskill_id: `math16_exponential_growth_generation_count`\n\n## Frozen task description (use as question_text)\n從 \\(1\\) 個細胞開始培養。每經過 \\(20\\) 小時，每個細胞分裂成 \\(4\\) 個，且新細胞仍依相同規則繼續分裂。經過 \\(15\\) 天後，細胞總數可寫成 \\(4^k\\)，求 \\(k\\)。\n\n## frozen_params (oracle_payload must equal this object)\n{\n  \"days\": 15,\n  \"hours_per_generation\": 20,\n  \"initial\": 1,\n  \"split_factor\": 4\n}\n"
+        }
+      ]
+    }
+  ],
+  "generation_config": {
+    "temperature": 0.0,
+    "max_output_tokens": 24576,
+    "top_p": 1.0,
+    "top_k": 1
+  },
+  "timeout_seconds": 600,
+  "tools": null,
+  "code_execution": false,
+  "function_calling": false,
+  "api_key_source": "environment",
+  "api_key_present": true,
+  "parameter_authority": "artifacts/math16_ab2d_full_domain_assisted_v1/preregistration/model_settings.json",
+  "math16_runtime_evidence": "docs/experiments/manifests/math16_pilot02_full_runtime_manifest.json",
+  "model_key": "gemini",
+  "condition": "ab2d_domain_menu",
+  "seed": 2026071301,
+  "qualification_only": false,
+  "primary_evidence": true,
+  "num_ctx_context_limit": "UNRESOLVED",
+  "thinking_reasoning_setting": false
+}

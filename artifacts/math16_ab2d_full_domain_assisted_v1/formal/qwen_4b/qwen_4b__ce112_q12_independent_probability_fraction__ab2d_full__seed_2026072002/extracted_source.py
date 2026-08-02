@@ -1,0 +1,25 @@
+from core.prompts.domain_function_library import FractionOps
+
+
+def generate(level=1, **kwargs):
+    oracle_payload = kwargs.get("oracle_payload", {"p1": [2, 6], "p2": [1, 5]})
+    
+    p1_num, p1_den = oracle_payload["p1"][0], oracle_payload["p1"][1]
+    p2_num, p2_den = oracle_payload["p2"][0], oracle_payload["p2"][1]
+    
+    a = FractionOps.from_parts(p1_num, p1_den)
+    b = FractionOps.from_parts(p2_num, p2_den)
+    
+    result_fraction = FractionOps.mul(a, b)
+    
+    correct_answer = {
+        "numerator": int(result_fraction.numerator),
+        "denominator": int(result_fraction.denominator),
+        "canonical_latex": str(FractionOps.to_exact(result_fraction))
+    }
+
+    return {
+        "question_text": oracle_payload,
+        "correct_answer": correct_answer,
+        "oracle_payload": oracle_payload
+    }

@@ -1,0 +1,217 @@
+from core.prompts.domain_function_library import PolynomialOps
+
+
+def generate(level=1, **kwargs):
+    # Parse the quadratic coefficients from frozen_params: [a2, a1, a0] = [39, 5, -14]
+    coeffs = kwargs.get("quadratic_coefficients", [39, 5, -14])
+    
+    # The task asks for (a + 2c) given the factorization:
+    # 39x^2 + 5x - 14 = (3x + a)(bx + c)
+    # Expanding the right side: 
+    # (3x + a)(bx + c) = 3b*x^2 + (3c + ab)*x + ac
+    
+    # Comparing coefficients with ax^2 + bx + c form (here coeffs[0], coeffs[1], coeffs[2]):
+    # x^2 term: 3 * b = 39 => b = 13
+    # constant term: a * c = -14
+    # linear term: 3c + ab = 5
+    
+    # From the first equation, we can determine b.
+    template_left_x_coefficient = kwargs.get("template_left_x_coefficient", 3)
+    
+    # Calculate b using the leading coefficient relationship: a2 * (b / left_a) = coeffs[0]
+    # Actually, from expansion: coeff_of_x_squared = left_a * right_b
+    # So, right_b = coeffs[0] // template_left_x_coefficient
+    
+    if template_left_x_coefficient == 0:
+        raise ValueError("Leading coefficient of the first factor cannot be zero.")
+
+    b_val = coeffs[0] // template_left_x_coefficient
+    
+    # Now we have a system for integers a and c:
+    # 1) a * c = -14
+    # 2) 3c + (a * b) = 5 => 3c + 13a = 5
+    
+    # We can iterate through integer factors of -14 to find 'a' and 'c'.
+    possible_factors = []
+    
+    # Get all pairs (a, c) such that a * c == -14
+    for i in range(-20, 20):
+        if i != 0 and (-14 // i) % 1 == 0:
+            j = -14 // i
+            possible_factors.append((i, j))
+    
+    # Filter pairs that satisfy the linear coefficient equation: 3c + ab = 5
+    valid_pairs = []
+    for a_val, c_val in possible_factors:
+        if 3 * c_val + (a_val * b_val) == coeffs[1]:
+            valid_pairs.append((a_val, c_val))
+    
+    # According to the task description "factor_order_policy=strict_source_template", 
+    # we assume there is a unique solution or we pick based on integer constraints.
+    if not valid_pairs:
+        raise ValueError("No integer factors found that satisfy the equation.")
+        
+    # In case of multiple solutions, typically Math16 problems have a unique intended answer.
+    # Let's verify which one fits standard factorization logic. 
+    # Equation 3c + ab = 5 with b=13: 3c + 13a = 5
+    
+    if len(valid_pairs) > 1:
+        # If multiple exist, usually the problem implies a specific ordering or context not fully explicit here,
+        # but let's check the constraints again. 
+        # Factors of -14: (-1, 14), (1, -14), (-2, 7), (2, -7) and their reverses with signs flipped for product -14.
+        # Pairs checked above cover all integer pairs multiplying to -14 in range [-20, 20].
+        
+        # Let's re-evaluate: 
+        # Case 1: a=-1, c=14 -> 3(14) + (-1)(13) = 42 - 13 = 29 != 5
+        # Case 2: a=1, c=-14 -> 3(-14) + (1)(13) = -42 + 13 = -29 != 5
+        # Case 3: a=-2, c=7 -> 3(7) + (-2)(13) = 21 - 26 = -5 != 5
+        # Case 4: a=2, c=-7 -> 3(-7) + (2)(13) = -21 + 26 = 5 == 5. This works!
+        
+        selected_a, selected_c = valid_pairs[0]
+    else:
+        selected_a, selected_c = valid_pairs[0]
+
+    # The question asks for a + 2c
+    result = selected_a + 2 * selected_c
+    
+    return {
+        "question_text": kwargs.get("frozen_params", {}).get("stem" if hasattr(kwargs.get('frozen_params'), 'keys') else "", 
+                   f"{kwargs.get('quadratic_coefficients', [39,5,-14])}"), # Reconstructing text based on input structure is complex without full stem
+        "correct_answer": result,
+        "oracle_payload": kwargs.get("frozen_params", {"factor_order_policy": "strict_source_template"})
+    }
+
+# Correction: The prompt requires using the frozen_params directly as oracle_payload and constructing question_text from it.
+# Since I cannot dynamically reconstruct LaTeX perfectly without a library that handles math strings, 
+# and the instruction says 'use as question_text', I will use the provided stem string if available or construct logically.
+# However, looking at the input structure: `frozen_params` contains coefficients but not necessarily the full text unless passed in kwargs differently.
+# The prompt provides a specific "Frozen task description" which should be used as question_text.
+
+def generate(level=1, **kwargs):
+    # Extract data from frozen_params provided in the context or defaults if missing (though usually present)
+    fp = kwargs.get("frozen_params", {
+        "factor_order_policy": "strict_source_template",
+        "quadratic_coefficients": [39, 5, -14],
+        "template_left_x_coefficient": 3
+    })
+
+    # Use the provided stem as question_text. 
+    # Note: The prompt instruction says 'use as question_text'. I will assume the variable `fp` might contain a key for text or we reconstruct from coeffs if not present in this specific call context, 
+    # but strictly following "Frozen task description (use as question_text)", I should use that string.
+    # Since the function signature doesn't pass the stem directly unless via kwargs, and to be safe with 'frozen_params' being the payload:
+    
+    coeffs = fp.get("quadratic_coefficients", [39, 5, -14])
+    left_a = fp.get("template_left_x_coefficient", 3)
+
+    # Solve for a and c as derived in previous thought block
+    
+    b_val = coeffs[0] // left_a if left_a != 0 else None
+    
+    possible_factors = []
+    target_product = -14 # constant term is coeffs[2]
+    
+    # Iterate to find integer factors of the constant term
+    for a_candidate in range(-50, 51):
+        if a_candidate == 0: continue
+        c_candidate = target_product // a_candidate
+        
+        # Check linear coefficient condition: (left_a * b) + (3 * c) ? No.
+        # Expansion of (ax+a)(bx+c) -> ax^2 term is left_a*b, x term is left_a*c + a*b_const? 
+        # Wait, the form given in problem description text was: 39x^2+5x-14=(3x+a)(bx+c)
+        # So first factor is (left_x * x + a), second is (b*x + c). Note 'a' here is constant term of first factor.
+        
+        if b_val == None or target_product % a_candidate != 0: continue
+        
+        # Calculate expected linear coefficient from expansion: 
+        # Coeff_x = left_a * c + a * b_val
+        calc_linear_coeff = (left_a * c_candidate) + (a_candidate * b_val)
+        
+        if calc_linear_coeff == coeffs[1]:
+            possible_factors.append((a_candidate, c_candidate))
+
+    selected_pair = None
+    
+    # Policy: strict_source_template implies following the order or uniqueness. 
+    # Usually these problems have a unique integer solution for integers a,b,c.
+    
+    if len(possible_factors) > 0:
+        # If multiple exist, pick based on standard factorization conventions (often positive leading factors etc), 
+        # but here we just need one valid set that matches the equation exactly.
+        selected_pair = possible_factors[0] 
+        
+    a_val, c_val = selected_pair
+    
+    answer = a_val + 2 * c_val
+
+    return {
+        "question_text": f"已知 $39x^2+5x-14=(3x+a)(bx+c)$，其中 $a,b,c$ 均為整數，求 $a+2c$。", 
+        # Reconstructing the text from the prompt's description since it wasn't passed as a separate arg in kwargs explicitly,
+        # but the instruction says "use as question_text". I will use the string provided in the task block.
+    }
+
+# Final clean implementation ensuring all constraints are met and using only allowed ops.
+from core.prompts.domain_function_library import PolynomialOps
+
+def generate(level=1, **kwargs):
+    fp = kwargs.get("frozen_params", {
+        "factor_order_policy": "strict_source_template",
+        "quadratic_coefficients": [39, 5, -14],
+        "template_left_x_coefficient": 3
+    })
+
+    # The question text is explicitly provided in the task block description. 
+    # We use it directly as per instructions: 'use as question_text'.
+    question_stem = "已知 $39x^2+5x-14=(3x+a)(bx+c)$，其中 $a,b,c$ 均為整數，求 $a+2c$。"
+
+    coeffs = fp.get("quadratic_coefficients", [39, 5, -14])
+    left_a = fp.get("template_left_x_coefficient", 3)
+
+    # Coefficients: a2=39, a1=5, a0=-14
+    # Equation: (left_a * x + a)(b * x + c) = left_a*b*x^2 + (left_a*c + a*b)*x + a*c
+    
+    if len(coeffs) < 3:
+        raise ValueError("Quadratic coefficients must have at least 3 elements.")
+
+    # Determine b from the leading coefficient
+    try:
+        b_val = coeffs[0] // left_a
+    except ZeroDivisionError:
+        raise ValueError(f"Leading factor coefficient {left_a} cannot be zero.")
+
+    target_const = coeffs[2]
+    
+    # Find integer a, c such that a*c == target_const and (left_a * c + a * b_val) == coeffs[1]
+    solutions = []
+    
+    # Search range for factors of -14 is small. 
+    limit = 50
+    
+    for a in range(-limit, limit+1):
+        if a == 0: continue
+        if target_const % a != 0: continue
+        
+        c = target_const // a
+        
+        check_linear = (left_a * c) + (a * b_val)
+        
+        if check_linear == coeffs[1]:
+            solutions.append((a, c))
+
+    # According to "strict_source_template", we expect a unique solution or the first valid one.
+    # In this specific math problem: 
+    # Factors of -14: (-2, 7), (2, -7) etc.
+    # If a=-2, c=7 -> linear = 3*7 + (-2)*13 = 21-26 = -5 != 5
+    # If a=2, c=-7 -> linear = 3*(-7) + (2)*13 = -21+26 = 5 == 5. Correct.
+    
+    if not solutions:
+        raise ValueError("No integer solution found.")
+
+    selected_a, selected_c = solutions[0] # Pick the first valid pair
+    
+    result_val = selected_a + 2 * selected_c
+
+    return {
+        "question_text": question_stem,
+        "correct_answer": int(result_val),
+        "oracle_payload": fp
+    }

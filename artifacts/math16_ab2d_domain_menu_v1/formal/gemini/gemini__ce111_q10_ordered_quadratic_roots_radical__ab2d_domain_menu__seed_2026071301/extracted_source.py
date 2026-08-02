@@ -1,0 +1,47 @@
+from core.prompts.domain_function_library import RadicalOps
+
+def generate(level=1, **kwargs):
+    # Frozen params
+    frozen_params = {
+        "equation": "(x-2)^2=3",
+        "order": "a>b",
+        "target": "2a+b"
+    }
+    
+    # Solve (x-2)^2 = 3
+    # x = 2 +/- sqrt(3)
+    # Since a > b:
+    # a = 2 + sqrt(3)
+    # b = 2 - sqrt(3)
+    
+    term_a = {"rational": 2, "radical_coefficient": 1, "radicand": 3}
+    term_b = {"rational": 2, "radical_coefficient": -1, "radicand": 3}
+    
+    # 2a
+    two_a = RadicalOps.scale_linear_radical(term_a, 2)
+    
+    # 2a + b
+    result_term = RadicalOps.add_linear_radicals(two_a, term_b)
+    
+    # Format
+    canonical_latex = RadicalOps.format_linear_radical(result_term)
+    
+    # Ensure exact integers
+    rational = RadicalOps.exact_integer(result_term["rational"])
+    radical_coefficient = RadicalOps.exact_integer(result_term["radical_coefficient"])
+    radicand = RadicalOps.exact_integer(result_term["radicand"])
+    
+    question_text = "一元二次方程式\n\\[\n(x-2)^2=3\n\\]\n的兩根為 \\(a,b\\)，且 \\(a>b\\)。求 \\(2a+b\\)，答案須保持精確根式形式。"
+    
+    return {
+        "question_text": question_text,
+        "correct_answer": {
+            "result": {
+                "rational": rational,
+                "radical_coefficient": radical_coefficient,
+                "radicand": radicand,
+                "canonical_latex": canonical_latex
+            }
+        },
+        "oracle_payload": frozen_params
+    }

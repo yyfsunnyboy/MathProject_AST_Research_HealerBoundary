@@ -1,0 +1,49 @@
+def generate(level=1, **kwargs):
+    frozen_params = {
+        "dividend_coefficients": [6, 4, 0],
+        "divisor_coefficients": [2, 0, 0]
+    }
+    
+    # Perform polynomial division to get quotient and remainder coefficients
+    q_coeffs, r_coeffs = PolynomialOps.div_qr(
+        frozen_params["dividend_coefficients"], 
+        frozen_params["divisor_coefficients"]
+    )
+    
+    # Format the remainder as LaTeX string. Note: div_qr returns list of ints/strs (JSON safe).
+    # format_latex expects numeric coeffs, but if r_coeffs contains 'p/q' strings it might fail or need handling.
+    # However, looking at example for div_qr return shape: "elements": [{"element_types": ["int", "str"]...}].
+    # If the remainder is a fraction like 1/2, div_qr returns ['0', 'p/q']? Or just string representation?
+    # The spec says element_types are int or str. Usually for fractions it uses 'p/q'.
+    # format_latex signature: (coeffs, var='x'). It expects numeric coefficients usually but might handle strings if they represent numbers? 
+    # Actually, looking at the boundary note "already exact JSON leaves", div_qr returns JSON safe types.
+    # If r_coeffs contains 'p/q', we cannot pass it directly to format_latex which likely expects ints/floats/Fractions for math rendering.
+    # However, if the remainder is 0 (int), or integer coefficients, it works.
+    # Let's check the specific case: (6x^2+4x) / (2x^2). 
+    # Dividend: [6, 4, 0] -> 6x^2 + 4x + 0
+    # Divisor: [2, 0, 0] -> 2x^2 + 0x + 0 = 2x^2.
+    # Division: (6x^2+4x) / (2x^2). 
+    # Term x^2 cancels to 3. Remainder is 4x.
+    # So remainder coefficients should be [4, 0]. These are ints. format_latex will work fine with [4, 0].
+    
+    r_latex = PolynomialOps.format_latex(r_coeffs)
+    
+    return {
+        "question_text": "計算多項式 \(6x^2+4x\) 除以 \(2x^2\) 所得的餘式。",
+        "correct_answer": {
+            "remainder": str(r_coeffs), # The JSON safe representation (list of ints/strs) is the canonical answer for remainder coefficients usually, but contract asks for string. 
+                                       # Wait, contract says: {"remainder": str, ...}. Does it mean a list serialized to string or just the latex?
+                                       # Looking at similar tasks in this domain style, "remainder" often refers to the coefficient list representation (JSON safe) OR the LaTeX if requested separately.
+                                       # The example generic code had quotient_latex and remainder_latex separate. 
+                                       # Here contract: {"remainder": str, "canonical_latex": str}.
+                                       # It is highly likely "remainder" expects the JSON-safe string of coefficients list (e.g., "[4, 0]") or just the latex?
+                                       # Given `correct_answer` usually holds the ground truth data structure. 
+                                       # If I look at `div_qr`, it returns tuple[list]. The contract asks for a dict with "remainder": str.
+                                       # It is safest to provide the string representation of the coefficient list (e.g., "[4, 0]") as that is the exact value from oracle_payload logic usually expected in these strict contracts unless specified otherwise. 
+                                       # However, sometimes they want just the latex for remainder too? But there is a separate "canonical_latex".
+                                       # Let's assume "remainder" holds the coefficient list string representation (JSON safe) and "canonical_latex" holds the rendered math.
+            },
+            "canonical_latex": r_latex,
+        },
+        "oracle_payload": frozen_params,
+    }

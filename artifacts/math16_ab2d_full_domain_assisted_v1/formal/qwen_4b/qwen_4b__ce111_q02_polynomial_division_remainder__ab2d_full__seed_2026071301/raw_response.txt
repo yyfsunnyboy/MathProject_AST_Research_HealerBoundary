@@ -1,0 +1,99 @@
+```python
+from core.prompts.domain_function_library import PolynomialOps, Fraction
+
+def generate(level=1, **kwargs):
+    frozen_params = {
+        "dividend_coefficients": [6, 4, 0],
+        "divisor_coefficients": [2, 0, 0]
+    }
+    
+    dividend_coeffs = frozen_params["dividend_coefficients"]
+    divisor_coeffs = frozen_params["divisor_coefficients"]
+    
+    quotient, remainder = PolynomialOps.div_qr(dividend_coeffs, divisor_coeffs)
+    
+    # The task asks for the remainder only. 
+    # We need to format it as a string if necessary or just use its coefficients representation?
+    # Looking at the contract: "remainder": str
+    
+    # Let's check what type 'remainder' is from div_qr. It returns list[int | str].
+    # For [6, 4, 0] / [2, 0, 0]: 
+    # Dividend = 6x^2 + 4x
+    # Divisor = 2x^2
+    # Quotient = (6/2) = 3. Remainder = 4x.
+    
+    # The contract requires "remainder": str and "canonical_latex": str.
+    # We should format the remainder coefficients into a LaTeX string using format_latex.
+    
+    if len(remainder) == 0:
+        rem_coeffs = [0]
+    else:
+        rem_coeffs = list(remainder)
+        
+    canonical_latex = PolynomialOps.format_latex(rem_coeffs, var='x')
+    
+    # The remainder itself needs to be a string. 
+    # Usually in these tasks, the "value" of the remainder is represented by its coefficients or latex form?
+    # Given "canonical_latex": str is required separately, maybe "remainder": str expects the LaTeX representation too?
+    # Or perhaps it expects the coefficient list converted to string? 
+    # Let's assume both point to the same mathematical object but formatted differently.
+    # Since canonical_latex is explicitly requested as a separate key with 'str' type, 
+    # and remainder is also str, they likely represent the polynomial in different forms or are identical representations of the result.
+    # Given the example structure often seen: "remainder": "<latex>", "canonical_latex": "<latex>"?
+    # Or maybe one is coefficient list stringified? 
+    # Let's look at similar tasks logic: usually remainder holds the value (often latex) and canonical_latex reinforces it.
+    # I will set both to the LaTeX representation of the remainder polynomial for consistency with "str" requirement if coefficients aren't directly serializable as a simple str without context, 
+    # but wait, Python lists can be jsonified. However, the contract says type is 'str'.
+    # Let's use the latex string for both keys to ensure validity and clarity of the mathematical result.
+
+    correct_answer = {
+        "remainder": canonical_latex,
+        "canonical_latex": canonical_latex
+    }
+    
+    return {
+        "question_text": frozen_params["dividend_coefficients"], # Wait, question_text must be the stem string provided in task description.
+        "correct_answer": correct_answer,
+        "oracle_payload": frozen_params
+    }
+
+# Correction: The prompt says 'Frozen task description (use as question_text)' which is a Chinese sentence about polynomial division.
+# I need to extract that text into question_text variable properly before returning.
+```python
+from core.prompts.domain_function_library import PolynomialOps, Fraction
+
+def generate(level=1, **kwargs):
+    # Define the frozen parameters exactly as provided in the task block
+    oracle_payload = {
+        "dividend_coefficients": [6, 4, 0],
+        "divisor_coefficients": [2, 0, 0]
+    }
+
+    dividend_coeffs = oracle_payload["dividend_coefficients"]
+    divisor_coeffs = oracle_payload["divisor_coefficients"]
+
+    # Perform polynomial division to get quotient and remainder
+    q, r = PolynomialOps.div_qr(dividend_coeffs, divisor_coeffs)
+
+    # Prepare the question text as specified in the task description
+    question_text = "計算多項式 \(6x^2+4x\) 除以 \(2x^2\) 所得的餘式。"
+
+    # Format the remainder coefficients into a LaTeX string using format_latex
+    rem_coeffs_list = list(r) if r else [0]
+    
+    # Ensure we handle potential empty lists correctly, though div_qr usually returns non-empty for valid inputs unless zero polynomial.
+    canonical_latex_str = PolynomialOps.format_latex(rem_coeffs_list, var='x')
+
+    # Construct the correct_answer dictionary according to the task-specific answer contract:
+    # {"remainder": str, "canonical_latex": str}
+    correct_answer = {
+        "remainder": canonical_latex_str,
+        "canonical_latex": canonical_latex_str
+    }
+
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer,
+        "oracle_payload": oracle_payload
+    }
+```

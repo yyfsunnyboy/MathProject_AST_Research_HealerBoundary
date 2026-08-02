@@ -1,0 +1,35 @@
+```python
+from core.prompts.domain_function_library import IntegerOps
+
+def generate(level=1, **kwargs):
+    frozen_params = {
+        "days": 15,
+        "hours_per_generation": 20,
+        "initial": 1,
+        "split_factor": 4
+    }
+    
+    # Calculate total hours passed: days * hours per generation
+    total_hours = IntegerOps.add(IntegerOps.mul(frozen_params["days"], frozen_params["hours_per_generation"]), 0)
+    
+    # Each generation takes hours_per_generation. Number of generations is floor(total_hours / hours_per_generation).
+    # Since initial cells split every 20h, and we start with 1 cell at t=0 (which counts as the first state before splitting),
+    # after N full cycles of 20 hours, we have multiplied by 4^N.
+    generations = IntegerOps.safe_eval(f"total_hours // {frozen_params['hours_per_generation']}") if isinstance(total_hours, int) else total_hours
+    
+    # The problem states: start with 1 cell. Every 20h, each splits into 4. 
+    # After k full cycles of splitting (each taking 20 hours), the count is 4^k * initial_count.
+    # We need to find k such that total_cells = 4^k. Since initial=1, we just solve for number of generations completed.
+    
+    # Calculate how many times it has split: floor(total_hours / generation_time)
+    num_splits = IntegerOps.safe_eval(f"{total_hours} // {frozen_params['hours_per_generation']}")
+    
+    # The answer k is exactly the number of splitting events that occurred to reach 4^k from 1.
+    correct_answer_k = int(num_splits)
+
+    return {
+        "question_text": f"從 \(1\) 個細胞開始培養。每經過 \(20\) 小時，每個細胞分裂成 \(4\) 個，且新細胞仍依相同規則繼續分裂。經過 \(15\) 天後，細胞總數可寫成 \(4^k\)，求 \(k\)。",
+        "correct_answer": {"k": correct_answer_k},
+        "oracle_payload": frozen_params,
+    }
+```

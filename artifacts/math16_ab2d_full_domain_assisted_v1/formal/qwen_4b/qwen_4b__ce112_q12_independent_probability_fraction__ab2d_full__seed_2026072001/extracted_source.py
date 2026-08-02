@@ -1,0 +1,31 @@
+from core.prompts.domain_function_library import FractionOps
+
+def generate(level=1, **kwargs):
+    oracle_payload = kwargs.get("oracle_payload", {})
+    
+    # Extract parameters from frozen_params structure: [favorable, total] for each group
+    p1_favorable = oracle_payload["p1"][0]
+    p1_total = oracle_payload["p1"][1]
+    p2_favorable = oracle_payload["p2"][0]
+    p2_total = oracle_payload["p2"][1]
+
+    # Step 1: Create fractions using from_parts (numerator, denominator)
+    prob_p1 = FractionOps.from_parts(p1_favorable, p1_total)
+    prob_p2 = FractionOps.from_parts(p2_favorable, p2_total)
+
+    # Step 2: Multiply the probabilities for independent events
+    result_fraction = FractionOps.mul(prob_p1, prob_p2)
+
+    # Step 3: Assemble correct_answer according to Task-specific answer contract
+    canonical_latex = FractionOps.to_latex(result_fraction)
+
+    return {
+        "question_text": oracle_payload["p1"][0] + "個等可能結果，其中" + str(oracle_payload["p1"][1]) + "個符合條件；第二組有" + 
+                         oracle_payload["p2"][0] + "個等可能結果，其中" + str(oracle_payload["p2"][1]) + "個符合條件。若兩次選擇彼此獨立，求兩組皆符合條件的機率，並以最簡分數表示。",
+        "correct_answer": {
+            "numerator": result_fraction.numerator,
+            "denominator": result_fraction.denominator,
+            "canonical_latex": canonical_latex
+        },
+        "oracle_payload": oracle_payload
+    }

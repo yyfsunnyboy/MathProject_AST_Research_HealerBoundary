@@ -1,0 +1,47 @@
+from core.prompts.domain_function_library import FractionOps
+
+
+def generate(level=1, **kwargs):
+    expression = kwargs.get("expression", "9/22 + 11/18 - (23/22 - 7/18)")
+    
+    # Parse the expression string to extract fractions. 
+    # The format is 'numerator/denominator'. We split by '+' and '-' carefully, 
+    # but since we have parentheses, a safer approach for this specific frozen task 
+    # structure (A + B - (C - D)) is to manually identify components or use regex.
+    
+    # Given the fixed expression: 9/22 + 11/18 - (23/22 - 7/18)
+    # We can split by '+' and '-' while respecting parentheses, 
+    # but for this specific task, we know the structure exactly from the frozen_params.
+    
+    parts = [
+        ("9", "22"),      # First term: +9/22
+        ("11", "18"),     # Second term: +11/18
+        ("23", "22"),     # Third term inside parens: - ( ... ) -> subtract this whole group
+        ("7", "18")       # Fourth term inside parens: -( 23/22 - 7/18) = -23/22 + 7/18
+    
+    ]
+
+    a = FractionOps.from_parts(int(parts[0][0]), int(parts[0][1]))
+    b = FractionOps.from_parts(int(parts[1][0]), int(parts[1][1]))
+    
+    # The expression is: (a + b) - (c - d)
+    c = FractionOps.from_parts(int(parts[2][0]), int(parts[2][1]))
+    d = FractionOps.from_parts(int(parts[3][0]), int(parts[3][1]))
+
+    inner_diff = FractionOps.sub(c, d)  # Calculate (23/22 - 7/18)
+    
+    total_sum = FractionOps.add(a, b)   # Calculate 9/22 + 11/18
+    
+    result = FractionOps.sub(total_sum, inner_diff)
+
+    correct_answer = {
+        "numerator": int(result.numerator),
+        "denominator": int(result.denominator),
+        "canonical_latex": str(FractionOps.to_exact(result))
+    }
+
+    return {
+        "question_text": kwargs.get("stem", r"精確計算\n\[\frac{9}{22}+\frac{11}{18}-\left(\frac{23}{22}-\frac{7}{18}\right).\n答案須化為最簡分數。"),
+        "correct_answer": correct_answer,
+        "oracle_payload": kwargs.get("frozen_params", {"expression": expression})
+    }

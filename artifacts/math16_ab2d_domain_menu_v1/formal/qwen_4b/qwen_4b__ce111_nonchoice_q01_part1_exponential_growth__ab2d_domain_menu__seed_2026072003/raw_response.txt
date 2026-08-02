@@ -1,0 +1,52 @@
+```python
+from core.prompts.domain_function_library import IntegerOps
+
+def generate(level=1, **kwargs):
+    frozen_params = {
+        "days": 15,
+        "hours_per_generation": 20,
+        "initial": 1,
+        "split_factor": 4
+    }
+
+    # Calculate total hours in the given days (assuming a standard day has 24 hours)
+    hours_in_day = 24
+    
+    # Total number of generations is determined by dividing total time by generation duration.
+    # The problem states: starting with 1 cell, every 20 hours it splits into 4.
+    # This implies the growth factor per generation is 4 (since "splits into 4").
+    
+    # Calculate total hours elapsed after 'days' days
+    total_hours = frozen_params["days"] * hours_in_day
+    
+    # Number of generations that have occurred
+    num_generations = IntegerOps.safe_eval(f"{total_hours} // {frozen_params['hours_per_generation']}")
+    
+    # The population grows by a factor of 4 per generation.
+    # Starting from 1, after k generations: Population = 1 * (split_factor)^k
+    
+    split_factor = frozen_params["split_factor"]
+    
+    # We need to find k such that total_cells = 4^k
+    # Since we calculated num_generations based on the problem description logic 
+    # ("every 20 hours... splits into 4"), and assuming each generation corresponds exactly to one split event,
+    # then k should be equal to the number of generations.
+    
+    # Let's verify: 
+    # Day 1 (24h): not a multiple of 20? The problem says "after every 20 hours".
+    # If we start at t=0 with N=1.
+    # At t=20, N becomes 4^1 = 4. Generation count k=1.
+    # ...
+    # After D days (D*24 hours), how many times has the "every 20 hours" event triggered?
+    
+    # Calculate exact number of generations based on time elapsed divided by generation period.
+    k_value = IntegerOps.safe_eval(f"{total_hours} // {frozen_params['hours_per_generation']}")
+
+    correct_answer = {"k": int(k_value)}
+    
+    return {
+        "question_text": f"從 \(1\) 個細胞開始培養。每經過 \(20\) 小時，每個細胞分裂成 \(4\) 個，且新細胞仍依相同規則繼續分裂。經過 \(15\) 天後，細胞總數可寫成 \(4^k\)，求 \(k\)。",
+        "correct_answer": correct_answer,
+        "oracle_payload": frozen_params
+    }
+```

@@ -1,0 +1,43 @@
+from core.prompts.domain_function_library import FractionOps
+
+
+def generate(level=1, **kwargs):
+    # Parse the expression components from frozen_params to build Fractions.
+    expr_str = kwargs.get("expression", "9/22 + 11/18 - (23/22 - 7/18)")
+    
+    # Extract terms based on the structure: A + B - (C - D) => A + B - C + D
+    
+    term_a_num, term_a_den = FractionOps.from_parts(9, 22)
+    term_b_num, term_b_den = FractionOps.from_parts(11, 18)
+    
+    # Inside the parenthesis: (23/22 - 7/18) => C and D
+    term_c_num, term_c_den = FractionOps.from_parts(23, 22)
+    term_d_num, term_d_den = FractionOps.from_parts(7, 18)
+    
+    # Calculate the inner parenthesis: (C - D)
+    paren_result = FractionOps.sub(term_c_num, term_d_num)
+    
+    # The expression is A + B - (paren_result), which equals A + B - C + D.
+    # We can compute it as ((A + B) - paren_result).
+    sum_ab = FractionOps.add(term_a_num, term_b_num)
+    total_sub_paren = FractionOps.sub(sum_ab, paren_result)
+    
+    # Alternatively, expanding: A + B - C + D
+    # Let's verify with direct expansion to ensure correctness.
+    expanded_step1 = FractionOps.add(total_sub_paren, term_d_num)  # (A+B-C)+D
+    
+    # Prepare the correct_answer according to the contract schema
+    numerator = int(expanded_step1.numerator)
+    denominator = int(expanded_step1.denominator)
+    
+    canonical_latex = FractionOps.to_latex(FractionOps.from_parts(numerator, denominator))
+
+    return {
+        "question_text": kwargs.get("expression", r"\frac{9}{22}+\frac{11}{18}-\left(\frac{23}{22}-\frac{7}{18}\right)."),
+        "correct_answer": {
+            "numerator": numerator,
+            "denominator": denominator,
+            "canonical_latex": canonical_latex
+        },
+        "oracle_payload": kwargs.get("expression", None)
+    }

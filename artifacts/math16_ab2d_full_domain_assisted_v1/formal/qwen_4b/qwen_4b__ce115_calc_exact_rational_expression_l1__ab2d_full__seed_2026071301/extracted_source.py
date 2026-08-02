@@ -1,0 +1,42 @@
+from core.prompts.domain_function_library import FractionOps
+
+
+def generate(level=1, **kwargs):
+    # Parse frozen_params as oracle_payload (must match exactly)
+    products = kwargs.get("products", [])
+    
+    # Step 1: Create Fractions from string operands using create()
+    fractions = []
+    for item in products:
+        left_str = str(item["left"])
+        right_str = str(item["right"])
+        
+        a = FractionOps.create(left_str)
+        b = FractionOps.create(right_str)
+        
+        # Apply sign based on the 'sign' field (1 or -1)
+        if item["sign"] == 1:
+            result_term = FractionOps.mul(a, b)
+        else:
+            result_term = FractionOps.sub(Fraction(0), FractionOps.mul(b, a)) # equivalent to -(a*b) but using sub for clarity with signs
+            
+        fractions.append(result_term)
+
+    # Step 2 & 3: Accumulate results (sum the terms) and get exact value
+    total_value = fractions[0]
+    
+    if len(fractions) > 1:
+        current_total = Fraction(0)
+        for term in fractions[1:]:
+            current_total += term # Using add() to accumulate
+        
+        total_value = current_total
+
+    # Step 4: Assemble correct_answer according to Task-specific answer contract
+    exact_str = FractionOps.to_exact(total_value)
+    
+    return {
+        "question_text": products,
+        "correct_answer": {"value": str(exact_str), "canonical_latex": ""}, 
+        "oracle_payload": products
+    }

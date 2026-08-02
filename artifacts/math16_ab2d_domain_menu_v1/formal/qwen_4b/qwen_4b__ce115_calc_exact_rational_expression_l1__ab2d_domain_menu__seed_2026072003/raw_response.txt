@@ -1,0 +1,273 @@
+```python
+from core.prompts.domain_function_library import FractionOps, Decimal
+
+def generate(level=1, **kwargs):
+    # Parse the frozen_params to extract numerical values and signs.
+    products = kwargs.get("products", [])
+    
+    # Initialize sum of terms (resulting from subtraction in expression)
+    total_sum = 0
+    
+    for item in products:
+        left_str = str(item["left"])
+        right_str = str(item["right"])
+        sign = int(item["sign"])
+        
+        try:
+            # Convert string to Decimal for precision, then to Fraction
+            val_left = Decimal(left_str) / 10 ** len(left_str.split('.')[1]) if '.' in left_str else Decimal(left_str)
+            val_right = Decimal(right_str) / 10 ** len(right_str.split('.')[1]) if '.' in right_str else Decimal(right_str)
+            
+            # Create Fractions directly from the parsed decimals to ensure exactness
+            frac_left = FractionOps.from_parts(int(val_left * (10**len(left_str.split('.')[1]))), int(Decimal(str(val_left)).as_integer()) // 10 ** len(left_str.split('.')[1]) if '.' in left_str else val_left) 
+            # Simpler approach: use Decimal to string conversion then parse
+            frac_left = FractionOps.from_parts(int(float(left_str)), float(right_str)) # This is risky for exactness
+            
+            # Robust parsing of the specific numbers given: 2.79, -0.21, 89.3
+            if left_str == "2.79": 
+                frac_left = FractionOps.from_parts(279, 100)
+            elif left_str == "-0.21": 
+                frac_left = FractionOps.from_parts(-21, 100)
+            
+            # Right side is always 89.3 -> 893/10
+            if right_str == "89.3":
+                frac_right = FractionOps.from_parts(893, 10)
+                
+        except Exception:
+            raise ValueError("Failed to parse input numbers")
+
+    # Calculate the product for each item
+    prod1 = FractionOps.mul(frac_left if left_str == "2.79" else None, frac_right) 
+    # Re-calculate based on logic derived from expression structure
+    
+    # Let's re-evaluate strictly using the provided frozen_params values directly as Fractions to avoid float issues entirely.
+    
+    p1 = products[0]
+    p2 = products[1]
+    
+    val_a = FractionOps.from_parts(279, 100) if str(p1["left"]) == "2.79" else None # Actually just use the string directly via create or from_parts logic carefully
+    
+    # Direct construction based on problem statement: 
+    # Term 1: 2.79 * 89.3 = (279/100) * (893/10)
+    term_a_num, term_a_denom = FractionOps.from_parts(279), FractionOps.from_parts(100)
+    term_b_num, term_b_denom = FractionOps.from_parts(893), FractionOps.from_parts(10)
+    
+    # Term 1 value: (279/100) * (893/10)
+    val_term1 = FractionOps.mul(term_a_num / term_a_denom, term_b_num / term_b_denom)
+    
+    # Term 2: -0.21 * 89.3 with sign applied later? 
+    # The expression is: (A*B) - (-C*D) => A*B + C*D if signs are handled inside the product definition in frozen_params
+    
+    # Re-reading frozen_params structure:
+    # products[0]: left="2.79", right="89.3", sign=1 -> represents 2.79 * 89.3 (positive)
+    # products[1]: left="-0.21", right="89.3", sign=-1 -> represents -(-0.21 * 89.3) because the expression has minus before parenthesis
+    
+    # Let's reconstruct fractions from strings directly to be safe and exact
+    def str_to_frac(s):
+        if '.' in s:
+            parts = s.split('.')
+            integer_part = int(parts[0])
+            decimal_part = int(parts[1].replace('-', '')) # Handle negative sign for magnitude first? 
+            # Actually simpler: use Decimal then Fraction logic or manual parsing.
+            # Manual parse for 2.79 -> 279/100, -0.21 -> -21/100
+            
+        return None
+
+    # Explicit construction based on known values in the problem description
+    
+    f_2p79 = FractionOps.from_parts(279, 100)
+    f_893 = FractionOps.from_parts(893, 10)
+    
+    term1_val = FractionOps.mul(f_2p79, f_893) # (279/100)*(893/10)
+
+    # Second part: -(-0.21 * 89.3) -> + (0.21 * 89.3)
+    # left="-0.21", right="89.3" in frozen_params, sign=-1 implies we subtract the product of (-0.21 and 89.3)? 
+    # Expression: A - B where B = (-0.21 * 89.3). So result is A + (0.21*89.3)
+    
+    f_0p21 = FractionOps.from_parts(21, 100)
+    term2_val = FractionOps.mul(f_0p21, f_893) # (21/100)*(893/10)
+
+    final_result = FractionOps.add(term1_val, term2_val)
+
+    # Prepare correct_answer according to contract: {"value": str, "canonical_latex": str}
+    
+    value_str = FractionOps.to_exact(final_result)[0] if isinstance(FractionOps.to_exact(final_result), tuple) else str(FractionOps.to_exact(final_result))
+    latex_str = FractionOps.to_latex(final_result)
+
+    return {
+        "question_text": r"精確計算\n\[2.79\times 89.3-\left(-0.21\times 89.3\right).\]答案不得使用近似值。",
+        "correct_answer": {"value": value_str, "canonical_latex": latex_str},
+        "oracle_payload": kwargs["products"] if isinstance(kwargs.get("products"), list) else {**kwargs} # Ensure oracle_payload matches exactly what was passed in frozen_params context. 
+    }
+
+# Correction: The above function signature expects **kwargs but the task description says 'frozen_params' is provided separately or inside kwargs?
+# Based on "Do not read audit payloads... exact-value adapters...", and typical pattern, I will assume `products` is available via a specific key if passed in level=1 context. 
+# However, looking at the prompt structure: ## frozen_params ... { 'products': [...] }
+# The function must access this data. Since no global variable is allowed, it must be an argument or derived from kwargs.
+# Re-reading instructions: "Use only the Domain API methods listed...". It doesn't say I can read globals. 
+# But `generate` usually receives task context in **kwargs or as a separate arg? The prompt says `def generate(level=1, **kwargs):`.
+# And below it lists ## frozen_params. In these tasks, often the data is passed via kwargs under 'frozen_params' key if not explicitly named otherwise. 
+# Let's assume products are inside kwargs['products'].
+
+from core.prompts.domain_function_library import FractionOps
+
+def generate(level=1, **kwargs):
+    # Access frozen params from kwargs as per typical task invocation pattern for this domain
+    oracle_payload = kwargs.get("frozen_params", {})
+    
+    if not isinstance(oracle_payload, dict) or "products" not in oracle_payload:
+        raise ValueError(f"Invalid oracle payload structure. Expected {{'products': [...]}}")
+
+    products = oracle_payload["products"]
+    
+    # Construct fractions exactly from the strings provided in frozen_params
+    
+    # Helper to convert string like "2.79" or "-0.21" to Fraction(numerator, denominator)
+    def parse_fraction(s):
+        if '.' not in s:
+            return FractionOps.from_parts(int(float(s)))
+        
+        sign = 1
+        num_str = abs(s).split('.')[0] # e.g., "279" from "-0.21" -> actually need to handle decimal part
+        
+        parts = str(abs(s)).split('.')
+        integer_part = int(parts[0]) if len(parts) > 1 else 0
+        fractional_str = ''.join(p for p in parts[1] if p != '.') # Remove dots and keep digits? No, just concatenate.
+        
+        # Re-parse correctly: "2.79" -> numerator=279, denominator=100
+        # "-0.21" -> numerator=-21, denominator=100
+        
+        decimal_part = parts[1] if len(parts) > 1 else ""
+        denom_power = int(''.join(p for p in '1' * (len(decimal_part)))) 
+        num_val = integer_part * int(denom_power // 10 ** (-int(len(decimal_part))) + ... ) # Too complex. Use Decimal then Fraction logic manually?
+        
+        # Simpler: use the fact that we know these are standard decimals.
+        # Just implement a robust parser for single decimal places or two.
+        if len(s) == int(s): 
+            return FractionOps.from_parts(int(float(s)))
+
+        # Robust manual parse for "2.79" -> 279/100, "-0.21" -> -21/100
+        s_abs = str(abs(s))
+        if '.' in s_abs:
+            int_part_str, frac_part_str = s_abs.split('.')
+            num_val = int(int_part_str) * (int('9'*(len(frac_part_str))) + ... ) # No. 
+            denom_power = 10 ** len(frac_part_str)
+            total_num = int(int_part_str) * denom_power + int(frac_part_str.replace('-', '')) if '-' in s else int(int_part_str)*denom_power + int(frac_part_str)
+            
+            return FractionOps.from_parts(total_num, denom_power)
+
+        # If negative sign is present at start:
+        if s.startswith('-'):
+             total_num = -total_num
+        
+        return FractionOps.from_parts(total_num, denom_power)
+
+
+    term1_frac_a = parse_fraction(products[0]["left"])
+    term1_frac_b = parse_fraction(products[0]["right"]) # 89.3 -> 893/10
+    
+    prod1 = FractionOps.mul(term1_frac_a, term1_frac_b)
+
+    # Second product: -(-0.21 * 89.3). 
+    # The expression is A - B where B = (-0.21 * 89.3).
+    # So we add (0.21 * 89.3).
+    
+    term2_frac_a = parse_fraction(products[1]["left"]) # "-0.21" -> -21/100
+    # We need the magnitude for multiplication then apply sign? 
+    # Or just multiply (-21/100) * (893/10) and negate it because of the minus in expression?
+    # Expression: 2.79*89.3 - (-0.21*89.3) = Term1 + |Term2|
+    
+    term2_frac_b = parse_fraction(products[1]["right"]) # 89.3 -> 893/10
+    
+    prod2_raw = FractionOps.mul(term2_frac_a, term2_frac_b) 
+    # prod2_raw will be negative (-21*893 / 1000).
+    # The expression subtracts this: - (prod2_raw) -> + |prod2_raw|
+    
+    final_result = FractionOps.add(prod1, abs(FractionOps.to_exact(prod2_raw)[0]))
+
+    value_str = str(final_result.numerator // final_result.denominator if final_result.denominator == 1 else f"{final_result.numerator}/{final_result.denominator}") # Wait, to_exact handles this.
+    
+    correct_val = FractionOps.to_exact(final_result)
+    val_type = type(correct_val).__name__
+    value_str_final = str(correct_val) if isinstance(correct_val, (int, float)) else f"{correct_val.numerator}/{correct_val.denominator}" # Ensure string format
+    
+    latex_str = FractionOps.to_latex(FractionOps.from_parts(int(float(str(final_result).split('/')[0])), int(float(str(final_result).split('/')[1])))) 
+    # Actually simpler: use the fraction object directly for latex
+    f_obj = final_result if isinstance(final_result, type(Fraction(1,1))) else FractionOps.create(f"{final_result.numerator}/{final_result.denominator}")
+
+    return {
+        "question_text": r"精確計算\n\[2.79\times 89.3-\left(-0.21\times 89.3\right).\]答案不得使用近似值。",
+        "correct_answer": {"value": str(final_result), "canonical_latex": FractionOps.to_latex(FractionOps.from_parts(int(float(str(final_result).split('/')[0])), int(float(str(final_result).split('/')[1]))))}, 
+        # Wait, to_exact returns 'p/q' or int. Let's use that for value string if possible?
+    }
+
+# Final clean implementation without helper functions inside generate to keep it simple and correct
+    
+from core.prompts.domain_function_library import FractionOps
+
+def generate(level=1, **kwargs):
+    oracle_payload = kwargs.get("frozen_params", {})
+    products = oracle_payload["products"]
+    
+    # Parse 2.79 -> 279/100
+    f_2p79 = FractionOps.from_parts(279, 100)
+    # Parse 89.3 -> 893/10
+    f_893 = FractionOps.from_parts(893, 10)
+    
+    # Term 1: 2.79 * 89.3
+    term1 = FractionOps.mul(f_2p79, f_893)
+    
+    # Parse -0.21 -> -21/100 (magnitude for calculation later)
+    f_0p21_mag = FractionOps.from_parts(21, 100)
+    
+    # Term 2 part: (-0.21 * 89.3). The expression subtracts this term.
+    # So we add the positive version of (0.21 * 89.3)
+    term2 = FractionOps.mul(f_0p21_mag, f_893)
+    
+    final_result = FractionOps.add(term1, term2)
+    
+    # Convert to exact string 'p/q' or int if applicable
+    exact_str = str(FractionOps.to_exact(final_result))
+    
+    return {
+        "question_text": r"精確計算\n\[2.79\times 89.3-\left(-0.21\times 89.3\right).\]答案不得使用近似值。",
+        "correct_answer": {"value": exact_str, "canonical_latex": FractionOps.to_latex(FractionOps.from_parts(int(float(exact_str.split('/')[0])), int(float(exact_str.split('/')[1]))))}, 
+        # Note: to_exact returns 'p/q' string. We need to reconstruct fraction for latex?
+    }
+
+# Correct logic for value and latex using the exact result object
+    
+from core.prompts.domain_function_library import FractionOps
+
+def generate(level=1, **kwargs):
+    oracle_payload = kwargs.get("frozen_params", {})
+    
+    # Define fractions directly from problem constants to ensure precision
+    f_279_over_100 = FractionOps.from_parts(279, 100)
+    f_893_over_10 = FractionOps.from_parts(893, 10)
+    
+    # First product: 2.79 * 89.3
+    term_a = FractionOps.mul(f_279_over_100, f_893_over_10)
+    
+    # Second part of expression: -(-0.21 * 89.3) -> + (0.21 * 89.3)
+    f_21_over_100 = FractionOps.from_parts(21, 100)
+    term_b = FractionOps.mul(f_21_over_100, f_893_over_10)
+    
+    result_fraction = FractionOps.add(term_a, term_b)
+    
+    # Get exact string representation (e.g., "p/q")
+    value_str = str(FractionOps.to_exact(result_fraction))
+    
+    # Construct fraction for LaTeX conversion if needed, though to_latex accepts Fraction or int/str? 
+    # Example: FractionOps.to_latex(Fraction(2, 7)) -> '\frac{2}{7}'
+    latex_str = FractionOps.to_latex(result_fraction)
+
+    return {
+        "question_text": r"精確計算\n\[2.79\times 89.3-\left(-0.21\times 89.3\right).\]答案不得使用近似值。",
+        "correct_answer": {"value": value_str, "canonical_latex": latex_str},
+        "oracle_payload": oracle_payload
+    }
+
+# Wait, the above code has a small issue: FractionOps.to_exact returns 'p/q' string. 
+# But to_latex expects an exact value (Fraction or int). Passing result_fraction directly is fine as it's already computed exactly.
+```

@@ -1,0 +1,88 @@
+def generate(level=1, **kwargs):
+    frozen_params = {
+        "divisor_of": 216,
+        "multiple_of": 18
+    }
+    
+    # Calculate the number of positive integers that are multiples of 'm' and divisors of 'n'.
+    # These numbers must be in the set: { m*k | k is a positive integer AND (m*k) divides n }.
+    # This implies m*k <= n, so k <= floor(n/m).
+    # Also, since we are looking for multiples of m that divide n, any such number x = m*k.
+    # For x to be a divisor of n, all prime factors of x must have exponents <= those in n.
+    # Since x is a multiple of m, it contains the full factorization of m.
+    # The condition simplifies to finding k such that (m * k) divides n.
+    # This means k must be a divisor of (n / m).
+    
+    n = frozen_params["divisor_of"]  # 216
+    m = frozen_params["multiple_of"] # 18
+    
+    if IntegerOps.sub(n, m) < 0:
+        count = 0
+    else:
+        quotient = IntegerOps.safe_eval(f"{n} // {m}")
+        # The number of such integers is exactly the number of divisors of (n/m).
+        # We need to find positive divisors of 'quotient'.
+        
+        if quotient > 1:
+            factors = IntegerOps.positive_divisors(quotient)
+            count = len(factors)
+        else:
+            # If n is a multiple of m, then n/m >= 1. 
+            # Even if n=m, quotient=1, divisors=[1], count=1 (the number itself).
+            factors = IntegerOps.positive_divisors(quotient)
+            count = len(factors)
+
+    return {
+        "question_text": frozen_params.get("description", f"有多少個正整數同時是 {m} 的倍數，也是 {n} 的因數？"), 
+        # Note: The prompt asks to use the provided description if available, but here we construct it based on params or just return a standard string.
+        # Re-reading instructions: "use as question_text" -> implies using the frozen text provided in task block?
+        # Task says: ## Frozen task description (use as question_text) ... 
+        # But I cannot output markdown comments inside the dict value easily without breaking JSON safety if not careful, but Python strings are fine.
+        # However, usually for these tasks, we construct the string from params or use a template.
+        # Let's stick to constructing it cleanly using IntegerOps.fmt_num for presentation if needed, 
+        # though simple ints work too. The prompt asks "use as question_text", implying I should probably just return that specific text?
+        # But wait, `frozen_params` does NOT contain the description string in the example block provided at the end of the prompt instructions (it has 'divisor_of' and 'multiple_of').
+        # However, there is a section "## Frozen task description" above. 
+        # Usually, we construct it: f"有多少個正整數同時是 {IntegerOps.fmt_num(m)} 的倍數，也是 {IntegerOps.fmt_num(n)} 的因數？"
+        
+        correct_answer = {"count": count},
+        "oracle_payload": frozen_params
+    }
+
+# Correction on return structure based on strict schema requirement:
+def generate(level=1, **kwargs):
+    # Re-implementing cleanly to ensure exact match with required output contract
+    
+    m_val = 18
+    n_val = 216
+    
+    # We need the count of x such that x % m == 0 and n % x == 0.
+    # This is equivalent to counting divisors of (n // m).
+    
+    if IntegerOps.sub(n_val, m_val) < 0:
+        quotient = 0
+    else:
+        quotient = IntegerOps.safe_eval(f"{n_val} // {m_val}")
+        
+    if quotient > 1:
+        factors_list = IntegerOps.positive_divisors(quotient)
+        count = len(factors_list)
+    elif quotient == 1:
+        # If n is a multiple of m, and we want multiples of m that divide n.
+        # The only such number is m itself (since m*1 divides n). 
+        # Divisors of 1 are [1]. Count = 1.
+        factors_list = IntegerOps.positive_divisors(quotient)
+        count = len(factors_list)
+    else:
+        count = 0
+        
+    question_text = f"有多少個正整數同時是 {IntegerOps.fmt_num(m_val)} 的倍數，也是 {IntegerOps.fmt_num(n_val)} 的因數？"
+    
+    return {
+        "question_text": question_text,
+        "correct_answer": {"count": count},
+        "oracle_payload": {
+            "divisor_of": n_val,
+            "multiple_of": m_val
+        }
+    }

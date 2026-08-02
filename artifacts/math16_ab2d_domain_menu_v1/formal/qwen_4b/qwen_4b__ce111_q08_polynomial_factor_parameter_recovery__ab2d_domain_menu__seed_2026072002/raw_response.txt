@@ -1,0 +1,95 @@
+```python
+from core.prompts.domain_function_library import PolynomialOps
+
+
+def generate(level=1, **kwargs):
+    # Extract frozen parameters from kwargs or use defaults if not provided in the context
+    factor_order_policy = kwargs.get("factor_order_policy", "strict_source_template")
+    
+    quadratic_coefficients = [39, 5, -14]
+    template_left_x_coefficient = 3
+    
+    # The task asks for a + 2c given (3x+a)(bx+c) = 39x^2+5x-14.
+    # We need to find integer factors of the quadratic such that one factor starts with 3x.
+    
+    # Step 1: Parse coefficients from polynomial expression if needed, 
+    # but we already have them in frozen_params as [a_n, a_{n-1}, ..., a_0].
+    # Here they are exactly [39, 5, -14] corresponding to 39x^2 + 5x - 14.
+
+    # Step 2: Find factors of the quadratic polynomial ax^2+bx+c = (px+m)(qx+n)
+    # where p=template_left_x_coefficient=3 and m=a, q=b, n=c are integers.
+    
+    # We need to find integer roots or factor directly. 
+    # Let's use PolynomialOps.div_qr with a monic-like divisor if possible, but we don't know b yet.
+    # Instead, let's try all divisors of the leading coefficient 39 for 'b' (since p*b = 39).
+    
+    import math
+    
+    def gcd(a, b):
+        while b:
+            a, b = b, a % b
+        return abs(a)
+
+    # Possible values for b such that 3 * b divides 39. 
+    # Factors of 13 (since 3*13=39). So b can be factors of 13 divided by gcd(3,b)? No.
+    # Actually, p*b = 39 => 3*b is a factor of 39? Not exactly. The product of leading coeffs must equal 39.
+    # If first term is (3x+a), then b * 3 = 39 => b = 13 or b=13/3(not int) etc. 
+    # Since coefficients are integers, and assuming monic-like structure isn't required for the second factor but integer coeffs:
+    # The leading coefficient of first factor is 3. Let second be k*x + m. Then 3*k = 39 => k=13? Or maybe factors like (3x...)(13x...) -> yes, if integers only.
+    
+    # Wait, could it be non-monic integer coefficients for the second term? 
+    # If we have (3x+a)(bx+c), then leading coeff is 3*b = 39 => b=13. This seems unique if a,b,c are integers and no other common factors reduce degrees differently.
+    
+    # Let's assume b=13 first:
+    # Polynomial P(x) = 39x^2 + 5x - 14
+    # Factor as (3x+a)(13x+c). 
+    # Expand: 3*13 x^2 + (3c+13a)x + ac = 39x^2 + (3c+13a)x + ac.
+    
+    # Match coefficients:
+    # 1) ac = -14
+    # 2) 3c + 13a = 5
+    
+    # From eq(1): possible integer pairs (a,c) for product -14:
+    # (-1, 14), (1, -14), (-2, 7), (2, -7), (-7, 2), (7, -2), (-14, 1), (14, -1).
+    
+    candidates = []
+    for a in [-14, -7, -2, -1, 1, 2, 7, 14]: # divisors of 14 with sign
+        if abs(a) * gcd(39, 5) != 0: pass 
+        c = -14 // a
+        
+        check_eq = (3*c + 13*a == 5)
+        
+        candidates.append((a, c))
+
+    # Let's verify manually or via code logic.
+    
+    found_solution = None
+    
+    for a in [-14, -7, -2, -1, 1, 2, 7, 14]:
+        if abs(a) == 0: continue
+        c_val = -14 // a
+        
+        # Check middle term coefficient match
+        mid_coeff_calc = (3 * c_val + 13 * a)
+        
+        if mid_coeff_calc == 5:
+            found_solution = (a, c_val)
+            break
+            
+    if not found_solution:
+        raise ValueError("No integer solution found for the assumed factorization.")
+
+    # We have a and c. The question asks for a + 2c.
+    
+    result_a_plus_2c = found_solution[0] + 2 * found_solution[1]
+    
+    return {
+        "question_text": f"已知\n\\[\n39x^2+5x-14=(3x+a)(bx+c),\n其中 \\(a,b,c\\) 均為整數，求 \\(a+2c\\)。",
+        "correct_answer": result_a_plus_2c,
+        "oracle_payload": {
+            "factor_order_policy": factor_order_policy,
+            "quadratic_coefficients": quadratic_coefficients,
+            "template_left_x_coefficient": template_left_x_coefficient
+        }
+    }
+```

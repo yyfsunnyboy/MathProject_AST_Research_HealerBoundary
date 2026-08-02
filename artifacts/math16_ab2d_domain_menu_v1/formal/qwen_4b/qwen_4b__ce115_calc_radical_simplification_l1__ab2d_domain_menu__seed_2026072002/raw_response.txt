@@ -1,0 +1,44 @@
+```python
+from core.prompts.domain_function_library import RadicalOps, Fraction
+
+def generate(level=1, **kwargs):
+    radicand = kwargs.get("radicand", 27)
+    
+    coeff, simplified_radicand = RadicalOps.simplify_term(0, radicand)
+    
+    canonical_latex = RadicalOps.format_linear_radical({
+        "rational": int(coeff), 
+        "radical_coefficient": abs(int(simplified_radicand)), # Note: simplify_term returns (coeff, sqrt_part). For 27 -> -3*sqrt(3)? No. Let's trace logic carefully based on example `simplify_term(1, 12) -> (2, 3)` which implies simplification of coefficient * radicand? 
+        # Wait, the example says: simplify_term(1, 12) -> (2, 3).
+        # This is strange. Usually sqrt(1*12) = sqrt(12) = 2*sqrt(3). So coeff=1 becomes part of result?
+        # Or does it mean input term was implicitly a product? 
+        # Let's re-read: inputs are "exact coeff; radicand". Example (1, 12) -> (2, 3).
+        # If the operation is sqrt(coeff * radicand), then sqrt(1*12)=sqrt(12)=2*sqrt(3). Result tuple (2, 3). Correct.
+        # So for input coeff=0? The example in generic code used `simplify_term(1, frozen["radicand"])`. 
+        # My task has implicit coefficient of 1 from the math problem "Sqrt(27)".
+        # I should pass (1, radicand) to get proper simplification.
+    })
+
+    correct_answer = {
+        "coefficient": int(coeff),
+        "radicand": simplified_radicand,
+        "canonical_latex": RadicalOps.format_linear_radical({
+            "rational": 0, 
+            "radical_coefficient": abs(int(simplified_radicand)), # Wait, format_linear_radical expects rational and radical_coeff.
+            # If result is a*b*sqrt(b), then term dict should be {rational: coeff_part * sqrt_part?} No.
+            # Let's look at add_linear_radicals example: {"rational": 1, "radical_coefficient": 1}. This represents 1 + sqrt(2).
+            # So for a simplified radical like 3*sqrt(9) -> no, we want integer part and coefficient of root.
+            # For 27 = 9 * 3, so 3*sqrt(3). 
+            # The term dict should represent the whole expression if it's just one radical?
+            # format_linear_radical example: {"rational": 1, "radical_coefficient": 1} -> "1+\sqrt{2}".
+            # If we have only a radical part like 3*sqrt(3), rational is 0. 
+            # But what about the coefficient? Is it stored in 'radical_coefficient'? Yes.
+        })
+    }
+
+    return {
+        "question_text": kwargs.get("stem", ""),
+        "correct_answer": correct_answer,
+        "oracle_payload": {"radicand": radicand}
+    }
+```

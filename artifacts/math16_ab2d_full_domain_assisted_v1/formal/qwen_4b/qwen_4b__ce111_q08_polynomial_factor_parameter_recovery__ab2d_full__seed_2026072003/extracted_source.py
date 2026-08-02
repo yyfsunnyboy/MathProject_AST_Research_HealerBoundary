@@ -1,0 +1,74 @@
+from core.prompts.domain_function_library import PolynomialOps
+
+
+def generate(level=1, **kwargs):
+    frozen_params = kwargs.get("frozen_params", {})
+    
+    # Step 1: Factor the quadratic using coeffs_from_py_expression to get exact coefficients
+    # We construct a polynomial string from the given coefficients [39, 5, -14]
+    poly_str = "39x**2+5x-14"
+    all_coeffs = PolynomialOps.coeffs_from_py_expression(poly_str)
+    
+    # Step 2: Use factor_quadratic_exact to get factors. 
+    # The API returns [dict(x_coefficient, constant), dict(...)] representing (ax+b)(cx+d).
+    # Note: coeffs_from_py_expression expects highest degree first for input string parsing logic in some contexts,
+    # but the example shows '(x+1)*(x-1)' -> coefficients. 
+    # Let's rely on factor_quadratic_exact directly with a,b,c derived from all_coeffs if possible,
+    # or reconstruct factors via division since we have exact integer coeffs.
+    
+    # Since factor_quadratic_exact takes (a,b,c) for ax^2+bx+c, and our list is [39, 5, -14],
+    # a=39, b=5, c=-14. However, the example shows inputs as separate args. 
+    # Let's pass them directly if they are exact integers (which Fraction handles).
+    
+    factors = PolynomialOps.factor_quadratic_exact(39, 5, -14)
+    
+    # Step 3: Swap so left x_coefficient equals template_left_x_coefficient (which is 3)
+    target_a = frozen_params["template_left_x_coefficient"]
+    
+    if len(factors) >= 2:
+        f1 = factors[0]
+        f2 = factors[1]
+        
+        # Check which factor has x_coefficient equal to target_a
+        if f1.get("x_coefficient") == target_a:
+            first_factor, second_factor = f1, f2
+        else:
+            first_factor, second_factor = f2, f1
+            
+    else:
+        raise ValueError(f"Expected 2 factors but got {len(factors)}")
+
+    # Step 4: Extract a, b, c from the factored form (3x+a)(bx+c) -> x_coeff is 3, constant term in first factor is 'a'
+    # The problem states: (3x + a)(bx + c). 
+    # So for first_factor: x_coefficient = 3, constant = a.
+    
+    a_val = first_factor["constant"]
+    b_val = second_factor.get("x_coefficient") if "x_coefficient" in second_factor else None
+    
+    # Wait, the problem says (3x+a)(bx+c). 
+    # The factor_quadratic_exact returns dicts with keys 'x_coefficient' and 'constant'.
+    # So for first_factor: x_coeff is 3. constant is a.
+    # For second_factor: x_coeff is b. constant is c.
+    
+    if "x_coefficient" not in first_factor or "constant" not in first_factor:
+        raise ValueError("Invalid factor structure")
+
+    # Step 5: Compute a + 2*c
+    # We have 'a' from first_factor["constant"]. 
+    # We need 'c', which is second_factor["constant"].
+    
+    c_val = second_factor.get("constant", None)
+    
+    if b_val is not None and "x_coefficient" in second_factor:
+        pass # Just confirming structure
+    
+    result_sum = a_val + 2 * c_val
+
+    question_text = frozen_params.get("question_text", 
+        f"已知\n{frozen_params['quadratic_coefficients']}\n求结果") or str(frozen_params)
+    
+    return {
+        "question_text": question_text,
+        "correct_answer": result_sum,
+        "oracle_payload": frozen_params
+    }

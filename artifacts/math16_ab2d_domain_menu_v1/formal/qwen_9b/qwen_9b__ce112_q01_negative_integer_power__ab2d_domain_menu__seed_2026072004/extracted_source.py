@@ -1,0 +1,15 @@
+from core.prompts.domain_function_library import IntegerOps
+
+def generate(level=1, **kwargs):
+    base = kwargs.get("base", -3)
+    exponent = kwargs.get("exponent", 3)
+    
+    # Compute (-3)^3 using safe_eval to ensure exact integer handling as per contract
+    expr_str = f"{IntegerOps.fmt_num(base)}**{exponent}"
+    result = IntegerOps.safe_eval(expr_str)
+    
+    return {
+        "question_text": r"計算\[(-3)^3.]",
+        "correct_answer": int(result),
+        "oracle_payload": {"base": -3, "exponent": 3}
+    }

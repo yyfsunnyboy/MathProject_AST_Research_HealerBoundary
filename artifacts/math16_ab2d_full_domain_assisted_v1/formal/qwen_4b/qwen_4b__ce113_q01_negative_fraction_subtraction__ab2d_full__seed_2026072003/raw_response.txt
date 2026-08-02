@@ -1,0 +1,135 @@
+```python
+from core.prompts.domain_function_library import FractionOps
+
+def generate(level=1, **kwargs):
+    oracle_payload = kwargs.get("oracle_payload", {"expression": "3/7 - (-1/4)"})
+    
+    # Parse the expression: 3/7 and -(-1/4) which is +1/4. 
+    # The problem asks for 3/7 minus negative one fourth, i.e., 3/7 - (-1/4).
+    # This simplifies to adding 1/4. However, the instruction says "Compute FractionOps.sub(left, right)".
+    # Let's parse left as 3/7 and right as -1/4 (negative numerator) based on standard fraction parsing rules 
+    # where a negative sign before a fraction applies to the whole thing or just the numerator depending on context.
+    # The expression is "3/7 - (-1/4)". 
+    # Left operand: 3/7 -> Fraction(3, 7)
+    # Right operand (the term being subtracted): -(-1/4). Wait, usually in math problems like A - B, if the text says "- (-1/4)", 
+    # it means we are subtracting a negative number. So B = -1/4. Then result is 3/7 - (-1/4) = 3/7 + 1/4.
+    # However, let's look at how to parse "(-1/4)". That represents the fraction with numerator -1 and denominator 4.
+    
+    left_numerator = 3
+    left_denominator = 7
+    
+    right_numerator = -1
+    right_denominator = 4
+    
+    a = FractionOps.from_parts(left_numerator, left_denominator)
+    b = FractionOps.from_parts(right_numerator, right_denominator)
+    
+    # The operation is subtraction: 3/7 minus (-1/4). 
+    # So we compute sub(a, b).
+    result_fraction = FractionOps.sub(a, b)
+    
+    correct_answer = {
+        "numerator": result_fraction.numerator,
+        "denominator": result_fraction.denominator,
+        "canonical_latex": FractionOps.to_latex(result_fraction),
+    }
+
+    return {
+        "question_text": oracle_payload["expression"], # Using the expression string as question text per instructions? 
+                                                        # Wait, instruction says: "Construct both operands from the frozen expression".
+                                                        # And "Frozen task description (use as question_text)".
+                                                        # The prompt has two sources for question_text.
+                                                        # 1. Frozen task description block with LaTeX and Chinese text.
+                                                        # 2. oracle_payload which contains just the string representation of the math.
+    ```
+
+Wait, I need to re-read carefully: "Frozen task description (use as question_text)". The frozen task description is provided in a specific markdown block containing the LaTeX equation and Chinese instructions. However, `oracle_payload` must equal `{ "expression": "3/7 - (-1/4)" }`.
+The instruction says: "question_text: the provided stem string". Which one? Usually, for these tasks, if there's a detailed description with LaTeX, that might be preferred, but often the expression itself is used. Let's look at the example in `generate` function inside the domain block: it uses `"example stem"`.
+The prompt explicitly says under "Frozen task description": use as question_text. So I should probably extract or copy that text. But wait, the frozen params also has an expression string. 
+Let's re-read: "question_text: the provided stem string (do not rebuild from scratch unless required)." and then later in processing steps it doesn't explicitly say which one to pick for `question_text`, but under "Frozen task description" it says "(use as question_text)".
+However, looking at typical formats, often the expression is what's expected if it's simple. But here we have a rich text block. Let's assume the user wants the LaTeX/Chinese text or just the math string? 
+Actually, looking at the `oracle_payload` requirement: "must exactly equal this object". That part is clear.
+For `question_text`, let's stick to the most direct interpretation of "provided stem". The frozen task description block contains:
+"精確計算 \n \\[ ... \\]. 答案須化為最簡分數。"
+But maybe just the expression string from oracle_payload is safer if it represents the core math? 
+Let's look at the example in `generate` again. It returns `"question_text": "example stem"`.
+Given the explicit instruction "(use as question_text)" next to the frozen task description block, I will use that text. However, since the model output needs to be valid JSON-compatible strings (or Python objects), and LaTeX might contain special characters, it should still work in a string field. 
+Wait, looking at `oracle_payload` again: `"expression": "3/7 - (-1/4)"`.
+If I use the frozen description text as question_text, that's fine. If I use the expression from oracle_payload, that might be simpler. Let's check if there are any constraints on what goes into `question_text`. No specific constraint other than being a string. 
+Let's try to infer intent: The task is about negative fraction subtraction. The frozen description provides the context "Precise calculation... answer must be simplified". This adds value over just the expression. I will use the text from the Frozen Task Description block as `question_text`.
+
+Wait, looking at the previous turn or standard behavior for these prompts (Math16), usually the question is the mathematical statement itself. The frozen description has LaTeX and Chinese. Let's copy that exactly into a string variable to be safe with "use as". But wait, if I just assign it directly in Python code without quotes? No, strings need quotes.
+Let's refine: 
+`question_text = r"精確計算\n\\[ \frac{3}{7}-\left(-\frac{1}{4}\right). \\ 答案須化為最簡分數。"` (using raw string to handle backslashes properly if needed, or just normal escaping).
+Actually, looking at the `oracle_payload` expression: "3/7 - (-1/4)". This is a plain text representation. 
+Let's reconsider. Often in these evaluations, the question_text should be what the user sees as the problem statement. The frozen block provides that. I will use it.
+
+One correction on logic:
+Expression: `3/7 - (-1/4)`
+Left (`a`): 3/7
+Right term to subtract (`b`): -(-1/4)? No, the expression is A minus B. 
+If the text says "3/7 - (-1/4)", then B = -1/4. 
+So we calculate `sub(a, b)` where a=Fraction(3, 7) and b=Fraction(-1, 4).
+Result: 3/7 + 1/4 = (12+7)/28 = 19/28.
+
+Let's double check the parsing logic in step 1 of processing steps: "Construct both operands from the frozen expression with FractionOps.from_parts (preserve the negative numerator)."
+This implies we parse `3` and `7`, then `-1` and `4`. 
+So `a = Fraction(3, 7)`, `b = Fraction(-1, 4)`.
+Then step 2: "Compute FractionOps.sub(left, right)". So `sub(a, b)`. Correct.
+
+Final check on imports: Only from `core.prompts.domain_function_library` as needed. I need to import `FractionOps`.
+
+```python
+from core.prompts.domain_function_library import FractionOps
+
+def generate(level=1, **kwargs):
+    # Extract oracle_payload if provided in kwargs or use default based on task_id context? 
+    # The prompt says "frozen_params (oracle_payload must equal this object)". 
+    # Since I am implementing the function that generates the answer for a specific task instance defined by frozen_params.
+    # In a real scenario, `kwargs` might contain these params or they are hardcoded per run if it's a single-shot generation script.
+    # Given "frozen_params" is provided in the prompt text as part of the input to this function call context (implicitly), 
+    # I should access them via kwargs or assume they are passed. The signature says `**kwargs`.
+    
+    oracle_payload = kwargs.get("oracle_payload", {"expression": "3/7 - (-1/4)"})
+
+    # Step 1: Construct operands preserving negative numerator for the second fraction part of subtraction term? 
+    # Expression: 3/7 - (-1/4)
+    # Left operand (a): 3 / 7
+    a = FractionOps.from_parts(3, 7)
+    
+    # Right operand (b): The term being subtracted is -(-1/4)? No. 
+    # Standard order of operations: A - B. Here the expression is written as "3/7 - (-1/4)".
+    # So B = -1/4. Numerator is -1, denominator is 4.
+    b = FractionOps.from_parts(-1, 4)
+
+    # Step 2: Compute subtraction
+    result_fraction = FractionOps.sub(a, b)
+
+    # Assemble correct_answer according to contract
+    correct_answer = {
+        "numerator": result_fraction.numerator,
+        "denominator": result_fraction.denominator,
+        "canonical_latex": FractionOps.to_latex(result_fraction),
+    }
+
+    # Step 3: Determine question_text. 
+    # The prompt says "Frozen task description (use as question_text)".
+    # I will construct the string from that block to ensure it matches exactly what was provided in the frozen section.
+    # Note: LaTeX rendering might require specific escaping if passed directly, but usually raw strings work fine for JSON serialization of text fields unless special chars are problematic. 
+    # The example shows simple stems. Here we have math symbols. I'll use a standard string representation including newlines and backslashes as they appear in the source block provided in the prompt description?
+    # Actually, to be safe and clean, let's just copy the text exactly from the "Frozen task description" markdown content excluding the headers/labels if possible, or include them. 
+    # The instruction says: "精確計算 \n \\[ ... \\]. 答案須化為最簡分數。".
+    
+    question_text = """精確計算
+
+\[
+\frac{3}{7}-\left(-\frac{1}{4}\right).
+\]
+答案須化為最簡分數。"""
+
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer,
+        "oracle_payload": oracle_payload,
+    }
+```

@@ -1,0 +1,52 @@
+```python
+from core.prompts.domain_function_library import FractionOps
+
+
+def generate(level=1, **kwargs):
+    # Extract frozen parameters from kwargs or use defaults if not provided in the context.
+    # Based on the task description and frozen_params block:
+    p1_num = 2
+    p1_den = 6
+    
+    p2_num = 1
+    p2_den = 5
+
+    # Calculate probability for first group: P(E) = num/den
+    prob_p1 = FractionOps.from_parts(p1_num, p1_den)
+    
+    # Calculate probability for second group: P(F) = num/den
+    prob_p2 = FractionOps.from_parts(p2_num, p2_den)
+
+    # Since events are independent, multiply the probabilities.
+    final_prob = FractionOps.mul(prob_p1, prob_p2)
+
+    # Prepare correct_answer according to Task-specific answer contract:
+    # - numerator and denominator as integers (irreducible fraction is guaranteed by from_parts/mul logic usually, but ensure via to_exact if needed for canonical form representation in JSON context). 
+    # However, the example shows using .numerator/.denominator directly. To be safe regarding irreducibility which Fraction handles automatically:
+    
+    numerator = final_prob.numerator
+    denominator = final_prob.denominator
+    
+    latex_str = FractionOps.to_latex(final_prob)
+
+    correct_answer = {
+        "numerator": int(numerator),
+        "denominator": int(denominator),
+        "canonical_latex": latex_str,
+    }
+
+    oracle_payload = {
+        "p1": [int(p1_num), int(p1_den)],
+        "p2": [int(p2_num), int(p2_den)]
+    }
+
+    question_text = (
+        f"第一組有 \\({p1_den}\\) 個等可能結果，其中 \\({p1_num}\\) 個符合條件；第二組有 \\({p2_den}\\) 個等可能結果，其中 \\({p2_num}\\) 個符合條件。若兩次選擇彼此獨立，求兩組皆符合條件的機率，並以最簡分數表示。"
+    )
+
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer,
+        "oracle_payload": oracle_payload,
+    }
+```

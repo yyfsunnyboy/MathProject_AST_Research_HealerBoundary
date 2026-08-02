@@ -1,0 +1,61 @@
+```python
+from core.prompts.domain_function_library import RadicalOps, Fraction
+
+def generate(level=1, **kwargs):
+    # Solve (x-2)^2 = 3 for x.
+    # Take square root: |x - 2| = sqrt(3) => x - 2 = ±sqrt(3).
+    # Roots are a = 2 + sqrt(3), b = 2 - sqrt(3).
+    
+    rational_part, radical_coefficient, radicand = RadicalOps.simplify_term(0, 3)
+    
+    # Calculate the two roots: (rational_part + radical_coefficient * sqrt(radicand)) and ...
+    root_a_rational = rational_part + radical_coefficient
+    root_b_rational = rational_part - radical_coefficient
+    
+    # We need to express these as LinearRadical terms. 
+    # The term structure is {"rational": ..., "radical_coefficient": ..., "radicand": ...}
+    
+    # Root a: 2 + sqrt(3) -> rational=2, coeff=1, radicand=3
+    term_a = {
+        "rational": root_a_rational, 
+        "radical_coefficient": radical_coefficient, 
+        "radicand": radicand
+    }
+    
+    # Root b: 2 - sqrt(3) -> rational=2, coeff=-1, radicand=3
+    term_b = {
+        "rational": root_b_rational, 
+        "radical_coefficient": -radical_coefficient, 
+        "radicand": radicand
+    }
+
+    # Verify a > b (which is true since 2+sqrt(3) > 2-sqrt(3))
+    
+    # Calculate target: 2a + b
+    # 2 * term_a + term_b
+    
+    # Scale term_a by 2 using the API to ensure proper handling of rational parts if needed, 
+    # though simple arithmetic on ints is allowed. Let's use scale_linear_radical for robustness.
+    
+    scaled_term_a = RadicalOps.scale_linear_radical(term_a, 2)
+    
+    # Add scaled term a and term b using add_linear_radicals
+    
+    final_result_dict = RadicalOps.add_linear_radicals(scaled_term_a, term_b)
+    
+    question_text = "一元二次方程式\n\\[(x-2)^2=3\\]\n的兩根為 \\(a,b\\)，且 \\(a>b\\)。求 \\(2a+b\\)，答案須保持精確根式形式。"
+
+    correct_answer = {
+        "result": final_result_dict, 
+        # The result dict from add_linear_radicals has keys: rational, radical_coefficient, radicand.
+        # We need to wrap it in the specific contract structure requested.
+    }
+
+    oracle_payload = kwargs.get('frozen_params', {"equation": "(x-2)^2=3", "order": "a>b", "target": "2a+b"})
+
+    return {
+        "question_text": question_text, 
+        "correct_answer": correct_answer, 
+        "oracle_payload": oracle_payload
+    }
+```

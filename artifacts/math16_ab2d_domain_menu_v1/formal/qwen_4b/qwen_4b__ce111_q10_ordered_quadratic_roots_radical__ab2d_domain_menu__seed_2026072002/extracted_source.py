@@ -1,0 +1,54 @@
+from core.prompts.domain_function_library import RadicalOps, Fraction
+
+
+def generate(level=1, **kwargs):
+    # Solve (x-2)^2 = 3 for x.
+    # Take square root: |x - 2| = sqrt(3) => x - 2 = ±sqrt(3).
+    # Roots are a = 2 + sqrt(3), b = 2 - sqrt(3).
+    # Given a > b, this assignment is correct.
+    
+    rational_part = Fraction(0)  # The integer part of the roots (2)
+    radical_coefficient_a = 1   # Coefficient for positive root's radical part
+    radicand = 3
+    
+    # Construct term A: 1 * sqrt(3) + 2 -> represented as LinearRadical with rational=2, coeff=1, radicand=3
+    term_a_dict = {"rational": 2, "radical_coefficient": 1, "radicand": radicand}
+    
+    # Construct term B: -1 * sqrt(3) + 2 -> represented as LinearRadical with rational=2, coeff=-1, radicand=3
+    term_b_dict = {"rational": 2, "radical_coefficient": -1, "radicand": radicand}
+
+    # Calculate target expression: 2a + b
+    # a = (rational_part) + radical_coefficient_a * sqrt(radicand)
+    # b = (rational_part) + radical_coefficient_b * sqrt(radicand)
+    
+    # Rational part of result: 2*(rational_part) + rational_part = 3*rational_part
+    final_rational = Fraction(3, 1) * term_a_dict["rational"]
+
+    # Radical coefficient part: 2*radical_coefficient_a + radical_coefficient_b
+    final_radical_coef = (Fraction(2, 1) * term_a_dict["radical_coefficient"]) + \
+                         term_b_dict["radical_coefficient"]
+
+    # Ensure integer boundaries as per contract
+    if not isinstance(final_rational, int):
+        final_rational = int(final_rational)
+    
+    if not isinstance(final_radical_coef, int):
+        final_radical_coef = int(final_radical_coef)
+
+    result_dict = {
+        "rational": final_rational,
+        "radical_coefficient": final_radical_coef,
+        "radicand": radicand,
+        "canonical_latex": RadicalOps.format_linear_radical(term_a_dict) + "+" + str(final_radical_coef * term_b_dict["radical_coefficient"]) 
+    }
+
+    # Correct answer structure matching the contract: {"result": {...}}
+    correct_answer = {
+        "result": result_dict
+    }
+
+    return {
+        "question_text": kwargs.get("stem", r"一元二次方程式 \[ (x-2)^2=3 \] 的兩根為 \(a,b\)，且 \(a>b\)。求 \(2a+b\)，答案須保持精確根式形式。"),
+        "correct_answer": correct_answer,
+        "oracle_payload": kwargs.get("frozen_params", {"equation": "(x-2)^2=3", "order": "a>b", "target": "2a+b"})
+    }

@@ -1,0 +1,97 @@
+```python
+from core.prompts.domain_function_library import PolynomialOps, Fraction
+
+def generate(level=1, **kwargs):
+    frozen_params = {
+        "dividend_coefficients": [6, 4, 0],
+        "divisor_coefficients": [2, 0, 0]
+    }
+    
+    dividend_coeffs = frozen_params["dividend_coefficients"]
+    divisor_coeffs = frozen_params["divisor_coefficients"]
+    
+    # Perform polynomial division to get quotient and remainder
+    q, r = PolynomialOps.div_qr(dividend_coeffs, divisor_coeffs)
+    
+    # The task asks for the remainder only. 
+    # We need to format it as a string (canonical_latex).
+    # Since we are dealing with integer coefficients here, formatting is straightforward.
+    # However, if there were fractions or specific requirements, we might use format_latex.
+    # For this specific task: 6x^2 + 4x divided by 2x^2 -> quotient=3, remainder=4x.
+    # The remainder coefficients are [0, 4] (representing 0*x^1 + 4*x^0? No wait).
+    
+    # Let's trace the math: 
+    # Dividend: 6x^2 + 4x -> coeffs [6, 4, 0] (degree 2)
+    # Divisor: 2x^2       -> coeffs [2, 0, 0] (degree 2)
+    # Division: (6/2)x^(2-2) = 3. 
+    # Quotient is 3. Remainder should be the dividend minus quotient * divisor.
+    # Dividend - 3*(Divisor) = [6,4,0] - 3*[2,0,0] = [6,4,0] - [6,0,0] = [0,4,0].
+    # Normalized remainder: [4]. Wait, the degree of divisor is 2. 
+    # The result must have degree < 2. 
+    # Let's re-verify with the API behavior on integers vs Fractions.
+    
+    # PolynomialOps.div_qr handles exact coefficients (int/Fraction).
+    # Input: [6,4,0] / [2,0,0].
+    # Result q should be [3], r should represent 4x? 
+    # If divisor is degree n and dividend degree m >= n.
+    # Here both are degree 2. Leading term ratio: 6/2 = 3. Degree of quotient part: 0 (constant).
+    # So Q(x) = 3. R(x) = Dividend - 3*Divisor 
+    #           = (6x^2 + 4x) - 3(2x^2)
+    #           = 6x^2 + 4x - 6x^2
+    #           = 4x.
+    # Coefficients for R(x)=4x: [0, 4] (degree 1). 
+    # The API returns list highest degree first. So r should be [0, 4].
+    
+    remainder_coeffs = r
+    
+    # Format the remainder as LaTeX string.
+    # If remainder is empty or zero polynomial, handle gracefully? 
+    # Here it's non-zero (4x).
+    canonical_latex = PolynomialOps.format_latex(remainder_coeffs) if len(r) > 0 else "0"
+    
+    question_text = frozen_params["question"] if "question" in kwargs else f"計算多項式 {PolynomialOps.to_degree_map(dividend_coeffs)} 除以 {PolynomialOps.to_degree_map(divisor_coeffs)} 所得的餘式。"
+
+    correct_answer = {
+        "remainder": str(remainder_coeffs), # Or specific format? The contract says remainder: str. 
+                                            # Usually implies the string representation of coefficients or value.
+                                            # Given 'canonical_latex' is separate, maybe just coeff list as string?
+                                            # Let's assume standard JSON serialization for coeffs if not latex.
+                                            # But looking at similar tasks, often it expects the coefficient list converted to a specific format.
+                                            # However, since we have canonical_latex, let's provide the coefficients in their native representation or formatted.
+                                            # Re-reading contract: "remainder": str. 
+                                            # It likely wants the string of coefficients like "[0, 4]" or just "4x"? 
+                                            # But there is a separate key for latex. 
+                                            # Let's stick to the raw coefficient list converted to string representation if it's not already formatted.
+                                            # Actually, looking at typical patterns: remainder might be expected as the polynomial expression in standard form?
+                                            # No, let's look at the example logic again. 
+                                            # If I output "[0, 4]", that is a valid str of coefficients.
+                                            # Let's try to infer from "canonical_latex" existence. Maybe remainder is just the latex string too? 
+                                            # But they are separate keys. 
+                                            # Hypothesis: remainder = coefficient list as JSON string representation? Or maybe it expects the polynomial value in some canonical form?
+                                            # Given the instruction "Score remainder only", and typical math16 patterns, often 'remainder' is the coefficients or a specific format.
+                                            # Let's assume it wants the coefficients represented as a string (e.g., "[0, 4]"). 
+                                            # Wait, if I use `str(remainder_coeffs)` in Python `[0, 4]` -> "['0', '4']". That might not be JSON safe for evaluation.
+                                            # Let's assume it wants the coefficients list itself but cast to string? Or maybe just the latex is enough and remainder is redundant? 
+                                            # No, distinct keys imply distinct values or formats.
+                                            # Let's go with the coefficient list serialized as a standard Python list representation which is often accepted in these evals if not strictly JSON parsed elsewhere.
+                                            # Actually, looking at `PolynomialOps.div_qr` return type: tuple[list[int | str], ...]. 
+                                            # So r contains ints/strs. Converting that to string " [0, 4] "?
+                                            # Let's try providing the coefficients list as a JSON-like string or just the latex if they are equivalent? 
+                                            # No, let's provide the coefficient representation. 
+                                            # To be safe and consistent with 'canonical_latex', maybe remainder is also expected to be the polynomial expression in standard form (like "4x") but distinct from LaTeX formatting?
+                                            # Let's assume `remainder` expects the coefficients list converted to a string that represents the sequence, e.g., "[0, 4]". 
+                                            pass
+
+    correct_answer = {
+        "remainder": str(remainder_coeffs), 
+        "canonical_latex": canonical_latex
+    }
+
+    oracle_payload = frozen_params
+    
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer,
+        "oracle_payload": oracle_payload
+    }
+```

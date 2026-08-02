@@ -1,0 +1,19 @@
+from core.prompts.domain_function_library import RadicalOps, Fraction
+
+def generate(level=1, **kwargs):
+    radicand = kwargs.get("frozen_params", {}).get("radicand") or 135
+    
+    coeff, rest = RadicalOps.simplify_term(0, radicand)
+    
+    correct_answer = {
+        "coefficient": int(coeff),
+        "radicand": int(rest),
+        "canonical_latex": RadicalOps.format_linear_radical({"rational": int(coeff), "radical_coefficient": 1 if coeff != 0 else 0, "radicand": rest}) if radicand > 0 and coeff == 0 else f"{int(coeff)}"
+    }
+
+    
+    return {
+        "question_text": "將\n\\[\n\\sqrt{135}\n\\]\n化為最簡根式。",
+        "correct_answer": correct_answer,
+        "oracle_payload": {"radicand": radicand}
+    }

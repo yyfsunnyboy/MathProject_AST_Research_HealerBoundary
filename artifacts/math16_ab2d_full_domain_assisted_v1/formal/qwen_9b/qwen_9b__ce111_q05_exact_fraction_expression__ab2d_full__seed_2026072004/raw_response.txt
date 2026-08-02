@@ -1,0 +1,56 @@
+from core.prompts.domain_function_library import FractionOps
+
+def generate(level=1, **kwargs):
+    # Parse frozen_params from kwargs or default if not present in this specific call context
+    # The task description provides a static expression for question_text and oracle_payload.
+    # We must construct the fractions based on that expression: 9/22 + 11/18 - (23/22 - 7/18)
+    
+    expr_str = "9/22 + 11/18 - (23/22 - 7/18)"
+    oracle_payload = {"expression": expr_str}
+
+    # Construct fractions from the expression components
+    f1_num, f1_den = 9, 22
+    f2_num, f2_den = 11, 18
+    f3_num, f3_den = 23, 22
+    f4_num, f4_den = 7, 18
+
+    a = FractionOps.from_parts(f1_num, f1_den) # 9/22
+    b = FractionOps.from_parts(f2_num, f2_den) # 11/18
+    c = FractionOps.from_parts(f3_num, f3_den) # 23/22
+    d = FractionOps.from_parts(f4_num, f4_den) # 7/18
+
+    # Evaluate inner parenthesis: (c - d) -> 23/22 - 7/18
+    inner_diff = FractionOps.sub(c, d)
+
+    # Evaluate full expression: a + b - inner_diff
+    sum_ab = FractionOps.add(a, b)
+    result = FractionOps.sub(sum_ab, inner_diff)
+
+    # Assemble correct_answer according to the contract
+    canonical_latex = FractionOps.to_latex(result)
+    
+    return {
+        "question_text": expr_str.replace("/", "\n\\frac{").replace("+", "+\n-(").replace("-", "-") if False else f"精確計算\n[{expr_str}]\n答案須化為最簡分數。", 
+                         # Actually, the prompt says: use as question_text. Let's stick to a clean representation or the raw string provided but formatted nicely?
+                         # The instruction "use as question_text" usually implies using the stem directly if it's already good, 
+                         # but here we have LaTeX in the description. Let's format it properly for the output dict.
+                         # However, standard practice is to return a readable string or the raw expression provided.
+                         # Given the input "精確計算 ...", I will construct a clean text version.
+                         f"精確計算\n\\[{expr_str}]\n答案須化為最簡分數。") if False else expr_str.replace("/", "\\\\frac{").replace("+", "+\\\\-(").replace("-", "-"), 
+        # Re-evaluating the question_text requirement: "use as question_text".
+        # The frozen description has LaTeX. I should probably return a string that represents it well or just the expression part if strictly interpreted, 
+        # but usually these tasks want the full prompt text cleaned up for JSON.
+        # Let's use the raw expression with simple formatting to ensure valid JSON and readability without markdown fences in the value itself?
+        # Actually, looking at previous examples of this type: often just the math string is used or a formatted version.
+        # I will provide the LaTeX representation as a plain string for compatibility if needed, 
+        # but standard text is safer unless specified "LaTeX". The prompt has LaTeX in description.
+        # Let's assume we return the expression with proper escaping for JSON inside the dict value? No, just a str.
+        # I will use the raw expression from frozen_params as it is the ground truth stem content essentially.
+        expr_str.replace("/", "\\\\frac{").replace("+", "+\\\\-(").replace("-", "-"), 
+        "correct_answer": {
+            "numerator": result.numerator,
+            "denominator": result.denominator,
+            "canonical_latex": canonical_latex
+        },
+        "oracle_payload": oracle_payload
+    }

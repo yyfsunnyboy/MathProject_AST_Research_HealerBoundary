@@ -1,0 +1,134 @@
+# Math16 Ab2d+domain-menu
+Write only Python source implementing `def generate(level=1, **kwargs):`.
+Use only the Domain API methods listed in the Domain API menu below for this domain.
+Allowed native ops: arithmetic, comparisons, if/else, loops, list/dict, unpacking, sorting.
+Forbidden: other domain public APIs; task-specific solvers; reading audit payloads;
+manifest answers; evaluator expected answers; answer lookup by task_id;
+prescribed per-item API sequences (none are provided — choose APIs yourself).
+Do not use Markdown fences or explanations outside the Python source.
+Import Domain API from `core.prompts.domain_function_library` only as needed.
+
+Domain for this task: RadicalOps.
+
+<!-- DOMAIN_API_BLOCK_BEGIN -->
+# Domain API menu: RadicalOps
+
+This menu lists every SUPPORTED_PUBLIC method on `RadicalOps`.
+It is domain-general: it does not name a Math16 task, prescribe which
+APIs a specific item must call, or give call order / solution steps.
+
+## Public APIs
+- `RadicalOps.add_linear_radicals` | import: `core.prompts.domain_function_library` | signature: `(term_a, term_b)` | returns: dict  # LinearRadical JSON-safe ints
+  inputs: two LinearRadical dicts with identical positive radicand
+  returns_shape: `{"json_safe": true, "required_keys": ["rational", "radical_coefficient", "radicand"], "type": "dict", "value_types": {"radical_coefficient": ["int"], "radicand": ["int"], "rational": ["int"]}}`
+  boundary: rejects mismatched radicand or zero result coefficient
+  example: `RadicalOps.add_linear_radicals({"rational": 1, "radical_coefficient": 1, "radicand": 2},{"rational": 3, "radical_coefficient": 1, "radicand": 2})`
+
+- `RadicalOps.exact_integer` | import: `core.prompts.domain_function_library` | signature: `(value)` | returns: int  # rejects non-integral rationals
+  inputs: non-bool int, integral Fraction, or integral 'p/q' string
+  returns_shape: `{"json_safe": true, "type": "int"}`
+  boundary: never returns str union
+  example: `RadicalOps.exact_integer(Fraction(4, 1))  # 4`
+
+- `RadicalOps.format_expression` | import: `core.prompts.domain_function_library` | signature: `(terms_dict, denominator=1)` | returns: str  # complete compound-radical LaTeX
+  inputs: mapping radicand->coefficient; exact denominator
+  returns_shape: `{"json_safe": true, "type": "str"}`
+  boundary: presentation only
+  example: `RadicalOps.format_expression({1: 6, 3: -1})  # '6 - \sqrt{3}'`
+
+- `RadicalOps.format_linear_radical` | import: `core.prompts.domain_function_library` | signature: `(term)` | returns: str  # presentation LaTeX
+  inputs: LinearRadical dict
+  returns_shape: `{"json_safe": true, "type": "str"}`
+  boundary: presentation only
+  example: `RadicalOps.format_linear_radical({"rational": 1, "radical_coefficient": 1, "radicand": 2})  # "1+\sqrt{2}"`
+
+- `RadicalOps.format_term` | import: `core.prompts.domain_function_library` | signature: `(coeff, radicand, is_first=True)` | returns: str  # complete single-term LaTeX including coefficient/sign
+  inputs: semantic coefficient and radicand
+  returns_shape: `{"json_safe": true, "type": "str"}`
+  boundary: presentation only
+  example: `RadicalOps.format_term(2, 3)  # '2\sqrt{3}'`
+
+- `RadicalOps.normalize_term_list` | import: `core.prompts.domain_function_library` | signature: `(terms)` | returns: list[dict]  # sorted; keys coefficient,radicand
+  inputs: list/tuple of pairs or coefficient/radicand dicts
+  returns_shape: `{"element": {"required_keys": ["coefficient", "radicand"], "type": "dict", "value_types": {"coefficient": ["int", "str"], "radicand": ["int"]}}, "json_safe": true, "length": "variable", "ordering": "ascending radicand", "type": "list"}`
+  boundary: official radical semantic JSON adapter
+  example: `RadicalOps.normalize_term_list([(1, 12)])`
+
+- `RadicalOps.rationalize_linear_denominator` | import: `core.prompts.domain_function_library` | signature: `(numerator, denom_rational, denom_radical_coeff, radicand)` | returns: tuple[int | Fraction, int | Fraction, int]
+  inputs: exact rational coefficients; positive nonsquare radicand; nonzero conjugate denominator
+  returns_shape: `{"elements": [{"types": ["int", "Fraction"]}, {"types": ["int", "Fraction"]}, {"type": "int"}], "json_safe": "partial", "length": 3, "type": "tuple"}`
+  boundary: RadicalOps.exact_integer on integral leaves before JSON
+  example: `RadicalOps.rationalize_linear_denominator(1, 2, 1, 3)`
+
+- `RadicalOps.scale_linear_radical` | import: `core.prompts.domain_function_library` | signature: `(term, k)` | returns: dict  # LinearRadical JSON-safe ints
+  inputs: term LinearRadical dict; k nonzero non-bool int
+  returns_shape: `{"json_safe": true, "required_keys": ["rational", "radical_coefficient", "radicand"], "type": "dict", "value_types": {"radical_coefficient": ["int"], "radicand": ["int"], "rational": ["int"]}}`
+  boundary: rejects k==0 and zero radical_coefficient
+  example: `RadicalOps.scale_linear_radical({"rational": 1, "radical_coefficient": 1, "radicand": 2}, 2)`
+
+- `RadicalOps.simplify_term` | import: `core.prompts.domain_function_library` | signature: `(coeff, radicand)` | returns: tuple[int | Fraction, int]  # semantic (coefficient, square-free radicand)
+  inputs: exact coeff; radicand non-bool non-negative int, or non-negative Fraction (converted); radicand<0 raises ValueError (no silent abs)
+  returns_shape: `{"elements": [{"types": ["int", "Fraction"]}, {"type": "int"}], "json_safe": "partial", "length": 2, "type": "tuple"}`
+  boundary: normalize_term_list or to_exact before JSON
+  example: `RadicalOps.simplify_term(1, 12)  # (2, 3)`
+
+## Generic domain code example (non-formal numbers)
+```python
+from core.prompts.domain_function_library import RadicalOps
+
+def generate(level=1, **kwargs):
+    # Generic API-usage illustration only — not a Math16 formal item.
+    # Demonstrates RadicalOps calls; the return shape below is NOT the answer
+    # contract for any Math16 task. Assemble correct_answer exactly according
+    # to ## Task-specific answer contract.
+    frozen = {"radicand": 50}
+    coeff, rest = RadicalOps.simplify_term(1, frozen["radicand"])
+    return {
+        "question_text": "example stem",
+        "correct_answer": {
+            "coefficient": coeff,
+            "radicand": rest,
+            "canonical_latex": RadicalOps.format_term(coeff, rest),
+        },  # ILLUSTRATIVE ONLY — see Task-specific answer contract
+        "oracle_payload": frozen,
+    }
+```
+
+## Shared output contract
+Return a dict with exactly three keys: question_text, correct_answer, oracle_payload.
+- question_text: the provided stem string (do not rebuild from scratch unless required).
+- correct_answer: JSON-compatible value matching ## Task-specific answer contract
+  (not the generic domain code example).
+- oracle_payload: must exactly equal the frozen_params object provided in the task block.
+Do not read audit payloads, evaluator expected answers, or answer tables.
+Exact-value adapters such as to_exact (when used) only serialize values to JSON-safe
+forms; they do not decide the final correct_answer schema.
+<!-- DOMAIN_API_BLOCK_END -->
+
+## Task-specific answer contract
+Source: agent_tools/finals_rebuild/math_answer_contracts.py (oracle_type=`math16_radical_simplification`).
+Assemble `correct_answer` exactly according to this contract. Do not treat the generic domain code example as the answer shape.
+Required return schema:
+{
+  "question_text": str,
+  "correct_answer": {"coefficient": int, "radicand": int, "canonical_latex": str},
+  "oracle_payload": dict
+}
+- Simplest radical form with canonical_latex.
+
+## Task
+task_id: `ce115_calc_radical_simplification_l1`
+domain_ops: `RadicalOps`
+skill_id: `math16_radical_simplification`
+
+## Frozen task description (use as question_text)
+將
+\[
+\sqrt{27}
+\]
+化為最簡根式 \(a\sqrt{b}\)，其中 \(a\) 為正整數，且 \(b\) 不含大於 \(1\) 的完全平方因數。
+
+## frozen_params (oracle_payload must equal this object)
+{
+  "radicand": 27
+}

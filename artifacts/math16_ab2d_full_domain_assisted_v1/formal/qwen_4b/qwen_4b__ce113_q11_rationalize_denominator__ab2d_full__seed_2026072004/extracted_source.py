@@ -1,0 +1,23 @@
+from core.prompts.domain_function_library import RadicalOps
+
+def generate(level=1, **kwargs):
+    frozen_params = kwargs.get("frozen_params", {})
+    
+    denom_rational = 4
+    denom_radical_coeff = -1
+    radicand = 7
+    
+    numerator = frozen_params["numerator"]
+    
+    result_tuple = RadicalOps.rationalize_linear_denominator(numerator, denom_rational, denom_radical_coeff, radicand)
+    
+    a = int(result_tuple[0])
+    b = int(result_tuple[1])
+    
+    correct_answer = a + b
+    
+    return {
+        "question_text": frozen_params["denominator"],
+        "correct_answer": correct_answer,
+        "oracle_payload": frozen_params
+    }

@@ -1,0 +1,74 @@
+```python
+from core.prompts.domain_function_library import FractionOps
+
+
+def generate(level=1, **kwargs):
+    # Parse frozen_params as oracle_payload (must match exactly)
+    products = kwargs.get("products", [])
+    
+    # Initialize accumulator for the expression: 2.79*89.3 - (-0.21*89.3)
+    # This is equivalent to adding two terms with signs extracted from frozen_params
+    
+    total_fraction = FractionOps.create(0)
+
+    for prod in products:
+        left_str = prod["left"]
+        right_str = prod["right"]
+        sign = prod["sign"]
+        
+        # Create fractions from strings (e.g., "2.79" -> 279/100, "-0.21" is handled by create)
+        a = FractionOps.create(left_str)
+        b = FractionOps.create(right_str)
+        
+        term_value = FractionOps.mul(a, b)
+        
+        # Apply sign to the term value (multiply by 1 or -1)
+        if sign == -1:
+            total_fraction = FractionOps.sub(total_fraction, term_value)
+        else:
+            total_fraction = FractionOps.add(total_fraction, term_value)
+
+    # Get exact rational representation for correct_answer["value"]
+    value_str = FractionOps.to_exact(total_fraction)
+    
+    # Generate canonical LaTeX using to_latex (mixed=False is default and appropriate here)
+    latex_str = FractionOps.to_latex(total_fraction)
+    
+    return {
+        "question_text": products,  # Using the frozen_params structure as requested stem context if needed, 
+                                   # but per instructions: use provided description.
+                                   # However, instruction says: "Frozen task description (use as question_text)"
+                                   # So we must put that string in question_text.
+    }
+
+# Correction based on strict reading of Task-specific answer contract and Frozen task description:
+def generate(level=1, **kwargs):
+    
+    products = kwargs.get("products", [])
+    
+    total_fraction = FractionOps.create(0)
+
+    for prod in products:
+        left_str = prod["left"]
+        right_str = prod["right"]
+        sign = prod["sign"]
+        
+        a = FractionOps.create(left_str)
+        b = FractionOps.create(right_str)
+        
+        term_value = FractionOps.mul(a, b)
+        
+        if sign == -1:
+            total_fraction = FractionOps.sub(total_fraction, term_value)
+        else:
+            total_fraction = FractionOps.add(total_fraction, term_value)
+
+    value_str = FractionOps.to_exact(total_fraction)
+    latex_str = FractionOps.to_latex(total_fraction)
+    
+    return {
+        "question_text": r"精確計算\n\[2.79\times 89.3-\left(-0.21\times 89.3\right).\]答案不得使用近似值。",
+        "correct_answer": {"value": value_str, "canonical_latex": latex_str},
+        "oracle_payload": products
+    }
+```

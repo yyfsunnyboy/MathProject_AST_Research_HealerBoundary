@@ -1,0 +1,40 @@
+from core.prompts.domain_function_library import FractionOps
+
+
+def generate(level=1, **kwargs):
+    # Step 1: Create fractions from string operands using create()
+    term1_left = FractionOps.create("2.79")
+    term1_right = FractionOps.create("89.3")
+    
+    term2_left = FractionOps.create("-0.21")
+    term2_right = FractionOps.create("89.3")
+
+    # Step 2: Calculate products and apply signs as per frozen_params logic
+    product1 = FractionOps.mul(term1_left, term1_right)
+    product2 = FractionOps.mul(term2_left, term2_right)
+    
+    # The expression is: (product1) - (product2)
+    result_fraction = FractionOps.sub(product1, product2)
+
+    # Step 3 & 4: Assemble correct_answer according to the task-specific contract
+    exact_value_str = FractionOps.to_exact(result_fraction)
+    latex_repr = FractionOps.to_latex(result_fraction)
+
+    return {
+        "question_text": r"精確計算\n\[\n2.79\times 89.3-\left(-0.21\times 89.3\right).\n\]\n答案不得使用近似值。",
+        "correct_answer": {"value": exact_value_str, "canonical_latex": latex_repr},
+        "oracle_payload": {
+            "products": [
+                {
+                    "left": "2.79",
+                    "right": "89.3",
+                    "sign": 1
+                },
+                {
+                    "left": "-0.21",
+                    "right": "89.3",
+                    "sign": -1
+                }
+            ]
+        }
+    }

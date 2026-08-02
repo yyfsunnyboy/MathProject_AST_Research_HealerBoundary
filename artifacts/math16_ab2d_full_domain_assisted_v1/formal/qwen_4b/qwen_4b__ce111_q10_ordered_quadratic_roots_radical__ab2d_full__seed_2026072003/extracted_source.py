@@ -1,0 +1,118 @@
+from core.prompts.domain_function_library import RadicalOps, Fraction
+
+
+def generate(level=1, **kwargs):
+    # Step 1: Solve (x-2)^2 = 3 -> x - 2 = ±√3 -> x = 2 ± √3
+    # Roots are a = 2 + √3 and b = 2 - √3. Since √3 > 0, a > b holds naturally.
+    
+    term_a_raw = {"rational": 2, "radical_coefficient": 1, "radicand": 3}
+    term_b_raw = {"rational": 2, "radical_coefficient": -1, "radicand": 3}
+
+    # Ensure a > b (larger root first)
+    if term_a_raw["radical_coefficient"] < term_b_raw["radical_coefficient"]:
+        term_a_raw, term_b_raw = term_b_raw, term_a_raw
+    
+    # Step 2: Compute target expression: 2a + b
+    # Scale a by 2 using RadicalOps.scale_linear_radical
+    scaled_term_a = RadicalOps.scale_linear_radical(term_a_raw, 2)
+    
+    # Add the smaller root (b) to the result
+    final_result_dict = RadicalOps.add_linear_radicals(scaled_term_a, term_b_raw)
+
+    # Step 3: Format for canonical LaTeX representation of the linear radical
+    latex_str = RadicalOps.format_linear_radical(final_result_dict)
+
+    # Extract components for correct_answer schema
+    rational_val = int(final_result_dict["rational"]) if isinstance(final_result_dict["rational"], Fraction) else final_result_dict["radicand"] 
+    # Wait, let's re-read the contract carefully.
+    # The answer is a single linear radical: 2a + b = (4+√3) + (2-√3) = 6? No wait.
+    # Let's trace math again to be absolutely sure about the structure before calling APIs blindly if needed, 
+    # but we must use API methods for operations as per instructions.
+    
+    # Re-trace: a = 2+sqrt(3), b=2-sqrt(3). Target: 2a+b = 2*(2+sqrt(3)) + (2-sqrt(3))
+    # = 4 + 2*sqrt(3) + 2 - sqrt(3) = 6 + sqrt(3).
+    
+    # The result is a single LinearRadical term: rational=6, radical_coefficient=1, radicand=3.
+    # However, the instruction says "Call ... then add". 
+    # Let's verify if my manual trace matches API behavior or if I should rely solely on APIs for calculation logic?
+    # The prompt asks to implement generate using Domain API methods.
+    
+    # Actually, looking at step 2: scale a by 2 -> (4 + 2√3). Add b (2 - √3) -> (6 + √3).
+    # This is correct. 
+    # But wait, the example in domain code shows `simplify_term` returning `(coeff, radicand)` where coeff might be simplified?
+    # Here we have 1 * sqrt(3), so it stays as coefficient 1.
+    
+    # Let's construct the answer object based on the final result dict from add_linear_radicals.
+    rational_part = int(final_result_dict["rational"]) if isinstance(final_result_dict["rational"], Fraction) else final_result_dict["rational"] 
+    radical_coeff = int(final_result_dict["radical_coefficient"]) if isinstance(final_result_dict["radical_coefficient"], Fraction) else final_result_dict["radical_coefficient"]
+    radicand_part = int(final_result_dict["radicand"])
+
+    # Ensure integer types for JSON safety as per contract (int or integer-valued Fraction with denom 1 -> normalized to int in schema description? 
+    # Contract says: "rational": int, ... same boundary. Non-integral rejected.)
+    
+    correct_answer = {
+        "result": {
+            "rational": rational_part if isinstance(rational_part, (int, type(Fraction(1)))) else int(rational_part),
+            "radical_coefficient": radical_coeff if isinstance(radical_coeff, (int, type(Fraction(1)))) else int(radical_coeff),
+            "radicand": radicand_part,
+            "canonical_latex": latex_str
+        }
+    }
+
+    return {
+        "question_text": kwargs.get("equation", "(x-2)^2=3"), # Use provided frozen params if available in context or default? 
+        # The prompt says: "Frozen task description (use as question_text)".
+        # But the function signature is generate(level=1, **kwargs). 
+        # Usually for these tasks, kwargs might contain the specific instance data. 
+        # However, looking at the frozen_params provided in the text block below this code cell...
+        # The prompt structure implies I should hardcode or access via global if not passed? 
+        # Actually, standard pattern: use `kwargs` to pass the task-specific inputs like equation/order/target if they vary per run.
+        # But here the input is fully specified in the "Frozen" section of the prompt text itself.
+        # I will assume kwargs contains 'equation', 'order', 'target' or similar, OR I should just use what's provided in the frozen block directly? 
+        # Re-reading: "Do not read audit payloads...". The frozen params are part of the task definition for THIS run.
+        # Since `generate` is a function called by an evaluator, and it receives **kwargs, likely the specific instance data (equation etc) should be in kwargs or I must infer from context? 
+        # Wait, looking at typical Math16 patterns: The frozen_params are usually passed via kwargs to generate.
+        # Let's assume `frozen` is accessible via a closure variable if this was a class method, but it's def generate(...).
+        # Given the strict "Do not read audit payloads", and no global state mentioned... 
+        # I will construct question_text from the frozen description provided in the prompt text directly? No, that breaks reusability.
+        # Actually, looking at the example generic code: `frozen = {"radicand": 50}` was local.
+        # The instruction says "Frozen task description (use as question_text)". 
+        # I will assume the evaluator passes these strings in kwargs if they vary, but since this is a single-shot generation for a specific ID...
+        # Let's look at `frozen_params` again: it has equation, order, target.
+        # If I don't have access to them via global or closure (which isn't allowed), and the prompt text provides them as "Frozen task description", 
+        # perhaps they are meant to be hardcoded for this specific execution? Or passed in kwargs?
+        # Standard practice: The `generate` function is called with the instance data. I will try to access it from kwargs if present, otherwise fallback to defaults defined in the prompt text (equation=(x-2)^2=3). 
+        # Actually, looking at the "Frozen task description" section, it explicitly says "(use as question_text)".
+        # And `frozen_params` is provided. It's highly likely these are passed via kwargs or I should just use them directly since this is a specific instance generation request.
+        # Let's assume they are in `kwargs`. If not, I'll hardcode the ones from the prompt text to ensure correctness for THIS task.
+        
+    }
+
+# Correction: Since I cannot read external state and must implement generate(level=1, **kwargs), 
+# and the specific instance data is given in the prompt description (not passed as args usually unless specified otherwise):
+# In many such evaluations, the `frozen_params` are injected into kwargs. 
+# Let's assume they might be there: 'equation', 'order', 'target'. 
+# If not present, I will use the values from the "Frozen task description" block in this specific run context (hardcoded for safety).
+
+    # Re-evaluating based on typical flow: The prompt provides a FULLY SPECIFIED instance.
+    # It asks to write code that implements `def generate(...)`. 
+    # If I hardcode the equation, it works for THIS task. 
+    # But if kwargs contains them, using kwargs is more robust? 
+    # Let's check the generic example: `frozen = {"radicand": 50}` was local variable inside function.
+    # The prompt says "Frozen params (oracle_payload must equal this object)". This implies I need to construct oracle_payload exactly as given in the text block below my code cell? 
+    # Yes, for THIS specific task instance provided in the prompt description.
+    
+    question_text = r"一元二次方程式\n\[(x-2)^2=3\]\n的兩根為 \(a,b\)，且 \(a>b\)。求 \(2a+b\)，答案須保持精確根式形式。"
+
+    # Construct oracle_payload exactly as provided in the prompt text
+    frozen_params = {
+        "equation": "(x-2)^2=3",
+        "order": "a>b",
+        "target": "2a+b"
+    }
+
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer, # From calculation above: 6 + sqrt(3) -> rational=6, coeff=1, radicand=3
+        "oracle_payload": frozen_params
+    }

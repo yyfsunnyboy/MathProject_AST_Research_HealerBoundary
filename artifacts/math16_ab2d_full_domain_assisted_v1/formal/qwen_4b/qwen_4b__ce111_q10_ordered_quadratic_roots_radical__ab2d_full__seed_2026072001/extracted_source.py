@@ -1,0 +1,39 @@
+from core.prompts.domain_function_library import RadicalOps, Fraction
+
+def generate(level=1, **kwargs):
+    # Parse equation (x-2)^2 = 3 -> x^2 - 4x + 4 = 3 -> x^2 - 4x + 1 = 0
+    # Roots are [4 +/- sqrt(16 - 4)] / 2 = [4 +/- sqrt(12)] / 2 = 2 +/- sqrt(3)
+    
+    # Root a (larger): 2 + sqrt(3). Represented as LinearRadical: rational=2, radical_coefficient=1, radicand=3
+    term_a = {"rational": 2, "radical_coefficient": 1, "radicand": 3}
+    
+    # Root b (smaller): 2 - sqrt(3). Represented as LinearRadical: rational=2, radical_coefficient=-1, radicand=3
+    term_b = {"rational": 2, "radical_coefficient": -1, "radicand": 3}
+
+    # Step 2: Calculate 2a + b using domain APIs
+    
+    # Scale a by 2
+    scaled_a = RadicalOps.scale_linear_radical(term_a, 2)
+    
+    # Add the smaller root (b) to the scaled larger root (2a)
+    result_term = RadicalOps.add_linear_radicals(scaled_a, term_b)
+
+    # Extract components for correct_answer schema
+    rational_part = result_term["rational"]
+    radical_coefficient = result_term["radical_coefficient"]
+    radicand = result_term["radicand"]
+    
+    canonical_latex = RadicalOps.format_linear_radical(result_term)
+
+    return {
+        "question_text": "一元二次方程式\n\\[(x-2)^2=3\\]\n的兩根為 \\(a,b\\)，且 \\(a>b\\)。求 \\(2a+b\\)，答案須保持精確根式形式。",
+        "correct_answer": {
+            "result": {
+                "rational": rational_part,
+                "radical_coefficient": radical_coefficient,
+                "radicand": radicand,
+                "canonical_latex": canonical_latex
+            }
+        },
+        "oracle_payload": kwargs.get("frozen_params", {"equation": "(x-2)^2=3", "order": "a>b", "target": "2a+b"})
+    }

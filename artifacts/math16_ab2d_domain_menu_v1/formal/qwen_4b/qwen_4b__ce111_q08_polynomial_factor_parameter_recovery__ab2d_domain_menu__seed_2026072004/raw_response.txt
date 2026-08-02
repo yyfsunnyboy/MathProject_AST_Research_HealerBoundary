@@ -1,0 +1,93 @@
+```python
+from core.prompts.domain_function_library import PolynomialOps
+
+
+def generate(level=1, **kwargs):
+    # Extract frozen parameters from kwargs or use defaults if not provided in the context.
+    # Based on the task description and frozen_params block:
+    
+    # Reconstruct the quadratic coefficients [39, 5, -14] as a list of Fractions for exact arithmetic
+    coeffs = PolynomialOps.coeffs_from_py_expression('39*x**2 + 5*x - 14')
+    
+    # The task specifies factor order policy: first factor is (3x+a)
+    template_left_x_coefficient = kwargs.get("template_left_x_coefficient", 3)
+    
+    # We need to find 'a', 'b', and 'c' such that:
+    # 39x^2 + 5x - 14 = (3x + a)(bx + c)
+    # Expanding the right side: 
+    # 3*b*x**2 + (3*c + b*a)*x + a*c
+    
+    # Comparing coefficients:
+    # x^2 term: 3 * b = 39 => b = 13
+    # constant term: a * c = -14
+    # linear term: 3c + ab = 5
+    
+    # From the first equation, we can determine 'b' exactly.
+    b_val = coeffs[0] // template_left_x_coefficient  # Integer division since coefficients are integers
+    
+    # Now substitute known values into the equations to solve for a and c.
+    # We have: 
+    # 1) a * c = -14
+    # 2) 3c + b*a = 5 => 3c + (b*c/a)*a ? No, simpler substitution.
+    
+    # Let's use the linear coefficient equation directly with integer arithmetic logic.
+    # We know 'b' is an integer derived from coeffs[0] / template_left_x_coefficient.
+    b_int = int(b_val)  # Ensure it's treated as int for calculation
+    
+    # Equation: 3*c + a*b = 5 => c = (5 - a*b) / 3
+    # Since 'a' and 'c' are integers, we can iterate possible factors of -14 to find valid pairs.
+    
+    import math
+
+    target_constant_product = coeffs[-1] if len(coeffs) > 0 else PolynomialOps.coeffs_from_py_expression('-14')[-1]
+    
+    # Factors of the constant term (-14). Since a and c are integers, they must be divisors of -14.
+    possible_factors = []
+    for i in range(1, int(math.sqrt(abs(target_constant_product))) + 2):
+        if target_constant_product % i == 0:
+            d1 = i
+            d2 = target_constant_product // i
+            # Check both (a, c) and (-c, -d1) etc. Actually just test divisors directly as 'a' candidates? 
+            # No, a is the constant term of (3x+a), so it's an integer factor.
+            
+            # Let's try all pairs (a, c) such that a * c = target_constant_product
+            
+            if d1 == 0: continue
+            
+            for val_a in [d1, -d1]:
+                val_c = target_constant_product // val_a
+                
+                possible_factors.append((val_a, val_c))
+
+    # Filter pairs based on the linear coefficient equation: 3*c + a*b = 5
+    valid_pair_found = False
+    
+    for a_val, c_val in possible_factors:
+        if (3 * c_val) + (a_val * b_int) == int(5):
+            found_a = a_val
+            found_c = c_val
+            
+            # Calculate the required answer: a + 2c
+            result_value = found_a + 2 * found_c
+            
+            return {
+                "question_text": f"已知\n\\[39x^2+5x-14=(3x+a)(bx+c),\n其中 \\(a,b,c\\) 均為整數，求 \\(a+2c\\)。",
+                "correct_answer": result_value,
+                "oracle_payload": {
+                    "factor_order_policy": kwargs.get("factor_order_policy", "strict_source_template"),
+                    "quadratic_coefficients": [39, 5, -14],
+                    "template_left_x_coefficient": template_left_x_coefficient
+                }
+            }
+
+    # Fallback if no integer solution found (should not happen for this problem)
+    return {
+        "question_text": f"已知\n\\[39x^2+5x-14=(3x+a)(bx+c),\n其中 \\(a,b,c\\) 均為整數，求 \\(a+2c\\)。",
+        "correct_answer": None, # Placeholder if logic fails
+        "oracle_payload": {
+            "factor_order_policy": kwargs.get("factor_order_policy", "strict_source_template"),
+            "quadratic_coefficients": [39, 5, -14],
+            "template_left_x_coefficient": template_left_x_coefficient
+        }
+    }
+```

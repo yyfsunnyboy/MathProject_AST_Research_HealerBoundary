@@ -1,0 +1,25 @@
+from core.prompts.domain_function_library import PolynomialOps
+
+def generate(level=1, **kwargs):
+    frozen_params = {
+        "dividend_coefficients": [6, 0, 6],
+        "divisor_coefficients": [1, -4]
+    }
+    
+    dividend_coeffs = frozen_params["dividend_coefficients"]
+    divisor_coeffs = frozen_params["divisor_coefficients"]
+    
+    quotient, remainder = PolynomialOps.div_qr(dividend_coeffs, divisor_coeffs)
+    
+    correct_answer = {
+        "quotient_coefficients": quotient,
+        "remainder_coefficients": remainder,
+        "quotient_latex": PolynomialOps.format_latex(quotient),
+        "remainder_latex": PolynomialOps.format_latex(remainder)
+    }
+    
+    return {
+        "question_text": r"將多項式 \[ 6x^2+6 \] 除以 \[ x-4, \]，求商式與餘式。",
+        "correct_answer": correct_answer,
+        "oracle_payload": frozen_params
+    }

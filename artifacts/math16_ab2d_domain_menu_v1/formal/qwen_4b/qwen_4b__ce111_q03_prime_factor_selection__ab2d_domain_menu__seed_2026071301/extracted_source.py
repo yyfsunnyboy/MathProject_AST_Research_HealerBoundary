@@ -1,0 +1,32 @@
+from core.prompts.domain_function_library import IntegerOps
+
+def generate(level=1, **kwargs):
+    frozen = {
+        "candidates": [11, 12, 13, 14],
+        "n": 156
+    }
+    
+    factors = IntegerOps.prime_factorization(frozen["n"])
+    
+    correct_answer = None
+    
+    for candidate in frozen["candidates"]:
+        if candidate == 1:
+            continue
+        
+        is_divisible = IntegerOps.is_divisible(candidate, 2) or \
+                      IntegerOps.is_divisible(candidate, 3) or \
+                      IntegerOps.is_divisible(candidate, 5) or \
+                      IntegerOps.is_divisible(candidate, 7) or \
+                      IntegerOps.is_divisible(candidate, 11) or \
+                      IntegerOps.is_divisible(candidate, 13)
+        
+        if is_divisible:
+            correct_answer = candidate
+            break
+    
+    return {
+        "question_text": frozen["n"],
+        "correct_answer": correct_answer,
+        "oracle_payload": frozen
+    }

@@ -1,0 +1,39 @@
+from core.prompts.domain_function_library import FractionOps
+
+
+def generate(level=1, **kwargs):
+    # Parse the expression components from frozen_params
+    expr = kwargs.get("oracle_payload", {}).get("expression")
+    
+    # Extract fractions: 9/22 + 11/18 - (23/22 - 7/18)
+    # This is equivalent to: 9/22 + 11/18 - 23/22 + 7/18
+    
+    a = FractionOps.from_parts(9, 22)
+    b = FractionOps.from_parts(11, 18)
+    c = FractionOps.from_parts(23, 22)
+    d = FractionOps.from_parts(7, 18)
+
+    # Calculate: a + b - (c - d) -> a + b - c + d
+    step1 = FractionOps.add(a, b)
+    step2 = FractionOps.sub(c, d)
+    result = FractionOps.sub(step1, step2)
+
+    # Ensure irreducible form and get canonical latex
+    numerator = int(result.numerator)
+    denominator = int(result.denominator)
+    
+    # Use to_exact for JSON-safe string representation if needed, 
+    # but the contract requires specific structure.
+    # We construct the answer based on Fraction properties which are already reduced by default in Python's Fraction class
+    
+    canonical_latex = FractionOps.to_latex(result)
+
+    return {
+        "question_text": r"精確計算\n\[\frac{9}{22}+\frac{11}{18}-\left(\frac{23}{22}-\frac{7}{18}\right).\n答案須化為最簡分數。",
+        "correct_answer": {
+            "numerator": numerator,
+            "denominator": denominator,
+            "canonical_latex": canonical_latex
+        },
+        "oracle_payload": kwargs.get("oracle_payload") or {"expression": expr} if 'expr' in locals() else {} 
+    }

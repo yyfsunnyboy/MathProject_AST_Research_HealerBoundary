@@ -1,0 +1,69 @@
+from core.prompts.domain_function_library import PolynomialOps, Fraction
+
+
+def generate(level=1, **kwargs):
+    # Retrieve frozen parameters from kwargs or use defaults if not provided in context
+    factor_order_policy = kwargs.get("factor_order_policy", "strict_source_template")
+    
+    quadratic_coefficients = kwargs.get("quadratic_coefficients", [39, 5, -14])
+    template_left_x_coefficient = kwargs.get("template_left_x_coefficient", 3)
+
+    # Step 1: Factor the quadratic using PolynomialOps.factor_quadratic_exact
+    # The input coefficients are for ax^2 + bx + c. 
+    # factor_quadratic_exact expects (a, b, c). Here a=39, b=5, c=-14.
+    coeffs = [Fraction(c) for c in quadratic_coefficients]  # Ensure exact Fraction handling
+    
+    factors_raw = PolynomialOps.factor_quadratic_exact(
+        int(coeffs[0]), 
+        int(coeffs[1]), 
+        int(coeffs[2])
+    )
+
+    # Step 2: Swap so left x_coefficient equals template_left_x_coefficient (which is 3)
+    # The function returns [dict, dict]. We need to ensure the first factor has x coefficient = 3.
+    factors_list = list(factors_raw)
+    
+    if len(factors_list) == 2:
+        f1 = factors_list[0]
+        f2 = factors_list[1]
+
+        # Check current leading coefficients (x_coefficient of the linear term in factor form mx+k is m)
+        x_coef_1 = int(f1["x_coefficient"]) if isinstance(f1["x_coefficient"], str) else float(f1["x_coefficient"])
+        
+        # If not matching, swap them. Note: The problem states 39x^2... and template says (3x+a).
+        # So we want the first factor to be (3x + a).
+        if x_coef_1 != template_left_x_coefficient:
+            factors_list[0], factors_list[1] = f2, f1
+
+    # Step 3: Extract a, b, c and compute a+2*c with native arithmetic.
+    # The factorization is (3x + a)(bx + c).
+    # From the first factor (3x + a): x_coefficient corresponds to 'b' in our expansion logic if we map directly? 
+    # Wait, let's re-read carefully: "first factor fixed as (3x+a)".
+    # So Factor1 = 3x + a. Thus, coeff of x is 3, constant term is a.
+    # Factor2 = bx + c. Coeff of x is b, constant term is c.
+    
+    f1_dict = factors_list[0]
+    f2_dict = factors_list[1]
+
+    # Identify 'a' and 'b', 'c' based on the structure (3x+a)(bx+c)
+    # In Python dict returned by factor_quadratic_exact, keys are "x_coefficient" and "constant".
+    
+    a_val = int(f1_dict["constant"]) if isinstance(f1_dict["constant"], str) else float(f1_dict["constant"])
+    b_val = int(f2_dict["x_coefficient"]) if isinstance(f2_dict["x_coefficient"], str) else float(f2_dict["x_coefficient"])
+    c_val = int(f2_dict["constant"]) if isinstance(f2_dict["constant"], str) else float(f2_dict["constant"])
+
+    # Compute a + 2*c using native arithmetic (integers as per problem statement "a,b,c are integers")
+    result = a_val + 2 * c_val
+    
+    # Step 4: Assemble correct_answer exactly according to the Answer contract.
+    oracle_payload = {
+        "factor_order_policy": factor_order_policy,
+        "quadratic_coefficients": quadratic_coefficients,
+        "template_left_x_coefficient": template_left_x_coefficient
+    }
+
+    return {
+        "question_text": f"已知\n\\[\n39x^2+5x-14=(3x+a)(bx+c),\n其中 \\(a,b,c\\) 均為整數，求 \\(a+2c\\)。",
+        "correct_answer": int(result), # Ensure integer output as per contract type hint
+        "oracle_payload": oracle_payload
+    }

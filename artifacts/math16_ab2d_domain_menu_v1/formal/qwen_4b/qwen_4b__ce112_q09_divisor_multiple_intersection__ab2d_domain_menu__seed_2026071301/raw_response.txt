@@ -1,0 +1,27 @@
+```python
+from core.prompts.domain_function_library import IntegerOps
+
+def generate(level=1, **kwargs):
+    divisor_of = kwargs.get("divisor_of", 0)
+    multiple_of = kwargs.get("multiple_of", 0)
+    
+    # Find all positive divisors of the number that is a multiple of 'multiple_of' and divides 'divisor_of'.
+    # A number x satisfies: x % divisor_of == 0 AND x * k = divisor_of for some integer k.
+    # This implies x must be a factor of divisor_of, and also divisible by multiple_of (since it's a multiple).
+    
+    divisors = IntegerOps.positive_divisors(divisor_of)
+    
+    count = 0
+    
+    for d in divisors:
+        if d % multiple_of == 0:
+            count += 1
+            
+    correct_answer = {"count": count}
+    
+    return {
+        "question_text": f"有多少個正整數同時是 \(18\) 的倍數，也是 \(216\) 的因數？",
+        "correct_answer": correct_answer,
+        "oracle_payload": kwargs.get("frozen_params") or {"divisor_of": divisor_of, "multiple_of": multiple_of}
+    }
+```

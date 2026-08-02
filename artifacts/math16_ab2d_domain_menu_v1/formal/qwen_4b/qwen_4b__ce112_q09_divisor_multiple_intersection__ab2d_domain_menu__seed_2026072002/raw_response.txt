@@ -1,0 +1,46 @@
+```python
+from core.prompts.domain_function_library import IntegerOps
+
+def generate(level=1, **kwargs):
+    divisor_of = kwargs.get("divisor_of", None) or 216
+    multiple_of = kwargs.get("multiple_of", None) or 18
+    
+    # Calculate the least common multiple (LCM) of the two numbers.
+    # A number is a multiple of 'a' and a divisor of 'b' if it equals k * LCM(a, b).
+    # We need to find how many such positive integers exist that are also divisors of 216.
+    
+    def gcd(x, y):
+        while y:
+            x, y = y, x % y
+        return x
+    
+    lcm_val = (divisor_of * multiple_of) // gcd(divisor_of, multiple_of)
+
+    # The numbers that are multiples of 18 and divisors of 216 must be in the form k * LCM(18, 216).
+    # Since any divisor of a number is also a divisor of its multiples (in terms of divisibility logic), 
+    # we need to find how many positive integers 'x' exist such that:
+    # x % multiple_of == 0 AND IntegerOps.is_divisible(x, divisor_of) is True.
+    
+    # The set of numbers divisible by 18 and dividing 216 are exactly the divisors of LCM(18, 216).
+    # Why? 
+    # Let x be a multiple of 18 => x = m * 18.
+    # Let x divide 216 => 216 % x == 0.
+    # Since 18 divides LCM(18, 216) and any common divisor property holds for the LCM structure here:
+    # Actually, simpler logic: 
+    # We need positive integers x such that (x is multiple of 18) AND (x is a factor of 216).
+    # This implies x must be a divisor of 216. Also x = k * 18 for some integer k >= 1.
+    # So we just need to count divisors d of 216 such that d % 18 == 0.
+
+    all_divisors = IntegerOps.positive_divisors(divisor_of)
+    
+    count = sum(1 for d in all_divisors if d % multiple_of == 0)
+    
+    return {
+        "question_text": f"有多少個正整數同時是 \(18\) 的倍數，也是 \(216\) 的因數？",
+        "correct_answer": {"count": count},
+        "oracle_payload": {
+            "divisor_of": divisor_of,
+            "multiple_of": multiple_of
+        }
+    }
+```

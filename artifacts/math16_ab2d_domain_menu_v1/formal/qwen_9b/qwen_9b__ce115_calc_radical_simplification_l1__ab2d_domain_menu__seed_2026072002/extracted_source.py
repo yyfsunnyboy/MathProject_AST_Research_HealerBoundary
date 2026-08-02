@@ -1,0 +1,18 @@
+from core.prompts.domain_function_library import RadicalOps
+
+def generate(level=1, **kwargs):
+    radicand = kwargs.get("radicand", 27)
+    
+    coeff, rest = RadicalOps.simplify_term(radicand, radicand)
+    
+    latex_str = RadicalOps.format_linear_radical({"rational": 0, "radical_coefficient": coeff, "radicand": rest})
+
+    return {
+        "question_text": r"將 \[\sqrt{27}\] 化為最簡根式 \(a\sqrt{b}\)，其中 \(a\) 為正整數，且 \(b\) 不含大於 \(1\) 的完全平方因數。",
+        "correct_answer": {
+            "coefficient": coeff,
+            "radicand": rest,
+            "canonical_latex": latex_str
+        },
+        "oracle_payload": {"radicand": radicand}
+    }

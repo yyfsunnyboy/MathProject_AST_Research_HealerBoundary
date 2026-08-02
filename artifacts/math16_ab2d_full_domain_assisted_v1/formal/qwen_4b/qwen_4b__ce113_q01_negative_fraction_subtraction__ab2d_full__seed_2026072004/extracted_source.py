@@ -1,0 +1,31 @@
+from core.prompts.domain_function_library import FractionOps
+
+def generate(level=1, **kwargs):
+    frozen_params = {
+        "expression": "3/7 - (-1/4)"
+    }
+    
+    # Parse the expression: 3/7 and -(-1/4) which is equivalent to adding 1/4.
+    # The problem asks for 3/7 - (-1/4). 
+    # We need to handle the negative sign carefully when creating fractions from parts.
+    # Operand A: 3/7 -> numerator=3, denominator=7
+    a = FractionOps.from_parts(3, 7)
+    
+    # Operand B: The term being subtracted is -1/4. 
+    # So we are calculating: (3/7) - (-1/4).
+    # This means the right operand for subtraction should be negative one fourth.
+    b = FractionOps.from_parts(-1, 4)
+    
+    result_fraction = FractionOps.sub(a, b)
+    
+    correct_answer = {
+        "numerator": int(result_fraction.numerator),
+        "denominator": int(result_fraction.denominator),
+        "canonical_latex": str(FractionOps.to_exact(result_fraction)) # to_exact returns 'p/q' string format which matches canonical latex for fractions in this context or can be used directly. 
+    }
+
+    return {
+        "question_text": f"精確計算\\[\\frac{3}{7}-\\left(-\\frac{1}{4}\\right).\\n答案須化為最簡分數。",
+        "correct_answer": correct_answer,
+        "oracle_payload": frozen_params
+    }
