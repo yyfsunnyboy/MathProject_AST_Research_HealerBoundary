@@ -76,10 +76,24 @@ description: Generated typed Domain API reference for formal Ab2d/Qwen prompts.
 
 ## IntegerOps.is_divisible
 - `IntegerOps.is_divisible` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | returns: bool
-- Inputs: integer-like a,b; b=0 returns False
+- Inputs: non-bool int a,b; float/bool raise ValueError; b=0 returns False (not an exception)
 - Shape: `{"json_safe": true, "type": "bool"}`
 - Normalization: not an answer integer
 - Example: `IntegerOps.is_divisible(156, 13)  # True`
+
+## IntegerOps.positive_divisors
+- `IntegerOps.positive_divisors` | import: `core.prompts.domain_function_library` | signature: `(n)` | returns: list[int]  # ascending positive divisors
+- Inputs: non-bool int n>0; no other task filters
+- Shape: `{"element_types": ["int"], "json_safe": true, "ordering": "ascending", "type": "list"}`
+- Normalization: filter multiples in model assembly if needed
+- Example: `IntegerOps.positive_divisors(12)  # [1,2,3,4,6,12]`
+
+## IntegerOps.prime_factorization
+- `IntegerOps.prime_factorization` | import: `core.prompts.domain_function_library` | signature: `(n)` | returns: dict[int, int]  # prime -> exponent; ±1 -> {}
+- Inputs: non-bool int; n!=0; factors abs(n)
+- Shape: `{"json_safe": true, "keys": "positive primes", "type": "dict", "values": "positive int exponents"}`
+- Normalization: no selected/answer field
+- Example: `IntegerOps.prime_factorization(12)  # {2:2, 3:1}`
 
 ## IntegerOps.safe_eval
 - `IntegerOps.safe_eval` | import: `core.prompts.domain_function_library` | signature: `(expr)` | returns: int | float  # bool and container results raise ValueError
@@ -97,7 +111,7 @@ description: Generated typed Domain API reference for formal Ab2d/Qwen prompts.
 
 ## PolynomialOps.add
 - `PolynomialOps.add` | import: `core.prompts.domain_function_library` | signature: `(c1, c2)` | returns: list[number]  # operand-dependent coefficient type; highest degree first
-- Inputs: coefficient lists with mutually arithmetic-compatible values
+- Inputs: coefficient lists with mutually arithmetic-compatible values; bool forbidden
 - Shape: `{"json_safe": "operand-dependent", "length": "max operand length after normalization", "ordering": "highest degree first", "type": "list"}`
 - Normalization: use to_exact per Fraction coefficient before JSON
 - Example: `PolynomialOps.add([1,2],[3,4])  # [4,6]`
@@ -125,28 +139,28 @@ description: Generated typed Domain API reference for formal Ab2d/Qwen prompts.
 
 ## PolynomialOps.format_latex
 - `PolynomialOps.format_latex` | import: `core.prompts.domain_function_library` | signature: `(coeffs, var='x')` | returns: str
-- Inputs: highest-degree-first numeric coefficients
+- Inputs: highest-degree-first numeric coefficients; bool forbidden
 - Shape: `{"json_safe": true, "type": "str"}`
 - Normalization: presentation only
 - Example: `PolynomialOps.format_latex([4,0])  # '4x'`
 
 ## PolynomialOps.mul
 - `PolynomialOps.mul` | import: `core.prompts.domain_function_library` | signature: `(c1, c2)` | returns: list[int | float | Fraction]  # operand-dependent; highest degree first
-- Inputs: non-empty coefficient lists containing arithmetic-compatible int,float,Fraction; bool unsupported
+- Inputs: coefficient lists containing arithmetic-compatible int,float,Fraction; empty operand -> [0]; bool forbidden
 - Shape: `{"element_types": ["int", "float", "Fraction"], "json_safe": "operand-dependent", "length": "len(c1)+len(c2)-1 before leading-zero normalization", "ordering": "highest degree first", "type": "list"}`
 - Normalization: Fraction coefficients require to_exact; exact tasks must not use float
 - Example: `PolynomialOps.mul([3,2],[13,-7])  # [39,5,-14]`
 
 ## PolynomialOps.normalize
 - `PolynomialOps.normalize` | import: `core.prompts.domain_function_library` | signature: `(coeffs)` | returns: list[number]  # highest degree first; leading zeros removed
-- Inputs: non-empty coefficient sequence
+- Inputs: coefficient sequence; empty or all-zero -> [0]; bool coefficients forbidden
 - Shape: `{"json_safe": "operand-dependent", "length": "variable", "ordering": "highest degree first", "type": "list"}`
 - Normalization: preserves coefficient types
 - Example: `PolynomialOps.normalize([0,2,1])  # [2,1]`
 
 ## PolynomialOps.sub
 - `PolynomialOps.sub` | import: `core.prompts.domain_function_library` | signature: `(c1, c2)` | returns: list[number]  # operand-dependent coefficient type; highest degree first
-- Inputs: coefficient lists with mutually arithmetic-compatible values
+- Inputs: coefficient lists with mutually arithmetic-compatible values; bool forbidden
 - Shape: `{"json_safe": "operand-dependent", "length": "max operand length after normalization", "ordering": "highest degree first", "type": "list"}`
 - Normalization: use to_exact per Fraction coefficient before JSON
 - Example: `PolynomialOps.sub([1,2],[3,4])  # [-2,-2]`
@@ -158,12 +172,33 @@ description: Generated typed Domain API reference for formal Ab2d/Qwen prompts.
 - Normalization: official polynomial JSON adapter
 - Example: `PolynomialOps.to_degree_map([1,0,-1])`
 
+## RadicalOps.add_linear_radicals
+- `RadicalOps.add_linear_radicals` | import: `core.prompts.domain_function_library` | signature: `(term_a, term_b)` | returns: dict  # LinearRadical JSON-safe ints
+- Inputs: two LinearRadical dicts with identical positive radicand
+- Shape: `{"json_safe": true, "required_keys": ["rational", "radical_coefficient", "radicand"], "type": "dict", "value_types": {"radical_coefficient": ["int"], "radicand": ["int"], "rational": ["int"]}}`
+- Normalization: rejects mismatched radicand or zero result coefficient
+- Example: `RadicalOps.add_linear_radicals({"rational":1,"radical_coefficient":1,"radicand":2},{"rational":3,"radical_coefficient":-1,"radicand":2})`
+
+## RadicalOps.exact_integer
+- `RadicalOps.exact_integer` | import: `core.prompts.domain_function_library` | signature: `(value)` | returns: int  # rejects non-integral rationals
+- Inputs: non-bool int, integral Fraction, or integral 'p/q' string
+- Shape: `{"json_safe": true, "type": "int"}`
+- Normalization: never returns str union
+- Example: `RadicalOps.exact_integer(Fraction(4,1))  # 4`
+
 ## RadicalOps.format_expression
 - `RadicalOps.format_expression` | import: `core.prompts.domain_function_library` | signature: `(terms_dict, denominator=1)` | returns: str  # complete compound-radical LaTeX
 - Inputs: mapping radicand->coefficient; exact denominator
 - Shape: `{"json_safe": true, "type": "str"}`
 - Normalization: presentation only
 - Example: `RadicalOps.format_expression({1:6,3:-1})  # '6 - \sqrt{3}'`
+
+## RadicalOps.format_linear_radical
+- `RadicalOps.format_linear_radical` | import: `core.prompts.domain_function_library` | signature: `(term)` | returns: str  # presentation LaTeX
+- Inputs: LinearRadical dict
+- Shape: `{"json_safe": true, "type": "str"}`
+- Normalization: presentation only
+- Example: `RadicalOps.format_linear_radical({"rational":1,"radical_coefficient":1,"radicand":2})  # "1+\sqrt{2}"`
 
 ## RadicalOps.format_term
 - `RadicalOps.format_term` | import: `core.prompts.domain_function_library` | signature: `(coeff, radicand, is_first=True)` | returns: str  # complete single-term LaTeX including coefficient/sign
@@ -183,12 +218,19 @@ description: Generated typed Domain API reference for formal Ab2d/Qwen prompts.
 - `RadicalOps.rationalize_linear_denominator` | import: `core.prompts.domain_function_library` | signature: `(numerator, denom_rational, denom_radical_coeff, radicand)` | returns: tuple[int | Fraction, int | Fraction, int]
 - Inputs: exact rational coefficients; positive nonsquare radicand; nonzero conjugate denominator
 - Shape: `{"elements": [{"types": ["int", "Fraction"]}, {"types": ["int", "Fraction"]}, {"type": "int"}], "json_safe": "partial", "length": 3, "type": "tuple"}`
-- Normalization: to_exact on first two leaves before JSON
+- Normalization: RadicalOps.exact_integer on integral leaves before JSON
 - Example: `RadicalOps.rationalize_linear_denominator(1,2,1,3)`
+
+## RadicalOps.scale_linear_radical
+- `RadicalOps.scale_linear_radical` | import: `core.prompts.domain_function_library` | signature: `(term, k)` | returns: dict  # LinearRadical JSON-safe ints
+- Inputs: term LinearRadical dict; k nonzero non-bool int
+- Shape: `{"json_safe": true, "required_keys": ["rational", "radical_coefficient", "radicand"], "type": "dict", "value_types": {"radical_coefficient": ["int"], "radicand": ["int"], "rational": ["int"]}}`
+- Normalization: rejects k==0 and zero radical_coefficient
+- Example: `RadicalOps.scale_linear_radical({"rational":1,"radical_coefficient":1,"radicand":2}, 2)`
 
 ## RadicalOps.simplify_term
 - `RadicalOps.simplify_term` | import: `core.prompts.domain_function_library` | signature: `(coeff, radicand)` | returns: tuple[int | Fraction, int]  # semantic (coefficient, square-free radicand)
-- Inputs: exact coeff; non-negative int or Fraction radicand
+- Inputs: exact coeff; radicand non-bool non-negative int, or non-negative Fraction (converted); radicand<0 raises ValueError (no silent abs)
 - Shape: `{"elements": [{"types": ["int", "Fraction"]}, {"type": "int"}], "json_safe": "partial", "length": 2, "type": "tuple"}`
 - Normalization: normalize_term_list or to_exact before JSON
 - Example: `RadicalOps.simplify_term(1,12)  # (2,3)`

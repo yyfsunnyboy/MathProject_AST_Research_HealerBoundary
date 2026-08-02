@@ -60,12 +60,15 @@ class FractionOps:
         - 如果輸入是 float，先轉 str 再轉 Fraction（避免浮點精度誤差）
         - 支援 str 輸入（如 "-0.6"）
         - 支援 Fraction、int、float 輸入
+        - 拒絕 bool（bool 是 int 子類，不得靜默當成 0/1）
         
         範例：
             FractionOps.create(-0.6)    → Fraction(-3, 5)
             FractionOps.create("-0.6")  → Fraction(-3, 5)
             FractionOps.create(3)       → Fraction(3, 1)
         """
+        if isinstance(value, bool):
+            raise ValueError("create rejects bool; use int 0/1 explicitly if needed")
         if isinstance(value, float):
             value_str = str(value)
             return Fraction(value_str).limit_denominator(10000)
@@ -91,8 +94,10 @@ class FractionOps:
                 raise ValueError(f"illegal Fraction string: {value!r}") from exc
         elif isinstance(value, Fraction):
             return value
-        else:
+        elif isinstance(value, int):
             return Fraction(value)
+        else:
+            raise ValueError("create requires int, finite float, legal numeric str, or Fraction")
     
     @staticmethod
     def to_latex(val, mixed=False):
@@ -212,7 +217,15 @@ class IntegerOps:
     
     @staticmethod
     def is_divisible(a, b):
-        """檢查 a 是否能被 b 整除"""
+        """檢查 a 是否能被 b 整除。
+
+        契約：a,b 必須為非 bool int；float／bool 皆 ValueError。
+        b==0 回傳 False（不拋例外）—— 這是 predicate 語意，不是除法運算。
+        """
+        if isinstance(a, bool) or isinstance(b, bool):
+            raise ValueError("is_divisible requires non-bool int operands")
+        if not isinstance(a, int) or not isinstance(b, int):
+            raise ValueError("is_divisible requires int operands")
         if b == 0:
             return False
         return a % b == 0
@@ -320,14 +333,24 @@ class RadicalOps:
 
     @staticmethod
     def div_terms(c1, r1, c2, r2):
-        """兩個單項根式相除 c1√r1 ÷ c2√r2，返回化簡與有理化結果 (new_coeff, new_radicand)"""
+        """兩個單項根式相除 c1√r1 ÷ c2√r2，返回化簡與有理化結果 (new_coeff, new_radicand)。
+
+        INTERNAL. 除零政策（凍結）：c2==0，或整數路徑下 r2==0，皆 raise ValueError("Division by zero")。
+        不回傳 None，不改用 ZeroDivisionError。
+        """
         from fractions import Fraction
+        if c2 == 0:
+            raise ValueError("Division by zero")
         # 處理分數被開方數
         is_r1_frac = type(r1).__name__ == "Fraction" or isinstance(r1, Fraction)
         is_r2_frac = type(r2).__name__ == "Fraction" or isinstance(r2, Fraction)
         if is_r1_frac or is_r2_frac:
+            if r2 == 0:
+                raise ValueError("Division by zero")
             return RadicalOps.simplify_term(Fraction(c1, c2), Fraction(r1, r2))
         # 整數被開方數
+        if r2 == 0:
+            raise ValueError("Division by zero")
         if r1 % r2 == 0:
             return RadicalOps.simplify_term(Fraction(c1, c2), r1 // r2)
         else:
@@ -343,19 +366,30 @@ class RadicalOps:
 
     @staticmethod
     def simplify_term(coeff, radicand):
-        """化簡單項根式 c√r -> (new_c, new_r)"""
+        """化簡單項根式 c√r -> (new_c, new_r)。
+
+        radicand 契約：非 bool int，或非負 Fraction（先化為整數 radicand）。
+        radicand < 0 → ValueError；不得以 abs 靜默轉換負根數。
+        """
         from fractions import Fraction
-        # [Fix] Handle Fraction radicand (e.g. 1/2 -> 2/4 -> 1/2 sqrt(2))
+        if isinstance(radicand, bool):
+            raise ValueError("radicand must be a non-bool int")
         if isinstance(radicand, Fraction):
+            if radicand < 0:
+                raise ValueError("radicand must be non-negative")
             if radicand.denominator != 1:
                 coeff = Fraction(coeff, radicand.denominator)
                 radicand = radicand.numerator * radicand.denominator
             else:
                 radicand = radicand.numerator
-
-        radicand = int(radicand)
-        if radicand == 0: return 0, 1
-        if radicand == 1: return coeff, 1
+        if isinstance(radicand, bool) or not isinstance(radicand, int):
+            raise ValueError("radicand must be a non-bool int")
+        if radicand < 0:
+            raise ValueError("radicand must be non-negative")
+        if radicand == 0:
+            return 0, 1
+        if radicand == 1:
+            return coeff, 1
         factors = RadicalOps.get_prime_factors(radicand)
         out_factor = 1
         new_radicand = 1
@@ -748,8 +782,17 @@ class PolynomialOps:
     """多項式運算模組 - 四則運算與 LaTeX 格式化 (降冪係數列表)"""
 
     @staticmethod
+    def _reject_bool_coeffs(coeffs, name: str) -> None:
+        if not isinstance(coeffs, (list, tuple)):
+            raise ValueError(f"{name} must be a coefficient list/tuple")
+        for index, value in enumerate(coeffs):
+            if isinstance(value, bool):
+                raise ValueError(f"{name}[{index}] must not be bool")
+
+    @staticmethod
     def normalize(coeffs):
-        """移除前導零，例: [0, 0, 3, -1] -> [3, -1]；全零回傳 [0]"""
+        """移除前導零，例: [0, 0, 3, -1] -> [3, -1]；空或全零回傳 [0]"""
+        PolynomialOps._reject_bool_coeffs(coeffs, "coeffs")
         if not coeffs:
             return [0]
         i = 0
@@ -814,6 +857,8 @@ class PolynomialOps:
     @staticmethod
     def add(c1, c2):
         """多項式加法：輸入兩個係數列表，回傳結果係數列表"""
+        PolynomialOps._reject_bool_coeffs(c1, "c1")
+        PolynomialOps._reject_bool_coeffs(c2, "c2")
         max_len = max(len(c1), len(c2))
         p1 = [0] * (max_len - len(c1)) + list(c1)
         p2 = [0] * (max_len - len(c2)) + list(c2)
@@ -822,6 +867,8 @@ class PolynomialOps:
     @staticmethod
     def sub(c1, c2):
         """多項式減法：c1 - c2"""
+        PolynomialOps._reject_bool_coeffs(c1, "c1")
+        PolynomialOps._reject_bool_coeffs(c2, "c2")
         max_len = max(len(c1), len(c2))
         p1 = [0] * (max_len - len(c1)) + list(c1)
         p2 = [0] * (max_len - len(c2)) + list(c2)
@@ -830,6 +877,8 @@ class PolynomialOps:
     @staticmethod
     def mul(c1, c2):
         """多項式乘法"""
+        PolynomialOps._reject_bool_coeffs(c1, "c1")
+        PolynomialOps._reject_bool_coeffs(c2, "c2")
         if not c1 or not c2:
             return [0]
         result = [0] * (len(c1) + len(c2) - 1)

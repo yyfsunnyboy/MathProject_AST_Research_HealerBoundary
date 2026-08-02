@@ -20,9 +20,9 @@ from agent_tools.finals_rebuild.math16_pool import load_pool_manifest
 from core.prompts.domain_function_library import FractionOps, IntegerOps, PolynomialOps, RadicalOps
 
 
-def test_inventory_has_exactly_43_classified_public_apis():
-    assert len(runtime_public_inventory()) == 43
-    assert len(API_CLASSIFICATION) == 43
+def test_inventory_has_exactly_49_classified_public_apis():
+    assert len(runtime_public_inventory()) == 49
+    assert len(API_CLASSIFICATION) == 49
     assert validate_inventory() == []
     assert set(DOMAIN_API_SSOT) == {n for n, c in API_CLASSIFICATION.items() if c == SUPPORTED_PUBLIC}
 
