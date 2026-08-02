@@ -65,13 +65,16 @@ APIs a specific item must call, or give call order / solution steps.
 from core.prompts.domain_function_library import IntegerOps
 
 def generate(level=1, **kwargs):
-    # Generic illustration only — not a Math16 formal item.
+    # Generic API-usage illustration only — not a Math16 formal item.
+    # Demonstrates IntegerOps calls; the return shape below is NOT the answer
+    # contract for any Math16 task. Assemble correct_answer exactly according
+    # to ## Task-specific answer contract.
     frozen = {"n": 12, "candidates": [2, 7, 11]}
     factors = IntegerOps.prime_factorization(frozen["n"])
     chosen = [c for c in frozen["candidates"] if c in factors][0]
     return {
         "question_text": "example stem",
-        "correct_answer": chosen,
+        "correct_answer": chosen,  # ILLUSTRATIVE ONLY — see Task-specific answer contract
         "oracle_payload": frozen,
     }
 ```
@@ -79,10 +82,24 @@ def generate(level=1, **kwargs):
 ## Shared output contract
 Return a dict with exactly three keys: question_text, correct_answer, oracle_payload.
 - question_text: the provided stem string (do not rebuild from scratch unless required).
-- correct_answer: JSON-compatible value matching the task answer shape.
+- correct_answer: JSON-compatible value matching ## Task-specific answer contract
+  (not the generic domain code example).
 - oracle_payload: must exactly equal the frozen_params object provided in the task block.
 Do not read audit payloads, evaluator expected answers, or answer tables.
+Exact-value adapters such as to_exact (when used) only serialize values to JSON-safe
+forms; they do not decide the final correct_answer schema.
 <!-- DOMAIN_API_BLOCK_END -->
+
+## Task-specific answer contract
+Source: agent_tools/finals_rebuild/math_answer_contracts.py (oracle_type=`integer_exact`).
+Assemble `correct_answer` exactly according to this contract. Do not treat the generic domain code example as the answer shape.
+Required return schema:
+{
+  "question_text": str,
+  "correct_answer": int,
+  "oracle_payload": dict
+}
+- Exact integer match.
 
 ## Task
 task_id: `ce112_q01_negative_integer_power`
@@ -103,4 +120,4 @@ skill_id: `math16_negative_integer_power`
 
 ## Processing steps
 1) Compute base ** exponent with native arithmetic.
-2) Return bare int.
+2) Assemble correct_answer exactly according to the Answer contract.

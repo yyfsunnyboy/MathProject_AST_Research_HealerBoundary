@@ -187,6 +187,7 @@ def test_full_plan_domain_api_block_matches_domain_menu():
     from agent_tools.finals_rebuild.math16_ab2d_domain_menu import (
         build_domain_menu_prompt,
         extract_domain_api_block,
+        extract_task_specific_answer_contract_block,
         load_domain_template,
     )
 
@@ -196,10 +197,35 @@ def test_full_plan_domain_api_block_matches_domain_menu():
         menu = build_domain_menu_prompt(task, load_domain_template(domain, ROOT))
         full = build_ab2d_full_prompt(task, ROOT)
         assert extract_domain_api_block(menu) == extract_domain_api_block(full)
+        assert extract_task_specific_answer_contract_block(menu) == (
+            extract_task_specific_answer_contract_block(full)
+        )
         # Sole prompt-level delta is Processing steps (and trailing content after base).
         assert full.startswith(menu.rstrip())
         assert "## Processing steps" in full[len(menu.rstrip()) :]
         assert "derived_scaffold" not in full.lower()
+        steps = full[len(menu.rstrip()) :]
+        assert "Assemble correct_answer exactly according to the Answer contract." in steps
+        for banned in (
+            'Return {"count"',
+            'return {"k"',
+            "Return bare int",
+            "Pack coefficient/radicand",
+            "Return numerator/denominator",
+            "final bare answer",
+            "nested or flat result dict",
+        ):
+            assert banned not in steps
+
+
+def test_generic_example_marked_non_normative():
+    from agent_tools.finals_rebuild.math16_ab2d_domain_menu import build_domain_template
+
+    for domain in ("IntegerOps", "FractionOps", "RadicalOps", "PolynomialOps"):
+        text = build_domain_template(domain)
+        assert "ILLUSTRATIVE ONLY" in text
+        assert "NOT the answer" in text or "NOT normative" in text or "NOT the answer contract" in text
+        assert "to_exact serializes Fraction values" in text or domain != "FractionOps"
 
 
 def test_reference_assembly_matches_evaluator_all_tasks():

@@ -15,6 +15,7 @@ from agent_tools.finals_rebuild.math16_ab2d_domain_menu import (
     DOMAIN_TEMPLATE_FILES,
     MANIFEST_REL,
     PROMPT_DIR_REL,
+    TASK_ANSWER_CONTRACT_HEADER,
     TEMPLATE_DIR_REL,
     build_all_prompts,
     build_domain_menu_prompt,
@@ -89,6 +90,35 @@ def test_no_solution_plan_or_guardrail(built):
         assert "evaluate the exact expression:" not in prompt.lower()
 
 
+def test_task_specific_answer_contract_present(built):
+    from agent_tools.finals_rebuild.math16_ab2d_domain_menu import (
+        TASK_ANSWER_CONTRACT_HEADER,
+        authoritative_answer_contract_text,
+        extract_task_specific_answer_contract_block,
+    )
+
+    tasks = tasks_by_id(ROOT)
+    for tid, prompt in built["prompts"].items():
+        assert TASK_ANSWER_CONTRACT_HEADER in prompt
+        block = extract_task_specific_answer_contract_block(prompt)
+        body = authoritative_answer_contract_text(tasks[tid])
+        assert body in block
+        assert "Required return schema:" in block
+
+
+def test_answer_contract_byte_identical_with_full_plan(built):
+    from agent_tools.finals_rebuild.math16_ab2d_domain_menu import (
+        extract_task_specific_answer_contract_block,
+    )
+    from agent_tools.finals_rebuild.math16_ab2d_full import build_ab2d_full_prompt
+
+    tasks = tasks_by_id(ROOT)
+    for tid, menu_prompt in built["prompts"].items():
+        full = build_ab2d_full_prompt(tasks[tid], ROOT)
+        assert extract_task_specific_answer_contract_block(menu_prompt) == (
+            extract_task_specific_answer_contract_block(full)
+        )
+
 def test_domain_templates_have_no_answer_leakage(built):
     tasks = list(tasks_by_id(ROOT).values())
     for domain in DOMAIN_OPS:
@@ -100,7 +130,9 @@ def test_domain_templates_have_no_answer_leakage(built):
 def test_prompt_domain_section_no_answer_leakage(built):
     tasks = list(tasks_by_id(ROOT).values())
     for tid, prompt in built["prompts"].items():
-        domain_part = prompt.split("## Task", 1)[0]
+        marker = "\n## Task\n"
+        task_at = prompt.find(marker)
+        domain_part = prompt[:task_at] if task_at >= 0 else prompt
         hits = scan_answer_leakage(domain_part, tasks, allow_frozen_overlap=False)
         assert hits == [], (tid, hits)
 
@@ -112,13 +144,18 @@ def test_task_block_has_stem_and_frozen_only(built):
         assert "## Frozen task description" in prompt
         assert "## frozen_params" in prompt
         assert task["math16_question_text"] in prompt
-        task_section = prompt.split("## Task", 1)[1]
+        marker = "\n## Task\n"
+        task_at = prompt.find(marker)
+        assert task_at >= 0
+        task_section = prompt[task_at + len(marker) :]
         # Must not embed a labeled formal answer object in the task section.
         assert re.search(r"(?i)expected[_ ]answer\s*[:=]", task_section) is None
         assert "evaluator expected" not in task_section.lower()
         dump = json.dumps(task["correct_answer"], ensure_ascii=False, sort_keys=True)
         if len(dump) >= 8:
-            assert dump not in prompt.split("## Task", 1)[0]
+            pre_task = prompt[:task_at]
+            # Contract schema text is allowed before ## Task; forbid full answer dump there.
+            assert dump not in pre_task.split(TASK_ANSWER_CONTRACT_HEADER, 1)[0]
 
 
 def test_each_task_exposes_full_own_domain_api(built):

@@ -1,8 +1,10 @@
 """Math16 Ab2d+full-plan: domain-menu API surface + task-specific Processing steps.
 
 Fairness alignment with Ab2d+domain-menu: prompts share the same domain API menu
-(byte-identical), stem, frozen_params, generic example, and output contract.
-The sole prompt-level addition is ``## Processing steps``.
+(byte-identical), stem, frozen_params, generic example, shared output contract,
+and task-specific answer contract (byte-identical).
+The sole prompt-level addition is ``## Processing steps`` (API/math order only;
+schema assembly defers to the Answer contract).
 
 Derived scaffolds remain available for zero-model reference assembly only and are
 NOT injected into model-facing prompts.
@@ -384,73 +386,84 @@ def _api_card(api_name: str) -> str:
 
 
 def _steps_for_task(task_id: str) -> str:
+    """API / math order only. Schema assembly always defers to Answer contract."""
+    assemble = "Assemble correct_answer exactly according to the Answer contract."
     steps = {
         "ce115_calc_polynomial_division_l1": (
             "1) Call PolynomialOps.div_qr on frozen coefficients.\n"
             "2) Optionally format latex.\n"
-            "3) Assemble coefficient lists into correct_answer."
+            f"3) {assemble}"
         ),
         "ce115_calc_polynomial_factor_roots_l1": (
             "1) factor_quadratic_exact(a,b,c).\n"
             "2) Convert factors to roots and sort ascending.\n"
-            "3) Return roots (latex optional)."
+            f"3) {assemble}"
         ),
         "ce115_calc_exact_rational_expression_l1": (
             "1) FractionOps.create each operand string.\n"
             "2) Multiply and accumulate with signs.\n"
-            "3) FractionOps.to_exact for value."
+            "3) FractionOps.to_exact may be used for exact value serialization of Fraction "
+            "results only; it does not define the final correct_answer schema.\n"
+            f"4) {assemble}"
         ),
         "ce115_calc_radical_simplification_l1": (
             "1) simplify_term(1, radicand).\n"
-            "2) Pack coefficient/radicand; optional format_term."
+            "2) Optionally format_term for latex presentation.\n"
+            f"3) {assemble}"
         ),
         "ce111_q02_polynomial_division_remainder": (
             "1) div_qr frozen coefficients.\n"
-            "2) Keep remainder only; format_latex if needed."
+            "2) Keep remainder only; format_latex if needed.\n"
+            f"3) {assemble}"
         ),
         "ce111_q08_polynomial_factor_parameter_recovery": (
             "1) factor_quadratic_exact.\n"
             "2) Swap so left x_coefficient equals template_left_x_coefficient.\n"
-            "3) Extract a,b,c and compute a+2*c with native arithmetic."
+            "3) Extract a,b,c and compute a+2*c with native arithmetic.\n"
+            f"4) {assemble}"
         ),
         "ce111_q03_prime_factor_selection": (
             "1) IntegerOps.prime_factorization(n).\n"
-            "2) Choose the candidate that appears as a prime key."
+            "2) Choose the candidate that appears as a prime key.\n"
+            f"3) {assemble}"
         ),
         "ce112_q01_negative_integer_power": (
             "1) Compute base ** exponent with native arithmetic.\n"
-            "2) Return bare int."
+            f"2) {assemble}"
         ),
         "ce112_q09_divisor_multiple_intersection": (
             "1) positive_divisors(divisor_of).\n"
             "2) Keep values divisible by multiple_of.\n"
-            "3) Return {\"count\": len(valid)}."
+            f"3) {assemble}"
         ),
         "ce111_nonchoice_q01_part1_exponential_growth": (
             "1) total_hours = days * 24.\n"
             "2) Ensure divisible by hours_per_generation.\n"
-            "3) k = total_hours // hours_per_generation; return {\"k\": k}."
+            "3) k = total_hours // hours_per_generation.\n"
+            f"4) {assemble}"
         ),
         "ce111_q05_exact_fraction_expression": (
             "1) From the frozen expression, construct each fraction leaf with "
             "FractionOps.from_parts.\n"
             "2) Evaluate the expression tree with FractionOps.add and FractionOps.sub "
             "(outer subtraction of the parenthesized difference).\n"
-            "3) Return numerator/denominator (+ optional FractionOps.to_latex)."
+            f"3) {assemble}"
         ),
         "ce113_q01_negative_fraction_subtraction": (
             "1) Construct both operands from the frozen expression with "
             "FractionOps.from_parts (preserve the negative numerator).\n"
             "2) Compute FractionOps.sub(left, right).\n"
-            "3) Return numerator/denominator (+ optional FractionOps.to_latex)."
+            f"3) {assemble}"
         ),
         "ce112_q12_independent_probability_fraction": (
             "1) from_parts for p1 and p2.\n"
-            "2) mul; return numerator/denominator."
+            "2) mul.\n"
+            f"3) {assemble}"
         ),
         "ce112_q04_radical_simplification": (
             "1) simplify_term(1, radicand).\n"
-            "2) Pack coefficient/radicand."
+            "2) Optionally format_term for latex presentation.\n"
+            f"3) {assemble}"
         ),
         "ce111_q10_ordered_quadratic_roots_radical": (
             "1) From the frozen shifted-square equation, form the two LinearRadical "
@@ -458,8 +471,8 @@ def _steps_for_task(task_id: str) -> str:
             "(a > b).\n"
             "2) Call RadicalOps.scale_linear_radical on the larger root with weight 2; "
             "then RadicalOps.add_linear_radicals with the smaller root.\n"
-            "3) Assemble the nested or flat result dict "
-            "(optional RadicalOps.format_linear_radical)."
+            "3) Optionally RadicalOps.format_linear_radical for presentation.\n"
+            f"4) {assemble}"
         ),
         "ce113_q11_rationalize_denominator": (
             "1) Interpret the frozen denominator as "
@@ -467,7 +480,8 @@ def _steps_for_task(task_id: str) -> str:
             "RadicalOps.rationalize_linear_denominator("
             "numerator, denom_rational, denom_radical_coeff, radicand).\n"
             "2) RadicalOps.exact_integer on both returned coefficients.\n"
-            "3) Native int add for final bare answer."
+            "3) Native int add of those coefficients.\n"
+            f"4) {assemble}"
         ),
     }
     return steps[task_id]
@@ -560,6 +574,23 @@ def validate_prompt_static(prompt: str, domain_ops: str) -> list[str]:
         errors.append("missing_domain_menu_api_block_markers")
     if "## Processing steps" not in prompt:
         errors.append("missing_processing_steps")
+    if "## Task-specific answer contract" not in prompt:
+        errors.append("missing_task_specific_answer_contract")
+    if "Assemble correct_answer exactly according to the Answer contract." not in prompt:
+        errors.append("processing_steps_missing_answer_contract_deferral")
+    # Schema-literal assembly phrases must not reappear in Processing steps.
+    steps_part = prompt.split("## Processing steps", 1)[-1] if "## Processing steps" in prompt else ""
+    for banned in (
+        'Return {"count"',
+        'return {"k"',
+        "Return bare int",
+        "Pack coefficient/radicand",
+        "Return numerator/denominator",
+        "final bare answer",
+        "nested or flat result dict",
+    ):
+        if banned in steps_part:
+            errors.append(f"processing_steps_schema_literal:{banned}")
     try:
         assert_domain_isolation(prompt, domain_ops)
     except AssertionError as exc:
@@ -763,7 +794,7 @@ def run_zero_model_preflight(root: Path | None = None) -> dict[str, Any]:
     for tid in manifest["task_ids"]:
         task = tasks[tid]
         prompt = build_ab2d_full_prompt(task, root)
-        (prompt_dir / f"{tid}.txt").write_text(prompt, encoding="utf-8")
+        (prompt_dir / f"{tid}.txt").write_text(prompt, encoding="utf-8", newline="\n")
         metrics = prompt_metrics(prompt, task, root)
         static_errors = validate_prompt_static(prompt, task["domain_ops"])
         metrics["static_errors"] = static_errors

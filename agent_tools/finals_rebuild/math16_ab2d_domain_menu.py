@@ -2,7 +2,8 @@
 """Math16 Ab2d+domain-menu: domain-level API menus (zero-model freeze).
 
 Each of the four domains exposes its full SUPPORTED_PUBLIC API surface.
-Per-task rendered prompts add only frozen stem + frozen_params.
+Per-task rendered prompts add: frozen stem + frozen_params + task-specific
+answer contract (from ``math_answer_contracts.CONTRACTS``).
 No task-specific guardrails, API-order plans, or answer/oracle leakage.
 """
 from __future__ import annotations
@@ -21,6 +22,7 @@ from agent_tools.finals_rebuild.domain_api_ssot import (
     require_ssot,
     validate_inventory,
 )
+from agent_tools.finals_rebuild.math_answer_contracts import CONTRACTS
 from agent_tools.finals_rebuild.math16_pool import (
     load_pool_manifest,
     tasks_by_id,
@@ -106,13 +108,16 @@ DOMAIN_CODE_EXAMPLES: dict[str, str] = {
 from core.prompts.domain_function_library import IntegerOps
 
 def generate(level=1, **kwargs):
-    # Generic illustration only — not a Math16 formal item.
+    # Generic API-usage illustration only — not a Math16 formal item.
+    # Demonstrates IntegerOps calls; the return shape below is NOT the answer
+    # contract for any Math16 task. Assemble correct_answer exactly according
+    # to ## Task-specific answer contract.
     frozen = {"n": 12, "candidates": [2, 7, 11]}
     factors = IntegerOps.prime_factorization(frozen["n"])
     chosen = [c for c in frozen["candidates"] if c in factors][0]
     return {
         "question_text": "example stem",
-        "correct_answer": chosen,
+        "correct_answer": chosen,  # ILLUSTRATIVE ONLY — see Task-specific answer contract
         "oracle_payload": frozen,
     }
 ```''',
@@ -120,7 +125,12 @@ def generate(level=1, **kwargs):
 from core.prompts.domain_function_library import FractionOps
 
 def generate(level=1, **kwargs):
-    # Generic illustration only — not a Math16 formal item.
+    # Generic API-usage illustration only — not a Math16 formal item.
+    # Demonstrates FractionOps calls; the return shape below is NOT the answer
+    # contract for any Math16 task. Assemble correct_answer exactly according
+    # to ## Task-specific answer contract.
+    # FractionOps.to_exact only serializes Fraction values to JSON-safe int|'p/q';
+    # it does NOT define the final correct_answer schema.
     frozen = {"p1": [1, 6], "p2": [1, 3]}
     a = FractionOps.from_parts(frozen["p1"][0], frozen["p1"][1])
     b = FractionOps.from_parts(frozen["p2"][0], frozen["p2"][1])
@@ -131,7 +141,7 @@ def generate(level=1, **kwargs):
             "numerator": value.numerator,
             "denominator": value.denominator,
             "canonical_latex": FractionOps.to_latex(value),
-        },
+        },  # ILLUSTRATIVE ONLY — see Task-specific answer contract
         "oracle_payload": frozen,
     }
 ```''',
@@ -139,7 +149,10 @@ def generate(level=1, **kwargs):
 from core.prompts.domain_function_library import RadicalOps
 
 def generate(level=1, **kwargs):
-    # Generic illustration only — not a Math16 formal item.
+    # Generic API-usage illustration only — not a Math16 formal item.
+    # Demonstrates RadicalOps calls; the return shape below is NOT the answer
+    # contract for any Math16 task. Assemble correct_answer exactly according
+    # to ## Task-specific answer contract.
     frozen = {"radicand": 50}
     coeff, rest = RadicalOps.simplify_term(1, frozen["radicand"])
     return {
@@ -148,7 +161,7 @@ def generate(level=1, **kwargs):
             "coefficient": coeff,
             "radicand": rest,
             "canonical_latex": RadicalOps.format_term(coeff, rest),
-        },
+        },  # ILLUSTRATIVE ONLY — see Task-specific answer contract
         "oracle_payload": frozen,
     }
 ```''',
@@ -156,7 +169,10 @@ def generate(level=1, **kwargs):
 from core.prompts.domain_function_library import PolynomialOps
 
 def generate(level=1, **kwargs):
-    # Generic illustration only — not a Math16 formal item.
+    # Generic API-usage illustration only — not a Math16 formal item.
+    # Demonstrates PolynomialOps calls; the return shape below is NOT the answer
+    # contract for any Math16 task. Assemble correct_answer exactly according
+    # to ## Task-specific answer contract.
     frozen = {"dividend_coefficients": [2, 0, 2], "divisor_coefficients": [1, 1]}
     q, r = PolynomialOps.div_qr(
         frozen["dividend_coefficients"], frozen["divisor_coefficients"]
@@ -168,18 +184,37 @@ def generate(level=1, **kwargs):
             "remainder_coefficients": r,
             "quotient_latex": PolynomialOps.format_latex(q),
             "remainder_latex": PolynomialOps.format_latex(r),
-        },
+        },  # ILLUSTRATIVE ONLY — see Task-specific answer contract
         "oracle_payload": frozen,
     }
 ```''',
 }
 
+# Clarify SSOT normalization blurbs in rendered prompts only (SSOT file unchanged).
+_BOUNDARY_CLARIFICATIONS: dict[str, str] = {
+    "to_exact before correct_answer": (
+        "FractionOps.to_exact serializes Fraction values to JSON-safe int|'p/q' only; "
+        "it does not define the final correct_answer schema "
+        "(see ## Task-specific answer contract)"
+    ),
+    "FractionOps.to_exact before correct_answer": (
+        "FractionOps.to_exact serializes Fraction values to JSON-safe int|'p/q' only; "
+        "it does not define the final correct_answer schema "
+        "(see ## Task-specific answer contract)"
+    ),
+}
+
 SHARED_OUTPUT_CONTRACT = """## Shared output contract
 Return a dict with exactly three keys: question_text, correct_answer, oracle_payload.
 - question_text: the provided stem string (do not rebuild from scratch unless required).
-- correct_answer: JSON-compatible value matching the task answer shape.
+- correct_answer: JSON-compatible value matching ## Task-specific answer contract
+  (not the generic domain code example).
 - oracle_payload: must exactly equal the frozen_params object provided in the task block.
-Do not read audit payloads, evaluator expected answers, or answer tables."""
+Do not read audit payloads, evaluator expected answers, or answer tables.
+Exact-value adapters such as to_exact (when used) only serialize values to JSON-safe
+forms; they do not decide the final correct_answer schema."""
+
+TASK_ANSWER_CONTRACT_HEADER = "## Task-specific answer contract"
 
 SYSTEM_HEADER = """# Math16 Ab2d+domain-menu
 Write only Python source implementing `def generate(level=1, **kwargs):`.
@@ -230,6 +265,10 @@ def supported_apis_for_domain(domain_ops: str) -> list[str]:
     )
 
 
+def _clarify_boundary(raw: str) -> str:
+    return _BOUNDARY_CLARIFICATIONS.get(raw, raw)
+
+
 def render_api_card(api_name: str) -> str:
     contract = require_ssot(api_name)
     example = GENERIC_USAGE_EXAMPLES[api_name]
@@ -238,10 +277,51 @@ def render_api_card(api_name: str) -> str:
             render_api_prompt_line(api_name),
             f"  inputs: {contract['input_constraints']}",
             f"  returns_shape: `{json.dumps(contract['return_contract'], ensure_ascii=False, sort_keys=True)}`",
-            f"  boundary: {contract['normalization_responsibility']}",
+            f"  boundary: {_clarify_boundary(contract['normalization_responsibility'])}",
             f"  example: `{example}`",
         ]
     )
+
+
+def authoritative_answer_contract_text(task: dict[str, Any]) -> str:
+    """Return evaluator-authoritative contract body from math_answer_contracts.CONTRACTS.
+
+    Raises ValueError if oracle_type is missing from CONTRACTS (no guessing).
+    """
+    oracle_type = task.get("oracle_type")
+    if not oracle_type or oracle_type not in CONTRACTS:
+        raise ValueError(
+            f"CONTRACT_SOURCE_INCOMPLETE: task_id={task.get('task_id')!r} "
+            f"oracle_type={oracle_type!r}"
+        )
+    return CONTRACTS[oracle_type].strip()
+
+
+def build_task_specific_answer_contract_block(task: dict[str, Any]) -> str:
+    body = authoritative_answer_contract_text(task)
+    return (
+        f"{TASK_ANSWER_CONTRACT_HEADER}\n"
+        "Source: agent_tools/finals_rebuild/math_answer_contracts.py "
+        f"(oracle_type=`{task['oracle_type']}`).\n"
+        "Assemble `correct_answer` exactly according to this contract. "
+        "Do not treat the generic domain code example as the answer shape.\n"
+        f"{body}\n"
+    )
+
+
+def extract_task_specific_answer_contract_block(prompt: str) -> str:
+    """Extract the Task-specific answer contract section (header through next ## Task)."""
+    header = TASK_ANSWER_CONTRACT_HEADER
+    begin = prompt.find(header)
+    if begin < 0:
+        raise ValueError("task-specific answer contract header missing")
+    rest = prompt[begin:]
+    task_idx = rest.find("\n## Task\n")
+    if task_idx < 0:
+        task_idx = rest.find("\n## Task\r\n")
+    if task_idx < 0:
+        raise ValueError("## Task section missing after answer contract")
+    return rest[:task_idx].strip("\n") + "\n"
 
 
 def build_domain_api_block(domain_ops: str) -> str:
@@ -318,6 +398,8 @@ def build_domain_menu_prompt(task: dict[str, Any], template_text: str | None = N
         "",
         wrapped,
         "",
+        build_task_specific_answer_contract_block(task).rstrip(),
+        "",
         build_task_block(task).rstrip(),
         "",
     ]
@@ -351,6 +433,8 @@ def validate_prompt_static(prompt: str, domain_ops: str) -> list[str]:
     errors: list[str] = []
     if DOMAIN_BLOCK_BEGIN not in prompt or DOMAIN_BLOCK_END not in prompt:
         errors.append("missing_domain_block_markers")
+    if TASK_ANSWER_CONTRACT_HEADER not in prompt:
+        errors.append("missing_task_specific_answer_contract")
     for other in other_domain_ops(domain_ops):
         if other in prompt:
             errors.append(f"cross_domain_exposure:{other}")
@@ -428,7 +512,9 @@ def scan_answer_leakage(
             if allow_frozen_overlap:
                 fp_idx = text.find("## frozen_params")
                 if fp_idx >= 0:
-                    domain_part = text[: text.find("## Task")] if "## Task" in text else text
+                    marker = "\n## Task\n"
+                    task_at = text.find(marker)
+                    domain_part = text[:task_at] if task_at >= 0 else text
                     if _token_present(domain_part, kind, token):
                         hits.append(f"{tid}:{token[:60]}")
                     continue
@@ -506,8 +592,12 @@ def build_all_prompts(root: Path | None = None) -> dict[str, Any]:
                 "condition": CONDITION,
                 "task_id": tid,
                 "domain_ops": domain,
+                "oracle_type": task["oracle_type"],
                 "prompt_path": f"{PROMPT_DIR_REL}/{tid}.txt".replace("\\", "/"),
                 "prompt_sha256": _sha256_text(prompt),
+                "answer_contract_sha256": _sha256_text(
+                    extract_task_specific_answer_contract_block(prompt)
+                ),
                 "template_rel": f"{TEMPLATE_DIR_REL}/{DOMAIN_TEMPLATE_FILES[domain]}",
                 "template_sha256": template_hashes[domain],
                 "domain_block_sha256": _sha256_text(extract_domain_api_block(prompt)),
@@ -542,7 +632,9 @@ def build_all_prompts(root: Path | None = None) -> dict[str, Any]:
     # Prompt leakage: answers must not appear in domain block / system header.
     prompt_leak_hits: list[str] = []
     for tid, prompt in prompts.items():
-        domain_part = prompt.split("## Task", 1)[0]
+        marker = "\n## Task\n"
+        task_at = prompt.find(marker)
+        domain_part = prompt[:task_at] if task_at >= 0 else prompt
         hits = scan_answer_leakage(domain_part, task_list, allow_frozen_overlap=False)
         for h in hits:
             prompt_leak_hits.append(f"{tid}:{h}")
@@ -555,7 +647,7 @@ def build_all_prompts(root: Path | None = None) -> dict[str, Any]:
         "condition": CONDITION,
         "condition_label": CONDITION_LABEL,
         "experiment_id": EXPERIMENT_ID,
-        "prompt_revision": "ab2d_domain_menu_v1",
+        "prompt_revision": "ab2d_domain_menu_answer_contract_v1",
         "n_tasks": len(task_records),
         "n_domains": 4,
         "llm_policy": "freeze_only; zero model calls",
@@ -564,6 +656,7 @@ def build_all_prompts(root: Path | None = None) -> dict[str, Any]:
         "task_freeze_hash": pool["task_freeze_hash"],
         "evaluator_identity": eval_id,
         "ssot_inventory_ok": True,
+        "answer_contract_source": "agent_tools/finals_rebuild/math_answer_contracts.py:CONTRACTS",
         "domain_template_sha256": template_hashes,
         "domain_block_hashes": {
             d: block_report[d]["block_sha256"] for d in DOMAIN_OPS
@@ -583,6 +676,7 @@ def build_all_prompts(root: Path | None = None) -> dict[str, Any]:
             "task_id→solution lookup",
         ],
         "allowed_per_task_additions": [
+            "task-specific answer contract (evaluator CONTRACTS)",
             "frozen task description (stem)",
             "frozen_params",
         ],

@@ -21,37 +21,37 @@ APIs a specific item must call, or give call order / solution steps.
 - `FractionOps.add` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | returns: Fraction
   inputs: a,b: Fraction
   returns_shape: `{"json_safe": false, "type": "Fraction"}`
-  boundary: to_exact before correct_answer
+  boundary: FractionOps.to_exact serializes Fraction values to JSON-safe int|'p/q' only; it does not define the final correct_answer schema (see ## Task-specific answer contract)
   example: `FractionOps.add(Fraction(1, 2), Fraction(1, 3))`
 
 - `FractionOps.create` | import: `core.prompts.domain_function_library` | signature: `(value)` | returns: Fraction  # not JSON serializable; use the to_exact adapter
   inputs: int, finite float, legal numeric str, or Fraction; bool forbidden
   returns_shape: `{"json_safe": false, "type": "Fraction"}`
-  boundary: FractionOps.to_exact before correct_answer
+  boundary: FractionOps.to_exact serializes Fraction values to JSON-safe int|'p/q' only; it does not define the final correct_answer schema (see ## Task-specific answer contract)
   example: `FractionOps.create("2/7")  # Fraction(2, 7)`
 
 - `FractionOps.div` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | returns: Fraction
   inputs: a,b: Fraction; b != 0
   returns_shape: `{"json_safe": false, "type": "Fraction"}`
-  boundary: to_exact before correct_answer
+  boundary: FractionOps.to_exact serializes Fraction values to JSON-safe int|'p/q' only; it does not define the final correct_answer schema (see ## Task-specific answer contract)
   example: `FractionOps.div(Fraction(1, 2), Fraction(1, 3))`
 
 - `FractionOps.from_parts` | import: `core.prompts.domain_function_library` | signature: `(numerator, denominator=1)` | returns: Fraction
   inputs: numerator,denominator: int; bool forbidden; denominator != 0
   returns_shape: `{"json_safe": false, "type": "Fraction"}`
-  boundary: to_exact before correct_answer
+  boundary: FractionOps.to_exact serializes Fraction values to JSON-safe int|'p/q' only; it does not define the final correct_answer schema (see ## Task-specific answer contract)
   example: `FractionOps.from_parts(6, 3)  # Fraction(2, 1)`
 
 - `FractionOps.mul` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | returns: Fraction
   inputs: a,b: Fraction
   returns_shape: `{"json_safe": false, "type": "Fraction"}`
-  boundary: to_exact before correct_answer
+  boundary: FractionOps.to_exact serializes Fraction values to JSON-safe int|'p/q' only; it does not define the final correct_answer schema (see ## Task-specific answer contract)
   example: `FractionOps.mul(Fraction(1, 2), Fraction(1, 3))`
 
 - `FractionOps.sub` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | returns: Fraction
   inputs: a,b: Fraction
   returns_shape: `{"json_safe": false, "type": "Fraction"}`
-  boundary: to_exact before correct_answer
+  boundary: FractionOps.to_exact serializes Fraction values to JSON-safe int|'p/q' only; it does not define the final correct_answer schema (see ## Task-specific answer contract)
   example: `FractionOps.sub(Fraction(1, 2), Fraction(1, 6))`
 
 - `FractionOps.to_exact` | import: `core.prompts.domain_function_library` | signature: `(value)` | returns: int | str  # integer or irreducible 'p/q'
@@ -71,7 +71,12 @@ APIs a specific item must call, or give call order / solution steps.
 from core.prompts.domain_function_library import FractionOps
 
 def generate(level=1, **kwargs):
-    # Generic illustration only — not a Math16 formal item.
+    # Generic API-usage illustration only — not a Math16 formal item.
+    # Demonstrates FractionOps calls; the return shape below is NOT the answer
+    # contract for any Math16 task. Assemble correct_answer exactly according
+    # to ## Task-specific answer contract.
+    # FractionOps.to_exact only serializes Fraction values to JSON-safe int|'p/q';
+    # it does NOT define the final correct_answer schema.
     frozen = {"p1": [1, 6], "p2": [1, 3]}
     a = FractionOps.from_parts(frozen["p1"][0], frozen["p1"][1])
     b = FractionOps.from_parts(frozen["p2"][0], frozen["p2"][1])
@@ -82,7 +87,7 @@ def generate(level=1, **kwargs):
             "numerator": value.numerator,
             "denominator": value.denominator,
             "canonical_latex": FractionOps.to_latex(value),
-        },
+        },  # ILLUSTRATIVE ONLY — see Task-specific answer contract
         "oracle_payload": frozen,
     }
 ```
@@ -90,10 +95,24 @@ def generate(level=1, **kwargs):
 ## Shared output contract
 Return a dict with exactly three keys: question_text, correct_answer, oracle_payload.
 - question_text: the provided stem string (do not rebuild from scratch unless required).
-- correct_answer: JSON-compatible value matching the task answer shape.
+- correct_answer: JSON-compatible value matching ## Task-specific answer contract
+  (not the generic domain code example).
 - oracle_payload: must exactly equal the frozen_params object provided in the task block.
 Do not read audit payloads, evaluator expected answers, or answer tables.
+Exact-value adapters such as to_exact (when used) only serialize values to JSON-safe
+forms; they do not decide the final correct_answer schema.
 <!-- DOMAIN_API_BLOCK_END -->
+
+## Task-specific answer contract
+Source: agent_tools/finals_rebuild/math_answer_contracts.py (oracle_type=`exact_fraction_canonical`).
+Assemble `correct_answer` exactly according to this contract. Do not treat the generic domain code example as the answer shape.
+Required return schema:
+{
+  "question_text": str,
+  "correct_answer": {"numerator": int, "denominator": int, "canonical_latex": str},
+  "oracle_payload": dict
+}
+- Irreducible fraction; structural Fraction equality plus canonical_latex.
 
 ## Task
 task_id: `ce111_q05_exact_fraction_expression`
@@ -116,4 +135,4 @@ skill_id: `math16_exact_fraction_expression`
 ## Processing steps
 1) From the frozen expression, construct each fraction leaf with FractionOps.from_parts.
 2) Evaluate the expression tree with FractionOps.add and FractionOps.sub (outer subtraction of the parenthesized difference).
-3) Return numerator/denominator (+ optional FractionOps.to_latex).
+3) Assemble correct_answer exactly according to the Answer contract.

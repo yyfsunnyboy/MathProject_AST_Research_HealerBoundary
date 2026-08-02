@@ -65,7 +65,10 @@ APIs a specific item must call, or give call order / solution steps.
 from core.prompts.domain_function_library import RadicalOps
 
 def generate(level=1, **kwargs):
-    # Generic illustration only — not a Math16 formal item.
+    # Generic API-usage illustration only — not a Math16 formal item.
+    # Demonstrates RadicalOps calls; the return shape below is NOT the answer
+    # contract for any Math16 task. Assemble correct_answer exactly according
+    # to ## Task-specific answer contract.
     frozen = {"radicand": 50}
     coeff, rest = RadicalOps.simplify_term(1, frozen["radicand"])
     return {
@@ -74,7 +77,7 @@ def generate(level=1, **kwargs):
             "coefficient": coeff,
             "radicand": rest,
             "canonical_latex": RadicalOps.format_term(coeff, rest),
-        },
+        },  # ILLUSTRATIVE ONLY — see Task-specific answer contract
         "oracle_payload": frozen,
     }
 ```
@@ -82,7 +85,10 @@ def generate(level=1, **kwargs):
 ## Shared output contract
 Return a dict with exactly three keys: question_text, correct_answer, oracle_payload.
 - question_text: the provided stem string (do not rebuild from scratch unless required).
-- correct_answer: JSON-compatible value matching the task answer shape.
+- correct_answer: JSON-compatible value matching ## Task-specific answer contract
+  (not the generic domain code example).
 - oracle_payload: must exactly equal the frozen_params object provided in the task block.
 Do not read audit payloads, evaluator expected answers, or answer tables.
+Exact-value adapters such as to_exact (when used) only serialize values to JSON-safe
+forms; they do not decide the final correct_answer schema.
 <!-- DOMAIN_API_BLOCK_END -->
