@@ -177,12 +177,14 @@ def test_zero_model_preflight_overall_pass(built):
 def test_formal_runner_skeleton_no_api_by_default():
     mod = importlib.import_module("scripts.run_math16_ab2d_domain_menu_gemini_formal")
     assert hasattr(mod, "integration_check")
+    # Fail-closed without flags.
     with pytest.raises(SystemExit) as exc:
-        mod.main(["--execute-api"])
+        mod.main([])
     assert "EXECUTE_API_BLOCKED" in str(exc.value)
     info = mod.integration_check()
     assert info["n_prompts_on_disk"] == 16
     assert info["model_calls"] == 0
+    assert info["execute_api_enabled"] is False
 
 
 def test_does_not_modify_ab2d_full_prompt_hashes():

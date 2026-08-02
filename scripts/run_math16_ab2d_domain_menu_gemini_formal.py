@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-"""Math16 Ab2d+domain-menu Gemini formal/qualification runner skeleton.
+"""Math16 Ab2d+domain-menu Gemini formal runner.
 
-Zero-model modes only by default. Live API requires ``--execute-api`` which
-is blocked unless explicitly enabled (not used during domain-menu freeze).
-Does not modify Ab2d+full prompts, APIs, evaluators, tasks, seeds, or settings.
+Default is fail-closed (no live calls without ``--execute-api``).
+Live parameters come from Math16 frozen model_settings (not CE115).
 """
 from __future__ import annotations
 
@@ -63,6 +62,9 @@ def integration_check() -> dict[str, Any]:
         "domain_blocks_byte_identical": manifest.get("domain_blocks_byte_identical"),
         "model_calls": 0,
         "execute_api_enabled": False,
+        "parameter_authority": (
+            "artifacts/math16_ab2d_full_domain_assisted_v1/preregistration/model_settings.json"
+        ),
     }
 
 
@@ -76,20 +78,19 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--preflight",
         action="store_true",
-        help="Run zero-model domain-menu preflight (build prompts + audits).",
+        help="Run zero-model domain-menu prompt preflight.",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Verify Math16 formal 80-cell plan (zero model calls).",
     )
     parser.add_argument(
         "--execute-api",
         action="store_true",
-        help="Live formal generation — forbidden during domain-menu freeze.",
+        help="Live formal generation (explicit opt-in; Math16 settings).",
     )
     args = parser.parse_args(argv)
-
-    if args.execute_api:
-        raise SystemExit(
-            "EXECUTE_API_BLOCKED: Ab2d+domain-menu freeze forbids model calls. "
-            "Re-run without --execute-api."
-        )
 
     if args.preflight:
         summary = run_zero_model_preflight(ROOT)
@@ -121,8 +122,23 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(info, ensure_ascii=False, indent=2))
         return 0 if info["n_prompts_on_disk"] == 16 else 1
 
-    parser.error("Specify --integration-check or --preflight (not --execute-api).")
-    return 2
+    if args.dry_run or args.execute_api:
+        from agent_tools.finals_rebuild.math16_ab2d_formal_execution import run_model_condition
+
+        summary = run_model_condition(
+            condition="ab2d_domain_menu",
+            model_key="gemini",
+            dry_run=bool(args.dry_run),
+            execute_api=bool(args.execute_api),
+        )
+        print(json.dumps(summary, ensure_ascii=False, indent=2))
+        return 0
+
+    # Fail-closed default: no live path without --execute-api.
+    raise SystemExit(
+        "EXECUTE_API_BLOCKED: pass --execute-api for live formal generation, "
+        "or use --dry-run / --integration-check / --preflight."
+    )
 
 
 if __name__ == "__main__":

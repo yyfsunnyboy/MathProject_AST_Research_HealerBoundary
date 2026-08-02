@@ -1,0 +1,127 @@
+{
+  "seed_list": [
+    2026071301,
+    2026072001,
+    2026072002,
+    2026072003,
+    2026072004
+  ],
+  "models": {
+    "gemini": {
+      "model_identifier": "gemini-3.5-flash",
+      "runtime_provider": "google (Math16 formal Gemini path; GEMINI_API_KEY)",
+      "evidence_sources": [
+        "docs/experiments/manifests/math16_pilot02_full_runtime_manifest.json",
+        "artifacts/math16_ab2d_full_domain_assisted_v1/preregistration/model_settings.json"
+      ],
+      "temperature": 0.0,
+      "top_p": 1.0,
+      "top_p_note": "Pinned to Math16 pilot02 Gemini runtime-manifest declared value (historical 320-cell declaration).",
+      "top_k": 1,
+      "top_k_note": "Pinned to Math16 pilot02 Gemini runtime-manifest declared value (historical 320-cell declaration).",
+      "seed_policy": "Cell identity uses frozen seed_list; API-level seed application is UNRESOLVED (transport does not pass seed).",
+      "num_ctx_context_limit": "UNRESOLVED",
+      "timeout_seconds": 600,
+      "max_output_tokens": 24576,
+      "thinking_reasoning_setting": false,
+      "retry_policy": {
+        "max_attempts": 3,
+        "retry_delays_seconds": [
+          5,
+          20
+        ],
+        "retryable": [
+          "timeout",
+          "rate_limit",
+          "5xx",
+          "connection_failure",
+          "empty_response"
+        ],
+        "not_retryable": [
+          "auth_failure",
+          "client_400",
+          "answer_incorrect",
+          "schema_failure"
+        ],
+        "evidence": "docs/experiments/design/math16_pilot02_runtime_preregistration.md + full_runtime_manifest"
+      },
+      "resume_policy": "skip cells with completed artifact marker; never regenerate completed cells"
+    },
+    "qwen_9b": {
+      "model_identifier": "qwen3.5:9b",
+      "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+      "runtime_provider": "ollama",
+      "runtime_version_at_pilot_freeze": "0.32.1",
+      "evidence_sources": [
+        "docs/experiments/manifests/math16_pilot02_qwen9b_runtime_manifest.json"
+      ],
+      "temperature": 0.2,
+      "top_p": 0.8,
+      "top_k": 20,
+      "seed_policy": "options.seed = cell seed; seed_transport_supported=true",
+      "num_ctx_context_limit": 65536,
+      "timeout_seconds": 1800,
+      "max_output_tokens": 24576,
+      "thinking_reasoning_setting": false,
+      "quantization": "Q4_K_M",
+      "retry_policy": {
+        "max_attempts": 3,
+        "retry_delays_seconds": [
+          5,
+          20,
+          60
+        ],
+        "retryable": [
+          "timeout",
+          "connection_failure",
+          "empty_response"
+        ],
+        "not_retryable": [
+          "answer_incorrect",
+          "schema_failure",
+          "oracle_mismatch"
+        ]
+      },
+      "resume_policy": "skip completed cells; do not overwrite finished artifacts",
+      "runtime_version_current_host": "UNRESOLVED"
+    },
+    "qwen_4b": {
+      "model_identifier": "qwen3.5:4b",
+      "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+      "runtime_provider": "ollama",
+      "runtime_version_at_pilot_freeze": "0.32.1",
+      "evidence_sources": [
+        "docs/experiments/manifests/math16_pilot02_qwen4b_runtime_manifest.json"
+      ],
+      "temperature": 0.2,
+      "top_p": 0.8,
+      "top_k": 20,
+      "seed_policy": "options.seed = cell seed; seed_transport_supported=true",
+      "num_ctx_context_limit": 65536,
+      "timeout_seconds": 1800,
+      "max_output_tokens": 24576,
+      "thinking_reasoning_setting": false,
+      "quantization": "Q4_K_M",
+      "retry_policy": {
+        "max_attempts": 3,
+        "retry_delays_seconds": [
+          5,
+          20,
+          60
+        ],
+        "retryable": [
+          "timeout",
+          "connection_failure",
+          "empty_response"
+        ],
+        "not_retryable": [
+          "answer_incorrect",
+          "schema_failure",
+          "oracle_mismatch"
+        ]
+      },
+      "resume_policy": "skip completed cells; do not overwrite finished artifacts",
+      "runtime_version_current_host": "UNRESOLVED"
+    }
+  }
+}

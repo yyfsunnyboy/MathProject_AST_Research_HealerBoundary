@@ -358,7 +358,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--execute-api",
         action="store_true",
-        help="Live formal 80-cell generation (forbidden during QFIX-001 freeze verification).",
+        help="Live formal 80-cell generation using Math16 frozen model_settings.",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Verify Math16 80-cell plan only (zero model calls).",
     )
     parser.add_argument(
         "--integration-check",
@@ -379,6 +384,7 @@ def main(argv: list[str] | None = None) -> int:
                     "design_hashes_ok": hashes["ok"],
                     "gemini_cells": 80,
                     "formal_output_root": str(FORMAL_ROOT).replace("\\", "/"),
+                    "parameter_authority": "artifacts/math16_ab2d_full_domain_assisted_v1/preregistration/model_settings.json",
                 },
                 ensure_ascii=False,
                 indent=2,
@@ -396,19 +402,21 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps({k: result[k] for k in result if k != "rows"}, ensure_ascii=False, indent=2))
         return 0 if result["all_raw_unchanged"] and result["all_artifacts_complete"] else 1
 
-    if args.execute_api:
-        if not api_key_status().get("api_key_present"):
-            raise RuntimeError("GEMINI_API_KEY missing")
-        tasks = tasks_by_id(ROOT)
-        FORMAL_ROOT.mkdir(parents=True, exist_ok=True)
-        summary = []
-        for cell in load_gemini_manifest_cells():
-            summary.append(execute_formal_cell(cell, tasks))
-        atomic_write_json(FORMAL_ROOT / "run_summary.json", {"cells": summary, "n": len(summary)})
-        print(json.dumps({"executed": len(summary)}, indent=2))
+    if args.dry_run or args.execute_api:
+        from agent_tools.finals_rebuild.math16_ab2d_formal_execution import run_model_condition
+
+        summary = run_model_condition(
+            condition="ab2d_full",
+            model_key="gemini",
+            dry_run=bool(args.dry_run),
+            execute_api=bool(args.execute_api),
+        )
+        print(json.dumps(summary, ensure_ascii=False, indent=2))
         return 0
 
-    parser.error("Specify --integration-check, --replay-qualification-assembly, or --execute-api")
+    parser.error(
+        "Specify --integration-check, --replay-qualification-assembly, --dry-run, or --execute-api"
+    )
     return 2
 
 
