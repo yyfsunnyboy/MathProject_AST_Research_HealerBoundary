@@ -152,6 +152,9 @@ def test_prompts_unique_budget_isolation_and_payload_rule():
         assert metrics["within_common_budget"]
         assert metrics["within_task_budget"]
         assert metrics["within_total_budget"]
+        assert metrics["has_derived_scaffold"] is False
+        assert metrics["has_processing_steps"] is True
+        assert "derived_scaffold" not in prompt.lower()
         assert validate_prompt_static(prompt, task["domain_ops"]) == []
         assert_domain_isolation(prompt, task["domain_ops"])
         assert markdown_fences_balanced(prompt)
@@ -160,7 +163,6 @@ def test_prompts_unique_budget_isolation_and_payload_rule():
                 ast.parse(body)
         # frozen echo contract text present; no audit payload dump
         assert '"oracle_payload"' in prompt or "oracle_payload" in prompt
-        frozen_json = json.dumps(task["frozen_params"], ensure_ascii=False, sort_keys=True)
         # key fields from frozen appear
         for key in task["frozen_params"]:
             assert key in prompt
@@ -179,6 +181,25 @@ def test_prompts_unique_budget_isolation_and_payload_rule():
         for api in TASK_ALLOWED_APIS[tid]:
             assert api in prompt or tid == "ce112_q01_negative_integer_power"
     assert len(hashes) == 16
+
+
+def test_full_plan_domain_api_block_matches_domain_menu():
+    from agent_tools.finals_rebuild.math16_ab2d_domain_menu import (
+        build_domain_menu_prompt,
+        extract_domain_api_block,
+        load_domain_template,
+    )
+
+    tasks = tasks_by_id(ROOT)
+    for tid, task in tasks.items():
+        domain = task["domain_ops"]
+        menu = build_domain_menu_prompt(task, load_domain_template(domain, ROOT))
+        full = build_ab2d_full_prompt(task, ROOT)
+        assert extract_domain_api_block(menu) == extract_domain_api_block(full)
+        # Sole prompt-level delta is Processing steps (and trailing content after base).
+        assert full.startswith(menu.rstrip())
+        assert "## Processing steps" in full[len(menu.rstrip()) :]
+        assert "derived_scaffold" not in full.lower()
 
 
 def test_reference_assembly_matches_evaluator_all_tasks():

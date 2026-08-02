@@ -1,7 +1,11 @@
-"""Math16 Ab2d+full: derived scaffolds, short prompt builder, zero-model preflight.
+"""Math16 Ab2d+full-plan: domain-menu API surface + task-specific Processing steps.
 
-Does not mutate Math16-LaTeX-v1 frozen task identity. Scaffold payloads are
-DERIVED_NON_ORACLE_STRUCTURAL_SCAFFOLD and live beside the pool, not inside it.
+Fairness alignment with Ab2d+domain-menu: prompts share the same domain API menu
+(byte-identical), stem, frozen_params, generic example, and output contract.
+The sole prompt-level addition is ``## Processing steps``.
+
+Derived scaffolds remain available for zero-model reference assembly only and are
+NOT injected into model-facing prompts.
 """
 from __future__ import annotations
 
@@ -14,6 +18,13 @@ from pathlib import Path
 from typing import Any, Callable
 
 from agent_tools.finals_rebuild.domain_api_ssot import render_api_prompt_line, require_ssot
+from agent_tools.finals_rebuild.math16_ab2d_domain_menu import (
+    DOMAIN_BLOCK_BEGIN,
+    DOMAIN_BLOCK_END,
+    build_domain_menu_prompt,
+    extract_domain_api_block,
+    load_domain_template,
+)
 from agent_tools.finals_rebuild.math16_pool import frozen_for_prompt, load_pool_manifest, tasks_by_id
 from agent_tools.finals_rebuild.math_task_oracles import evaluate_math_task_oracle
 from core.prompts.domain_function_library import (
@@ -31,9 +42,10 @@ PREFLIGHT_REL = Path("docs/experiments/results/math16_ab2d_full_phase3_preflight
 
 KIND = "DERIVED_NON_ORACLE_STRUCTURAL_SCAFFOLD"
 TOKEN_ESTIMATE_METHOD = "chars_div_4_ceil"
-COMMON_TOKEN_BUDGET = 900
-TASK_TOKEN_BUDGET = 1200
-TOTAL_TOKEN_BUDGET = 2200
+# Full-domain menus (~1.8k tokens) + processing steps; budgets raised for fairness rebuild.
+COMMON_TOKEN_BUDGET = 500
+TASK_TOKEN_BUDGET = 3500
+TOTAL_TOKEN_BUDGET = 4000
 
 FORBIDDEN_ANSWER_KEYS = frozenset(
     {
@@ -420,13 +432,17 @@ def _steps_for_task(task_id: str) -> str:
             "3) k = total_hours // hours_per_generation; return {\"k\": k}."
         ),
         "ce111_q05_exact_fraction_expression": (
-            "1) Walk expression_tree leaves with from_parts.\n"
-            "2) Evaluate add/sub nodes.\n"
-            "3) Return numerator/denominator (+ optional latex)."
+            "1) From the frozen expression, construct each fraction leaf with "
+            "FractionOps.from_parts.\n"
+            "2) Evaluate the expression tree with FractionOps.add and FractionOps.sub "
+            "(outer subtraction of the parenthesized difference).\n"
+            "3) Return numerator/denominator (+ optional FractionOps.to_latex)."
         ),
         "ce113_q01_negative_fraction_subtraction": (
-            "1) Walk expression_tree with from_parts and sub.\n"
-            "2) Return numerator/denominator (+ optional latex)."
+            "1) Construct both operands from the frozen expression with "
+            "FractionOps.from_parts (preserve the negative numerator).\n"
+            "2) Compute FractionOps.sub(left, right).\n"
+            "3) Return numerator/denominator (+ optional FractionOps.to_latex)."
         ),
         "ce112_q12_independent_probability_fraction": (
             "1) from_parts for p1 and p2.\n"
@@ -437,23 +453,35 @@ def _steps_for_task(task_id: str) -> str:
             "2) Pack coefficient/radicand."
         ),
         "ce111_q10_ordered_quadratic_roots_radical": (
-            "1) From shifted-square scaffold build larger/smaller LinearRadical.\n"
-            "2) scale_linear_radical(larger, weight); add_linear_radicals.\n"
-            "3) Assemble nested or flat result dict."
+            "1) From the frozen shifted-square equation, form the two LinearRadical "
+            "roots with native arithmetic; order them so the larger root is first "
+            "(a > b).\n"
+            "2) Call RadicalOps.scale_linear_radical on the larger root with weight 2; "
+            "then RadicalOps.add_linear_radicals with the smaller root.\n"
+            "3) Assemble the nested or flat result dict "
+            "(optional RadicalOps.format_linear_radical)."
         ),
         "ce113_q11_rationalize_denominator": (
-            "1) rationalize_linear_denominator(numerator, denom_rational, denom_radical_coeff, radicand).\n"
-            "2) exact_integer on both coefficients.\n"
+            "1) Interpret the frozen denominator as "
+            "(denom_rational) + (denom_radical_coeff)*sqrt(radicand); call "
+            "RadicalOps.rationalize_linear_denominator("
+            "numerator, denom_rational, denom_radical_coeff, radicand).\n"
+            "2) RadicalOps.exact_integer on both returned coefficients.\n"
             "3) Native int add for final bare answer."
         ),
     }
     return steps[task_id]
 
 
-def build_task_block(task: dict[str, Any], scaffold_structure: dict[str, Any] | None) -> str:
+def build_task_block(task: dict[str, Any], scaffold_structure: dict[str, Any] | None = None) -> str:
+    """Legacy helper retained for tests; prompts no longer inject scaffolds.
+
+    Prefer ``build_ab2d_full_prompt``, which shares the domain-menu base and only
+    appends Processing steps.
+    """
+    del scaffold_structure  # intentionally unused in model-facing prompts
     frozen = task["frozen_params"]
     domain = task["domain_ops"]
-    apis = TASK_ALLOWED_APIS[task["task_id"]]
     parts = [
         f"# Task `{task['task_id']}`",
         f"domain_ops: {domain}",
@@ -463,63 +491,44 @@ def build_task_block(task: dict[str, Any], scaffold_structure: dict[str, Any] | 
         "",
         "## frozen_params (oracle_payload must equal this object)",
         json.dumps(frozen, ensure_ascii=False, indent=2, sort_keys=True),
+        "",
+        "## Processing steps",
+        _steps_for_task(task["task_id"]),
     ]
-    if scaffold_structure is not None:
-        parts.extend(
-            [
-                "",
-                f"## derived_scaffold ({KIND})",
-                "Use this structure; it contains no answers.",
-                json.dumps(scaffold_structure, ensure_ascii=False, indent=2, sort_keys=True),
-            ]
-        )
-    parts.append("")
-    parts.append("## Allowed Domain API")
-    if apis:
-        for name in apis:
-            parts.append(_api_card(name))
-    else:
-        parts.append("- (none required; use native arithmetic only)")
-    parts.extend(["", "## Processing steps", _steps_for_task(task["task_id"])])
-    parts.extend(
-        [
-            "",
-            "## Output contract",
-            "Return exactly:",
-            '{"question_text": <stem str>, "correct_answer": <task shape>, "oracle_payload": <frozen_params>}',
-        ]
-    )
-    example = DOMAIN_EXAMPLES.get(domain)
-    if example:
-        parts.extend(["", "## Generic domain example (non-task numbers)", example])
     return "\n".join(parts) + "\n"
 
 
 def build_ab2d_full_prompt(task: dict[str, Any], root: Path | None = None) -> str:
-    scaffold = scaffold_for_task(task["task_id"], root)
-    common = common_system_block(task["domain_ops"])
-    task_block = build_task_block(task, scaffold)
-    return common + "\n" + task_block
+    """Ab2d+full-plan = domain-menu prompt + task-specific Processing steps only."""
+    root = root or ROOT
+    template = load_domain_template(task["domain_ops"], root)
+    base = build_domain_menu_prompt(task, template)
+    steps = _steps_for_task(task["task_id"])
+    return base.rstrip() + "\n\n## Processing steps\n" + steps + "\n"
 
 
 def prompt_metrics(prompt: str, task: dict[str, Any], root: Path | None = None) -> dict[str, Any]:
-    common = common_system_block(task["domain_ops"])
-    scaffold = scaffold_for_task(task["task_id"], root)
-    task_block = build_task_block(task, scaffold)
+    root = root or ROOT
+    template = load_domain_template(task["domain_ops"], root)
+    base = build_domain_menu_prompt(task, template)
+    steps = "## Processing steps\n" + _steps_for_task(task["task_id"]) + "\n"
     return {
         "task_id": task["task_id"],
         "domain_ops": task["domain_ops"],
-        "common_chars": len(common),
-        "task_chars": len(task_block),
+        "common_chars": len(base),
+        "task_chars": len(steps),
         "total_chars": len(prompt),
-        "common_tokens_est": estimate_tokens(common),
-        "task_tokens_est": estimate_tokens(task_block),
+        "common_tokens_est": estimate_tokens(base),
+        "task_tokens_est": estimate_tokens(steps),
         "total_tokens_est": estimate_tokens(prompt),
         "token_estimate_method": TOKEN_ESTIMATE_METHOD,
         "prompt_sha256": _sha256_text(prompt),
-        "within_common_budget": estimate_tokens(common) <= COMMON_TOKEN_BUDGET,
-        "within_task_budget": estimate_tokens(task_block) <= TASK_TOKEN_BUDGET,
+        "within_common_budget": estimate_tokens(base) <= TOTAL_TOKEN_BUDGET,
+        "within_task_budget": estimate_tokens(steps) <= TASK_TOKEN_BUDGET,
         "within_total_budget": estimate_tokens(prompt) <= TOTAL_TOKEN_BUDGET,
+        "domain_api_block_sha256": _sha256_text(extract_domain_api_block(prompt)),
+        "has_derived_scaffold": "derived_scaffold" in prompt.lower(),
+        "has_processing_steps": "## Processing steps" in prompt,
     }
 
 
@@ -545,6 +554,12 @@ def validate_prompt_static(prompt: str, domain_ops: str) -> list[str]:
     errors: list[str] = []
     if not markdown_fences_balanced(prompt):
         errors.append("unbalanced_markdown_fences")
+    if "derived_scaffold" in prompt.lower():
+        errors.append("derived_scaffold_injected")
+    if DOMAIN_BLOCK_BEGIN not in prompt or DOMAIN_BLOCK_END not in prompt:
+        errors.append("missing_domain_menu_api_block_markers")
+    if "## Processing steps" not in prompt:
+        errors.append("missing_processing_steps")
     try:
         assert_domain_isolation(prompt, domain_ops)
     except AssertionError as exc:

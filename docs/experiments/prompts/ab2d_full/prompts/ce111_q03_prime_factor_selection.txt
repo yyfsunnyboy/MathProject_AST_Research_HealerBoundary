@@ -1,21 +1,95 @@
-# Math16 Ab2d+full system
+# Math16 Ab2d+domain-menu
 Write only Python source implementing `def generate(level=1, **kwargs):`.
-Return a dict with exactly three keys: question_text, correct_answer, oracle_payload.
-question_text must be the provided stem string (do not rebuild LaTeX).
-oracle_payload must exactly equal the frozen_params object.
-correct_answer must be JSON-compatible and match the task answer shape.
-Use only the listed Domain API methods from this prompt.
-Domain for this task: IntegerOps.
+Use only the Domain API methods listed in the Domain API menu below for this domain.
 Allowed native ops: arithmetic, comparisons, if/else, loops, list/dict, unpacking, sorting.
 Forbidden: other domain public APIs; task-specific solvers; reading audit payloads;
-manifest answers; evaluator expected answers; answer lookup by task_id.
+manifest answers; evaluator expected answers; answer lookup by task_id;
+prescribed per-item API sequences (none are provided — choose APIs yourself).
 Do not use Markdown fences or explanations outside the Python source.
 Import Domain API from `core.prompts.domain_function_library` only as needed.
 
-# Task `ce111_q03_prime_factor_selection`
-domain_ops: IntegerOps
+Domain for this task: IntegerOps.
 
-## Question stem (use verbatim as question_text)
+<!-- DOMAIN_API_BLOCK_BEGIN -->
+# Domain API menu: IntegerOps
+
+This menu lists every SUPPORTED_PUBLIC method on `IntegerOps`.
+It is domain-general: it does not name a Math16 task, prescribe which
+APIs a specific item must call, or give call order / solution steps.
+
+## Public APIs
+- `IntegerOps.add` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | returns: int
+  inputs: a,b: int; bool forbidden
+  returns_shape: `{"json_safe": true, "type": "int"}`
+  boundary: none
+  example: `IntegerOps.add(10, 20)  # 30`
+
+- `IntegerOps.fmt_num` | import: `core.prompts.domain_function_library` | signature: `(n)` | returns: str
+  inputs: ordered numeric n
+  returns_shape: `{"json_safe": true, "type": "str"}`
+  boundary: presentation only
+  example: `IntegerOps.fmt_num(-2)  # "(-2)"`
+
+- `IntegerOps.is_divisible` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | returns: bool
+  inputs: non-bool int a,b; float/bool raise ValueError; b=0 returns False (not an exception)
+  returns_shape: `{"json_safe": true, "type": "bool"}`
+  boundary: not an answer integer
+  example: `IntegerOps.is_divisible(21, 7)  # True`
+
+- `IntegerOps.positive_divisors` | import: `core.prompts.domain_function_library` | signature: `(n)` | returns: list[int]  # ascending positive divisors
+  inputs: non-bool int n>0; no other task filters
+  returns_shape: `{"element_types": ["int"], "json_safe": true, "ordering": "ascending", "type": "list"}`
+  boundary: filter multiples in model assembly if needed
+  example: `IntegerOps.positive_divisors(12)  # [1, 2, 3, 4, 6, 12]`
+
+- `IntegerOps.prime_factorization` | import: `core.prompts.domain_function_library` | signature: `(n)` | returns: dict[int, int]  # prime -> exponent; ±1 -> {}
+  inputs: non-bool int; n!=0; factors abs(n)
+  returns_shape: `{"json_safe": true, "keys": "positive primes", "type": "dict", "values": "positive int exponents"}`
+  boundary: no selected/answer field
+  example: `IntegerOps.prime_factorization(12)  # {2: 2, 3: 1}`
+
+- `IntegerOps.safe_eval` | import: `core.prompts.domain_function_library` | signature: `(expr)` | returns: int | float  # bool and container results raise ValueError
+  inputs: arithmetic expression string using literals,+,-,*,/,//,%,**,abs,sum,min,max; trusted generated input only
+  returns_shape: `{"forbidden_types": ["bool", "tuple", "list", "dict"], "json_safe": true, "type": "union", "types": ["int", "float"]}`
+  boundary: exact-int contracts must require type(value) is int; floats are never coerced to int
+  example: `IntegerOps.safe_eval("2**4")  # 16`
+
+- `IntegerOps.sub` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | returns: int
+  inputs: a,b: int; bool forbidden
+  returns_shape: `{"json_safe": true, "type": "int"}`
+  boundary: none
+  example: `IntegerOps.sub(30, 8)  # 22`
+
+## Generic domain code example (non-formal numbers)
+```python
+from core.prompts.domain_function_library import IntegerOps
+
+def generate(level=1, **kwargs):
+    # Generic illustration only — not a Math16 formal item.
+    frozen = {"n": 12, "candidates": [2, 7, 11]}
+    factors = IntegerOps.prime_factorization(frozen["n"])
+    chosen = [c for c in frozen["candidates"] if c in factors][0]
+    return {
+        "question_text": "example stem",
+        "correct_answer": chosen,
+        "oracle_payload": frozen,
+    }
+```
+
+## Shared output contract
+Return a dict with exactly three keys: question_text, correct_answer, oracle_payload.
+- question_text: the provided stem string (do not rebuild from scratch unless required).
+- correct_answer: JSON-compatible value matching the task answer shape.
+- oracle_payload: must exactly equal the frozen_params object provided in the task block.
+Do not read audit payloads, evaluator expected answers, or answer tables.
+<!-- DOMAIN_API_BLOCK_END -->
+
+## Task
+task_id: `ce111_q03_prime_factor_selection`
+domain_ops: `IntegerOps`
+skill_id: `math16_prime_factor_selection`
+
+## Frozen task description (use as question_text)
 下列整數 \(11,12,13,14\) 中，哪一個是 \(156\) 的質因數？
 
 ## frozen_params (oracle_payload must equal this object)
@@ -29,30 +103,6 @@ domain_ops: IntegerOps
   "n": 156
 }
 
-## Allowed Domain API
-- `IntegerOps.prime_factorization` | import: `core.prompts.domain_function_library` | signature: `(n)` | returns: dict[int, int]  # prime -> exponent; ±1 -> {}
-  inputs: non-bool int; n!=0; factors abs(n)
-  notes: no selected/answer field
-
 ## Processing steps
 1) IntegerOps.prime_factorization(n).
 2) Choose the candidate that appears as a prime key.
-
-## Output contract
-Return exactly:
-{"question_text": <stem str>, "correct_answer": <task shape>, "oracle_payload": <frozen_params>}
-
-## Generic domain example (non-task numbers)
-```python
-from core.prompts.domain_function_library import IntegerOps
-
-def generate(level=1, **kwargs):
-    frozen = {"n": 12, "candidates": [2, 5, 7]}
-    factors = IntegerOps.prime_factorization(frozen["n"])
-    chosen = [c for c in frozen["candidates"] if c in factors][0]
-    return {
-        "question_text": "example stem",
-        "correct_answer": chosen,
-        "oracle_payload": frozen,
-    }
-```
