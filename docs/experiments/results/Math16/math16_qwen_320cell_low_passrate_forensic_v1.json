@@ -1,0 +1,202 @@
+{
+  "audit_metadata": {
+    "title": "Math16 Qwen 9B/4B 320-Cell Low Pass-Rate Forensic Audit",
+    "target_commit": "f0fbf4a0c2131f03a1bb9096a15d462f27e9b5d4",
+    "audit_date": "2026-08-03",
+    "auditor": "Antigravity AI Agent",
+    "models_audited": [
+      "qwen_9b",
+      "qwen_4b"
+    ],
+    "conditions_audited": [
+      "ab2d_domain_menu",
+      "ab2d_full"
+    ],
+    "total_cells_audited": 320,
+    "verdict": "VALID_MODEL_CAPACITY_AND_PROMPT_COMPLEXITY_RESULT",
+    "final_classification": "PROMPT_COMPLEXITY_OR_CLARITY_EFFECT"
+  },
+  "model_identity_and_settings": {
+    "qwen_9b": {
+      "model_identifier": "qwen3.5:9b",
+      "model_digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+      "preregistration_match": true,
+      "options": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_ctx": 65536,
+        "num_predict": 24576,
+        "think": false
+      }
+    },
+    "qwen_4b": {
+      "model_identifier": "qwen3.5:4b",
+      "model_digest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+      "preregistration_match": true,
+      "options": {
+        "temperature": 0.2,
+        "top_p": 0.8,
+        "top_k": 20,
+        "num_ctx": 65536,
+        "num_predict": 24576,
+        "think": false
+      }
+    }
+  },
+  "answer_contract_comprehensibility": {
+    "prompt_byte_identity_with_gemini": "100% byte-identical (0/320 mismatch)",
+    "contract_presence": "320/320 present (100%)",
+    "schema_failure_counts": {
+      "qwen_9b": 5,
+      "qwen_4b": 10
+    },
+    "schema_failure_pattern": "95 cells misused kwargs.get('frozen_params')/kwargs.get('oracle_payload'); 40 cells misread API return tuple/dict structures.",
+    "classification": "PROMPT_COMPLEXITY_OR_CLARITY_EFFECT"
+  },
+  "seed_independence": {
+    "total_task_condition_groups": 64,
+    "unique_response_counts_distribution": {
+      "5_unique_out_of_5": 55,
+      "4_unique_out_of_5": 2,
+      "3_unique_out_of_5": 5,
+      "2_unique_out_of_5": 2,
+      "1_unique_out_of_5": 0
+    },
+    "deterministic_collapse": false,
+    "analysis": "No 5/5 byte-identical groups (0%). Seed variation with temperature=0.2 produced distinct responses across seeds."
+  },
+  "truncation_and_extraction": {
+    "COMPLETE_BUT_INVALID": 155,
+    "MODEL_TRUNCATED": 9,
+    "RUNNER_TRUNCATED": 0,
+    "EXTRACTOR_TRUNCATED": 0,
+    "UNRESOLVED": 0,
+    "num_predict_effective": true,
+    "analysis": "155 out of 164 non-passed cells completed code generation but contained logic/schema errors. 9 cells (Qwen 4B) were model-truncated due to infinite repetition."
+  },
+  "infrastructure_audit": {
+    "transport_errors": 0,
+    "attempts_greater_than_1": 0,
+    "latency_stats_ms": {
+      "min": 1323,
+      "max": 384742,
+      "mean": 18034.8
+    },
+    "infrastructure_anomalies": false,
+    "gpu_telemetry_status": "EVIDENCE_INSUFFICIENT (hardware VRAM/CUDA metrics not logged; API infrastructure 100% clean)"
+  },
+  "api_misuse_statistics": {
+    "total_failing_cells": 164,
+    "breakdown": {
+      "runtime_call_convention_misuse": 95,
+      "api_return_semantics_misuse": 40,
+      "wrong_method": 6,
+      "wrong_signature": 1,
+      "wrong_domain": 0,
+      "unavailable_api": 0
+    }
+  },
+  "evaluator_comparability": {
+    "comparable_with_pilot02": true,
+    "evaluator_gate_changes": "None. Gates match Pilot-02 exactly; QFIX-001 added only null-safe JSON writing without altering evaluation classification."
+  },
+  "preregistration_caliber_breakdown": {
+    "qwen_9b_domain_menu": {
+      "5/5_stable": 1,
+      "4/5_tasks": 1,
+      "1-3/5_tasks": 12,
+      "0/5_tasks": 2,
+      "pass_rate": "35/80 (43.8%)"
+    },
+    "qwen_9b_full_plan": {
+      "5/5_stable": 9,
+      "4/5_tasks": 1,
+      "1-3/5_tasks": 5,
+      "0/5_tasks": 1,
+      "pass_rate": "61/80 (76.3%)"
+    },
+    "qwen_4b_domain_menu": {
+      "5/5_stable": 3,
+      "4/5_tasks": 1,
+      "1-3/5_tasks": 5,
+      "0/5_tasks": 7,
+      "pass_rate": "29/80 (36.3%)"
+    },
+    "qwen_4b_full_plan": {
+      "5/5_stable": 3,
+      "4/5_tasks": 2,
+      "1-3/5_tasks": 6,
+      "0/5_tasks": 5,
+      "pass_rate": "31/80 (38.8%)"
+    }
+  },
+  "failure_hotspots": {
+    "top_failing_tasks": [
+      {
+        "model": "qwen_4b",
+        "task": "ce111_q02_polynomial_division_remainder",
+        "domain": "PolynomialOps",
+        "fails": 10
+      },
+      {
+        "model": "qwen_4b",
+        "task": "ce113_q11_rationalize_denominator",
+        "domain": "RadicalOps",
+        "fails": 10
+      },
+      {
+        "model": "qwen_4b",
+        "task": "ce115_calc_polynomial_factor_roots_l1",
+        "domain": "PolynomialOps",
+        "fails": 10
+      },
+      {
+        "model": "qwen_4b",
+        "task": "ce115_calc_radical_simplification_l1",
+        "domain": "RadicalOps",
+        "fails": 10
+      },
+      {
+        "model": "qwen_9b",
+        "task": "ce115_calc_polynomial_factor_roots_l1",
+        "domain": "PolynomialOps",
+        "fails": 9
+      },
+      {
+        "model": "qwen_4b",
+        "task": "ce111_nonchoice_q01_part1_exponential_growth",
+        "domain": "IntegerOps",
+        "fails": 9
+      },
+      {
+        "model": "qwen_4b",
+        "task": "ce115_calc_exact_rational_expression_l1",
+        "domain": "FractionOps",
+        "fails": 9
+      },
+      {
+        "model": "qwen_4b",
+        "task": "ce112_q04_radical_simplification",
+        "domain": "RadicalOps",
+        "fails": 8
+      },
+      {
+        "model": "qwen_4b",
+        "task": "ce112_q12_independent_probability_fraction",
+        "domain": "FractionOps",
+        "fails": 8
+      },
+      {
+        "model": "qwen_9b",
+        "task": "ce113_q11_rationalize_denominator",
+        "domain": "RadicalOps",
+        "fails": 7
+      }
+    ]
+  },
+  "rerun_recommendation": {
+    "requires_rerun": false,
+    "affected_cells": []
+  }
+}

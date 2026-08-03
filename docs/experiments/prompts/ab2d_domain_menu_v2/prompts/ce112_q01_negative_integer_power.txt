@@ -1,0 +1,144 @@
+# Math16 Ab2d+domain-menu
+Write only Python source implementing `def generate(level=1, **kwargs):`.
+Use only the Domain API methods listed in the Domain API menu below for this domain.
+Allowed native ops: arithmetic, comparisons, if/else, loops, list/dict, unpacking, sorting.
+Forbidden: other domain public APIs; task-specific solvers; reading audit payloads;
+manifest answers; evaluator expected answers; answer lookup by task_id;
+prescribed per-item API sequences (none are provided — choose APIs yourself).
+Do not use Markdown fences or explanations outside the Python source.
+Import Domain API from `core.prompts.domain_function_library` only as needed.
+
+Domain for this task: IntegerOps.
+
+<!-- DOMAIN_API_BLOCK_BEGIN -->
+# Domain API menu: IntegerOps
+
+This menu lists every SUPPORTED_PUBLIC method on `IntegerOps`.
+It is domain-general: it does not name a Math16 task, prescribe which
+APIs a specific item must call, or give call order / solution steps.
+
+## Public APIs
+- `IntegerOps.add` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | returns: int
+  inputs: a,b: int; bool forbidden
+  returns_shape: `{"json_safe": true, "type": "int"}`
+  boundary: none
+  example: `IntegerOps.add(10, 20)  # 30`
+
+- `IntegerOps.fmt_num` | import: `core.prompts.domain_function_library` | signature: `(n)` | returns: str
+  inputs: ordered numeric n
+  returns_shape: `{"json_safe": true, "type": "str"}`
+  boundary: presentation only
+  example: `IntegerOps.fmt_num(-2)  # "(-2)"`
+
+- `IntegerOps.is_divisible` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | returns: bool
+  inputs: non-bool int a,b; float/bool raise ValueError; b=0 returns False (not an exception)
+  returns_shape: `{"json_safe": true, "type": "bool"}`
+  boundary: not an answer integer
+  example: `IntegerOps.is_divisible(21, 7)  # True`
+
+- `IntegerOps.positive_divisors` | import: `core.prompts.domain_function_library` | signature: `(n)` | returns: list[int]  # ascending positive divisors
+  inputs: non-bool int n>0; no other task filters
+  returns_shape: `{"element_types": ["int"], "json_safe": true, "ordering": "ascending", "type": "list"}`
+  boundary: filter multiples in model assembly if needed
+  example: `IntegerOps.positive_divisors(12)  # [1, 2, 3, 4, 6, 12]`
+
+- `IntegerOps.prime_factorization` | import: `core.prompts.domain_function_library` | signature: `(n)` | returns: dict[int, int]  # prime -> exponent; ±1 -> {}
+  inputs: non-bool int; n!=0; factors abs(n)
+  returns_shape: `{"json_safe": true, "keys": "positive primes", "type": "dict", "values": "positive int exponents"}`
+  boundary: no selected/answer field
+  example: `IntegerOps.prime_factorization(12)  # {2: 2, 3: 1}`
+
+- `IntegerOps.safe_eval` | import: `core.prompts.domain_function_library` | signature: `(expr)` | returns: int | float  # bool and container results raise ValueError
+  inputs: arithmetic expression string using literals,+,-,*,/,//,%,**,abs,sum,min,max; trusted generated input only
+  returns_shape: `{"forbidden_types": ["bool", "tuple", "list", "dict"], "json_safe": true, "type": "union", "types": ["int", "float"]}`
+  boundary: exact-int contracts must require type(value) is int; floats are never coerced to int
+  example: `IntegerOps.safe_eval("2**4")  # 16`
+
+- `IntegerOps.sub` | import: `core.prompts.domain_function_library` | signature: `(a, b)` | returns: int
+  inputs: a,b: int; bool forbidden
+  returns_shape: `{"json_safe": true, "type": "int"}`
+  boundary: none
+  example: `IntegerOps.sub(30, 8)  # 22`
+
+## Generic domain code example (non-formal numbers)
+```python
+from core.prompts.domain_function_library import IntegerOps
+
+def generate(level=1, **kwargs):
+    # Generic API-usage illustration only — not a Math16 formal item.
+    # Demonstrates IntegerOps calls; the return shape below is NOT the answer
+    # contract for any Math16 task. Assemble correct_answer exactly according
+    # to ## Task-specific answer contract.
+    frozen = {"n": 12, "candidates": [2, 7, 11]}
+    factors = IntegerOps.prime_factorization(frozen["n"])
+    chosen = [c for c in frozen["candidates"] if c in factors][0]
+    return {
+        "question_text": "example stem",
+        "correct_answer": chosen,  # ILLUSTRATIVE ONLY — see Task-specific answer contract
+        "oracle_payload": frozen,
+    }
+```
+
+## Shared output contract
+Return a dict with exactly three keys: question_text, correct_answer, oracle_payload.
+- question_text: the provided stem string (do not rebuild from scratch unless required).
+- correct_answer: JSON-compatible value matching ## Task-specific answer contract
+  (not the generic domain code example).
+- oracle_payload: must exactly equal the frozen_params object provided in the task block.
+Do not read audit payloads, evaluator expected answers, or answer tables.
+Exact-value adapters such as to_exact (when used) only serialize values to JSON-safe
+forms; they do not decide the final correct_answer schema.
+<!-- DOMAIN_API_BLOCK_END -->
+
+## Task-specific answer contract
+Source: agent_tools/finals_rebuild/math_answer_contracts.py (oracle_type=`integer_exact`).
+Assemble `correct_answer` exactly according to this contract. Do not treat the generic domain code example as the answer shape.
+Required return schema:
+{
+  "question_text": str,
+  "correct_answer": int,
+  "oracle_payload": dict
+}
+- Exact integer match.
+
+## Runtime binding contract (zero-argument evaluator call)
+At execution time the evaluator calls your function as `generate()` -- zero arguments. `level` defaults to 1 and `**kwargs` is always `{}`. Do NOT do this:
+    kwargs.get("frozen_params")   # kwargs is empty -- this is always None, and
+                                    # any code that depends on it will fail.
+Do not read frozen values from `kwargs` in any form -- not `kwargs.get("frozen_params")`, not `kwargs["frozen_params"]`, not any other
+`kwargs.get(...)` lookup. The frozen values for this task are given below as plain
+Python literals; assign them to a local variable inside `generate()` and use them
+directly -- do not expect them to arrive as function arguments.
+
+Zero-argument skeleton for this task's frozen_params (`ce112_q01_negative_integer_power`):
+```python
+def generate(level=1, **kwargs):
+    # kwargs is always {} here -- see the Runtime binding contract above.
+    frozen = {"base": -3, "exponent": 3}
+    question_text = "..."  # use ## Frozen task description below, verbatim
+    correct_answer = ...  # int, see ## Task-specific answer contract
+    # ^ fill in the `...` placeholders yourself by calling Domain API methods from the
+    # menu above -- domain-menu does not name which method(s) or call order to use.
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer,
+        "oracle_payload": frozen,
+    }
+```
+
+## Task
+task_id: `ce112_q01_negative_integer_power`
+domain_ops: `IntegerOps`
+skill_id: `math16_negative_integer_power`
+
+## Frozen task description (use as question_text)
+計算
+\[
+(-3)^3.
+\]
+
+## frozen_params (oracle_payload must equal this object)
+{
+  "base": -3,
+  "exponent": 3
+}

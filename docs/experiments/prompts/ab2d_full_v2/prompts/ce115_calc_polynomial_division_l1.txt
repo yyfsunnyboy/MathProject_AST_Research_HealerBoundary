@@ -1,0 +1,216 @@
+# Math16 Ab2d+domain-menu
+Write only Python source implementing `def generate(level=1, **kwargs):`.
+Use only the Domain API methods listed in the Domain API menu below for this domain.
+Allowed native ops: arithmetic, comparisons, if/else, loops, list/dict, unpacking, sorting.
+Forbidden: other domain public APIs; task-specific solvers; reading audit payloads;
+manifest answers; evaluator expected answers; answer lookup by task_id;
+prescribed per-item API sequences (none are provided — choose APIs yourself).
+Do not use Markdown fences or explanations outside the Python source.
+Import Domain API from `core.prompts.domain_function_library` only as needed.
+
+Domain for this task: PolynomialOps.
+
+<!-- DOMAIN_API_BLOCK_BEGIN -->
+# Domain API menu: PolynomialOps
+
+This menu lists every SUPPORTED_PUBLIC method on `PolynomialOps`.
+It is domain-general: it does not name a Math16 task, prescribe which
+APIs a specific item must call, or give call order / solution steps.
+
+## Public APIs
+- `PolynomialOps.add` | import: `core.prompts.domain_function_library` | signature: `(c1, c2)` | returns: list[number]  # operand-dependent coefficient type; highest degree first
+  inputs: coefficient lists with mutually arithmetic-compatible values; bool forbidden
+  returns_shape: `{"json_safe": "operand-dependent", "length": "max operand length after normalization", "ordering": "highest degree first", "type": "list"}`
+  boundary: use to_exact per Fraction coefficient before JSON
+  example: `PolynomialOps.add([1, 2], [3, 4])  # [4, 6]`
+
+- `PolynomialOps.coeffs_from_py_expression` | import: `core.prompts.domain_function_library` | signature: `(expression, var='x')` | returns: list[Fraction]  # highest degree first
+  inputs: restricted polynomial expression using integer constants,+,-,*,nonnegative integer **
+  returns_shape: `{"element_types": ["Fraction"], "json_safe": false, "length": "degree+1", "ordering": "highest degree first", "type": "list"}`
+  boundary: to_degree_map or to_exact per coefficient
+  example: `PolynomialOps.coeffs_from_py_expression('(x+1)*(x-1)')`
+
+- `PolynomialOps.div_qr` | import: `core.prompts.domain_function_library` | signature: `(dividend_coefficients, divisor_coefficients)` | returns: tuple[list[int | str], list[int | str]]  # quotient,remainder
+  inputs: non-empty exact coefficient lists: int,Fraction,or p/q; no bool/float; nonzero divisor
+  returns_shape: `{"elements": [{"element_types": ["int", "str"], "type": "list"}, {"element_types": ["int", "str"], "type": "list"}], "json_safe": true, "length": 2, "ordering": "highest degree first", "type": "tuple"}`
+  boundary: already exact JSON leaves
+  example: `PolynomialOps.div_qr([2, 0, 2], [1, 1])`
+
+- `PolynomialOps.factor_quadratic_exact` | import: `core.prompts.domain_function_library` | signature: `(a, b, c)` | returns: list[dict, dict]  # fixed length 2; keys x_coefficient,constant; int or 'p/q'; NOT a 3-tuple
+  inputs: exact rational a,b,c; a nonzero; rational roots required
+  returns_shape: `{"element": {"required_keys": ["x_coefficient", "constant"], "type": "dict", "value_types": ["int", "str"]}, "json_safe": true, "length": 2, "ordering": "deterministic implementation order; consumers must not infer sorted roots", "type": "list"}`
+  boundary: already JSON safe
+  example: `PolynomialOps.factor_quadratic_exact(1, -5, 6)`
+
+- `PolynomialOps.format_latex` | import: `core.prompts.domain_function_library` | signature: `(coeffs, var='x')` | returns: str
+  inputs: highest-degree-first numeric coefficients; bool forbidden
+  returns_shape: `{"json_safe": true, "type": "str"}`
+  boundary: presentation only
+  example: `PolynomialOps.format_latex([2, 0])  # '2x'`
+
+- `PolynomialOps.mul` | import: `core.prompts.domain_function_library` | signature: `(c1, c2)` | returns: list[int | float | Fraction]  # operand-dependent; highest degree first
+  inputs: coefficient lists containing arithmetic-compatible int,float,Fraction; empty operand -> [0]; bool forbidden
+  returns_shape: `{"element_types": ["int", "float", "Fraction"], "json_safe": "operand-dependent", "length": "len(c1)+len(c2)-1 before leading-zero normalization", "ordering": "highest degree first", "type": "list"}`
+  boundary: Fraction coefficients require to_exact; exact tasks must not use float
+  example: `PolynomialOps.mul([1, 1], [1, -1])  # [1, 0, -1]`
+
+- `PolynomialOps.normalize` | import: `core.prompts.domain_function_library` | signature: `(coeffs)` | returns: list[number]  # highest degree first; leading zeros removed
+  inputs: coefficient sequence; empty or all-zero -> [0]; bool coefficients forbidden
+  returns_shape: `{"json_safe": "operand-dependent", "length": "variable", "ordering": "highest degree first", "type": "list"}`
+  boundary: preserves coefficient types
+  example: `PolynomialOps.normalize([0, 2, 1])  # [2, 1]`
+
+- `PolynomialOps.sub` | import: `core.prompts.domain_function_library` | signature: `(c1, c2)` | returns: list[number]  # operand-dependent coefficient type; highest degree first
+  inputs: coefficient lists with mutually arithmetic-compatible values; bool forbidden
+  returns_shape: `{"json_safe": "operand-dependent", "length": "max operand length after normalization", "ordering": "highest degree first", "type": "list"}`
+  boundary: use to_exact per Fraction coefficient before JSON
+  example: `PolynomialOps.sub([1, 2], [3, 4])  # [-2, -2]`
+
+- `PolynomialOps.to_degree_map` | import: `core.prompts.domain_function_library` | signature: `(coeffs)` | returns: dict[str, int | str]  # descending degree insertion order
+  inputs: non-empty exact coefficient list
+  returns_shape: `{"json_safe": true, "keys": "decimal degree strings", "ordering": "descending numeric degree insertion order", "type": "dict", "values": ["int", "str"]}`
+  boundary: official polynomial JSON adapter
+  example: `PolynomialOps.to_degree_map([1, 0, -1])`
+
+## Generic domain code example (non-formal numbers)
+```python
+from core.prompts.domain_function_library import PolynomialOps
+
+def generate(level=1, **kwargs):
+    # Generic API-usage illustration only — not a Math16 formal item.
+    # Demonstrates PolynomialOps calls; the return shape below is NOT the answer
+    # contract for any Math16 task. Assemble correct_answer exactly according
+    # to ## Task-specific answer contract.
+    frozen = {"dividend_coefficients": [2, 0, 2], "divisor_coefficients": [1, 1]}
+    q, r = PolynomialOps.div_qr(
+        frozen["dividend_coefficients"], frozen["divisor_coefficients"]
+    )
+    return {
+        "question_text": "example stem",
+        "correct_answer": {
+            "quotient_coefficients": q,
+            "remainder_coefficients": r,
+            "quotient_latex": PolynomialOps.format_latex(q),
+            "remainder_latex": PolynomialOps.format_latex(r),
+        },  # ILLUSTRATIVE ONLY — see Task-specific answer contract
+        "oracle_payload": frozen,
+    }
+```
+
+## Shared output contract
+Return a dict with exactly three keys: question_text, correct_answer, oracle_payload.
+- question_text: the provided stem string (do not rebuild from scratch unless required).
+- correct_answer: JSON-compatible value matching ## Task-specific answer contract
+  (not the generic domain code example).
+- oracle_payload: must exactly equal the frozen_params object provided in the task block.
+Do not read audit payloads, evaluator expected answers, or answer tables.
+Exact-value adapters such as to_exact (when used) only serialize values to JSON-safe
+forms; they do not decide the final correct_answer schema.
+<!-- DOMAIN_API_BLOCK_END -->
+
+## Task-specific answer contract
+Source: agent_tools/finals_rebuild/math_answer_contracts.py (oracle_type=`math16_polynomial_division_general`).
+Assemble `correct_answer` exactly according to this contract. Do not treat the generic domain code example as the answer shape.
+Required return schema:
+{
+  "question_text": str,
+  "correct_answer": {
+    "quotient_coefficients": list,
+    "remainder_coefficients": list,
+    "quotient_latex": str,
+    "remainder_latex": str
+  },
+  "oracle_payload": dict
+}
+- question_text must use formal LaTeX (\( \) / \[ \]). Structural fields are scored; latex fields required.
+
+## Runtime binding contract (zero-argument evaluator call)
+At execution time the evaluator calls your function as `generate()` -- zero arguments. `level` defaults to 1 and `**kwargs` is always `{}`. Do NOT do this:
+    kwargs.get("frozen_params")   # kwargs is empty -- this is always None, and
+                                    # any code that depends on it will fail.
+Do not read frozen values from `kwargs` in any form -- not `kwargs.get("frozen_params")`, not `kwargs["frozen_params"]`, not any other
+`kwargs.get(...)` lookup. The frozen values for this task are given below as plain
+Python literals; assign them to a local variable inside `generate()` and use them
+directly -- do not expect them to arrive as function arguments.
+
+Zero-argument skeleton for this task's frozen_params (`ce115_calc_polynomial_division_l1`):
+```python
+def generate(level=1, **kwargs):
+    # kwargs is always {} here -- see the Runtime binding contract above.
+    frozen = {"dividend_coefficients": [6, 0, 6], "divisor_coefficients": [1, -4]}
+    question_text = "..."  # use ## Frozen task description below, verbatim
+    correct_answer = {
+            "quotient_coefficients": ...,  # list
+            "remainder_coefficients": ...,  # list
+            "quotient_latex": ...,  # str
+            "remainder_latex": ...,  # str
+        }
+    # ^ fill in the `...` placeholders yourself by calling Domain API methods from the
+    # menu above -- domain-menu does not name which method(s) or call order to use.
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer,
+        "oracle_payload": frozen,
+    }
+```
+
+## Task
+task_id: `ce115_calc_polynomial_division_l1`
+domain_ops: `PolynomialOps`
+skill_id: `math16_polynomial_division_general`
+
+## Frozen task description (use as question_text)
+將多項式
+\[
+6x^2+6
+\]
+除以
+\[
+x-4,
+\]
+求商式與餘式。
+
+## frozen_params (oracle_payload must equal this object)
+{
+  "dividend_coefficients": [
+    6,
+    0,
+    6
+  ],
+  "divisor_coefficients": [
+    1,
+    -4
+  ]
+}
+
+## Task-specific scaffold (full-plan only)
+Concrete API selection, call order, and assembly for `ce115_calc_polynomial_division_l1` (computed via genuine Domain API composition; not a hardcoded ground-truth value):
+1) dividend = frozen["dividend_coefficients"]; divisor = frozen["divisor_coefficients"].
+2) q, r = PolynomialOps.div_qr(dividend, divisor).
+3) q_latex = PolynomialOps.format_latex(q); r_latex = PolynomialOps.format_latex(r).
+4) Assemble correct_answer exactly according to the Answer contract.
+
+```python
+from core.prompts.domain_function_library import PolynomialOps
+
+def generate(level=1, **kwargs):
+    # kwargs is always {} here -- see the Runtime binding contract above.
+    frozen = {"dividend_coefficients": [6, 0, 6], "divisor_coefficients": [1, -4]}
+    question_text = "..."  # use ## Frozen task description above, verbatim
+    dividend = frozen["dividend_coefficients"]
+    divisor = frozen["divisor_coefficients"]
+    q, r = PolynomialOps.div_qr(dividend, divisor)
+    q_latex = PolynomialOps.format_latex(q)
+    r_latex = PolynomialOps.format_latex(r)
+    correct_answer = {
+        "quotient_coefficients": q,
+        "remainder_coefficients": r,
+        "quotient_latex": q_latex,
+        "remainder_latex": r_latex,
+    }
+    return {
+        "question_text": question_text,
+        "correct_answer": correct_answer,
+        "oracle_payload": frozen,
+    }
+```

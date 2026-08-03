@@ -1,0 +1,217 @@
+{
+  "domain": "PolynomialOps",
+  "supported_public_count": 9,
+  "apis": [
+    {
+      "api": "PolynomialOps.add",
+      "import": "core.prompts.domain_function_library",
+      "signature": "(c1, c2)",
+      "input_constraints": "coefficient lists with mutually arithmetic-compatible values; bool forbidden",
+      "return_type": "list[number]  # operand-dependent coefficient type; highest degree first",
+      "return_shape": {
+        "type": "list",
+        "length": "max operand length after normalization",
+        "ordering": "highest degree first",
+        "json_safe": "operand-dependent"
+      },
+      "json_boundary": "use to_exact per Fraction coefficient before JSON",
+      "executable_example": "PolynomialOps.add([1, 2], [3, 4])  # [4, 6]",
+      "example_executes_locally": true,
+      "example_error": null,
+      "rendered_in_prompt_matches_ssot": true,
+      "missing_required_fields": []
+    },
+    {
+      "api": "PolynomialOps.coeffs_from_py_expression",
+      "import": "core.prompts.domain_function_library",
+      "signature": "(expression, var='x')",
+      "input_constraints": "restricted polynomial expression using integer constants,+,-,*,nonnegative integer **",
+      "return_type": "list[Fraction]  # highest degree first",
+      "return_shape": {
+        "type": "list",
+        "length": "degree+1",
+        "element_types": [
+          "Fraction"
+        ],
+        "ordering": "highest degree first",
+        "json_safe": false
+      },
+      "json_boundary": "to_degree_map or to_exact per coefficient",
+      "executable_example": "PolynomialOps.coeffs_from_py_expression('(x+1)*(x-1)')",
+      "example_executes_locally": true,
+      "example_error": null,
+      "rendered_in_prompt_matches_ssot": true,
+      "missing_required_fields": []
+    },
+    {
+      "api": "PolynomialOps.div_qr",
+      "import": "core.prompts.domain_function_library",
+      "signature": "(dividend_coefficients, divisor_coefficients)",
+      "input_constraints": "non-empty exact coefficient lists: int,Fraction,or p/q; no bool/float; nonzero divisor",
+      "return_type": "tuple[list[int | str], list[int | str]]  # quotient,remainder",
+      "return_shape": {
+        "type": "tuple",
+        "length": 2,
+        "elements": [
+          {
+            "type": "list",
+            "element_types": [
+              "int",
+              "str"
+            ]
+          },
+          {
+            "type": "list",
+            "element_types": [
+              "int",
+              "str"
+            ]
+          }
+        ],
+        "ordering": "highest degree first",
+        "json_safe": true
+      },
+      "json_boundary": "already exact JSON leaves",
+      "executable_example": "PolynomialOps.div_qr([2, 0, 2], [1, 1])",
+      "example_executes_locally": true,
+      "example_error": null,
+      "rendered_in_prompt_matches_ssot": true,
+      "missing_required_fields": []
+    },
+    {
+      "api": "PolynomialOps.factor_quadratic_exact",
+      "import": "core.prompts.domain_function_library",
+      "signature": "(a, b, c)",
+      "input_constraints": "exact rational a,b,c; a nonzero; rational roots required",
+      "return_type": "list[dict, dict]  # fixed length 2; keys x_coefficient,constant; int or 'p/q'; NOT a 3-tuple",
+      "return_shape": {
+        "type": "list",
+        "length": 2,
+        "element": {
+          "type": "dict",
+          "required_keys": [
+            "x_coefficient",
+            "constant"
+          ],
+          "value_types": [
+            "int",
+            "str"
+          ]
+        },
+        "ordering": "deterministic implementation order; consumers must not infer sorted roots",
+        "json_safe": true
+      },
+      "json_boundary": "already JSON safe",
+      "executable_example": "PolynomialOps.factor_quadratic_exact(1, -5, 6)",
+      "example_executes_locally": true,
+      "example_error": null,
+      "rendered_in_prompt_matches_ssot": true,
+      "missing_required_fields": []
+    },
+    {
+      "api": "PolynomialOps.format_latex",
+      "import": "core.prompts.domain_function_library",
+      "signature": "(coeffs, var='x')",
+      "input_constraints": "highest-degree-first numeric coefficients; bool forbidden",
+      "return_type": "str",
+      "return_shape": {
+        "type": "str",
+        "json_safe": true
+      },
+      "json_boundary": "presentation only",
+      "executable_example": "PolynomialOps.format_latex([2, 0])  # '2x'",
+      "example_executes_locally": true,
+      "example_error": null,
+      "rendered_in_prompt_matches_ssot": true,
+      "missing_required_fields": []
+    },
+    {
+      "api": "PolynomialOps.mul",
+      "import": "core.prompts.domain_function_library",
+      "signature": "(c1, c2)",
+      "input_constraints": "coefficient lists containing arithmetic-compatible int,float,Fraction; empty operand -> [0]; bool forbidden",
+      "return_type": "list[int | float | Fraction]  # operand-dependent; highest degree first",
+      "return_shape": {
+        "type": "list",
+        "length": "len(c1)+len(c2)-1 before leading-zero normalization",
+        "element_types": [
+          "int",
+          "float",
+          "Fraction"
+        ],
+        "ordering": "highest degree first",
+        "json_safe": "operand-dependent"
+      },
+      "json_boundary": "Fraction coefficients require to_exact; exact tasks must not use float",
+      "executable_example": "PolynomialOps.mul([1, 1], [1, -1])  # [1, 0, -1]",
+      "example_executes_locally": true,
+      "example_error": null,
+      "rendered_in_prompt_matches_ssot": true,
+      "missing_required_fields": []
+    },
+    {
+      "api": "PolynomialOps.normalize",
+      "import": "core.prompts.domain_function_library",
+      "signature": "(coeffs)",
+      "input_constraints": "coefficient sequence; empty or all-zero -> [0]; bool coefficients forbidden",
+      "return_type": "list[number]  # highest degree first; leading zeros removed",
+      "return_shape": {
+        "type": "list",
+        "length": "variable",
+        "ordering": "highest degree first",
+        "json_safe": "operand-dependent"
+      },
+      "json_boundary": "preserves coefficient types",
+      "executable_example": "PolynomialOps.normalize([0, 2, 1])  # [2, 1]",
+      "example_executes_locally": true,
+      "example_error": null,
+      "rendered_in_prompt_matches_ssot": true,
+      "missing_required_fields": []
+    },
+    {
+      "api": "PolynomialOps.sub",
+      "import": "core.prompts.domain_function_library",
+      "signature": "(c1, c2)",
+      "input_constraints": "coefficient lists with mutually arithmetic-compatible values; bool forbidden",
+      "return_type": "list[number]  # operand-dependent coefficient type; highest degree first",
+      "return_shape": {
+        "type": "list",
+        "length": "max operand length after normalization",
+        "ordering": "highest degree first",
+        "json_safe": "operand-dependent"
+      },
+      "json_boundary": "use to_exact per Fraction coefficient before JSON",
+      "executable_example": "PolynomialOps.sub([1, 2], [3, 4])  # [-2, -2]",
+      "example_executes_locally": true,
+      "example_error": null,
+      "rendered_in_prompt_matches_ssot": true,
+      "missing_required_fields": []
+    },
+    {
+      "api": "PolynomialOps.to_degree_map",
+      "import": "core.prompts.domain_function_library",
+      "signature": "(coeffs)",
+      "input_constraints": "non-empty exact coefficient list",
+      "return_type": "dict[str, int | str]  # descending degree insertion order",
+      "return_shape": {
+        "type": "dict",
+        "keys": "decimal degree strings",
+        "values": [
+          "int",
+          "str"
+        ],
+        "ordering": "descending numeric degree insertion order",
+        "json_safe": true
+      },
+      "json_boundary": "official polynomial JSON adapter",
+      "executable_example": "PolynomialOps.to_degree_map([1, 0, -1])",
+      "example_executes_locally": true,
+      "example_error": null,
+      "rendered_in_prompt_matches_ssot": true,
+      "missing_required_fields": []
+    }
+  ],
+  "missing_required_fields_total": 0,
+  "example_exec_fail_total": 0,
+  "rendered_mismatch_total": 0
+}

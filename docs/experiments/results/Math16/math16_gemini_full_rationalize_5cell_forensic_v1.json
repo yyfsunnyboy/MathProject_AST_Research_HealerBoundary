@@ -1,0 +1,157 @@
+{
+  "audit_metadata": {
+    "title": "Math16 Gemini Full-Plan Rationalize Denominator 5-Cell Forensic Audit",
+    "target_commit": "f0fbf4a0c2131f03a1bb9096a15d462f27e9b5d4",
+    "audit_date": "2026-08-03",
+    "auditor": "Antigravity AI Agent",
+    "task_id": "ce113_q11_rationalize_denominator",
+    "condition": "ab2d_full",
+    "seeds": [
+      2026071301,
+      2026072001,
+      2026072002,
+      2026072003,
+      2026072004
+    ],
+    "verdict": "CONFIRMED_MODEL_MISINTERPRETATION",
+    "final_classification": "MODEL_MISINTERPRETATION"
+  },
+  "prompt_audit": {
+    "prompt_file": "docs/experiments/prompts/ab2d_full/prompts/ce113_q11_rationalize_denominator.txt",
+    "prompt_error": false,
+    "processing_steps": [
+      "1) Interpret the frozen denominator as (denom_rational) + (denom_radical_coeff)*sqrt(radicand); call RadicalOps.rationalize_linear_denominator(numerator, denom_rational, denom_radical_coeff, radicand).",
+      "2) RadicalOps.exact_integer on both returned coefficients.",
+      "3) Native int add of those coefficients.",
+      "4) Assemble correct_answer exactly according to the Answer contract."
+    ],
+    "analysis": "Processing steps explicitly state: 'call RadicalOps.rationalize_linear_denominator' and apply 'RadicalOps.exact_integer on both returned coefficients'. No step implies or suggests dividing by the 3rd return value r."
+  },
+  "api_documentation_audit": {
+    "api_name": "RadicalOps.rationalize_linear_denominator",
+    "docstring": "化簡 numerator / (a + b√r)，傳回 (a_out, b_out, r) 使得結果 = a_out + b_out√r。",
+    "signature": "(numerator, denom_rational, denom_radical_coeff, radicand)",
+    "return_type": "tuple[int | Fraction, int | Fraction, int]",
+    "return_semantics": {
+      "elem_1": "a_out: rational term coefficient (Fraction/int)",
+      "elem_2": "b_out: radical term coefficient (Fraction/int)",
+      "elem_3": "r: radicand (int)"
+    },
+    "documentation_error": false,
+    "analysis": "Docstring and menu unambiguously state that a_out and b_out are already the final simplified coefficients a and b of a + b√r."
+  },
+  "api_implementation_audit": {
+    "implementation_file": "core/prompts/domain_function_library.py",
+    "implementation_error": false,
+    "zero_model_local_call": {
+      "input": {
+        "numerator": 9,
+        "denom_rational": 4,
+        "denom_radical_coeff": -1,
+        "radicand": 7
+      },
+      "output": [
+        {
+          "value": "Fraction(4, 1)",
+          "type": "Fraction"
+        },
+        {
+          "value": "Fraction(1, 1)",
+          "type": "Fraction"
+        },
+        {
+          "value": 7,
+          "type": "int"
+        }
+      ],
+      "exact_integer_a": 4,
+      "exact_integer_b": 1,
+      "sum": 5
+    },
+    "analysis": "Implementation strictly matches documentation and mathematical definition. Calling exact_integer on a_out (Fraction(4, 1)) and b_out (Fraction(1, 1)) yields 4 and 1, producing sum = 5."
+  },
+  "evaluator_parameter_binding_audit": {
+    "frozen_params": {
+      "denominator": "4-sqrt(7)",
+      "numerator": 9,
+      "radicand": 7
+    },
+    "ground_truth_answer": 5,
+    "binding_error": false,
+    "domain_menu_pass_analysis": {
+      "domain_menu_outcome": "5 / 5 PASS",
+      "explanation": "In ab2d_domain_menu condition, Gemini wrote defensive code: 'if val3 == 7: a = exact_integer(val1); b = exact_integer(val2)'. Because val3 equaled 7 (the radicand), it bypassed division and passed 5/5. In ab2d_full condition, Gemini unconditionally assigned 'common_denom = val3' and performed '/ common_denom', causing ValueError."
+    }
+  },
+  "five_cell_forensics": [
+    {
+      "cell_id": "gemini__ce113_q11_rationalize_denominator__ab2d_full__seed_2026071301",
+      "seed": 2026071301,
+      "outcome": "runtime_failure",
+      "erroneous_code_lines": [
+        "num_rational, num_radical_coeff, common_denom = RadicalOps.rationalize_linear_denominator(numerator, denom_rational, denom_radical_coeff, radicand)",
+        "a_frac = Fraction(num_rational) / common_denom",
+        "b_frac = Fraction(num_radical_coeff) / common_denom",
+        "a = RadicalOps.exact_integer(a_frac)",
+        "b = RadicalOps.exact_integer(b_frac)"
+      ],
+      "exception_raised": "ValueError: exact_integer requires an integral Fraction (got 4/7)"
+    },
+    {
+      "cell_id": "gemini__ce113_q11_rationalize_denominator__ab2d_full__seed_2026072001",
+      "seed": 2026072001,
+      "outcome": "runtime_failure",
+      "erroneous_code_lines": [
+        "num_rational, num_radical_coeff, common_denom = RadicalOps.rationalize_linear_denominator(numerator, denom_rational, denom_radical_coeff, radicand)",
+        "a_frac = Fraction(num_rational) / common_denom",
+        "b_frac = Fraction(num_radical_coeff) / common_denom",
+        "a = RadicalOps.exact_integer(a_frac)",
+        "b = RadicalOps.exact_integer(b_frac)"
+      ],
+      "exception_raised": "ValueError: exact_integer requires an integral Fraction (got 4/7)"
+    },
+    {
+      "cell_id": "gemini__ce113_q11_rationalize_denominator__ab2d_full__seed_2026072002",
+      "seed": 2026072002,
+      "outcome": "runtime_failure",
+      "erroneous_code_lines": [
+        "num_rational, num_radical_coeff, common_denom = RadicalOps.rationalize_linear_denominator(numerator, denom_rational, denom_radical_coeff, radicand)",
+        "a_frac = Fraction(num_rational) / common_denom",
+        "b_frac = Fraction(num_radical_coeff) / common_denom",
+        "a = RadicalOps.exact_integer(a_frac)",
+        "b = RadicalOps.exact_integer(b_frac)"
+      ],
+      "exception_raised": "ValueError: exact_integer requires an integral Fraction (got 4/7)"
+    },
+    {
+      "cell_id": "gemini__ce113_q11_rationalize_denominator__ab2d_full__seed_2026072003",
+      "seed": 2026072003,
+      "outcome": "runtime_failure",
+      "erroneous_code_lines": [
+        "num_rational, num_radical_coeff, common_denom = RadicalOps.rationalize_linear_denominator(numerator, denom_rational, denom_radical_coeff, radicand)",
+        "a_frac = Fraction(num_rational) / common_denom",
+        "b_frac = Fraction(num_radical_coeff) / common_denom",
+        "a = RadicalOps.exact_integer(a_frac)",
+        "b = RadicalOps.exact_integer(b_frac)"
+      ],
+      "exception_raised": "ValueError: exact_integer requires an integral Fraction (got 4/7)"
+    },
+    {
+      "cell_id": "gemini__ce113_q11_rationalize_denominator__ab2d_full__seed_2026072004",
+      "seed": 2026072004,
+      "outcome": "runtime_failure",
+      "erroneous_code_lines": [
+        "num_rational, num_radical_coeff, common_denom = RadicalOps.rationalize_linear_denominator(numerator, denom_rational, denom_radical_coeff, radicand)",
+        "a_frac = Fraction(num_rational) / common_denom",
+        "b_frac = Fraction(num_radical_coeff) / common_denom",
+        "a = RadicalOps.exact_integer(a_frac)",
+        "b = RadicalOps.exact_integer(b_frac)"
+      ],
+      "exception_raised": "ValueError: exact_integer requires an integral Fraction (got 4/7)"
+    }
+  ],
+  "rerun_recommendation": {
+    "requires_rerun": false,
+    "affected_cells": []
+  }
+}
